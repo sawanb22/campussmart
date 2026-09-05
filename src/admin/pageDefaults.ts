@@ -27,30 +27,46 @@ export const pageDefaults: Record<string, any> = {
   ]
 },
   'ai-ml': {
-  heroTitle: 'AI & Machine Learning',
-  heroSubtitle: 'Cutting-edge AI and ML solutions for educational institutions. Prepare students for the future with hands-on learning experiences.',
-  heroImage: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
-  section1Title: 'AI/ML Solutions',
-  section2Title: 'Future-Ready Education',
+  heroTitle: 'AI & Machine Learning, made classroom-ready',
+  heroSubtitle: 'Learning stations, ML labs and computing infrastructure that give students hands-on experience with real AI tools, not just slides about them.',
+  heroImage: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=700&q=85',
   cards: [
-    { title: 'AI Learning Stations', description: 'Interactive AI-powered learning environments' },
-    { title: 'ML Labs', description: 'Machine learning experimentation setups' },
-    { title: 'Coding Platforms', description: 'Programming and development environments' },
-    { title: 'Computing Infrastructure', description: 'High-performance computing solutions' },
+    { title: 'AI Learning Stations', description: 'Interactive, sensor-equipped stations where students run and tweak real AI models instead of just reading about them.', categories: ['Learning Stations'], image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=85' },
+    { title: 'ML Labs', description: 'Dedicated lab benches for model training, data pipelines and experimentation, sized for a full class at once.', categories: ['Learning Stations'], image: 'https://images.unsplash.com/photo-1555255707-c07966088b7b?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=85' },
+    { title: 'Coding Platforms', description: 'Cloud-ready development environments pre-loaded with the frameworks students need for AI and software projects.', categories: ['Software Platforms'], image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=85' },
+    { title: 'Computing Infrastructure', description: 'GPU-backed compute and campus networking sized to keep training jobs and simulations running smoothly.', categories: ['Infrastructure'], image: 'https://images.unsplash.com/photo-1531746790731-6c087fecd65a?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=85' },
+    { title: 'AI Curriculum & Certification', description: 'NEP-aligned course modules and assessments that give AI/ML learning a clear, credentialed structure.', categories: ['Curriculum'], image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=85' },
+    { title: 'Faculty AI Training', description: 'Hands-on workshops that get faculty comfortable teaching and mentoring AI/ML projects, not just supervising them.', categories: ['Curriculum'], image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=85' },
   ],
-  features: [],
 },
   'ai-stations': {
-  heroTitle: 'AI Stations',
-  heroSubtitle: 'AI-powered learning stations for modern education. Interactive, engaging, and designed for the future of learning.',
-  heroImage: 'https://images.unsplash.com/photo-1531746790731-6c087fecd65a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-  section1Title: 'Features',
+  heroTitle: 'AI Learning Stations',
+  heroSubtitle: 'Give every classroom an AI-powered learning hub — adaptive tutoring, real-time analytics and hands-on AI literacy built for K-12 and higher-ed campuses.',
+  section1Title: 'AI Learning Features',
   cards: [
-    { title: 'Interactive AI Tutors', description: 'Personalized learning experiences powered by AI', image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Personalized Learning Paths', description: 'Adaptive curriculum tailored to each student', image: 'https://images.unsplash.com/photo-1516321318423-f06a051b3e14?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Real-time Analytics', description: 'Track progress with comprehensive data insights', image: 'https://images.unsplash.com/photo-1551427260-7cddeaf76ae8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Multi-language Support', description: 'Learning in preferred languages with AI assistance', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' }
-  ]
+    { title: 'Interactive AI Tutors', description: 'Personalized learning experiences powered by AI', image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' },
+    { title: 'Personalized Learning Paths', description: 'Adaptive curriculum tailored to each student', image: 'https://images.unsplash.com/photo-1516321318423-f06a051b3e14?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' },
+    { title: 'Real-time Analytics', description: 'Track progress with comprehensive data insights', image: 'https://images.unsplash.com/photo-1551427260-7cddeaf76ae8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' },
+    { title: 'Multi-language Support', description: 'Learning in preferred languages with AI assistance', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' },
+  ],
+  ctaTitle: 'Ready to bring AI stations to your campus?',
+  ctaSubtitle: 'Talk to our team about piloting AI learning stations tailored to your students and curriculum.'
+},
+  'ar-vr-experiences': {
+  heroTitle: 'AR / VR Learning',
+  heroSubtitle: 'Immersive reality experiences that bring complex concepts to vivid, unforgettable life — from anatomy walkthroughs to virtual field trips your students will actually remember.',
+  heroImage: 'https://images.unsplash.com/photo-1622979135225-d2ba269cf1ac?auto=format&fit=crop&w=900&q=85',
+  section2Title: 'AR / VR Experiences',
+  cards: [
+    { title: 'VR Science Labs', description: 'Run chemistry and physics experiments virtually — no breakage, no safety risk, unlimited repeats.', image: 'https://images.unsplash.com/photo-1617802690992-15d93263d3a9?auto=format&fit=crop&w=700&q=85' },
+    { title: 'AR Anatomy & Biology', description: 'Walk through a beating heart or a living cell at full scale, layer by layer, on a tablet or headset.', image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=700&q=85' },
+    { title: 'Virtual Field Trips', description: 'Visit the pyramids, the ISS or the ocean floor without leaving the classroom, in fully guided sessions.', image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=700&q=85' },
+    { title: 'Historical & Cultural Simulations', description: 'Step into recreated historical events and sites for a kind of recall no textbook page can match.', image: 'https://images.unsplash.com/photo-1466442929976-97f336a657be?auto=format&fit=crop&w=700&q=85' },
+    { title: 'Engineering & Design Visualization', description: 'Rotate, section and stress-test 3D models of real engineering projects before a single part is built.', image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=700&q=85' },
+    { title: 'Language Immersion Experiences', description: 'Practise conversations in simulated real-world settings that make new languages stick faster.', image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=700&q=85' },
+  ],
+  ctaTitle: 'Ready to Bring AR / VR to Your Classrooms?',
+  ctaSubtitle: 'Tell us about your subjects and student count — our team will recommend the right starting setup.',
 },
   'assessment-system': {
   heroTitle: 'Student Assessment System',
@@ -62,37 +78,115 @@ export const pageDefaults: Record<string, any> = {
   ]
 },
   'blog': {
-  heroTitle: 'The Resource Hub',
-  heroSubtitle: 'Insights, trends, and best practices in educational infrastructure.'
+  heroTitle: 'Campus Insights & Ideas',
+  heroSubtitle: 'Practical guidance on campus design, technology, and infrastructure — written for principals, administrators and facility teams building better institutions.',
+  heroImage: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80'
 },
   'campus-automation': {
-  heroTitle: 'Campus Automation',
-  heroSubtitle: 'Transform your campus into a smart, automated environment. Admissions, attendance, finance, and research tracking - all in one place.',
+  heroTitle: 'Turn everyday operations into automated workflows.',
+  heroSubtitle: 'Admissions, attendance, finance, scheduling and reporting — automated so your staff can spend less time on paperwork and more time with students.',
+  section1Title: 'Automation Modules',
   cards: [
-    { title: 'Admissions', description: 'Automated and streamlined processes.' },
-    { title: 'Attendance', description: 'Automated and streamlined processes.' },
-    { title: 'Finance', description: 'Automated and streamlined processes.' }
-  ]
+    {
+      title: 'Automated Admissions',
+      description: 'Move applicants from enquiry to enrolment with online forms, document checks and status tracking that runs itself — no more chasing paperwork.',
+      image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=85',
+      categories: ['Admissions']
+    },
+    {
+      title: 'Smart Attendance',
+      description: 'Biometric and RFID attendance that syncs straight to parent alerts and academic records.',
+      image: 'https://images.unsplash.com/photo-1596496181848-3091d4878b24?auto=format&fit=crop&w=800&q=85',
+      categories: ['Attendance']
+    },
+    {
+      title: 'Finance & Fee Automation',
+      description: 'Automated fee reminders, online payments and real-time reconciliation that keeps accounts audit-ready.',
+      image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=800&q=85',
+      categories: ['Finance']
+    },
+    {
+      title: 'Timetable Scheduling',
+      description: 'Generate conflict-free timetables in minutes and adjust instantly when a class or faculty member changes.',
+      image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=85',
+      categories: ['Scheduling']
+    },
+    {
+      title: 'Research & Compliance Tracking',
+      description: 'Track grants, publications and regulatory filings in one dashboard instead of scattered spreadsheets.',
+      image: 'https://images.unsplash.com/photo-1554774853-b415df9eeb92?auto=format&fit=crop&w=800&q=85',
+      categories: ['Research']
+    },
+    {
+      title: 'Operations Dashboard',
+      description: 'A single real-time view of admissions, attendance and finance for administrators and leadership.',
+      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=85',
+      categories: ['Analytics']
+    }
+  ],
+  ctaTitle: 'Ready to automate your campus operations?',
+  ctaSubtitle: "Tell us which processes eat up the most staff time — we'll show you what can run itself."
 },
   'campus-design-execution': {
-  heroTitle: 'Campus Design + Execution',
-  heroSubtitle: 'End-to-end campus design and construction services. From concept to completion, we bring your vision to life.',
-  heroImage: 'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-  section1Title: 'Our Process',
-  features: [
-    'Site Analysis',
-    'Concept Design',
-    'Detailed Planning',
-    'Construction',
-    'Handover'
-  ]
+  heroTitle: 'Design & Execution',
+  heroSubtitle: 'A single accountable team from first site visit to final handover — planning, design and on-ground construction for campuses that get built on time.',
+  cards: [
+    {
+      title: 'Master Planning & Site Analysis',
+      description: 'Topography, footfall and growth studies that turn a raw site into a phased master plan built around how your campus will actually be used.',
+      image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=700&q=80',
+      categories: ['Planning'],
+    },
+    {
+      title: 'Architectural & Interior Design',
+      description: 'Concept-to-working drawings for academic blocks, labs and common areas, balancing daylight, acoustics and NEP-ready classroom layouts.',
+      image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=700&q=80',
+      categories: ['Design'],
+    },
+    {
+      title: 'Construction & Site Execution',
+      description: 'Vetted contractors and a dedicated site engineer keep every phase on schedule, with weekly progress reporting back to your team.',
+      image: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=700&q=80',
+      categories: ['Execution'],
+    },
+    {
+      title: 'MEP & Technical Infrastructure',
+      description: 'Electrical, plumbing and network backbone planned alongside construction, not bolted on afterwards.',
+      image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=700&q=80',
+      categories: ['Infrastructure'],
+    },
+    {
+      title: 'Landscape & Outdoor Design',
+      description: 'Courtyards, walkways and green zones that hold up to daily campus traffic.',
+      image: 'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=700&q=80',
+      categories: ['Landscape'],
+    },
+    {
+      title: 'Handover & Quality Assurance',
+      description: 'Snag-free handover with full documentation, warranties and defect-liability support.',
+      image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=700&q=80',
+      categories: ['Handover'],
+    },
+  ],
+},
+  'campus-furniture-design': {
+  heroTitle: 'Campus Furniture Design',
+  heroSubtitle: 'Thoughtfully engineered, ergonomic furniture that elevates the academic experience — from classroom seating to library shelving, hostel furnishing and custom builds for every corner of your campus.',
+  heroImage: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=900&q=85',
+  cards: [
+    { title: 'Ergonomic Classroom Seating', description: 'Posture-friendly desks and chairs sized for every age group, built to stay comfortable through a full day of classes.', categories: ['Classroom'], image: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Modular Library Furniture', description: 'Reconfigurable shelving, reading tables and study pods that adapt as your collection and reader habits change.', categories: ['Library'], image: 'https://images.unsplash.com/photo-1568667256549-094345857637?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Hostel & Dormitory Furniture', description: 'Space-efficient beds, wardrobes and study units engineered for durability under daily student use.', categories: ['Hostel'], image: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Laboratory Workbenches & Stools', description: 'Chemical-resistant, height-adjustable lab furniture built to keep up with hands-on science and research.', categories: ['Lab'], image: 'https://images.unsplash.com/photo-1532094349884-543290e34c7d?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Outdoor & Play Furniture', description: 'Weatherproof seating, play structures and courtyard furniture that hold up to sun, rain and daily footfall.', categories: ['Outdoor'], image: 'https://images.unsplash.com/photo-1566454544259-f4b94c3d758c?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Custom Furniture Design Services', description: 'In-house designers who work from your floor plan to spec furniture that fits the exact room, not the other way round.', categories: ['Custom'], image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=900&q=85' },
+  ],
 },
   'campus-design': {
   heroTitle: 'Campus Design',
   heroSubtitle: 'Transform your educational vision into reality with our comprehensive campus design services. We create spaces that inspire learning and foster innovation.',
   heroImage: 'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
   section1Title: 'Our Design Services',
-  section2Title: "Why Choose Our Campus Design?",
   ctaTitle: "Ready to Design Your Dream Campus?",
   ctaSubtitle: "Let our expert team help you create a campus that inspires and empowers.",
   cards: [
@@ -101,52 +195,61 @@ export const pageDefaults: Record<string, any> = {
     { title: 'Interior Design', description: 'Functional and aesthetic interior spaces for learning.', image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80' },
     { title: 'Landscape Design', description: 'Outdoor spaces that enhance the campus environment.', image: 'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80' },
   ],
-  features: [
-    'Space optimization and utilization analysis',
-    'Sustainable and eco-friendly design',
-    'NEP 2020 compliant layouts',
-    'Accessibility and inclusivity',
-    'Future-ready infrastructure',
-    'Cost-effective solutions',
+},
+  'campus-master-planning': {
+  heroTitle: 'Campus Master Planning',
+  heroSubtitle: 'Visionary campus planning from concept to construction — a single master plan that sequences land, buildings and budget into a campus built to inspire generations.',
+  heroImage: 'https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=900&q=85',
+  section2Title: 'Our Planning Services',
+  cards: [
+    { title: 'Site & Feasibility Studies', description: 'Topography, soil and infrastructure surveys that tell you exactly what a site can support before you commit to it.', image: 'https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=700&q=85' },
+    { title: 'Master Plan Development', description: 'A single, coherent land-use plan that sequences academic blocks, hostels, sports and green space around how a campus actually runs.', image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=700&q=85' },
+    { title: 'Zoning & Land Use Planning', description: 'Clear zoning for academic, residential, recreational and utility areas that keeps a growing campus organised, not congested.', image: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=700&q=85' },
+    { title: 'Phased Development Roadmaps', description: 'Multi-year rollout plans that sequence construction phases against enrolment growth and available budget.', image: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=700&q=85' },
+    { title: 'Infrastructure & Utility Planning', description: 'Power, water, drainage and network backbone planned alongside the buildings they serve, not bolted on afterwards.', image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=700&q=85' },
+    { title: 'Regulatory & Approval Support', description: 'Navigating statutory approvals and compliance requirements so your plan is buildable, not just beautiful.', image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=700&q=85' },
   ],
+  ctaTitle: 'Ready to Plan Your Campus?',
+  ctaSubtitle: 'Tell us about your site and growth goals — our planning team will get back to you within 2 business days.',
 },
   'catalogues': {
-  heroTitle: 'Product Catalogues',
-  heroSubtitle: 'Browse our comprehensive catalogues featuring furniture, equipment, and infrastructure solutions for educational institutions.',
+  heroTitle: 'Catalogues & Downloads',
+  heroSubtitle: 'Every SchoolMart product range, brief and design guide in one library — download the PDFs your team needs to plan and spec a campus.',
+  heroImage: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80',
   cards: [
     {
       title: 'NEP READY CLASSROOM FURNITURE',
       description: 'Furniture solutions specifically designed to align with New Education Policy guidelines for modern classrooms.',
       image: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      downloadLink: '#',
+      downloadLink: '',
       size: '12 MB',
     },
     {
       title: 'SCHOOLMART BRIEF PROFILE [PDF]',
       description: 'An overview of SchoolMart\'s mission, services, and extensive experience in educational infrastructure.',
       image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      downloadLink: '#',
+      downloadLink: '',
       size: '5 MB',
     },
     {
       title: 'SCHOOL DESIGN [PDF]',
       description: 'Comprehensive guide on architectural and ergonomic principles for modern school environments.',
       image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      downloadLink: '#',
+      downloadLink: '',
       size: '18 MB',
     },
     {
       title: 'CLASSROOM CONFIGURATION IDEAS [PDF]',
       description: 'Creative and functional layout samples for various classroom sizes and learning objectives.',
       image: 'https://images.unsplash.com/photo-1588072432836-e10032774350?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      downloadLink: '#',
+      downloadLink: '',
       size: '8 MB',
     },
     {
       title: 'MASTER CATALOGUE',
       description: 'Our full range of products including Labs, Libraries, Sports, and AI Stations.',
       image: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      downloadLink: '#',
+      downloadLink: '',
       size: '25 MB',
     },
   ],
@@ -172,65 +275,65 @@ export const pageDefaults: Record<string, any> = {
   heroTitle: 'Classifieds',
   heroSubtitle: 'Explore opportunities in the education sector. Colleges for sale, funding options, and partnerships.',
   cards: [
-    { title: 'Colleges for Sale', description: 'Browse educational institutions available for acquisition', href: '#' },
-    { title: 'Education Funding', description: 'Explore funding options for your institution', href: '#' },
-    { title: 'Partnership Opportunities', description: 'Find partnership opportunities with running colleges', href: '/partnership' }
-  ]
-},
-  'contact-us': {
-  heroTitle: 'Contact Us',
-  heroSubtitle: "Have a question or need assistance? We're here to help. Reach out to us through any of the channels below.",
-  cards: [
-    { title: 'Phone', description: '+91 9966109191\n+91 9866091111' },
-    { title: 'Email', description: 'info@campusmart.in\nsupport@campusmart.in' },
-    { title: 'Working Hours', description: 'Monday - Friday: 9:00 AM - 6:00 PM\nSaturday: 10:00 AM - 4:00 PM' }
-  ]
-},
-  'payment-policy': {
-  heroTitle: 'Payment Policy',
-  sections: [
-    { heading: '1. Payment Methods', body: 'We accept various payment methods including Credit/Debit Cards, Net Banking, and UPI through our secure payment gateway partners.' },
-    { heading: '2. Currency', body: 'All transactions are processed in Indian Rupees (INR) unless otherwise explicitly specified in the order quotation.' },
-    { heading: '3. Billing and Taxes', body: 'GST will be applied as per the prevailing government regulations. A detailed tax invoice will be provided for all purchases.' },
-    { heading: '4. Security', body: 'We do not store your credit card or sensitive financial information on our servers. All payments are handled by certified third-party payment processors.' }
+    { title: 'Colleges for Sale', description: 'Browse educational institutions available for acquisition', href: '/colleges-universities-for-sale' },
+    { title: 'Education Funding', description: 'Explore funding options for your institution', href: '' },
+    { title: 'Partnership Opportunities', description: 'Find partnership opportunities with running colleges', href: '/partner-with-colleges' },
   ],
-  lastUpdated: 'March 2024'
-},
-  'privacy-policy': {
-  heroTitle: 'Privacy Policy',
-  sections: [
-    { heading: '1. Introduction', body: 'Campus Mart ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our services.' },
-    { heading: '2. Information We Collect', body: 'We may collect personal information that you voluntarily provide to us, including:', bullets: ['Name and contact information', 'Email address', 'Phone number', 'Institution details', 'Payment information'] },
-    { heading: '3. How We Use Your Information', body: 'We use the information we collect to:', bullets: ['Provide and maintain our services', 'Process your orders and requests', 'Communicate with you about our services', 'Improve our website and services', 'Comply with legal obligations'] },
-    { heading: '4. Information Sharing', body: 'We do not sell or rent your personal information to third parties. We may share your information with:', bullets: ['Service providers who assist us in operating our business', 'Legal authorities when required by law', 'Business partners with your consent'] },
-    { heading: '5. Data Security', body: 'We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.' },
-    { heading: '6. Your Rights', body: 'You have the right to:', bullets: ['Access your personal information', 'Correct inaccurate information', 'Request deletion of your information', 'Opt-out of marketing communications'] },
-    { heading: '7. Contact Us', body: 'If you have any questions about this Privacy Policy, please contact us at:\nEmail: privacy@campusmart.in\nPhone: +91 9966109191' }
-  ],
-  lastUpdated: 'January 2025'
-},
-  'replacement-return': {
-  heroTitle: 'Replacement & Return Policy',
-  sections: [
-    { heading: '1. Overview', body: 'At Campus Mart, we strive to ensure that every product delivered meets our high standards of quality. However, if you receive a product that is damaged or defective, we are committed to resolving the issue through our replacement policy.' },
-    { heading: '2. Conditions for Replacement', body: 'Replacements will only be considered under the following circumstances:', bullets: ['Products received in a physically damaged condition.', 'Products that have missing parts or accessories.', 'Products that are different from what was ordered.'] },
-    { heading: '3. Reporting an Issue', body: 'Any damage or discrepancy must be reported within 48 hours of delivery. Please provide photographic evidence of the damage and your order details to our support team at info@campusmart.in.' },
-    { heading: '4. Return Process', body: 'Once your request is approved, we will arrange for the collection of the damaged item. Please ensure the product is in its original packaging with all manuals and accessories included.' },
-    { heading: '5. Non-Returnable Items', body: 'Custom-made furniture, specially ordered equipment, and digital software solutions are generally non-returnable unless they possess a manufacturing defect.' }
-  ],
-  lastUpdated: 'March 2024'
 },
   'collaboration': {
-  heroTitle: 'Collaboration Spaces',
-  heroSubtitle: 'Foster teamwork and innovation with purpose-built collaboration spaces. Designed for modern learning and working styles.',
-  heroImage: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
-  section1Title: 'Collaboration Features',
+  heroTitle: 'Spaces built for working together',
+  heroSubtitle: "Flexible rooms, pods and studios that turn group work, discussion and presentation into a normal part of campus life.",
   cards: [
-    { title: 'Collaborative Spaces', description: 'Designed for teamwork and group projects' },
-    { title: 'Discussion Rooms', description: 'Private spaces for focused conversations' },
-    { title: 'Video Conferencing', description: 'Connect with remote participants seamlessly' },
-    { title: 'Presentation Areas', description: 'Equipped for effective presentations' }
+    { title: 'Collaborative Learning Pods', description: 'Flexible, movable seating for project teams to gather, sketch out ideas and work side by side.', image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=700&q=80' },
+    { title: 'Discussion & Seminar Rooms', description: 'Acoustically treated rooms for tutorials, viva sessions and small-group discussion away from the noise.', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=700&q=80' },
+    { title: 'Video Conferencing Suites', description: 'Camera, mic and display setups that make hybrid classes and remote guest sessions feel effortless.', image: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=700&q=80' },
+    { title: 'Presentation & Pitch Studios', description: 'A dedicated stage for practice talks, project demos and jury presentations, built and lit properly.', image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=700&q=80' },
+    { title: 'Maker & Innovation Corners', description: 'Hands-on benches where student teams can prototype, tinker and test ideas together.', image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=700&q=80' },
+    { title: 'Faculty Collaboration Lounges', description: 'A calmer space for staff to plan curriculum, mentor students and work between classes.', image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=700&q=80' }
   ]
+},
+  'colleges-universities-for-sale': {
+  heroTitle: 'Businesses for Sale and Investment',
+  heroSubtitle: 'Showing businesses for sale and investment. Buy or invest in a business listed by direct business owners and business brokers.',
+  filterLabel: 'cbse schools',
+  cards: [
+  {
+    title: 'School for Sale in Bahraich, India',
+    description: 'CBSE school with 800+ students, day and boarding facility for sale in Bahraich. The school encompasses a total area of 87,000 square feet and includes approximately 40 rooms, fully equipped science and computer labs.',
+    location: 'Bahraich', region: 'North', rating: '6.8', sales: 'INR 2.6 crore', margin: '40 %', askingPrice: 'INR 20 Cr', premium: true,
+    image: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=700&q=80',
+  },
+  {
+    title: 'Playschool Seeking Loan in Haryana, India',
+    description: 'Education society in Haryana with 5 CBSE schools and 70 playschools. This is an educational society with primary and play schools seeking growth funding.',
+    location: 'Haryana', region: 'North', rating: '6.8', sales: 'INR 30 crore', margin: '25 %', askingPrice: 'INR 5 Cr at 15%', premium: true,
+    image: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=700&q=80',
+  },
+  {
+    title: 'School for Sale in Thiruvananthapuram, India',
+    description: 'CBSE-affiliated school with 400+ students and owned facilities. Located in Thiruvananthapuram, this school offers quality education from a well-established campus.',
+    location: 'Thiruvananthapuram', region: 'South', rating: '6.2', sales: 'INR 1.6 crore', margin: '10 - 20 %', askingPrice: 'INR 8 Cr',
+    image: 'https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?auto=format&fit=crop&w=700&q=80',
+  },
+  {
+    title: 'Residential School Opportunity in Karnataka',
+    description: 'Established residential school with modern classrooms, hostel facilities, and a growing student community.',
+    location: 'Karnataka', region: 'South', rating: '6.5', sales: 'INR 12 crore', margin: '30 %', askingPrice: 'INR 18 Cr',
+    image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=700&q=80',
+  },
+  {
+    title: 'International School Investment Opportunity',
+    description: 'Premium school campus with sports facilities, digital classrooms, and strong long-term investment potential.',
+    location: 'Pune', region: 'West', rating: '7.1', sales: 'INR 22 crore', margin: '35 %', askingPrice: 'INR 32 Cr',
+    image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=700&q=80',
+  },
+  {
+    title: 'College Campus Available for Partnership',
+    description: 'Fully operational higher education campus with laboratories, library infrastructure, and flexible partnership options.',
+    location: 'Delhi NCR', region: 'North', rating: '6.7', sales: 'INR 40 crore', margin: '28 %', askingPrice: 'INR 55 Cr',
+    image: 'https://images.unsplash.com/photo-1564981797816-1043664bf78d?auto=format&fit=crop&w=700&q=80',
+  },
+  ],
 },
   'corporate': {
   heroTitle: 'About Campus Mart',
@@ -271,14 +374,25 @@ export const pageDefaults: Record<string, any> = {
 },
   'digital-transformation': {
   heroTitle: 'Digital Transformation',
-  heroSubtitle: 'Transform your campus with cutting-edge digital solutions. From smart classrooms to complete campus automation.',
-  heroImage: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
+  heroSubtitle: 'Transform your campus with connected classrooms, campus automation and data-driven decision making — built around how your institution actually works.',
+  heroImage: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80',
   section1Title: 'Digital Services',
   cards: [
-    { title: 'Smart Classrooms', description: 'Comprehensive solutions for modern education.' },
-    { title: 'Campus Automation', description: 'Comprehensive solutions for modern education.' },
-    { title: 'Digital Learning', description: 'Comprehensive solutions for modern education.' }
-  ]
+    { title: 'Smart Classrooms', description: 'Interactive displays, connected devices and digital content that keep every lesson engaging.' },
+    { title: 'Campus Automation', description: 'Automate attendance, access control, timetabling and routine administrative work.' },
+    { title: 'Digital Learning (LMS)', description: 'A single platform for coursework, assessments and communication with students.' },
+    { title: 'Campus Analytics', description: 'Real-time dashboards that turn operational data into decisions administrators can act on.' },
+    { title: 'Cybersecurity & Access', description: 'Protect student data and campus systems with modern security and access controls.' },
+    { title: 'Digital Signage & Communication', description: 'Keep students, staff and visitors informed across every building on campus.' }
+  ],
+  sections: [
+    { heading: 'Assess', body: 'Review current systems, infrastructure and the outcomes your campus wants from going digital.' },
+    { heading: 'Design', body: 'Plan the platform, integrations and rollout sequence around your calendar and budget.' },
+    { heading: 'Implement', body: 'Deploy hardware and software, migrate data, and train staff and faculty.' },
+    { heading: 'Support & Scale', body: 'Monitor adoption, resolve issues quickly and expand to more campuses or buildings.' }
+  ],
+  ctaTitle: 'Have a digital transformation project in mind?',
+  ctaSubtitle: 'Tell us what you want to build, automate or connect — our team will help you plan it.'
 },
   'furniture-design-supply': {
   heroTitle: 'Furniture Design + Supply',
@@ -296,48 +410,84 @@ export const pageDefaults: Record<string, any> = {
   heroTitle: 'Furniture Solutions',
   heroSubtitle: 'Premium quality furniture designed for educational institutions. From classrooms to libraries, we provide durable and ergonomic solutions.',
   heroImage: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
-  section1Title: 'Furniture Categories',
-  section2Title: 'Why Our Furniture?',
-  cards: [
-    { title: 'Classroom Furniture', description: '45 products', image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Library Furniture', description: '28 products', image: 'https://images.unsplash.com/photo-1568667256549-094345857637?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Office Furniture', description: '32 products', image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Hostel Furniture', description: '18 products', image: 'https://images.unsplash.com/photo-1505693416388-b0346ef414b8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Play Furniture', description: '24 products', image: 'https://images.unsplash.com/photo-1566454544259-f4b94c3d758c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Premium Furniture', description: '15 products', image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-  ],
-  features: [
-    'Ergonomic designs for comfort',
-    'Durable and long-lasting materials',
-    'Customizable options available',
-    'Eco-friendly manufacturing',
-    'Bulk order discounts',
-    'Installation services included',
-  ],
 },
   'innovation-centres': {
   heroTitle: 'Innovation Centres',
   heroSubtitle: 'Create spaces that foster creativity and innovation. From maker spaces to research labs, we build environments for breakthrough thinking.',
-  section1Title: 'What We Offer',
-  heroImage: 'https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-  features: [
-    'Maker Spaces',
-    'Research Labs',
-    'Innovation Hubs',
-    'Startup Incubators'
-  ]
-},
-  'innovation': {
-  heroTitle: 'Innovation Centers',
-  heroSubtitle: 'Create spaces that nurture creativity and innovation. From maker spaces to research centers, we build environments that inspire breakthrough thinking.',
   heroImage: 'https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
   section1Title: 'Innovation Solutions',
   cards: [
-    { title: 'Innovation Labs', description: 'Spaces for creative thinking and prototyping' },
-    { title: 'Startup Incubators', description: 'Support for student entrepreneurship' },
-    { title: 'Research Centers', description: 'Dedicated research and development spaces' },
-    { title: 'Maker Spaces', description: 'Hands-on creation and experimentation areas' },
+    { title: 'Maker Spaces', description: 'Collaborative spaces for hands-on creation and experimentation', image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Research Labs', description: 'Advanced facilities for student research and discovery', image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Innovation Hubs', description: 'Dynamic ecosystems for ideation and prototyping', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Startup Incubators', description: 'Business development spaces for student entrepreneurs', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
   ],
+},
+  'innovation-centers': {
+  heroTitle: 'Spaces Built for Breakthrough Thinking',
+  heroSubtitle: 'From first prototype to first pitch, explore the maker spaces, labs and studios that turn a campus innovation centre into somewhere students actually want to build.',
+  cards: [
+    { title: 'Maker & Prototyping Studios', description: 'Tool walls, 3D printers and workbenches where an idea can go from sketch to working prototype in an afternoon.', categories: ['Maker Spaces'], image: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Startup Incubation Bays', description: 'Dedicated desks, mentor hours and seed funding pathways for the student teams ready to turn a project into a company.', categories: ['Incubation'], image: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Robotics & IoT Labs', description: 'Sensor kits, microcontrollers and open bench space for teams building the next connected-device project.', categories: ['Robotics'], image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Design Thinking Studios', description: 'Whiteboard walls and modular furniture built for the messy, iterative work of user research and rapid ideation.', categories: ['Design'], image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Research & Innovation Cells', description: 'Quiet, well-equipped rooms for faculty-led research projects that need more focus than a shared lab allows.', categories: ['Research'], image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Industry Collaboration Hubs', description: 'Meeting and demo space designed for the site visits, sponsor reviews and industry mentoring that keep projects grounded.', categories: ['Collaboration'], image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=85' },
+  ],
+},
+  'innovation': {
+  heroTitle: 'Innovation & Startup Programme',
+  heroSubtitle: 'A managed platform that takes student ideas from first sketch to a funded, market-ready startup — run on your campus.',
+  cards: [
+    {
+      title: 'Ideation & Research',
+      description: 'Structured workshops and mentor office hours that turn early, half-formed ideas into validated problem statements worth building.',
+      image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=85',
+      categories: ['Ideation'],
+    },
+    {
+      title: 'Incubation Support',
+      description: 'Dedicated desk space, seed funding pathways and technical mentors to help student teams build their first working prototype.',
+      image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=85',
+      categories: ['Incubation'],
+    },
+    {
+      title: 'Acceleration Programme',
+      description: 'A time-boxed sprint with industry mentors and investor exposure to push validated teams toward their first paying customers.',
+      image: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=85',
+      categories: ['Acceleration'],
+    },
+    {
+      title: 'Market Access & Funding',
+      description: 'Investor connect days, grant application support and distribution partnerships that get real products in front of real customers.',
+      image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=85',
+      categories: ['Funding'],
+    },
+    {
+      title: 'Managed Innovation Hubs',
+      description: 'A fully equipped, staffed innovation centre on your own campus — we handle setup, tooling and day-to-day operations.',
+      image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=85',
+      categories: ['Ecosystem'],
+    },
+    {
+      title: 'Venture Studio Launchpad',
+      description: 'A structured path from validated prototype to registered company, with legal, financial and go-to-market support built in.',
+      image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=85',
+      categories: ['Ecosystem'],
+    },
+    {
+      title: 'Global Chapters Network',
+      description: 'Connect student founders with partner campuses and alumni founders across our national innovation network.',
+      image: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=85',
+      categories: ['Ecosystem'],
+    },
+  ],
+  ctaTitle: 'Ready to talk?',
+  ctaSubtitle: 'Connect with our programme managers for a walkthrough of what a managed innovation centre looks like on your campus.',
+},
+  'lab-products': {
+  heroTitle: 'Lab Products',
+  heroSubtitle: 'Explore equipment and solutions for modern school and college laboratories.',
 },
   'labs': {
   heroTitle: 'Laboratory Solutions',
@@ -345,10 +495,15 @@ export const pageDefaults: Record<string, any> = {
   heroImage: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
   section1Title: 'Lab Types',
   cards: [
-    { title: 'Chemistry Lab', description: '', image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Physics Lab', description: '', image: 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Biology Lab', description: '', image: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Computer Lab', description: '', image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Chemistry Lab', description: 'Purpose-built environments for practical chemistry education and safe experimentation.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Physics Lab', description: 'Hands-on spaces for experiments, measurement, and applied physics learning.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Math Lab', description: 'Interactive learning environments that make mathematical concepts practical and visual.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=400&q=80' },
+    { title: 'Biology Lab', description: 'Well-equipped spaces for life science observation, analysis, and discovery.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Composite Skill Lab', description: 'Flexible multidisciplinary labs that support practical and vocational skill development.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=400&q=80' },
+    { title: 'AI/ML Lab', description: 'Future-ready computing environments for artificial intelligence and machine learning.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1555255707-c07966088b7b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Computer Lab', description: 'Connected, ergonomic spaces for digital learning, coding, and collaboration.', categories: ['Tech Labs'], image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'AI Stations', description: 'Specialized workstations for immersive technology and intelligent systems learning.', categories: ['Tech Labs'], image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=400&q=80' },
+    { title: 'STEM Labs', description: 'Integrated innovation spaces that bring science, technology, engineering, and math together.', categories: ['Innovation Labs'], image: 'https://images.unsplash.com/photo-1535378917042-10a22c95931a?auto=format&fit=crop&w=400&q=80' },
   ],
 },
   'libraries': {
@@ -357,20 +512,32 @@ export const pageDefaults: Record<string, any> = {
   heroImage: 'https://images.unsplash.com/photo-1568667256549-094345857637?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
   section1Title: 'Library Features',
   cards: [
-    { title: 'Digital Cataloging', description: 'Modern library management systems' },
-    { title: 'E-Library Solutions', description: 'Digital resources and e-books' },
-    { title: 'Reading Spaces', description: 'Comfortable reading environments' },
-    { title: 'Collaboration Zones', description: 'Group study and discussion areas' }
+    { title: 'Library Furniture', description: 'Complete furniture solutions for functional and welcoming library environments.', categories: ['Library Furniture'], image: 'https://images.unsplash.com/photo-1568667256549-094345857637?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Reading Tables and Chairs', description: 'Comfortable, durable seating for focused individual and group reading.', categories: ['Library Furniture'], image: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=400&q=80' },
+    { title: 'Bookshelves and Racks', description: 'Organized storage systems that make every collection easy to access.', categories: ['Library Furniture'], image: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=400&q=80' },
+    { title: 'Open Book Shelves', description: 'Accessible open shelving designed for discovery and smooth circulation.', categories: ['Library Furniture'], image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=400&q=80' },
+    { title: 'Traditional', description: 'Timeless library spaces that support focused reading and classic resource access.', categories: ['Libraries'], image: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&w=400&q=80' },
+    { title: 'Digital Library', description: 'Technology-enabled environments for digital collections, research, and connected learning.', categories: ['Libraries'], image: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=400&q=80' },
+    { title: 'Junior Library', description: 'Bright, welcoming reading spaces designed to build curiosity and a love of books.', categories: ['Libraries'], image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=400&q=80' },
+    { title: 'Minimalist', description: 'Clean, adaptable library interiors that keep learning and usability at the centre.', categories: ['Libraries'], image: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=400&q=80' }
   ]
 },
   'library-management': {
-  heroTitle: 'Library Management System',
-  heroSubtitle: 'Modernize your library with our AI-driven management software. Digital cataloging, e-journal integration, and advanced search systems.',
+  heroTitle: 'Your library, run the modern way',
+  heroSubtitle: 'AI-assisted cataloguing, digital access and self-service tools that free your library staff to spend less time on paperwork and more time helping students.',
+  heroImage: 'https://images.unsplash.com/photo-1568667256549-094345857637?auto=format&fit=crop&w=700&q=85',
   cards: [
-    { title: 'Digital Cataloging', description: 'Streamline your library operations.' },
-    { title: 'E-Journal Access', description: 'Streamline your library operations.' },
-    { title: 'User Management', description: 'Streamline your library operations.' }
+    { title: 'Digital Cataloguing', description: 'Barcode and RFID-based cataloguing that keeps your entire collection searchable and accurate in real time.', categories: ['Catalogue'], image: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=900&q=85' },
+    { title: 'E-Journal & Database Access', description: 'Single sign-on access to journals, e-books and research databases from anywhere on or off campus.', categories: ['Digital Access'], image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Circulation & User Management', description: 'Track issues, returns, renewals and fines automatically, with a clear history for every member.', categories: ['Operations'], image: 'https://images.unsplash.com/photo-1568667256549-094345857637?auto=format&fit=crop&w=900&q=85' },
+    { title: 'RFID Self-Checkout', description: 'Let students issue and return books themselves at a self-service kiosk, cutting queues at the counter.', categories: ['Automation'], image: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Usage Analytics & Reports', description: 'See which titles, sections and hours get used most, so your next acquisition budget goes further.', categories: ['Insights'], image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Automated Reminders', description: 'SMS and email reminders for due dates and reservations, sent automatically so nothing slips through.', categories: ['Automation'], image: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=900&q=85' }
   ]
+},
+  'library-products': {
+  heroTitle: 'Library Furniture',
+  heroSubtitle: 'Explore furniture and equipment for modern library spaces.',
 },
   'lms': {
   heroTitle: 'Learning Management System',
@@ -430,6 +597,52 @@ export const pageDefaults: Record<string, any> = {
       href: '/collaboration',
     },
   ]
+},
+  'partner-with-colleges': {
+  heroTitle: 'Partner With Running Colleges',
+  heroSubtitle: "Join India's fastest-growing network of educational partnerships. Bring proven campus infrastructure, technology and management expertise to your institution — and grow together with CampusMart.",
+  heroImage: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+  section2Title: 'Partnership Models',
+  cards: [
+    {
+      title: 'Managed Campus Partnership',
+      description: 'We take on day-to-day academic and campus operations while you retain ownership, backed by our proven management playbook.',
+      image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      href: '',
+    },
+    {
+      title: 'Franchise & Brand Licensing',
+      description: 'License curriculum, branding and quality standards to launch a recognised institution with a fast-track playbook.',
+      image: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=600&q=80',
+      href: '',
+    },
+    {
+      title: 'Equity & Investment Partnership',
+      description: 'Access growth capital and strategic investment to expand facilities, technology and academic programmes.',
+      image: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      href: '',
+    },
+    {
+      title: 'Infrastructure Development',
+      description: 'Turnkey campus design, construction and furnishing delivered by our in-house architects and execution teams.',
+      image: 'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      href: '',
+    },
+    {
+      title: 'Curriculum & Academic Collaboration',
+      description: 'Co-develop NEP-aligned curriculum, assessment systems and digital learning tools with our academic partners.',
+      image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      href: '',
+    },
+    {
+      title: 'Faculty Exchange & Training',
+      description: 'Upskill faculty through structured training programmes, workshops and cross-campus exchange initiatives.',
+      image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      href: '',
+    },
+  ],
+  ctaTitle: 'Ready to Explore a Partnership?',
+  ctaSubtitle: "Tell us about your institution and our partnerships team will get in touch within 2 business days.",
 },
   'partnership': {
   heroTitle: 'Partnership Enquiry',
@@ -519,61 +732,83 @@ export const pageDefaults: Record<string, any> = {
         }
     ]
 },
+  'smart-classrooms': {
+  heroTitle: 'Smart Classrooms',
+  heroSubtitle: 'Create connected, flexible classrooms that help educators teach more effectively and keep every learner engaged.',
+  heroImage: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=1200&q=90',
+  features: [
+    'IoT-Enabled Rooms',
+    'Interactive Displays',
+    'Real-Time Analytics',
+    'Flexible Furniture',
+    'Teacher Enablement'
+  ],
+  cards: [
+    { title: 'Interactive Learning', description: 'Interactive displays, digital content, and collaborative tools make lessons more engaging.' },
+    { title: 'Connected Classrooms', description: 'Reliable audio, video, networking, and device integration keep the classroom connected.' },
+    { title: 'Flexible Furniture', description: 'Ergonomic, movable furniture supports group work, presentations, and different teaching styles.' },
+    { title: 'Teacher Enablement', description: 'Simple controls and training help teachers use the technology confidently every day.' }
+  ],
+  ctaTitle: 'Ready to upgrade your classrooms?',
+  ctaSubtitle: 'Talk to our team about a smart classroom rollout tailored to your campus and budget.'
+},
   'sports-infra': {
   heroTitle: 'Sports Infrastructure',
   heroSubtitle: 'World-class sports facilities designed to promote physical fitness and athletic excellence in educational institutions.',
   heroImage: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
   section1Title: 'Sports Facilities',
   section2Title: 'Our Services Include',
+  section2Description: 'From concept to completion, we deliver turnkey solutions for elite athletic performance.',
+  ctaTitle: 'Ready to Build Your Arena?',
+  ctaButtonLabel: 'Get Project Audit',
+  ctaHref: '/contact-us',
   cards: [
-    { title: 'Basketball Court', description: '' },
-    { title: 'Football Ground', description: '' },
-    { title: 'Tennis Court', description: '' },
-    { title: 'Swimming Pool', description: '' },
-    { title: 'Athletics Track', description: '' },
-    { title: 'Indoor Sports', description: '' },
+    { title: 'Basketball Court', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Indoor', 'Adults'], image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Football Ground', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Outdoor', 'Adults'], image: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Tennis Court', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Outdoor', 'Adults'], image: 'https://images.unsplash.com/photo-1622163642998-1ea36b1ade5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Swimming Pool', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Indoor', 'Kids', 'Adults'], image: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Athletics Track', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Outdoor', 'Adults', 'Training'], image: 'https://images.unsplash.com/photo-1461896836934-voices?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Indoor Badminton Arena', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Indoor', 'Kids', 'Adults'], image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Kids Play Zone', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Kids'], image: 'https://images.unsplash.com/photo-1472162072942-cd5147eb3902?auto=format&fit=crop&w=400&q=80' },
+    { title: 'Multi-Sport Training Area', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Training', 'Adults'], image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=400&q=80' },
   ],
   features: [
     'Surface Installation',
     'Equipment Supply',
     'Maintenance'
   ],
-  // Helper images for cards since CMS doesn't store card images natively
-  _cardImages: [
-    'https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-    'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-    'https://images.unsplash.com/photo-1622163642998-1ea36b1ade5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-    'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-    'https://images.unsplash.com/photo-1461896836934-voices?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-    'https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
-  ]
 },
-  'sports-design-execution': {
-  heroTitle: 'Sports Design & Execution',
-  heroSubtitle: 'Complete sports facility design and construction services — from concept to final handover.',
-  heroImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
-  section1Title: 'Our Approach',
+  'sports-infrastructure': {
+  heroTitle: 'Sports Infrastructure',
+  heroSubtitle: 'World-class athletic facilities that nurture champions, wellness and team spirit — built to a competition standard from the ground up.',
+  heroImage: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1100&q=85',
+  ctaTitle: 'Build a Campus That Competes.',
+  ctaSubtitle: 'Tell us about your site and sport priorities — our infrastructure team will scope a facility plan and budget.',
+  ctaButtonLabel: 'Get Project Audit',
   cards: [
-    { title: 'Sport-Specific Design', description: 'Custom designs meeting international sports standards' },
-    { title: 'Material Sourcing', description: 'High-quality certified sports surface materials' },
-    { title: 'Construction', description: 'Expert construction with minimal disruption' },
-    { title: 'Certification', description: 'Sports facilities certified to national/international standards' }
-  ]
-},
-  'terms-of-use': {
-  heroTitle: 'Terms of Use',
-  sections: [
-    { heading: '1. Acceptance of Terms', body: 'By accessing and using the Campus Mart website and services, you agree to be bound by these Terms of Use. If you do not agree to these terms, please do not use our services.' },
-    { heading: '2. Use of Services', body: 'You agree to use our services only for lawful purposes and in accordance with these Terms. You agree not to:', bullets: ['Use our services in any way that violates applicable laws', 'Attempt to gain unauthorized access to our systems', 'Interfere with or disrupt our services', 'Transmit any harmful or malicious content'] },
-    { heading: '3. Account Registration', body: 'To access certain features, you may need to create an account. You are responsible for:', bullets: ['Providing accurate and complete information', 'Maintaining the confidentiality of your account credentials', 'All activities that occur under your account'] },
-    { heading: '4. Intellectual Property', body: 'All content on our website, including text, graphics, logos, and images, is the property of Campus Mart or its licensors and is protected by copyright and other intellectual property laws.' },
-    { heading: '5. Product Information', body: 'We strive to provide accurate product information, but we do not warrant that product descriptions, pricing, or other content is accurate, complete, or current. Prices and availability are subject to change without notice.' },
-    { heading: '6. Limitation of Liability', body: 'Campus Mart shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising out of or relating to your use of our services.' },
-    { heading: '7. Governing Law', body: 'These Terms shall be governed by and construed in accordance with the laws of India. Any disputes shall be subject to the exclusive jurisdiction of the courts in Bangalore.' },
-    { heading: '8. Changes to Terms', body: 'We reserve the right to modify these Terms at any time. We will notify you of any material changes by posting the updated Terms on our website.' },
-    { heading: '9. Contact Information', body: 'If you have any questions about these Terms, please contact us:\nEmail: legal@campusmart.in\nPhone: +91 9966109191' }
+    { title: 'Basketball & Multi-Court Arenas', description: 'Indoor and outdoor courts built to tournament specification, with proper flooring, lighting and markings.', categories: ['Courts'], image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Football & Athletics Grounds', description: 'Full-size pitches and running tracks engineered for drainage, turf health and year-round play.', categories: ['Outdoor'], image: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Indoor Badminton & Table Tennis Halls', description: 'Climate-controlled indoor halls with sprung flooring, sized for training squads and inter-college matches.', categories: ['Indoor'], image: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Swimming Pools & Aquatic Centers', description: 'Filtration-certified pools with lane markings and deck safety built for both training and recreation.', categories: ['Aquatics'], image: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Kids Play & Recreation Zones', description: 'Safety-certified play equipment and soft-fall surfacing designed for younger students.', categories: ['Kids'], image: 'https://images.unsplash.com/photo-1472162072942-cd5147eb3902?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Equipment Supply & Turf Maintenance', description: 'Ongoing supply of training equipment plus scheduled turf, track and court maintenance programmes.', categories: ['Equipment'], image: 'https://images.unsplash.com/photo-1547347298-4074fc3086f0?auto=format&fit=crop&w=900&q=85' },
   ],
-  lastUpdated: 'January 2025'
+},
+  'sports-products': {
+  heroTitle: 'Sports Products',
+  heroSubtitle: 'Explore sports equipment and solutions for schools, colleges, and training facilities.',
+},
+  'science-tech-labs': {
+  heroTitle: 'Labs Built for Real Discovery',
+  heroSubtitle: 'Fully equipped science and technology labs designed around the way students actually learn — by testing, measuring and building things themselves.',
+  cards: [
+    { title: 'Physics Laboratories', description: 'Precision instrumentation and safe experiment stations for mechanics, optics and electromagnetism practicals.', categories: ['Physics'], image: 'https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Chemistry Laboratories', description: 'Fume hoods, safe storage and full wet-lab benches built to the safety standards a real chemistry programme needs.', categories: ['Chemistry'], image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Biology & Life Sciences Labs', description: 'Microscopy stations and specimen storage for hands-on cell biology, genetics and life-science coursework.', categories: ['Biology'], image: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Computer Science Labs', description: 'Networked workstations and dev environments for programming, data structures and systems coursework.', categories: ['Computer Science'], image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Electronics & Robotics Labs', description: 'Soldering stations, component libraries and test benches for circuit design and embedded systems projects.', categories: ['Electronics'], image: 'https://images.unsplash.com/photo-1555255707-c07966088b7b?auto=format&fit=crop&w=900&q=85' },
+    { title: 'STEM Integration Labs', description: 'Flexible, multidisciplinary spaces where physics, coding and design come together in a single project brief.', categories: ['STEM'], image: 'https://images.unsplash.com/photo-1535378917042-10a22c95931a?auto=format&fit=crop&w=900&q=85' },
+  ],
 },
   'tech-infra': {
   heroTitle: 'Technology Infrastructure',
@@ -581,10 +816,10 @@ export const pageDefaults: Record<string, any> = {
   heroImage: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
   section1Title: 'Our Services',
   cards: [
-    { title: 'Interactive Displays', description: 'Smart boards and digital displays' },
-    { title: 'Network Solutions', description: 'Campus-wide WiFi and networking' },
-    { title: 'Server Infrastructure', description: 'On-premise and cloud solutions' },
-    { title: 'Cybersecurity', description: 'Complete security solutions' }
+    { title: 'Interactive Displays', description: 'Smart boards and digital displays for connected classrooms.', categories: ['Classroom Tech'], image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Network Solutions', description: 'Campus-wide WiFi and structured networking.', categories: ['Networking'], image: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Server Infrastructure', description: 'On-premise and cloud server solutions.', categories: ['Networking'], image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Cybersecurity', description: 'Complete security solutions for campus networks.', categories: ['Security'], image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
   ]
 },
   'ugc-guidelines': {

@@ -7,6 +7,8 @@ module.exports = {
       fontFamily: {
         'poppins': ['Poppins', 'sans-serif'],
         'opensans': ['Open Sans', 'sans-serif'],
+        'playfair': ['"Playfair Display"', 'serif'],
+        'grotesk': ['"Space Grotesk"', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

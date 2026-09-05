@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { Link } from 'react-router-dom';
 import {
@@ -11,23 +11,81 @@ import {
   Microscope,
   Users,
   Lightbulb,
+  GraduationCap,
+  BookOpen,
+  Cpu,
+  Wrench,
+  ShieldCheck,
+  Globe,
+  Rocket,
+  Sparkles,
+  Layers,
+  Trophy,
+  Palette,
+  type LucideIcon,
 } from 'lucide-react';
+import api from '@/api/client';
 
-const categories = [
-  { icon: Ruler, label: 'Campus Design', href: '/campus-design' },
-  { icon: Armchair, label: 'Furniture', href: '/furniture' },
-  { icon: Circle, label: 'Sports Infra', href: '/sports-infra' },
-  { icon: Brain, label: 'AI/ML', href: '/ai-ml' },
-  { icon: Monitor, label: 'Tech Infra', href: '/tech-infra' },
-  { icon: Building2, label: 'Libraries', href: '/libraries' },
-  { icon: Microscope, label: 'Labs', href: '/labs' },
-  { icon: Users, label: 'Collaboration', href: '/collaboration' },
-  { icon: Lightbulb, label: 'Innovation', href: '/innovation' },
+export const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  Ruler,
+  Armchair,
+  Circle,
+  Brain,
+  Monitor,
+  Building2,
+  Microscope,
+  Users,
+  Lightbulb,
+  GraduationCap,
+  BookOpen,
+  Cpu,
+  Wrench,
+  ShieldCheck,
+  Globe,
+  Rocket,
+  Sparkles,
+  Layers,
+  Trophy,
+  Palette,
+};
+
+export interface CategoryItem {
+  icon: string;
+  label: string;
+  href: string;
+}
+
+export const DEFAULT_CATEGORIES: CategoryItem[] = [
+  { icon: 'Ruler', label: 'Campus Design', href: '/campus-design' },
+  { icon: 'Armchair', label: 'Furniture', href: '/furniture' },
+  { icon: 'Circle', label: 'Sports Infra', href: '/sports-infra' },
+  { icon: 'Brain', label: 'AI/ML', href: '/ai-ml' },
+  { icon: 'Monitor', label: 'Tech Infra', href: '/tech-infra' },
+  { icon: 'Building2', label: 'Libraries', href: '/libraries' },
+  { icon: 'Microscope', label: 'Labs', href: '/labs' },
+  { icon: 'Users', label: 'Collaboration', href: '/collaboration' },
+  { icon: 'Lightbulb', label: 'Innovation', href: '/innovation' },
 ];
 
 const CategoryBar = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const iconsRef = useRef<HTMLDivElement>(null);
+  const [categories, setCategories] = useState<CategoryItem[]>(DEFAULT_CATEGORIES);
+
+  useEffect(() => {
+    let active = true;
+    api
+      .get('/content')
+      .then(({ data }) => {
+        if (!active || !data.home_categories) return;
+        try {
+          const parsed = JSON.parse(data.home_categories);
+          if (Array.isArray(parsed) && parsed.length > 0) setCategories(parsed);
+        } catch { /* noop */ }
+      })
+      .catch(() => { /* keep defaults */ });
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -43,7 +101,7 @@ const CategoryBar = () => {
       );
     });
     return () => ctx.revert();
-  }, []);
+  }, [categories]);
 
   return (
     <div
@@ -55,20 +113,23 @@ const CategoryBar = () => {
           ref={iconsRef}
           className="grid grid-cols-3 items-start gap-x-0 gap-y-2 pt-3 pb-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-3 sm:pt-2 sm:pb-2 md:gap-6"
         >
-          {categories.map(({ icon: Icon, label, href }) => (
-            <div key={label} className="relative group min-w-0 cursor-pointer shrink-0">
-              <Link to={href} className="flex flex-col items-center justify-center gap-1.5 px-0 hover:text-cm-blue transition-colors sm:px-2">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-50 text-gray-600 transition-all duration-300 group-hover:bg-blue-50 group-hover:text-cm-blue sm:h-12 sm:w-12 md:h-14 md:w-14">
-                  <Icon className="h-5 w-5 sm:h-5 sm:w-5 md:h-7 md:w-7" />
-                </div>
-                <span className="text-[12px] leading-tight font-bold text-center text-gray-700 tracking-tight uppercase transition-colors group-hover:text-cm-blue sm:whitespace-nowrap sm:text-[12px] md:text-[14px]">
-                  {label}
-                </span>
+          {categories.map(({ icon, label, href }) => {
+            const Icon = CATEGORY_ICONS[icon] || Circle;
+            return (
+              <div key={label} className="relative group min-w-0 cursor-pointer shrink-0">
+                <Link to={href} className="flex flex-col items-center justify-center gap-1.5 px-0 hover:text-cm-blue transition-colors sm:px-2">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-50 text-gray-600 transition-all duration-300 group-hover:bg-blue-50 group-hover:text-cm-blue sm:h-12 sm:w-12 md:h-14 md:w-14">
+                    <Icon className="h-5 w-5 sm:h-5 sm:w-5 md:h-7 md:w-7" />
+                  </div>
+                  <span className="text-[12px] leading-tight font-bold text-center text-gray-700 tracking-tight uppercase transition-colors group-hover:text-cm-blue sm:whitespace-nowrap sm:text-[12px] md:text-[14px]">
+                    {label}
+                  </span>
 
-                <div className="absolute -bottom-[8px] left-0 h-[3px] w-full origin-center scale-x-0 bg-cm-yellow transition-transform duration-300 group-hover:scale-x-100" />
-              </Link>
-            </div>
-          ))}
+                  <div className="absolute -bottom-[8px] left-0 h-[3px] w-full origin-center scale-x-0 bg-cm-yellow transition-transform duration-300 group-hover:scale-x-100" />
+                </Link>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

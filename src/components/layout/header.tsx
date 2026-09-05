@@ -64,7 +64,6 @@ const MainHeader = () => {
         { label: 'About Us', href: '/about-us' },
         { label: 'Our Team', href: '/about-us#team' },
         { label: 'Partners', href: '/about-us#partners' },
-        { label: 'Careers', href: '/partnership' },
       ]
     },
     {

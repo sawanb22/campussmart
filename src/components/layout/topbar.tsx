@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { Mail, Phone, Facebook, Twitter, Youtube, Instagram, Linkedin } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useWishlist } from '@/contexts/WishlistContext';
 
 const TopBar = () => {
   const topBarRef = useRef<HTMLDivElement>(null);
@@ -46,6 +47,11 @@ const TopBar = () => {
   const currentUser = storedUser ? JSON.parse(storedUser) : null;
   const isLoggedIn = !!localStorage.getItem('cm_token') && !!currentUser;
   const userName = currentUser?.name || currentUser?.email || '';
+  const { count: wishlistCount, refresh: refreshWishlist } = useWishlist();
+
+  useEffect(() => {
+    refreshWishlist();
+  }, [isLoggedIn, refreshWishlist]);
 
   const handleLogout = () => {
     localStorage.removeItem('cm_token');
@@ -117,6 +123,18 @@ const TopBar = () => {
                     className="hover:text-cm-yellow transition-colors duration-200 relative group"
                   >
                     MY ACCOUNT
+                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-cm-yellow transition-all duration-300 group-hover:w-full" />
+                  </Link>
+                  <Link
+                    to="/my-account?tab=wishlist"
+                    className="hover:text-cm-yellow transition-colors duration-200 relative group inline-flex items-center gap-1.5"
+                  >
+                    WISHLIST
+                    {wishlistCount > 0 && (
+                      <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-cm-yellow px-1 text-[9px] font-bold text-cm-blue-dark">
+                        {wishlistCount}
+                      </span>
+                    )}
                     <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-cm-yellow transition-all duration-300 group-hover:w-full" />
                   </Link>
                   <button

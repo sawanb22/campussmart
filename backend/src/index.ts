@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import path from 'path';
 import fs from 'fs';
 import dotenv from 'dotenv';
 
@@ -17,31 +16,44 @@ import addressRoutes from './routes/addresses.routes';
 import classifiedRoutes from './routes/classifieds.routes';
 import contactRoutes from './routes/contact.routes';
 import catalogueRoutes from './routes/catalogues.routes';
+import caseStudyRoutes from './routes/case-studies.routes';
 import adminRoutes from './routes/admin.routes';
 import contentRoutes from './routes/content.routes';
 import pagesRoutes from './routes/pages.routes';
+import mediaRoutes from './routes/media.routes';
 import { errorHandler } from './middleware/error.middleware';
+import { UPLOADS_DIR } from './lib/uploads-dir';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Create uploads directory if it doesn't exist
-// const uploadsDir = path.join(__dirname, '../../uploads');
-// const cataloguesDir = path.join(uploadsDir, 'catalogues');
-// const imagesDir = path.join(uploadsDir, 'images');
-// [uploadsDir, cataloguesDir, imagesDir].forEach((dir) => {
-//     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-// });
+if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+console.log(`Serving uploads from: ${UPLOADS_DIR}`);
 
 // Security middleware
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+// Env vars may hold a single URL or a comma-separated list, sometimes with a
+// stray path or trailing slash; normalize everything down to bare origins
+// (scheme+host+port) so a formatting typo can't silently lock out real traffic.
+const toOrigin = (value: string): string | null => {
+    try {
+        return new URL(value.trim()).origin;
+    } catch {
+        return null;
+    }
+};
+
 const allowedOrigins = [
     process.env.FRONTEND_URL,
     process.env.ADMIN_URL,
     'http://localhost:5173',
     'http://localhost:5174',
     'http://localhost:3000',
-].filter(Boolean) as string[];
+]
+    .filter(Boolean)
+    .flatMap((value) => (value as string).split(','))
+    .map(toOrigin)
+    .filter(Boolean) as string[];
 
 app.use(cors({
     origin: (origin, callback) => {
@@ -65,7 +77,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Static files (uploaded images/PDFs)
-// app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
+app.use('/uploads', express.static(UPLOADS_DIR));
 
 // Health check
 app.get('/health', (_req, res) => {
@@ -82,9 +94,11 @@ app.use('/api/addresses', addressRoutes);
 app.use('/api/classifieds', classifiedRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/catalogues', catalogueRoutes);
+app.use('/api/case-studies', caseStudyRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/pages', pagesRoutes);
+app.use('/api/media', mediaRoutes);
 
 // Error handler must be last
 app.use(errorHandler);

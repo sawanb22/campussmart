@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { User, ShoppingBag, Heart, MapPin, CreditCard, LogOut, Edit, Package, Trash2, Plus, X } from 'lucide-react';
+import { User, ShoppingBag, Heart, MapPin, LogOut, Edit, Package } from 'lucide-react';
 import api from '@/api/client';
+import { resolveMediaUrl } from '@/lib/media-url';
+import { useWishlist } from '@/contexts/WishlistContext';
 
 interface WishlistItem {
   id: number;
@@ -12,7 +14,11 @@ interface WishlistItem {
     imageUrl?: string;
     slug: string;
     category?: { name: string; slug: string };
-  };
+  } | null;
+  designKey?: string | null;
+  designTitle?: string | null;
+  designImage?: string | null;
+  pageSlug?: string | null;
 }
 
 interface Address {
@@ -23,13 +29,6 @@ interface Address {
   city: string;
   state: string;
   pincode: string;
-}
-
-interface PaymentMethod {
-  id: string;
-  type: 'card' | 'upi' | 'netbanking';
-  label: string;
-  detail: string;
 }
 
 interface Order {
@@ -57,8 +56,10 @@ const MyAccount = () => {
   const storedUser = localStorage.getItem('cm_user');
   const currentUser = storedUser ? JSON.parse(storedUser) : null;
   const isLoggedIn = !!localStorage.getItem('cm_token') && !!currentUser;
-  const paymentStorageKey = `cm_payment_methods_${currentUser?.id || currentUser?.email || 'user'}`;
-  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'profile');
+  const initialTab = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(
+    initialTab && ['profile', 'orders', 'wishlist', 'addresses'].includes(initialTab) ? initialTab : 'profile'
+  );
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -74,10 +75,7 @@ const MyAccount = () => {
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileError, setProfileError] = useState('');
   const [profileForm, setProfileForm] = useState({ name: currentUser?.name || '', phone: currentUser?.phone || '', institution: currentUser?.institution || '' });
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
-  const [paymentFormOpen, setPaymentFormOpen] = useState(false);
-  const [paymentForm, setPaymentForm] = useState({ type: 'card' as PaymentMethod['type'], holder: '', cardNumber: '', expiry: '', upiId: '', bankName: '' });
-  const [paymentError, setPaymentError] = useState('');
+  const { refresh: refreshWishlistCount } = useWishlist();
   const handleLogout = () => {
     localStorage.removeItem('cm_token');
     localStorage.removeItem('cm_user');
@@ -100,11 +98,7 @@ const MyAccount = () => {
       .then(({ data }) => setOrders(data))
       .catch(() => setOrders([]))
       .finally(() => setOrdersLoading(false));
-    const storedMethods = localStorage.getItem(paymentStorageKey);
-    if (storedMethods) {
-      try { setPaymentMethods(JSON.parse(storedMethods)); } catch { setPaymentMethods([]); }
-    }
-  }, [isLoggedIn, paymentStorageKey]);
+  }, [isLoggedIn]);
 
   useEffect(() => {
     if (!isLoggedIn || activeTab !== 'addresses') return;
@@ -117,7 +111,7 @@ const MyAccount = () => {
 
   useEffect(() => {
     const tab = searchParams.get('tab');
-    if (tab) {
+    if (tab && ['profile', 'orders', 'wishlist', 'addresses'].includes(tab)) {
       setActiveTab(tab);
     }
   }, [searchParams]);
@@ -125,7 +119,18 @@ const MyAccount = () => {
   const removeFromWishlist = async (productId: number) => {
     try {
       await api.delete(`/wishlist/${productId}`);
-      setWishlist((prev) => prev.filter((item) => item.product.id !== productId));
+      setWishlist((prev) => prev.filter((item) => item.product?.id !== productId));
+      refreshWishlistCount();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to remove from wishlist');
+    }
+  };
+
+  const removeDesignFromWishlist = async (designKey: string) => {
+    try {
+      await api.delete(`/wishlist/design/${encodeURIComponent(designKey)}`);
+      setWishlist((prev) => prev.filter((item) => item.designKey !== designKey));
+      refreshWishlistCount();
     } catch (err: any) {
       alert(err.response?.data?.error || 'Failed to remove from wishlist');
     }
@@ -135,6 +140,7 @@ const MyAccount = () => {
     try {
       await api.post('/wishlist', { productId });
       alert('Product added to cart (wishlist).');
+      refreshWishlistCount();
     } catch (err: any) {
       if (err.response?.status === 401) {
         alert('Please login to add products to cart.');
@@ -160,54 +166,11 @@ const MyAccount = () => {
     }
   };
 
-  const savePaymentMethods = (methods: PaymentMethod[]) => {
-    setPaymentMethods(methods);
-    localStorage.setItem(paymentStorageKey, JSON.stringify(methods));
-  };
-
-  const addPaymentMethod = (event: React.FormEvent) => {
-    event.preventDefault();
-    setPaymentError('');
-    let detail = '';
-    let label = '';
-    if (paymentForm.type === 'card') {
-      const digits = paymentForm.cardNumber.replace(/\D/g, '');
-      if (digits.length < 12 || digits.length > 19 || !paymentForm.holder || !/^\d{2}\/\d{2}$/.test(paymentForm.expiry)) {
-        setPaymentError('Enter a valid cardholder name, card number, and expiry in MM/YY format.');
-        return;
-      }
-      label = 'Card';
-      detail = `•••• ${digits.slice(-4)} · ${paymentForm.expiry}`;
-    } else if (paymentForm.type === 'upi') {
-      if (!/^[\w.-]+@[\w.-]+$/.test(paymentForm.upiId)) {
-        setPaymentError('Enter a valid UPI ID, for example name@bank.');
-        return;
-      }
-      label = 'UPI';
-      detail = paymentForm.upiId;
-    } else {
-      if (!paymentForm.bankName.trim()) {
-        setPaymentError('Enter a bank name.');
-        return;
-      }
-      label = 'Net Banking';
-      detail = paymentForm.bankName.trim();
-    }
-    savePaymentMethods([...paymentMethods, { id: crypto.randomUUID(), type: paymentForm.type, label, detail }]);
-    setPaymentForm({ type: 'card', holder: '', cardNumber: '', expiry: '', upiId: '', bankName: '' });
-    setPaymentFormOpen(false);
-  };
-
-  const removePaymentMethod = (id: string) => {
-    savePaymentMethods(paymentMethods.filter((method) => method.id !== id));
-  };
-
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'orders', label: 'My Orders', icon: ShoppingBag },
     { id: 'wishlist', label: 'Wishlist', icon: Heart },
     { id: 'addresses', label: 'Addresses', icon: MapPin },
-    { id: 'payment', label: 'Payment Methods', icon: CreditCard },
   ];
 
   const openNewAddressForm = () => {
@@ -315,7 +278,12 @@ const MyAccount = () => {
                           }`}
                       >
                         <tab.icon className="w-5 h-5" />
-                        {tab.label}
+                        <span className="flex-1 text-left">{tab.label}</span>
+                        {tab.id === 'wishlist' && wishlist.length > 0 && (
+                          <span className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-bold ${activeTab === 'wishlist' ? 'bg-white/20 text-white' : 'bg-cm-blue/10 text-cm-blue'}`}>
+                            {wishlist.length}
+                          </span>
+                        )}
                       </button>
                     </li>
                   ))}
@@ -403,17 +371,17 @@ const MyAccount = () => {
 
             {activeTab === 'wishlist' && (
               <div className="bg-white rounded-xl p-8 shadow-card">
-                <h2 className="text-xl font-bold text-cm-blue-dark mb-6">My Wishlist</h2>
+                <h2 className="text-xl font-bold text-cm-blue-dark mb-6">My Wishlist {wishlist.length > 0 && <span className="text-base font-semibold text-gray-400">({wishlist.length})</span>}</h2>
                 {wishlistLoading ? (
                   <div className="text-sm text-slate-500">Loading wishlist...</div>
                 ) : wishlist.length === 0 ? (
                   <div className="text-sm text-slate-500">Your wishlist is empty. Add items from the product page or shop.</div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {wishlist.map((item) => (
+                    {wishlist.map((item) => item.product ? (
                       <div key={item.id} className="border rounded-lg p-4 flex gap-4">
                         <img
-                          src={item.product.imageUrl || 'https://via.placeholder.com/160'}
+                          src={resolveMediaUrl(item.product.imageUrl) || 'https://via.placeholder.com/160'}
                           alt={item.product.name}
                           className="w-20 h-20 object-cover rounded-lg"
                         />
@@ -421,10 +389,27 @@ const MyAccount = () => {
                           <h3 className="font-semibold text-cm-blue-dark">{item.product.name}</h3>
                           <p className="text-cm-blue font-bold">₹{item.product.price.toLocaleString()}</p>
                           <div className="flex gap-3 mt-3">
-                            <button onClick={() => moveToCart(item.product.id)} className="text-sm text-cm-blue hover:underline">
+                            <button onClick={() => moveToCart(item.product!.id)} className="text-sm text-cm-blue hover:underline">
                               Move to Cart
                             </button>
-                            <button onClick={() => removeFromWishlist(item.product.id)} className="text-sm text-red-600 hover:underline">
+                            <button onClick={() => removeFromWishlist(item.product!.id)} className="text-sm text-red-600 hover:underline">
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div key={item.id} className="border rounded-lg p-4 flex gap-4">
+                        <img
+                          src={resolveMediaUrl(item.designImage || undefined) || 'https://via.placeholder.com/160'}
+                          alt={item.designTitle || 'Design'}
+                          className="w-20 h-20 object-cover rounded-lg"
+                        />
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-cm-blue-dark">{item.designTitle}</h3>
+                          <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mt-1">Saved design</p>
+                          <div className="flex gap-3 mt-3">
+                            <button onClick={() => removeDesignFromWishlist(item.designKey!)} className="text-sm text-red-600 hover:underline">
                               Remove
                             </button>
                           </div>
@@ -479,30 +464,6 @@ const MyAccount = () => {
                     ))}
                   </div>
                 )}
-              </div>
-            )}
-
-            {activeTab === 'payment' && (
-              <div className="bg-white rounded-xl p-8 shadow-card">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-cm-blue-dark">Payment Methods</h2>
-                  <button onClick={() => { setPaymentError(''); setPaymentFormOpen(true); }} className="btn-primary text-sm inline-flex items-center gap-2"><Plus className="h-4 w-4" />Add Payment Method</button>
-                </div>
-                {paymentFormOpen && <form onSubmit={addPaymentMethod} className="mb-6 rounded-lg border bg-gray-50 p-4 space-y-4">
-                  <div className="flex items-center justify-between"><h3 className="font-semibold text-cm-blue-dark">Add payment method</h3><button type="button" onClick={() => setPaymentFormOpen(false)} aria-label="Close payment form"><X className="h-4 w-4" /></button></div>
-                  <select value={paymentForm.type} onChange={(e) => setPaymentForm({ ...paymentForm, type: e.target.value as PaymentMethod['type'] })} className="form-input"><option value="card">Credit / Debit Card</option><option value="upi">UPI</option><option value="netbanking">Net Banking</option></select>
-                  {paymentForm.type === 'card' && <><input required value={paymentForm.holder} onChange={(e) => setPaymentForm({ ...paymentForm, holder: e.target.value })} className="form-input" placeholder="Cardholder name" /><input required inputMode="numeric" value={paymentForm.cardNumber} onChange={(e) => setPaymentForm({ ...paymentForm, cardNumber: e.target.value.replace(/\D/g, '').slice(0, 19) })} className="form-input" placeholder="Card number" /><input required value={paymentForm.expiry} onChange={(e) => setPaymentForm({ ...paymentForm, expiry: e.target.value.replace(/[^\d/]/g, '').slice(0, 5) })} className="form-input" placeholder="Expiry MM/YY" /></>}
-                  {paymentForm.type === 'upi' && <input required value={paymentForm.upiId} onChange={(e) => setPaymentForm({ ...paymentForm, upiId: e.target.value })} className="form-input" placeholder="name@bank" />}
-                  {paymentForm.type === 'netbanking' && <input required value={paymentForm.bankName} onChange={(e) => setPaymentForm({ ...paymentForm, bankName: e.target.value })} className="form-input" placeholder="Bank name" />}
-                  {paymentError && <p className="text-sm text-red-600">{paymentError}</p>}<button type="submit" className="btn-primary">Save Payment Method</button>
-                </form>}
-                {paymentMethods.length === 0 && !paymentFormOpen ? <div className="text-center py-12">
-                  <CreditCard className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                  <p className="text-gray-600">No saved payment methods</p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Add a card, UPI ID, or net banking account for faster checkout
-                  </p>
-                </div> : <div className="space-y-3">{paymentMethods.map((method) => <div key={method.id} className="flex items-center justify-between rounded-lg border p-4"><div className="flex items-center gap-3"><CreditCard className="h-5 w-5 text-cm-blue" /><div><p className="font-semibold text-cm-blue-dark">{method.label}</p><p className="text-sm text-gray-500">{method.detail}</p></div></div><button onClick={() => removePaymentMethod(method.id)} aria-label={`Remove ${method.label}`} className="text-red-600 hover:text-red-700"><Trash2 className="h-4 w-4" /></button></div>)}</div>}
               </div>
             )}
           </div>

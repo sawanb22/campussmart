@@ -27,9 +27,20 @@ router.post('/', verifyToken, requireAdmin, uploadPDF.single('file'), async (req
     }
 });
 
-router.put('/:id', verifyToken, requireAdmin, async (req: AuthRequest, res: Response) => {
+router.put('/:id', verifyToken, requireAdmin, uploadPDF.single('file'), async (req: AuthRequest, res: Response) => {
     try {
-        const catalogue = await prisma.catalogue.update({ where: { id: Number(req.params.id) }, data: req.body });
+        const current = await prisma.catalogue.findUnique({ where: { id: Number(req.params.id) } });
+        if (!current) { res.status(404).json({ error: 'Catalogue not found' }); return; }
+
+        const catalogue = await prisma.catalogue.update({
+            where: { id: Number(req.params.id) },
+            data: {
+                title: req.body.title ?? current.title,
+                description: req.body.description ?? current.description,
+                thumbnailUrl: req.body.thumbnailUrl ?? current.thumbnailUrl,
+                fileUrl: req.file ? `/uploads/catalogues/${req.file.filename}` : (req.body.fileUrl || current.fileUrl),
+            },
+        });
         res.json(catalogue);
     } catch {
         res.status(500).json({ error: 'Failed to update catalogue' });

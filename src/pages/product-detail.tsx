@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ShoppingCart, Check, Share2, Award, Truck, ShieldCheck, Heart, ArrowLeft } from 'lucide-react';
 import api from '@/api/client';
+import LoginPromptModal from '@/components/login-prompt-modal';
+import { resolveMediaUrl } from '@/lib/media-url';
+import { useWishlist } from '@/contexts/WishlistContext';
 
 interface Product {
   id: number;
@@ -26,6 +29,8 @@ const ProductDetail = () => {
   const [mainImage, setMainImage] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
   const [gallery, setGallery] = useState<string[]>([]);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const { refresh: refreshWishlistCount } = useWishlist();
 
   useEffect(() => {
     setLoading(true);
@@ -33,12 +38,12 @@ const ProductDetail = () => {
     api.get(`/products/${slug}`)
       .then(({ data }) => {
         setProduct(data);
-        setMainImage(data.imageUrl || 'https://via.placeholder.com/600x450');
+        setMainImage(resolveMediaUrl(data.imageUrl) || 'https://via.placeholder.com/600x450');
         
         if (data.images) {
            try {
               const list = JSON.parse(data.images);
-              if (Array.isArray(list)) setGallery(list);
+              if (Array.isArray(list)) setGallery(list.map((image) => resolveMediaUrl(image)));
            } catch { setGallery([]); }
         }
       })
@@ -81,8 +86,10 @@ const ProductDetail = () => {
     try {
       await api.post('/wishlist', { productId: product.id });
       alert('Added to wishlist');
+      refreshWishlistCount();
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to add to wishlist');
+      if (err.response?.status === 401) setShowLoginPrompt(true);
+      else alert(err.response?.data?.error || 'Failed to add to wishlist');
     }
   };
 
@@ -90,9 +97,10 @@ const ProductDetail = () => {
     try {
       await api.post('/wishlist', { productId: product.id });
       alert('Product added to cart!');
+      refreshWishlistCount();
     } catch (err: any) {
       if (err.response?.status === 401) {
-        alert('Please login to add products to cart.');
+        setShowLoginPrompt(true);
       } else {
         alert(err.response?.data?.error || 'Failed to add to cart.');
       }
@@ -101,6 +109,7 @@ const ProductDetail = () => {
 
   return (
     <main className="bg-slate-50 min-h-screen pb-12">
+      <LoginPromptModal open={showLoginPrompt} onClose={() => setShowLoginPrompt(false)} />
       {/* Breadcrumb & Back Action */}
       <div className="bg-white border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-2 text-sm text-slate-500 font-medium">
@@ -131,7 +140,7 @@ const ProductDetail = () => {
             </div>
             {gallery.length > 0 && (
               <div className="flex gap-2 overflow-x-auto pb-2">
-                {[product.imageUrl, ...gallery].filter(Boolean).map((img, i) => (
+                {[resolveMediaUrl(product.imageUrl), ...gallery].filter(Boolean).map((img, i) => (
                   <button 
                      key={i} 
                      onClick={() => setMainImage(img || '')}

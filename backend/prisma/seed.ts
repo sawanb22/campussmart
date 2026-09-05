@@ -73,16 +73,16 @@ async function main() {
 
     // Categories
     const categories = [
-        { name: 'Furniture', slug: 'furniture' },
-        { name: 'Lab Equipment', slug: 'labs' },
-        { name: 'Sports', slug: 'sports' },
-        { name: 'Technology', slug: 'technology' },
-        { name: 'Library', slug: 'library' },
+        { name: 'Furniture', slug: 'furniture', page: 'furniture' },
+        { name: 'Lab Equipment', slug: 'labs', page: 'labs' },
+        { name: 'Sports', slug: 'sports', page: 'sports' },
+        { name: 'Technology', slug: 'technology', page: 'furniture' },
+        { name: 'Library', slug: 'library', page: 'libraries' },
     ];
     for (const cat of categories) {
         await withRetry(() => prisma.category.upsert({
             where: { slug: cat.slug },
-            update: {},
+            update: { page: cat.page },
             create: cat,
         }));
     }
@@ -181,6 +181,7 @@ async function main() {
         { title: 'Solutions', slug: 'solutions' },
         { title: 'Catalogues', slug: 'catalogues' },
         { title: 'Classifieds', slug: 'classifieds' },
+        { title: 'Colleges / Universities for Sale', slug: 'colleges-universities-for-sale' },
         { title: 'AI Digital Design Supply', slug: 'ai-digital-design-supply' },
         { title: 'AI Guide', slug: 'ai-guide' },
         { title: 'AI & ML', slug: 'ai-ml' },
@@ -197,6 +198,7 @@ async function main() {
         { title: 'Innovation', slug: 'innovation' },
         { title: 'Labs', slug: 'labs' },
         { title: 'Libraries', slug: 'libraries' },
+        { title: 'Library Products', slug: 'library-products' },
         { title: 'Library Management', slug: 'library-management' },
         { title: 'Learning Management System', slug: 'lms' },
         { title: 'Lookbook', slug: 'lookbook' },
@@ -208,6 +210,7 @@ async function main() {
         { title: 'Setup College', slug: 'setup-college' },
         { title: 'Sports Design Execution', slug: 'sports-design-execution' },
         { title: 'Sports Infrastructure', slug: 'sports-infra' },
+        { title: 'Sports Products', slug: 'sports-products' },
         { title: 'Tech Infrastructure', slug: 'tech-infra' },
         { title: 'Terms of Use', slug: 'terms-of-use' },
         { title: 'UGC Guidelines', slug: 'ugc-guidelines' },
@@ -217,6 +220,7 @@ async function main() {
         { title: 'My Account', slug: 'my-account' },
         { title: 'Login', slug: 'login' },
         { title: 'Registration', slug: 'registration' },
+        { title: 'Lab Products', slug: 'lab-products' },
     ];
 
     for (const page of pages) {

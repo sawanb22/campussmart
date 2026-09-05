@@ -4,14 +4,13 @@ import { Link } from 'react-router-dom';
 import { Building2, Ruler, PenTool, CheckCircle } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 
-interface Card { title: string; description: string; image?: string; }
+interface Card { title: string; description: string; image?: string; href?: string; }
 
 const DEFAULTS = {
   heroTitle: 'Campus Design',
   heroSubtitle: 'Transform your educational vision into reality with our comprehensive campus design services. We create spaces that inspire learning and foster innovation.',
   heroImage: 'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
   section1Title: 'Our Design Services',
-  section2Title: "Why Choose Our Campus Design?",
   ctaTitle: "Ready to Design Your Dream Campus?",
   ctaSubtitle: "Let our expert team help you create a campus that inspires and empowers.",
   cards: [
@@ -20,14 +19,6 @@ const DEFAULTS = {
     { title: 'Interior Design', description: 'Functional and aesthetic interior spaces for learning.', image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80' },
     { title: 'Landscape Design', description: 'Outdoor spaces that enhance the campus environment.', image: 'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80' },
   ] as Card[],
-  features: [
-    'Space optimization and utilization analysis',
-    'Sustainable and eco-friendly design',
-    'NEP 2020 compliant layouts',
-    'Accessibility and inclusivity',
-    'Future-ready infrastructure',
-    'Cost-effective solutions',
-  ],
 };
 
 const PROCESS_STEPS = [
@@ -36,6 +27,8 @@ const PROCESS_STEPS = [
   { icon: PenTool, title: 'Design', description: 'Creating detailed design proposals' },
   { icon: CheckCircle, title: 'Execution', description: 'Bringing designs to life' },
 ];
+
+const serviceSlug = (title: string) => title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 const CampusDesign = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -69,11 +62,9 @@ const CampusDesign = () => {
   const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
   const heroImage = data.heroImage ?? DEFAULTS.heroImage;
   const section1Title = data.section1Title ?? DEFAULTS.section1Title;
-  const section2Title = data.section2Title ?? DEFAULTS.section2Title;
   const ctaTitle = data.ctaTitle ?? DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? DEFAULTS.ctaSubtitle;
   const cards: Card[] = (data.cards && data.cards.length > 0) ? data.cards : DEFAULTS.cards;
-  const features: string[] = (data.features && data.features.length > 0) ? data.features : DEFAULTS.features;
 
   return (
     <main className="min-h-screen bg-white">
@@ -113,25 +104,26 @@ const CampusDesign = () => {
             </p>
           </div>
 
-          <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div ref={cardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {cards.map((service) => (
-              <div 
-                key={service.title} 
-                className="group bg-white rounded-[2rem] overflow-hidden shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)] border border-slate-200/70 flex flex-col min-h-[360px]"
+              <Link
+                key={service.title}
+                to={service.href || `/campus-design/${serviceSlug(service.title)}`}
+                className="group bg-white rounded-2xl overflow-hidden shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)] border border-slate-200/70 flex flex-col"
               >
-                <div className="relative overflow-hidden aspect-[4/5]">
+                <div className="relative overflow-hidden aspect-[16/10]">
                   <img src={service.image} alt={service.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent" />
                 </div>
-                <div className="px-6 pb-6 pt-5 flex flex-col flex-grow">
-                  <h3 className="text-xl font-semibold text-slate-900 tracking-tight mb-3">{service.title}</h3>
-                  <p className="text-sm text-slate-600 leading-relaxed mb-4 flex-grow">{service.description}</p>
+                <div className="px-5 pb-5 pt-4 flex flex-col flex-grow">
+                  <h3 className="text-lg font-semibold text-slate-900 tracking-tight mb-2">{service.title}</h3>
+                  <p className="text-sm text-slate-600 leading-relaxed mb-3 flex-grow line-clamp-2">{service.description}</p>
                   <div className="flex items-center justify-between text-slate-700">
-                    <span className="text-xs uppercase tracking-[0.28em] text-slate-400">Architecture</span>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-cm-blue">View</span>
+                    <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Architecture</span>
+                    <span className="text-xs font-bold uppercase tracking-widest text-cm-blue">View</span>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -159,39 +151,13 @@ const CampusDesign = () => {
         </div>
       </section>
 
-      {/* Feature Showcase Segment */}
-      <section className="py-12 mb-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-cm-gray/30 rounded-[3rem] p-10 md:p-20 shadow-xl overflow-hidden relative border border-cm-gray">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-              <div>
-                <h2 className="text-2xl md:text-4xl font-bold text-cm-blue-dark mb-6 leading-tight tracking-tight">{section2Title}</h2>
-                <div className="grid grid-cols-1 gap-6 font-opensans">
-                  {features.map((feature) => (
-                    <div key={feature} className="flex items-center gap-6 group">
-                      <div className="w-10 h-10 rounded-xl bg-cm-blue/10 flex items-center justify-center group-hover:bg-cm-blue transition-all border border-cm-blue/10">
-                        <CheckCircle className="w-6 h-6 text-cm-blue group-hover:text-cm-yellow" />
-                      </div>
-                      <span className="text-lg text-gray-700 font-bold">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="relative p-4 bg-white rounded-[3rem] shadow-2xl">
-                <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Architecture" className="rounded-[2.5rem] shadow-2xl w-full h-[500px] object-cover" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Branding Call to Action */}
-      <section className="py-16 text-center bg-cm-blue-dark text-white rounded-t-[5rem] border-t-8 border-cm-yellow/50">
+      <section className="py-10 text-center bg-cm-blue-dark text-white rounded-t-[5rem] border-t-8 border-cm-yellow/50">
         <div className="max-w-4xl mx-auto px-6">
-           <Building2 className="w-20 h-20 text-cm-yellow mx-auto mb-10 opacity-50" />
-           <h2 className="text-4xl md:text-7xl font-bold mb-10 tracking-tighter">{ctaTitle}</h2>
-           <p className="text-2xl text-white/70 mb-12 font-bold leading-relaxed font-opensans text-pretty">{ctaSubtitle}</p>
-           <Link to="/request-quote" className="btn-secondary px-16 py-5 text-2xl">
+           <Building2 className="w-12 h-12 text-cm-yellow mx-auto mb-5 opacity-50" />
+           <h2 className="text-2xl md:text-4xl font-bold mb-4 tracking-tighter">{ctaTitle}</h2>
+           <p className="text-base md:text-lg text-white/70 mb-7 font-bold leading-relaxed font-opensans text-pretty">{ctaSubtitle}</p>
+           <Link to="/request-quote" className="btn-secondary px-10 py-3.5 text-base">
              Elevate Your Space
            </Link>
         </div>

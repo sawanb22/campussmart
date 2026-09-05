@@ -5,6 +5,7 @@ import { uploadImage } from '../middleware/upload.middleware';
 import path from 'path';
 
 const router = Router();
+const CATEGORY_PAGES = new Set(['furniture', 'libraries', 'labs', 'sports', 'ai-ml', 'tech-infra']);
 
 
 // GET /api/products
@@ -14,8 +15,12 @@ router.get('/', async (req: Request, res: Response) => {
         const skip = (Number(page) - 1) * Number(limit);
         const where: Record<string, unknown> = { active: true };
         if (category && category !== 'all') {
-            const cat = await prisma.category.findUnique({ where: { slug: String(category) } });
-            if (cat) where.categoryId = cat.id;
+            const categorySlugs = String(category).split(',').map((slug) => slug.trim()).filter(Boolean);
+            const categoryRows = await prisma.category.findMany({
+                where: { slug: { in: categorySlugs } },
+                select: { id: true },
+            });
+            where.categoryId = { in: categoryRows.map((cat) => cat.id) };
         }
         if (search) where.name = { contains: String(search), mode: 'insensitive' };
         if (featured === 'true') where.featured = true;
@@ -39,10 +44,15 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 // GET /api/products/categories
-router.get('/categories', async (_req: Request, res: Response) => {
+router.get('/categories', async (req: Request, res: Response) => {
     try {
-        const categories = await prisma.category.findMany();
-        res.json(categories);
+        const page = String(req.query.page || '').trim();
+        const categories = await prisma.category.findMany({
+            where: page ? { page } : undefined,
+            orderBy: [{ page: 'asc' }, { name: 'asc' }],
+            include: { _count: { select: { product: true } } },
+        });
+        res.json(categories.map(({ _count, ...category }) => ({ ...category, _count: { products: _count.product } })));
     } catch {
         res.status(500).json({ error: 'Failed to fetch categories' });
     }
@@ -51,10 +61,13 @@ router.get('/categories', async (_req: Request, res: Response) => {
 // POST /api/products/categories (admin)
 router.post('/categories', verifyToken, requireAdmin, async (req: AuthRequest, res: Response) => {
     try {
-        const { name, slug } = req.body;
+        const { name, slug, page } = req.body;
+        if (!name || !page || !CATEGORY_PAGES.has(page)) {
+            return res.status(400).json({ error: 'Category name and a valid page are required' });
+        }
         const finalSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
         const category = await prisma.category.create({
-            data: { name, slug: finalSlug }
+            data: { name, slug: finalSlug, page }
         });
         res.status(201).json(category);
     } catch (err: any) {
@@ -65,10 +78,13 @@ router.post('/categories', verifyToken, requireAdmin, async (req: AuthRequest, r
 // PUT /api/products/categories/:id (admin)
 router.put('/categories/:id', verifyToken, requireAdmin, async (req: AuthRequest, res: Response) => {
     try {
-        const { name, slug } = req.body;
+        const { name, slug, page } = req.body;
+        if (page !== undefined && !CATEGORY_PAGES.has(page)) {
+            return res.status(400).json({ error: 'Invalid category page' });
+        }
         const category = await prisma.category.update({
             where: { id: Number(req.params.id) },
-            data: { name, slug }
+            data: { name, slug, page }
         });
         res.json(category);
     } catch (err: any) {
@@ -80,14 +96,33 @@ router.put('/categories/:id', verifyToken, requireAdmin, async (req: AuthRequest
 router.delete('/categories/:id', verifyToken, requireAdmin, async (req: AuthRequest, res: Response) => {
     try {
         const id = Number(req.params.id);
-        const productsCount = await prisma.product.count({ where: { categoryId: id } });
-        if (productsCount > 0) {
-            return res.status(400).json({ error: 'Cannot delete category that has products' });
+        if (!Number.isInteger(id) || id <= 0) {
+            return res.status(400).json({ error: 'Invalid category id' });
         }
-        await prisma.category.delete({ where: { id } });
+
+        await prisma.$transaction(async (tx) => {
+            const category = await tx.category.findUnique({
+                where: { id },
+                select: { id: true, _count: { select: { product: true } } },
+            });
+            if (!category) {
+                throw new Error('Category not found');
+            }
+            // Deleting a category that still has products would either violate the
+            // product-category foreign key or (previously) silently spawn a fresh
+            // "Uncategorized" category on every delete. Require the admin to move or
+            // delete those products first, so a delete either removes the category
+            // for good or fails with a clear reason.
+            if (category._count.product > 0) {
+                throw new Error(`Cannot delete: ${category._count.product} product(s) still use this category. Move or delete them first.`);
+            }
+            await tx.category.delete({ where: { id } });
+        });
         res.json({ message: 'Category deleted' });
     } catch (err: any) {
-        res.status(500).json({ error: err.message || 'Failed to delete category' });
+        const message = err.message || 'Failed to delete category';
+        const status = message === 'Category not found' ? 404 : message.startsWith('Cannot delete') ? 409 : 500;
+        res.status(status).json({ error: message });
     }
 });
 

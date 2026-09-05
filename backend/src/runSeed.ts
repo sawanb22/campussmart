@@ -13,13 +13,13 @@ const HOME_FEATURES = [
     { title: 'Digital Transformation', description: 'Cutting-edge digital infrastructure transforming how modern campuses operate and learn.', image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=90', href: '/digital-transformation', tag: 'Digital', color: '#3B82F6', h: 340 },
     { title: 'AI-Powered Learning Stations', description: 'Intelligent AI stations personalising education for every student at every level.', image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=800&q=90', href: '/ai-stations', tag: 'AI & Tech', color: '#8B5CF6', h: 220 },
     { title: 'Innovation Centres', description: 'Purpose-built spaces designed to unlock creativity, collaboration and breakthrough thinking.', image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=90', href: '/innovation-centres', tag: 'Innovation', color: '#EC4899', h: 270 },
-    { title: 'Smart Classrooms', description: 'IoT-connected rooms with interactive boards, real-time analytics and immersive tools.', image: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=800&q=90', href: '/tech-infra', tag: 'Tech Infra', color: '#06B6D4', h: 220 },
+    { title: 'Smart Classrooms', description: 'IoT-connected rooms with interactive boards, real-time analytics and immersive tools.', image: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=800&q=90', href: '/smart-classrooms', tag: 'Tech Infra', color: '#06B6D4', h: 220 },
     { title: 'Campus Furniture Design', description: 'Thoughtfully engineered, ergonomic furniture that elevates the academic experience.', image: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=90', href: '/furniture', tag: 'Furniture', color: '#F59E0B', h: 360 },
     { title: 'Sports Infrastructure', description: 'World-class athletic facilities nurturing champions, wellness, and team spirit.', image: 'https://images.unsplash.com/photo-1575361204480-aadea25e6e68?auto=format&fit=crop&w=800&q=90', href: '/sports-infra', tag: 'Sports', color: '#10B981', h: 240 },
     { title: 'Library Management', description: 'AI-driven smart library solutions providing seamless access to global knowledge.', image: 'https://images.unsplash.com/photo-1568667256549-094345857637?auto=format&fit=crop&w=800&q=90', href: '/library-management', tag: 'Library', color: '#6366F1', h: 300 },
     { title: 'Science & Tech Labs', description: 'Fully equipped STEM laboratories built for discovery, experimentation and innovation.', image: 'https://images.unsplash.com/photo-1532094349884-543290e34c7d?auto=format&fit=crop&w=800&q=90', href: '/labs', tag: 'Labs', color: '#14B8A6', h: 200 },
     { title: 'Campus Master Planning', description: 'Visionary campus planning from concept to construction, built to inspire generations.', image: 'https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=800&q=90', href: '/campus-design', tag: 'Planning', color: '#F97316', h: 320 },
-    { title: 'AR / VR Learning', description: 'Immersive reality experiences bringing complex concepts to vivid, unforgettable life.', image: 'https://images.unsplash.com/photo-1622979135225-d2ba269cf1ac?auto=format&fit=crop&w=800&q=90', href: '/digital-transformation', tag: 'AR / VR', color: '#A855F7', h: 240 },
+    { title: 'AR / VR Learning', description: 'Immersive reality experiences bringing complex concepts to vivid, unforgettable life.', image: 'https://images.unsplash.com/photo-1622979135225-d2ba269cf1ac?auto=format&fit=crop&w=800&q=90', href: '/ar-vr-learning', tag: 'AR / VR', color: '#A855F7', h: 240 },
     { title: 'Campus Automation', description: 'Smart systems automating admissions, attendance, finance and governance seamlessly.', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=90', href: '/campus-automation', tag: 'Automation', color: '#0EA5E9', h: 200 },
     { title: 'Collaboration Spaces', description: 'Dynamic, flexible zones engineered for productive teamwork and creative ideation.', image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=90', href: '/collaboration', tag: 'Spaces', color: '#EF4444', h: 260 },
 ];
@@ -27,7 +27,7 @@ const HOME_FEATURES = [
 // ── Sidebar content ───────────────────────────────────────────────────────
 const HOME_SIDEBAR = {
     classifieds: [
-        { label: 'Colleges / Universities for Sale', href: '/classifieds' },
+        { label: 'Colleges / Universities for Sale', href: '/colleges-universities-for-sale' },
         { label: 'Education Infra Funding', href: '/classifieds' },
         { label: 'Partner with Running Colleges', href: '/partnership' },
     ],
@@ -55,6 +55,19 @@ const HOME_SIDEBAR = {
 
 // ── Inner page data ───────────────────────────────────────────────────────
 const PAGE_DATA: Record<string, object> = {
+    'colleges-universities-for-sale': {
+        heroTitle: 'Businesses for Sale and Investment',
+        heroSubtitle: 'Showing businesses for sale and investment. Buy or invest in a business listed by direct business owners and business brokers.',
+        filterLabel: 'cbse schools',
+        cards: [
+            { title: 'School for Sale in Bahraich, India', description: 'CBSE school with 800+ students, day and boarding facility for sale in Bahraich. The school encompasses a total area of 87,000 square feet and includes approximately 40 rooms, fully equipped science and computer labs.', location: 'Bahraich', rating: '6.8', sales: 'INR 2.6 crore', margin: '40 %', askingPrice: 'INR 20 Cr', premium: true, image: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=700&q=80' },
+            { title: 'Playschool Seeking Loan in Haryana, India', description: 'Education society in Haryana with 5 CBSE schools and 70 playschools. This is an educational society with primary and play schools seeking growth funding.', location: 'Haryana', rating: '6.8', sales: 'INR 30 crore', margin: '25 %', askingPrice: 'INR 5 Cr at 15%', premium: true, image: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=700&q=80' },
+            { title: 'School for Sale in Thiruvananthapuram, India', description: 'CBSE-affiliated school with 400+ students and owned facilities. Located in Thiruvananthapuram, this school offers quality education from a well-established campus.', location: 'Thiruvananthapuram', rating: '6.2', sales: 'INR 1.6 crore', margin: '10 - 20 %', askingPrice: 'INR 8 Cr', image: 'https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?auto=format&fit=crop&w=700&q=80' },
+            { title: 'Residential School Opportunity in Karnataka', description: 'Established residential school with modern classrooms, hostel facilities, and a growing student community.', location: 'Karnataka', rating: '6.5', sales: 'INR 12 crore', margin: '30 %', askingPrice: 'INR 18 Cr', image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=700&q=80' },
+            { title: 'International School Investment Opportunity', description: 'Premium school campus with sports facilities, digital classrooms, and strong long-term investment potential.', location: 'Pune', rating: '7.1', sales: 'INR 22 crore', margin: '35 %', askingPrice: 'INR 32 Cr', image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=700&q=80' },
+            { title: 'College Campus Available for Partnership', description: 'Fully operational higher education campus with laboratories, library infrastructure, and flexible partnership options.', location: 'Delhi NCR', rating: '6.7', sales: 'INR 40 crore', margin: '28 %', askingPrice: 'INR 55 Cr', image: 'https://images.unsplash.com/photo-1564981797816-1043664bf78d?auto=format&fit=crop&w=700&q=80' },
+        ],
+    },
     'ai-ml': {
         heroTitle: 'AI & Machine Learning',
         heroSubtitle: 'Cutting-edge AI and ML solutions for educational institutions. Prepare students for the future with hands-on learning experiences.',
@@ -593,24 +606,36 @@ async function seed() {
     });
 
     // ── Sidebar ───────────────────────────────────────────────────────────
-    await prisma.siteContent.upsert({
-        where: { key: 'home_sidebar' },
-        update: { value: JSON.stringify(HOME_SIDEBAR) },
-        create: { key: 'home_sidebar', value: JSON.stringify(HOME_SIDEBAR) },
-    });
+    const existingSidebar = await prisma.siteContent.findUnique({ where: { key: 'home_sidebar' } });
+    if (!existingSidebar) {
+        await prisma.siteContent.create({ data: { key: 'home_sidebar', value: JSON.stringify(HOME_SIDEBAR) } });
+    } else {
+        try {
+            const sidebar = JSON.parse(existingSidebar.value);
+            if (Array.isArray(sidebar.classifieds)) {
+                const collegeListing = sidebar.classifieds.find((item: any) => item.label === 'Colleges / Universities for Sale');
+                if (collegeListing && collegeListing.href === '/classifieds') {
+                    collegeListing.href = '/colleges-universities-for-sale';
+                    await prisma.siteContent.update({ where: { key: 'home_sidebar' }, data: { value: JSON.stringify(sidebar) } });
+                }
+            }
+        } catch {
+            console.warn('Could not migrate home_sidebar JSON');
+        }
+    }
 
     console.log('✓ Homepage content seeded (hero, services, features, sidebar)');
 
     // ── Categories & Products ─────────────────────────────────────────────
     const categories = [
-        { name: 'Furniture', slug: 'furniture' },
-        { name: 'Lab Equipment', slug: 'labs' },
-        { name: 'Sports', slug: 'sports' },
-        { name: 'Technology', slug: 'technology' },
-        { name: 'Library', slug: 'library' },
+        { name: 'Furniture', slug: 'furniture', page: 'furniture' },
+        { name: 'Lab Equipment', slug: 'labs', page: 'labs' },
+        { name: 'Sports', slug: 'sports', page: 'sports' },
+        { name: 'Technology', slug: 'technology', page: 'furniture' },
+        { name: 'Library', slug: 'library', page: 'libraries' },
     ];
     for (const cat of categories) {
-        await prisma.category.upsert({ where: { slug: cat.slug }, update: {}, create: cat });
+        await prisma.category.upsert({ where: { slug: cat.slug }, update: { page: cat.page }, create: cat });
     }
 
     const catMap = await prisma.category.findMany();
@@ -673,6 +698,7 @@ async function seed() {
     // ── Pages ─────────────────────────────────────────────────────────────
     const corePages = [
         { slug: 'about-us', title: 'About Us', template: 'corporate' },
+        { slug: 'ar-vr-learning', title: 'AR / VR Learning', template: 'home-feature-detail' },
         { slug: 'ai-digital-design-supply', title: 'AI/Digital Design & Supply', template: 'ai-digital-design-supply' },
         { slug: 'ai-guide', title: 'AI Guide', template: 'ai-guide' },
         { slug: 'ai-ml', title: 'AI & ML Labs', template: 'ai-ml' },
@@ -684,6 +710,7 @@ async function seed() {
         { slug: 'campus-design', title: 'Campus Design', template: 'campus-design' },
         { slug: 'catalogues', title: 'Catalogues', template: 'catalogues' },
         { slug: 'classifieds', title: 'Classifieds', template: 'classifieds' },
+        { slug: 'colleges-universities-for-sale', title: 'Colleges / Universities for Sale', template: 'colleges-universities-for-sale' },
         { slug: 'collaboration', title: 'Collaboration Spaces', template: 'collaboration' },
         { slug: 'contact-us', title: 'Contact Us', template: 'contact-us' },
         { slug: 'corporate', title: 'Corporate Identity', template: 'corporate' },
@@ -693,9 +720,12 @@ async function seed() {
         { slug: 'innovation-centres', title: 'Innovation Centres', template: 'innovation-centres' },
         { slug: 'innovation', title: 'Innovation Ecosystems', template: 'innovation' },
         { slug: 'labs', title: 'Laboratories', template: 'labs' },
+        { slug: 'lab-products', title: 'Lab Products', template: 'lab-products' },
         { slug: 'libraries', title: 'Libraries', template: 'libraries' },
+        { slug: 'library-products', title: 'Library Products', template: 'library-products' },
         { slug: 'library-management', title: 'Library Management', template: 'library-management' },
         { slug: 'lms', title: 'Learning Management System', template: 'lms' },
+        { slug: 'smart-classrooms', title: 'Smart Classrooms', template: 'smart-classrooms' },
         { slug: 'lookbook', title: 'Lookbook', template: 'lookbook' },
         { slug: 'new-environments', title: 'New Learning Environments', template: 'new-environments' },
         { slug: 'partnership', title: 'Partnership', template: 'partnership' },
@@ -708,6 +738,7 @@ async function seed() {
         { slug: 'shop', title: 'Shop', template: 'shop' },
         { slug: 'sports-design-execution', title: 'Sports Design & Execution', template: 'sports-design-execution' },
         { slug: 'sports-infra', title: 'Sports Infrastructure', template: 'sports-infra' },
+        { slug: 'sports-products', title: 'Sports Products', template: 'sports-products' },
         { slug: 'tech-infra', title: 'Tech Infrastructure', template: 'tech-infra' },
         { slug: 'terms-of-use', title: 'Terms of Use', template: 'terms-of-use' },
         { slug: 'ugc-guidelines', title: 'UGC Guidelines', template: 'ugc-guidelines' },
@@ -718,12 +749,21 @@ async function seed() {
 
     for (const page of corePages) {
         const pageData = PAGE_DATA[page.slug];
+        const existingPage = await prisma.page.findUnique({ where: { slug: page.slug } });
+        let existingPageHasCards = false;
+        try {
+            const existingCards = existingPage?.pageData ? JSON.parse(existingPage.pageData).cards : undefined;
+            existingPageHasCards = Array.isArray(existingCards) && existingCards.length > 0;
+        } catch {
+            existingPageHasCards = false;
+        }
+        const shouldSeedNewPageData = page.slug === 'colleges-universities-for-sale' && !existingPageHasCards;
         await prisma.page.upsert({
             where: { slug: page.slug },
             update: {
                 template: page.template,
                 published: true,
-                ...(pageData ? { pageData: JSON.stringify(pageData) } : {}),
+                ...(shouldSeedNewPageData && pageData ? { pageData: JSON.stringify(pageData) } : {}),
             },
             create: {
                 title: page.title,

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Plus, Trash2 } from 'lucide-react';
 import api from '../api/client';
+import MediaImageField from '../components/MediaImageField';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface CardItem {
@@ -10,6 +11,7 @@ interface CardItem {
     image?: string;
     count?: number;
     name?: string;
+    href?: string;
 }
 
 interface PageData {
@@ -71,23 +73,7 @@ function Field({ label, value, onChange, multiline = false, placeholder = '' }: 
 function ImagePreviewField({ label, value, onChange }: {
     label: string; value: string; onChange: (v: string) => void;
 }) {
-    return (
-        <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-700">{label}</label>
-            <input
-                type="text"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cm-blue/30"
-                value={value}
-                onChange={e => onChange(e.target.value)}
-                placeholder="https://images.unsplash.com/..."
-            />
-            {value && (
-                <div className="relative h-36 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
-                    <img src={value} alt="preview" className="w-full h-full object-cover" />
-                </div>
-            )}
-        </div>
-    );
+    return <MediaImageField label={label} value={value} onChange={onChange} />;
 }
 
 // ─── Main Editor ─────────────────────────────────────────────────────────────
@@ -123,7 +109,7 @@ export default function PageEditor() {
     };
 
     const addCard = () =>
-        set('cards', [...(data.cards ?? []), { title: 'New Item', description: '', image: '' }]);
+        set('cards', [...(data.cards ?? []), { title: 'New Item', description: '', image: '', href: '' }]);
 
     const removeCard = (i: number) =>
         set('cards', (data.cards ?? []).filter((_, idx) => idx !== i));
@@ -202,7 +188,7 @@ export default function PageEditor() {
                 <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Hero Section</h2>
                 <Field label="Hero Title *" value={data.heroTitle ?? ''} onChange={v => set('heroTitle', v)} placeholder="e.g. AI & Machine Learning" />
                 <Field label="Hero Subtitle" value={data.heroSubtitle ?? ''} onChange={v => set('heroSubtitle', v)} multiline placeholder="Supporting text below the title..." />
-                <ImagePreviewField label="Hero Background Image URL" value={data.heroImage ?? ''} onChange={v => set('heroImage', v)} />
+                <ImagePreviewField label="Hero Background Image" value={data.heroImage ?? ''} onChange={v => set('heroImage', v)} />
             </div>
 
             {/* Section Headings */}
@@ -244,13 +230,9 @@ export default function PageEditor() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <Field label="Title" value={card.title ?? ''} onChange={v => setCard(i, 'title', v)} />
                                 <Field label="Description" value={card.description ?? ''} onChange={v => setCard(i, 'description', v)} />
+                                <Field label="Detail Page Link (optional)" value={card.href ?? ''} onChange={v => setCard(i, 'href', v)} placeholder="Auto-generated from title if blank" />
                             </div>
-                            <Field label="Image URL" value={card.image ?? ''} onChange={v => setCard(i, 'image', v)} placeholder="https://images.unsplash.com/..." />
-                            {card.image && (
-                                <div className="h-24 rounded-lg overflow-hidden">
-                                    <img src={card.image} alt={card.title} className="w-full h-full object-cover" />
-                                </div>
-                            )}
+                            <MediaImageField label="Image" value={card.image ?? ''} onChange={v => setCard(i, 'image', v)} previewClassName="h-24" />
                         </div>
                     ))}
                 </div>

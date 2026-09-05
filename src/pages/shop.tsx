@@ -2,26 +2,53 @@ import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search, ShoppingCart, Filter, Heart, Check, Trash2, X } from 'lucide-react';
 import api from '@/api/client';
+import { resolveMediaUrl } from '@/lib/media-url';
+import LoginPromptModal from '@/components/login-prompt-modal';
+import { useWishlist } from '@/contexts/WishlistContext';
 
 interface Category { id: number; name: string; slug: string; }
 interface Product { id: number; name: string; slug: string; price: number; imageUrl?: string; rating: number; reviewCount: number; category: Category; }
 
-const Shop = () => {
+interface ShopProps {
+  categorySlug?: string;
+  categorySlugs?: string[];
+  showAllCategories?: boolean;
+  categoryRoutes?: Record<string, string>;
+  excludedCategorySlugs?: string[];
+  categoryPage?: string;
+  /** Hide the category sidebar — used where categories are picked on the parent page instead. */
+  hideCategorySidebar?: boolean;
+}
+
+const Shop = ({ categorySlug, categorySlugs, showAllCategories = false, categoryRoutes = {}, excludedCategorySlugs = [], categoryPage, hideCategorySidebar = false }: ShopProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
-  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all');
+  const [selectedCategory, setSelectedCategory] = useState(categorySlug || searchParams.get('category') || 'all');
   const [sort, setSort] = useState(searchParams.get('sort') || 'newest');
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set());
   const [wishlistProducts, setWishlistProducts] = useState<Set<number>>(new Set());
   const [removingProducts, setRemovingProducts] = useState<Set<number>>(new Set());
   const [actionMessage, setActionMessage] = useState('');
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const { refresh: refreshWishlistCount } = useWishlist();
+  const categorySlugKey = categorySlugs?.join(',') || '';
+  const excludedCategorySlugKey = excludedCategorySlugs.join(',');
 
   useEffect(() => {
-    api.get('/products/categories').then(({ data }) => setCategories(data));
-  }, []);
+    setCategoriesLoaded(false);
+    api.get('/products/categories', { params: categoryPage ? { page: categoryPage } : undefined })
+      .then(({ data }) => setCategories(Array.isArray(data) ? data : []))
+      .catch(() => setCategories([]))
+      .finally(() => setCategoriesLoaded(true));
+  }, [categoryPage]);
+
+  useEffect(() => {
+    if (categorySlug) setSelectedCategory(categorySlug);
+  }, [categorySlug]);
 
   useEffect(() => {
     if (!localStorage.getItem('cm_token')) return;
@@ -36,6 +63,7 @@ const Shop = () => {
     try {
       await api.post('/wishlist', { productId: product.id });
       setActionMessage(`${product.name} added to wishlist.`);
+      refreshWishlistCount();
     } catch (err: any) {
       setWishlistProducts((previous) => {
         const next = new Set(previous);
@@ -43,7 +71,7 @@ const Shop = () => {
         return next;
       });
       if (err.response?.status === 401) {
-        setActionMessage('Please login to add products to wishlist.');
+        setShowLoginPrompt(true);
       } else {
         setActionMessage(err.response?.data?.error || 'Failed to add to wishlist.');
       }
@@ -60,6 +88,7 @@ const Shop = () => {
         return next;
       });
       setActionMessage(`${product.name} removed from wishlist.`);
+      refreshWishlistCount();
     } catch (err: any) {
       setActionMessage(err.response?.data?.error || 'Failed to remove from wishlist.');
     } finally {
@@ -94,37 +123,62 @@ const Shop = () => {
       await Promise.all(productsToAdd.map((product) => api.post('/wishlist', { productId: product.id })));
       setActionMessage(`${productsToAdd.length} product${productsToAdd.length === 1 ? '' : 's'} added to wishlist.`);
       setSelectedProducts(new Set());
+      refreshWishlistCount();
     } catch (err: any) {
       setWishlistProducts((previous) => {
         const next = new Set(previous);
         productsToAdd.forEach((product) => next.delete(product.id));
         return next;
       });
-      setActionMessage(err.response?.status === 401 ? 'Please login to add products to wishlist.' : 'Some products could not be added.');
+      if (err.response?.status === 401) setShowLoginPrompt(true);
+      else setActionMessage('Some products could not be added.');
     }
   };
 
   useEffect(() => {
+    if ((categoryPage || excludedCategorySlugs.length > 0) && !categoriesLoaded) return;
     setLoading(true);
     const params: Record<string, string> = { limit: '50', sort };
-    if (selectedCategory !== 'all') params.category = selectedCategory;
+    // A ?category= slug that does not belong to this page falls back to the whole page.
+    const activeCategory = categoryPage && selectedCategory !== 'all' && !categories.some((category) => category.slug === selectedCategory)
+      ? 'all'
+      : selectedCategory;
+    if (categorySlug) params.category = categorySlug;
+    else if (activeCategory !== 'all') params.category = activeCategory;
+    else if (categorySlugs?.length) params.category = categorySlugs.join(',');
+    // '__none__' matches no category, so a page with no categories yet shows nothing instead of every product.
+    else if (categoryPage) params.category = categories.map((category) => category.slug).join(',') || '__none__';
+    else if (excludedCategorySlugs.length > 0) {
+      const availableSlugs = categories
+        .map((category) => category.slug)
+        .filter((slug) => !excludedCategorySlugs.includes(slug));
+      params.category = availableSlugs.join(',');
+    }
     const searchTimer = window.setTimeout(() => {
       if (searchQuery.trim()) params.search = searchQuery.trim();
-      setSearchParams({ ...(selectedCategory !== 'all' ? { category: selectedCategory } : {}), ...(searchQuery.trim() ? { search: searchQuery.trim() } : {}), sort }, { replace: true });
+      setSearchParams({ ...(activeCategory !== 'all' ? { category: activeCategory } : {}), ...(searchQuery.trim() ? { search: searchQuery.trim() } : {}), sort }, { replace: true });
       api.get('/products', { params })
         .then(({ data }) => setProducts(data.products))
         .finally(() => setLoading(false));
     }, 250);
     return () => window.clearTimeout(searchTimer);
-  }, [selectedCategory, searchQuery, sort, setSearchParams]);
+  }, [categoryPage, categoriesLoaded, categorySlug, categorySlugKey, categories, excludedCategorySlugKey, selectedCategory, searchQuery, sort, setSearchParams]);
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(price);
 
+  const scopedCategorySlugs = showAllCategories
+    ? excludedCategorySlugs.length ? categories.map((category) => category.slug).filter((slug) => !excludedCategorySlugs.includes(slug)) : []
+    : categorySlugs?.length ? categorySlugs : categorySlug ? [categorySlug] : [];
+  const shopCategories = scopedCategorySlugs.length
+    ? categories.filter((category) => scopedCategorySlugs.includes(category.slug))
+    : categories;
+
   return (
     <main className="min-h-screen bg-cm-gray">
+      <LoginPromptModal open={showLoginPrompt} onClose={() => setShowLoginPrompt(false)} />
       <div className="bg-white border-b">
-        <div className="w-full mx-auto px-2 sm:px-4 py-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1 max-w-xl">
               <div className="relative">
@@ -145,44 +199,62 @@ const Shop = () => {
         </div>
       </div>
 
-      <div className="w-full mx-auto px-2 sm:px-4 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-2">
           {/* Sidebar */}
-          <aside className="lg:w-64 flex-shrink-0">
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <div className="flex items-center gap-2 mb-4">
-                <Filter className="w-5 h-5 text-cm-blue" />
-                <h3 className="font-bold text-cm-blue-dark">Categories</h3>
-              </div>
-              <ul className="space-y-2">
-                <li>
-                  <button
-                    onClick={() => setSelectedCategory('all')}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${selectedCategory === 'all' ? 'bg-cm-blue text-white' : 'hover:bg-gray-100 text-gray-700'}`}
-                  >
-                    All Products
-                  </button>
-                </li>
-                {categories.map((cat) => (
-                  <li key={cat.id}>
+          {!hideCategorySidebar && (
+            <aside className="lg:w-64 flex-shrink-0">
+              <div className="bg-white rounded-xl p-6 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <Filter className="w-5 h-5 text-cm-blue" />
+                  <h3 className="font-bold text-cm-blue-dark">Categories</h3>
+                </div>
+                <ul className="space-y-2">
+                  <li>
                     <button
-                      onClick={() => setSelectedCategory(cat.slug)}
-                      className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${selectedCategory === cat.slug ? 'bg-cm-blue text-white' : 'hover:bg-gray-100 text-gray-700'}`}
+                      onClick={() => setSelectedCategory('all')}
+                      className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${selectedCategory === 'all' ? 'bg-cm-blue text-white' : 'hover:bg-gray-100 text-gray-700'}`}
                     >
-                      {cat.name}
+                      All Products
                     </button>
                   </li>
-                ))}
-              </ul>
-            </div>
-          </aside>
+                  {shopCategories.map((cat) => (
+                    <li key={cat.id}>
+                      {categoryRoutes[cat.slug] ? (
+                        <Link
+                          to={categoryRoutes[cat.slug]}
+                          className="block w-full text-left px-3 py-2 rounded-lg transition-colors hover:bg-gray-100 text-gray-700"
+                        >
+                          {cat.name}
+                        </Link>
+                      ) : (
+                        <button
+                          onClick={() => setSelectedCategory(cat.slug)}
+                          className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${selectedCategory === cat.slug ? 'bg-cm-blue text-white' : 'hover:bg-gray-100 text-gray-700'}`}
+                        >
+                          {cat.name}
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </aside>
+          )}
 
           {/* Products Grid */}
           <div className="flex-1">
             <div className="flex items-center justify-between mb-6">
-              <h1 className="text-2xl font-bold text-cm-blue-dark">
-                {selectedCategory === 'all' ? 'All Products' : categories.find((c) => c.slug === selectedCategory)?.name}
-              </h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold text-cm-blue-dark">
+                  {categories.find((c) => c.slug === selectedCategory)?.name || 'All Products'}
+                </h1>
+                {hideCategorySidebar && categories.some((c) => c.slug === selectedCategory) && (
+                  <button onClick={() => setSelectedCategory('all')} className="text-xs font-semibold uppercase tracking-widest text-cm-blue hover:underline">
+                    Show all
+                  </button>
+                )}
+              </div>
               <div className="flex items-center gap-2">
                 <label htmlFor="shop-sort" className="text-gray-600">Sort by:</label>
                 <select id="shop-sort" value={sort} onChange={(e) => setSort(e.target.value)} className="px-3 py-2 bg-white rounded-lg border hover:bg-gray-50">
@@ -226,7 +298,7 @@ const Shop = () => {
                     <Link to={`/product/${product.slug}`} className="cursor-pointer">
                       <div className="aspect-[4/3] overflow-hidden bg-white flex items-center justify-center p-2 group-hover/card:bg-slate-50/50 transition-colors">
                         <img
-                          src={product.imageUrl || 'https://via.placeholder.com/400x300'}
+                          src={resolveMediaUrl(product.imageUrl) || 'https://via.placeholder.com/400x300'}
                           alt={product.name}
                           className="max-h-full max-w-full object-contain group-hover/card:scale-105 transition-all duration-500"
                         />

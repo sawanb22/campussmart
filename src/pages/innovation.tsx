@@ -1,271 +1,182 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
-import { PenSquare, X, CheckCircle2 } from 'lucide-react';
-import api from '@/api/client';
+import { ArrowRight, Sparkles } from 'lucide-react';
+import { usePageData } from '@/hooks/usePageData';
+import { resolveMediaUrl } from '@/lib/media-url';
+import { INNOVATION_PAGE_SLUG, INNOVATION_DEFAULTS, slugifyInnovationTitle, type InnovationCard } from './innovation.data';
 
-interface Card { title: string; description: string; }
-interface Section { title: string; description: string; image?: string; }
-
-const DEFAULTS = {
-  heroTitle: 'Launch startup and innovation centres at your college with our platform-driven managed services',
-  cards: [
-    { title: 'Idea Ideation & research', description: 'Early stage support systems for nurturing creativity.' },
-    { title: 'INCUBATION', description: 'Nurturing student ideas into Minimum Viable Products.' },
-    { title: 'ACCELERATION', description: 'Speed up expansion nodes following rapid execution cycles.' },
-    { title: 'MARKET ACCESS', description: 'Investor connecting layers targeting global distribution pipelines.' },
-  ] as Card[],
-  sections: [
-    { 
-      title: 'About Us', 
-      description: 'We connect entrepreneurship and innovation, starting from student mindsets to successful startups. Every step of our process empowers students to discover, adapt, and grow with accurate mentorship and accurate workflow benchmarks.',
-      image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
-    },
-    { 
-      title: 'Startups & Innovation', 
-      description: 'Innovation is inside our DNA. Leveraging our managed innovation systems for higher educational institutes, we bring together student minds and experienced faculty with startup accelerators that fuel high velocity growth cycles.',
-      image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
-    },
-    { 
-      title: 'Managed Services', 
-      description: 'We provide end-to-end solutions for tech and design incubations. Absolute digital hubs equipped with next-gen tooling layouts including smooth support systems following fully manageable structural frameworks securely.',
-      image: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
-    },
-    { 
-      title: 'Venture Studio Launchpad', 
-      description: 'Accredited venture validation frameworks validating prototype nodes scaling up safely with accurate investor pipelines connecting loads aligning natively onto marketplace environments seamlessly.',
-      image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
-    },
-    { 
-      title: 'Start Free, Scale at Your Pace', 
-      description: 'Our pricing scales as your centres adapt to startup launches. Safe, modular, and affordable load balancing matrices targeting campus innovation designs framing accurate institutional growth models securely.',
-      image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
-    },
-    { 
-      title: 'Global Chapters', 
-      description: 'Connect globally with our expansive hub networks, sharing node references to startup founders directly aligning workflow loops natively and safely across campus networks everywhere.',
-      image: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
-    }
-  ] as Section[]
-};
+gsap.registerPlugin(ScrollTrigger);
 
 const Innovation = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [data, setData] = useState<any>({});
-  const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editData, setEditData] = useState<any>({});
-
-  const fetchData = () => {
-     api.get('/pages/innovation')
-       .then(res => {
-          try {
-             const parsed = res.data.pageData ? JSON.parse(res.data.pageData) : {};
-             setData(parsed);
-             setEditData(parsed);
-          } catch { setData({}); }
-       })
-       .catch(() => setData({}))
-       .finally(() => setLoading(false));
-  };
+  const heroRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const { data } = usePageData(INNOVATION_PAGE_SLUG);
+  const [activeCategory, setActiveCategory] = useState('All');
 
   useEffect(() => {
-    fetchData();
-    setIsAdmin(!!localStorage.getItem('adminToken'));
-  }, []);
-
-  useEffect(() => {
-    if (loading) return;
     const ctx = gsap.context(() => {
-      gsap.fromTo(containerRef.current, { opacity: 0 }, { opacity: 1, duration: 0.6 });
+      gsap.fromTo(heroRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' });
+      const items = gridRef.current?.children;
+      if (items) {
+        gsap.fromTo(
+          items,
+          { opacity: 0, y: 24 },
+          { opacity: 1, y: 0, duration: 0.6, stagger: 0.08, scrollTrigger: { trigger: gridRef.current, start: 'top 85%' } },
+        );
+      }
     });
     return () => ctx.revert();
-  }, [loading]);
+  }, []);
 
-  const handleSave = async () => {
-      try {
-          await api.post('/pages/innovation', { pageData: JSON.stringify(editData) });
-          alert('Page updated successfully!');
-          setData(editData);
-          setIsEditModalOpen(false);
-      } catch {
-          alert('Failed to save page data.');
-      }
-  };
+  const heroTitle = data.heroTitle ?? INNOVATION_DEFAULTS.heroTitle;
+  const heroSubtitle = data.heroSubtitle ?? INNOVATION_DEFAULTS.heroSubtitle;
+  const ctaTitle = data.ctaTitle ?? INNOVATION_DEFAULTS.ctaTitle;
+  const ctaSubtitle = data.ctaSubtitle ?? INNOVATION_DEFAULTS.ctaSubtitle;
+  const allCards: InnovationCard[] = data.cards?.length ? data.cards : INNOVATION_DEFAULTS.cards;
 
-  if (loading) return (
-     <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-10 h-10 border-4 border-cm-blue border-t-transparent rounded-full animate-spin" />
-     </div>
+  const categoryOptions = useMemo(
+    () => Array.from(new Set(allCards.flatMap((card) => card.categories ?? []).filter(Boolean))),
+    [allCards],
   );
 
-  const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
-  const sections: Section[] = (data.sections && data.sections.length > 0) ? data.sections : DEFAULTS.sections;
+  const filteredCards = useMemo(
+    () => (activeCategory === 'All' ? allCards : allCards.filter((card) => (card.categories ?? []).includes(activeCategory))),
+    [allCards, activeCategory],
+  );
+
+  const [featured, ...remaining] = filteredCards;
+  const richGrid = remaining.slice(0, 3);
+  const simpleGrid = remaining.slice(3);
+
+  const cardLink = (card: InnovationCard) => `/${INNOVATION_PAGE_SLUG}/${slugifyInnovationTitle(card.title)}`;
 
   return (
-    <main ref={containerRef} className="min-h-screen bg-slate-50 pb-20 relative">
-      {/* Admin Edit Floating Button */}
-      {isAdmin && (
-         <button 
-           onClick={() => setIsEditModalOpen(true)}
-           className="fixed bottom-6 right-6 p-4 bg-slate-900 text-white rounded-full shadow-2xl z-[500] hover:scale-105 transition-transform flex items-center gap-2 font-bold text-sm"
-         >
-           <PenSquare className="w-5 h-5 text-cm-yellow" /> Edit Page
-         </button>
-      )}
+    <main className="min-h-screen bg-white">
+      <section ref={heroRef} className="px-4 pt-10 sm:px-6 sm:pt-12 lg:px-8">
+        <div className="mx-auto max-w-6xl">
+          <h1 className="text-4xl font-bold tracking-tight text-emerald-800 sm:text-5xl">{heroTitle}</h1>
+          <p className="mt-3 max-w-xl text-sm leading-relaxed text-gray-500 sm:text-base">{heroSubtitle}</p>
 
-      {/* Hero Banner Title */}
-      <section className="bg-cm-blue py-12 md:py-16 text-center text-white px-4 mx-3 sm:mx-6 lg:mx-8 rounded-[2rem] my-4">
-        <div className="max-w-5xl mx-auto">
-           <h1 className="text-2xl md:text-5xl font-black tracking-tight leading-tight md:leading-snug">
-             {heroTitle}
-           </h1>
+          {/* Category pill bar */}
+          <div className="mt-6 inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-full bg-emerald-800 p-1.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <button
+              type="button"
+              onClick={() => setActiveCategory('All')}
+              className={`shrink-0 rounded-full px-3.5 py-2 text-xs font-semibold transition-colors ${
+                activeCategory === 'All' ? 'bg-white/15 text-white' : 'text-white/60 hover:text-white/90'
+              }`}
+            >
+              All
+            </button>
+            {categoryOptions.map((category) => (
+              <button
+                key={category}
+                type="button"
+                onClick={() => setActiveCategory(category)}
+                className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-2 text-xs font-semibold transition-colors ${
+                  activeCategory === category ? 'bg-white/15 text-white' : 'text-white/60 hover:text-white/90'
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Card-based detail grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {sections.map((sec, i) => (
-               <div key={i} className="group bg-white rounded-xl overflow-hidden shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] border border-slate-200/70 transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)]">
-                  <div className="relative overflow-hidden aspect-[16/12]">
-                     <img src={sec.image || 'https://via.placeholder.com/600x450?text=Innovation'} alt={sec.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent" />
-                     <div className="absolute top-3 left-3 rounded-full bg-white/90 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-800 shadow-sm backdrop-blur-sm">
-                        0{i + 1}
-                     </div>
+      <section className="px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+        <div className="mx-auto max-w-6xl">
+          {!featured ? (
+            <div className="rounded-2xl border border-gray-100 bg-gray-50 py-20 text-center text-gray-500">No programme tracks match that filter.</div>
+          ) : (
+            <>
+              {/* Featured spotlight */}
+              <Link
+                to={cardLink(featured)}
+                className="group grid grid-cols-1 overflow-hidden rounded-[1.75rem] bg-emerald-50 sm:grid-cols-2"
+              >
+                <div className="flex flex-col justify-center bg-emerald-800 p-8 text-white sm:p-10">
+                  <span className="mb-3 inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-300">
+                    <Sparkles className="h-3 w-3" /> Featured track
+                  </span>
+                  <h2 className="max-w-md text-2xl font-bold leading-tight tracking-tight sm:text-3xl">{featured.title}</h2>
+                  {featured.description && <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/75">{featured.description}</p>}
+                  <span className="mt-6 inline-flex w-fit items-center gap-2.5 text-sm font-bold text-white">
+                    Read more
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-orange-500 transition-transform group-hover:translate-x-0.5">
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </span>
+                  </span>
+                </div>
+                <div className="min-h-[220px] overflow-hidden sm:min-h-full">
+                  {resolveMediaUrl(featured.image) && (
+                    <img
+                      src={resolveMediaUrl(featured.image)}
+                      alt={featured.title}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  )}
+                </div>
+              </Link>
+
+              {/* Rich grid */}
+              {richGrid.length > 0 && (
+                  <div ref={gridRef} className="mt-6 grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+                    {richGrid.map((card) => {
+                      const image = resolveMediaUrl(card.image);
+                      return (
+                        <Link key={card.title} to={cardLink(card)} className="group block min-w-0">
+                          <div className="aspect-[4/3] w-full overflow-hidden rounded-xl bg-gray-100">
+                            {image && (
+                              <img src={image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                            )}
+                          </div>
+                          <div className="mt-3 flex items-center gap-2 text-xs text-gray-400">
+                            <span className="font-semibold uppercase tracking-wide text-orange-600">{card.categories?.[0] ?? 'Programme'}</span>
+                          </div>
+                          <h3 className="mt-1 text-base font-extrabold leading-snug tracking-tight text-emerald-800 group-hover:text-emerald-700 sm:text-lg">
+                            {card.title}
+                          </h3>
+                          {card.description && <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-gray-500">{card.description}</p>}
+                        </Link>
+                      );
+                    })}
                   </div>
-                  <div className="px-4 pb-4 pt-3">
-                     <div className="h-1 w-10 bg-cm-yellow rounded-full mb-2" />
-                     <h2 className="text-sm md:text-base font-black text-slate-900 tracking-tight mb-2 line-clamp-2">{sec.title}</h2>
-                     <p className="text-slate-600 text-xs md:text-sm leading-tight font-opensans line-clamp-2">{sec.description}</p>
-                     <div className="mt-3 flex items-center gap-1 text-[11px] font-bold text-cm-blue">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-500" /> Managed Solutions
-                     </div>
+              )}
+
+              {/* Simple flat cards */}
+              {simpleGrid.length > 0 && (
+                  <div className="mt-10 border-t border-gray-100 pt-8">
+                    <h2 className="mb-5 text-2xl font-bold tracking-tight text-emerald-800">More from the ecosystem</h2>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                      {simpleGrid.map((card) => (
+                        <Link key={card.title} to={cardLink(card)} className="group block rounded-2xl bg-emerald-50 p-5 transition-colors hover:bg-emerald-100">
+                          <span className="text-xs font-bold uppercase tracking-wide text-orange-600">{card.categories?.[0] ?? 'Programme'}</span>
+                          <h3 className="mt-2 text-base font-bold leading-snug text-emerald-800">{card.title}</h3>
+                        </Link>
+                      ))}
                   </div>
-               </div>
-            ))}
-         </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </section>
 
-      {/* CTA Box */}
-      <section className="py-16 px-4">
-         <div className="max-w-5xl mx-auto bg-gradient-to-br from-cm-yellow via-amber-400 to-amber-500 rounded-3xl p-8 md:p-12 text-center shadow-xl shadow-amber-500/10 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-left">
-               <h3 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Ready to talk?</h3>
-               <p className="text-slate-800/80 text-sm font-bold mt-1">Connect with our execution platform managers for instant deployment guides.</p>
-            </div>
-            <div className="flex gap-4">
-               <Link to="/contact-us" className="px-8 py-3 bg-slate-900 text-white font-black rounded-xl hover:bg-slate-800 shadow-xl shadow-slate-900/10 transition-all text-sm">Contact Us</Link>
-            </div>
-         </div>
+      {/* CTA */}
+      <section className="px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-6 rounded-3xl bg-gradient-to-br from-cm-yellow via-amber-400 to-amber-500 p-8 text-center shadow-xl shadow-amber-500/10 sm:flex-row sm:p-10 sm:text-left">
+          <div>
+            <h3 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{ctaTitle}</h3>
+            <p className="mt-1.5 text-sm font-semibold text-slate-800/80">{ctaSubtitle}</p>
+          </div>
+          <Link to="/contact-us" className="shrink-0 rounded-xl bg-slate-900 px-8 py-3 text-sm font-bold text-white shadow-xl shadow-slate-900/10 transition-all hover:bg-slate-800">
+            Contact Us
+          </Link>
+        </div>
       </section>
-
-      {/* Edit Modal Overlay */}
-      {isEditModalOpen && (
-         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[1000] p-4 animate-in fade-in duration-300">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
-               <div className="p-6 border-b flex items-center justify-between bg-slate-50">
-                  <div>
-                     <h2 className="text-lg font-black text-slate-900">Edit Page Content</h2>
-                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Dynamic CMS Loader</p>
-                  </div>
-                  <button onClick={() => setIsEditModalOpen(false)} className="p-2 text-slate-400 hover:text-red-500 rounded-xl transition-all"><X className="w-5 h-5" /></button>
-               </div>
-               
-               <div className="p-6 overflow-y-auto space-y-5 flex-1">
-                  <div className="space-y-1">
-                     <label className="text-xs font-bold text-slate-700">Hero Main Title</label>
-                     <textarea 
-                       className="w-full border border-slate-200 rounded-xl px-4 py-2 text-sm font-medium focus:ring-2 focus:ring-blue-500/20 h-20" 
-                       value={editData.heroTitle ?? heroTitle}
-                       onChange={(e) => setEditData({...editData, heroTitle: e.target.value})}
-                     />
-                  </div>
-
-                  {/* Edit Grid Cards */}
-                  <div className="space-y-2">
-                     <h3 className="text-xs font-black text-slate-900 border-b pb-1 uppercase tracking-tight">1. Grid Cards (4 items)</h3>
-                     <div className="grid grid-cols-2 gap-3">
-                        {(editData.cards || DEFAULTS.cards).map((c: any, i: number) => (
-                            <div key={i} className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5">
-                                <span className="text-[10px] font-black text-slate-400">Card {i+1}</span>
-                                <input 
-                                  value={c.title}
-                                  placeholder="Title"
-                                  className="w-full border border-slate-200 p-1.5 text-xs font-bold rounded-lg focus:outline-none"
-                                  onChange={e => {
-                                     const list = JSON.parse(JSON.stringify(editData.cards || DEFAULTS.cards));
-                                     list[i].title = e.target.value;
-                                     setEditData({...editData, cards: list});
-                                  }}
-                                />
-                                <input 
-                                  value={c.description}
-                                  placeholder="Subtitle"
-                                  className="w-full border border-slate-200 p-1.5 text-xs rounded-lg focus:outline-none"
-                                  onChange={e => {
-                                     const list = JSON.parse(JSON.stringify(editData.cards || DEFAULTS.cards));
-                                     list[i].description = e.target.value;
-                                     setEditData({...editData, cards: list});
-                                  }}
-                                />
-                            </div>
-                        ))}
-                     </div>
-                  </div>
-
-                  {/* Edit Rows Sections */}
-                  <div className="space-y-2">
-                     <h3 className="text-xs font-black text-slate-900 border-b pb-1 uppercase tracking-tight">2. Body Sections Rows</h3>
-                     <div className="space-y-3">
-                        {(editData.sections || DEFAULTS.sections).map((s: any, i: number) => (
-                            <div key={i} className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5">
-                                <span className="text-[10px] font-black text-slate-400">Section {i+1}</span>
-                                <input 
-                                  value={s.title}
-                                  placeholder="Title"
-                                  className="w-full border border-slate-200 p-1.5 text-xs font-bold rounded-lg focus:outline-none"
-                                  onChange={e => {
-                                     const list = JSON.parse(JSON.stringify(editData.sections || DEFAULTS.sections));
-                                     list[i].title = e.target.value;
-                                     setEditData({...editData, sections: list});
-                                  }}
-                                />
-                                <textarea 
-                                  value={s.description}
-                                  placeholder="Description paragraph..."
-                                  className="w-full border border-slate-200 p-1.5 text-xs rounded-lg focus:outline-none h-14"
-                                  onChange={e => {
-                                     const list = JSON.parse(JSON.stringify(editData.sections || DEFAULTS.sections));
-                                     list[i].description = e.target.value;
-                                     setEditData({...editData, sections: list});
-                                  }}
-                                />
-                                <input 
-                                  value={s.image || ''}
-                                  placeholder="Image URL index cover..."
-                                  className="w-full border border-slate-200 p-1.5 text-[10px] rounded-lg focus:outline-none font-mono"
-                                  onChange={e => {
-                                     const list = JSON.parse(JSON.stringify(editData.sections || DEFAULTS.sections));
-                                     list[i].image = e.target.value;
-                                     setEditData({...editData, sections: list});
-                                  }}
-                                />
-                            </div>
-                        ))}
-                     </div>
-                  </div>
-               </div>
-
-               <div className="p-6 border-t flex justify-end gap-3 bg-slate-50/50">
-                  <button onClick={() => setIsEditModalOpen(false)} className="px-6 py-2.5 text-sm font-bold text-slate-400 hover:text-slate-900">Cancel</button>
-                  <button onClick={handleSave} className="px-8 py-2.5 bg-blue-600 text-white text-sm font-black rounded-xl hover:bg-blue-700 transition-all shadow-lg">Save Changes</button>
-               </div>
-            </div>
-         </div>
-      )}
     </main>
   );
 };

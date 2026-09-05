@@ -1,58 +1,78 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
-import { Download, FileText, BookOpen, ArrowRight } from 'lucide-react';
+import { Download, FileText, BookOpen, ArrowRight, Lock, Search, FolderOpen } from 'lucide-react';
 import api from '@/api/client';
 import { usePageData } from '@/hooks/usePageData';
+import LoginPromptModal from '@/components/login-prompt-modal';
+import { resolveMediaUrl } from '@/lib/media-url';
+import { getCardCover } from '@/lib/card-covers';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const API_UPLOAD_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api').replace(/\/api\/?$/, '');
-
 const normalizeCatalogDownload = (value?: string) => {
   if (!value || value === '#') return '';
-  if (/^(https?:)?\/\//i.test(value)) return value;
-  if (value.startsWith('/')) return `${API_UPLOAD_BASE}${value}`;
-  return value;
+  return resolveMediaUrl(value);
+};
+
+const PAGE_SIZE = 6;
+
+const formatDate = (value?: string) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString('en-IN', { month: 'short', day: '2-digit', year: 'numeric' });
 };
 
 const DEFAULTS = {
-  heroTitle: 'Product Catalogues',
-  heroSubtitle: 'Browse our comprehensive catalogues featuring furniture, equipment, and infrastructure solutions for educational institutions.',
+  heroTitle: 'Catalogues & Downloads',
+  heroSubtitle:
+    'Every SchoolMart product range, brief and design guide in one library — download the PDFs your team needs to plan and spec a campus.',
+  heroImage: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80',
   cards: [
     {
       title: 'NEP READY CLASSROOM FURNITURE',
-      description: 'Furniture solutions specifically designed to align with New Education Policy guidelines for modern classrooms.',
-      image: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      description:
+        'Furniture solutions specifically designed to align with New Education Policy guidelines for modern classrooms.',
+      image:
+        'https://images.unsplash.com/photo-1524758631624-e2822e304c36?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
       downloadLink: '',
       size: '12 MB',
     },
     {
       title: 'SCHOOLMART BRIEF PROFILE [PDF]',
-      description: 'An overview of SchoolMart\'s mission, services, and extensive experience in educational infrastructure.',
-      image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      description:
+        "An overview of SchoolMart's mission, services, and extensive experience in educational infrastructure.",
+      image:
+        'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
       downloadLink: '',
       size: '5 MB',
     },
     {
       title: 'SCHOOL DESIGN [PDF]',
-      description: 'Comprehensive guide on architectural and ergonomic principles for modern school environments.',
-      image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      description:
+        'Comprehensive guide on architectural and ergonomic principles for modern school environments.',
+      image:
+        'https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
       downloadLink: '',
       size: '18 MB',
     },
     {
       title: 'CLASSROOM CONFIGURATION IDEAS [PDF]',
-      description: 'Creative and functional layout samples for various classroom sizes and learning objectives.',
-      image: 'https://images.unsplash.com/photo-1588072432836-e10032774350?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      description:
+        'Creative and functional layout samples for various classroom sizes and learning objectives.',
+      image:
+        'https://images.unsplash.com/photo-1588072432836-e10032774350?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
       downloadLink: '',
       size: '8 MB',
     },
     {
       title: 'MASTER CATALOGUE',
-      description: 'Our full range of products including Labs, Libraries, Sports, and AI Stations.',
-      image: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      description:
+        'Our full range of products including Labs, Libraries, Sports, and AI Stations.',
+      image:
+        'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
       downloadLink: '',
       size: '25 MB',
     },
@@ -60,57 +80,90 @@ const DEFAULTS = {
   caseStudies: [
     {
       title: 'Campus Master Planning',
-      description: 'Complete campus transformation for a leading university in Bangalore.',
-      image: 'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+      description:
+        'Complete campus transformation for a leading university in Bangalore.',
+      image:
+        'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
     },
     {
       title: '20 Stunning College Buildings',
-      description: 'Showcase of our most innovative campus architecture projects.',
-      image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+      description:
+        'Showcase of our most innovative campus architecture projects.',
+      image:
+        'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
     },
     {
       title: 'STEM Lab Implementation',
-      description: 'State-of-the-art STEM lab setup for a prestigious school chain.',
-      image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+      description:
+        'State-of-the-art STEM lab setup for a prestigious school chain.',
+      image:
+        'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
     },
-  ]
+  ],
 };
 
 const Catalogues = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const { data } = usePageData('catalogues');
   const [catalogueRows, setCatalogueRows] = useState<any[]>([]);
+  const [caseStudyRows, setCaseStudyRows] = useState<any[]>([]);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const isLoggedIn = Boolean(localStorage.getItem('cm_token'));
+
+  const handleDownloadClick = async (e: MouseEvent, catalogue: any) => {
+    e.preventDefault();
+    if (!isLoggedIn) {
+      setShowLoginPrompt(true);
+      return;
+    }
+
+    const filename = `${(catalogue.title || 'catalogue').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'catalogue'}.pdf`;
+
+    try {
+      const response = await fetch(catalogue.downloadLink);
+      if (!response.ok) throw new Error('Download failed');
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      // Fall back to opening the file directly if it can't be fetched as a blob
+      // (e.g. a cross-origin host that doesn't allow fetch reads).
+      window.open(catalogue.downloadLink, '_blank', 'noopener,noreferrer');
+    }
+  };
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        heroRef.current,
-        { opacity: 0, y: 50 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          ease: 'power3.out',
-        }
-      );
+      gsap.fromTo(heroRef.current, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' });
     });
-
     return () => ctx.revert();
   }, []);
 
   useEffect(() => {
     let active = true;
 
-    api.get('/catalogues')
+    api
+      .get('/catalogues')
       .then((res) => {
         if (!active) return;
+
         const mapped = (Array.isArray(res.data) ? res.data : []).map((catalogue: any) => ({
           title: catalogue.title,
           description: catalogue.description || 'Download the catalogue PDF.',
-          image: catalogue.thumbnailUrl || 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+          image: resolveMediaUrl(catalogue.thumbnailUrl) || '',
           downloadLink: normalizeCatalogDownload(catalogue.fileUrl),
           size: 'PDF',
+          date: catalogue.createdAt,
         }));
+
         setCatalogueRows(mapped);
       })
       .catch(() => {
@@ -122,128 +175,220 @@ const Catalogues = () => {
     };
   }, []);
 
+  useEffect(() => {
+    let active = true;
+
+    api
+      .get('/case-studies')
+      .then((res) => {
+        if (!active) return;
+
+        const mapped = (Array.isArray(res.data) ? res.data : []).map((study: any) => ({
+          title: study.title,
+          description: study.description || '',
+          image:
+            resolveMediaUrl(study.imageUrl) ||
+            'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+          slug: study.slug,
+        }));
+
+        setCaseStudyRows(mapped);
+      })
+      .catch(() => {
+        if (active) setCaseStudyRows([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
   const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
-  const catalogues = catalogueRows.length > 0
-    ? catalogueRows
-    : ((data.cards && data.cards.length > 0)
-      ? data.cards.map((catalogue: any) => ({
-          ...catalogue,
-          downloadLink: normalizeCatalogDownload(catalogue.downloadLink ?? catalogue.fileUrl),
-        }))
-      : DEFAULTS.cards);
-  const caseStudies = (data.caseStudies && data.caseStudies.length > 0) ? data.caseStudies : DEFAULTS.caseStudies;
+  const heroImage = resolveMediaUrl(data.heroImage) || DEFAULTS.heroImage;
+
+  const catalogues =
+    catalogueRows.length > 0
+      ? catalogueRows
+      : data.cards && data.cards.length > 0
+        ? data.cards.map((catalogue: any) => ({
+            ...catalogue,
+            image: resolveMediaUrl(catalogue.image) || catalogue.image,
+            downloadLink: normalizeCatalogDownload(catalogue.downloadLink ?? catalogue.fileUrl),
+          }))
+        : DEFAULTS.cards;
+
+  const caseStudies =
+    caseStudyRows.length > 0 ? caseStudyRows : data.caseStudies && data.caseStudies.length > 0 ? data.caseStudies : DEFAULTS.caseStudies;
+
+  const filteredCatalogues = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return catalogues;
+    return catalogues.filter((item: any) => `${item.title} ${item.description}`.toLowerCase().includes(query));
+  }, [catalogues, searchQuery]);
+
+  const visibleCatalogues = filteredCatalogues.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredCatalogues.length;
 
   return (
-    <main className="min-h-screen">
-      {/* Hero Section */}
-      <section ref={heroRef} className="bg-cm-blue mx-3 sm:mx-6 md:mx-10 lg:mx-16 xl:mx-32 rounded-[2rem] py-4 sm:py-6 mt-4">
-        <div className="w-full mx-auto px-4 sm:px-8 md:px-12 text-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-3 sm:mb-6">
-            {heroTitle}
-          </h1>
-          <p className="text-base sm:text-xl text-white/80 max-w-3xl mx-auto leading-snug">
-            {heroSubtitle}
-          </p>
-        </div>
-      </section>
+    <main className="min-h-screen bg-white">
+      <LoginPromptModal
+        open={showLoginPrompt}
+        onClose={() => setShowLoginPrompt(false)}
+        icon={Lock}
+        eyebrow="Registered users only"
+        title="Register to download catalogues"
+        description="Create a free account to download our product catalogues and case study PDFs."
+      />
 
-      {/* Catalogues Grid */}
-      <section className="py-8 sm:py-12 md:py-16 px-4 sm:px-6 md:px-10 lg:px-16 xl:px-32">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-cm-blue-dark mb-6 md:mb-12 text-center">
-            Download Our Catalogues
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-            {catalogues.map((catalogue: any) => {
-              const hasDownload = Boolean(catalogue.downloadLink);
-
-              return (
-                <div
-                  key={catalogue.title}
-                  className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 hover:border-cm-blue/20"
-                >
-                  <div className="h-44 sm:h-56 overflow-hidden bg-gray-100">
-                    <img
-                      src={catalogue.image}
-                      alt={catalogue.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                  <div className="p-4 sm:p-6 md:p-8">
-                    <div className="flex items-center gap-2 mb-4">
-                      <FileText className="w-5 h-5 text-cm-blue" />
-                      <span className="text-xs font-semibold text-cm-blue uppercase tracking-wider">{catalogue.size || 'PDF'}</span>
-                    </div>
-                    <h3 className="text-lg md:text-xl font-bold text-cm-blue-dark mb-3 line-clamp-2">
-                      {catalogue.title}
-                    </h3>
-                    <p className="text-gray-600 text-sm md:text-base mb-6 line-clamp-3">{catalogue.description}</p>
-                    {hasDownload ? (
-                      <a
-                        href={catalogue.downloadLink}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-cm-blue text-white font-semibold rounded-lg hover:bg-cm-blue-dark transition-colors duration-200"
-                      >
-                        <Download className="w-4 h-4" />
-                        Download PDF
-                      </a>
-                    ) : (
-                      <button
-                        type="button"
-                        disabled
-                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-200 text-gray-500 font-semibold rounded-lg cursor-not-allowed"
-                      >
-                        <Download className="w-4 h-4" />
-                        PDF Unavailable
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+      {/* Hero */}
+      <section className="px-4 pb-8 pt-10 sm:px-6 sm:pb-10 sm:pt-14 lg:px-8">
+        <div ref={heroRef} className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14">
+          <div>
+            <span className="mb-3 inline-block text-[11px] font-bold uppercase tracking-[0.18em] text-cm-blue">
+              Product Library
+            </span>
+            <h1 className="max-w-xl text-4xl font-extrabold leading-[1.05] tracking-tight text-cm-blue-dark sm:text-5xl">
+              {heroTitle}
+            </h1>
+            <p className="mt-5 max-w-lg text-sm leading-relaxed text-gray-500 sm:text-base">{heroSubtitle}</p>
+          </div>
+          <div className="relative mx-auto hidden h-52 w-full max-w-sm lg:block">
+            <div className="absolute -right-4 top-0 h-40 w-52 rounded-[48%_52%_44%_56%] bg-gradient-to-br from-cm-blue/10 to-cm-yellow/20" />
+            <div className="absolute left-2 top-6 h-36 w-64 overflow-hidden rounded-2xl shadow-xl">
+              <img src={heroImage} alt={heroTitle} className="h-full w-full object-cover" />
+            </div>
+            <div className="absolute -bottom-2 right-0 flex items-center gap-2 rounded-xl border border-gray-100 bg-white px-4 py-3 shadow-lg">
+              <FolderOpen className="h-4 w-4 text-cm-blue" />
+              <span className="text-xs font-bold text-cm-blue-dark">{catalogues.length}+ PDF downloads</span>
+            </div>
           </div>
         </div>
       </section>
 
+      {/* Toolbar */}
+      <section className="px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 border-b border-gray-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs font-semibold text-gray-400">
+            Showing {filteredCatalogues.length} of {catalogues.length} catalogues
+          </p>
+          <label className="flex shrink-0 items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-xs text-gray-500 sm:w-56">
+            <Search className="h-3.5 w-3.5" />
+            <input
+              type="text"
+              placeholder="Search catalogues..."
+              value={searchQuery}
+              onChange={(event) => {
+                setSearchQuery(event.target.value);
+                setVisibleCount(PAGE_SIZE);
+              }}
+              className="w-full bg-transparent outline-none placeholder:text-gray-400"
+            />
+          </label>
+        </div>
+      </section>
+
+      {/* Catalogues Grid */}
+      <section className="px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+        <div className="mx-auto max-w-6xl">
+          {visibleCatalogues.length === 0 ? (
+            <div className="rounded-2xl border border-gray-100 bg-gray-50 py-20 text-center text-gray-500">No catalogues found.</div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+                {visibleCatalogues.map((catalogue: any, index: number) => {
+                  const cover = getCardCover(index);
+                  const hasDownload = Boolean(catalogue.downloadLink);
+                  return (
+                    <div key={catalogue.title} className="group min-w-0">
+                      <div className="relative h-48 overflow-hidden rounded-xl" style={{ background: cover.background }}>
+                        {catalogue.image && (
+                          <img src={catalogue.image} alt={catalogue.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                        )}
+                        <span className="absolute bottom-0 left-0 h-7 w-7 rounded-tr-xl rounded-bl-xl" style={{ background: cover.accent }} />
+                      </div>
+                      <div className="mt-3 flex items-center gap-2 text-[11px] text-gray-400">
+                        <FileText className="h-3 w-3 text-cm-blue" />
+                        <span className="font-bold text-cm-blue">{catalogue.size || 'PDF'}</span>
+                        {catalogue.date && <span>{formatDate(catalogue.date)}</span>}
+                      </div>
+                      <h3 className="mt-1.5 text-base font-extrabold leading-snug tracking-tight text-cm-blue-dark line-clamp-2 sm:text-lg">
+                        {catalogue.title}
+                      </h3>
+                      <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-gray-500">{catalogue.description}</p>
+
+                      {hasDownload ? (
+                        <a
+                          href={catalogue.downloadLink}
+                          onClick={(e) => handleDownloadClick(e, catalogue)}
+                          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-cm-blue px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-cm-blue-dark"
+                        >
+                          {isLoggedIn ? <Download className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+                          Download PDF
+                        </a>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled
+                          className="mt-4 inline-flex cursor-not-allowed items-center gap-2 rounded-lg bg-gray-100 px-4 py-2.5 text-sm font-semibold text-gray-400"
+                        >
+                          <Download className="h-4 w-4" />
+                          PDF Unavailable
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {hasMore && (
+                <div className="mt-10 text-center">
+                  <button
+                    type="button"
+                    onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+                    className="rounded-full border border-gray-200 bg-white px-6 py-2.5 text-xs font-semibold text-gray-600 transition-colors hover:border-cm-blue hover:text-cm-blue"
+                  >
+                    Load More
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </section>
+
       {/* Case Studies */}
-      <section className="py-12 md:py-16 px-4 sm:px-6 md:px-10 lg:px-16 xl:px-32 bg-gradient-to-b from-gray-50 to-white">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-cm-blue-dark mb-4 text-center">
-            Case Studies & Projects
-          </h2>
-          <p className="text-gray-600 text-center text-base md:text-lg max-w-3xl mx-auto mb-10 md:mb-12">
+      <section className="bg-gradient-to-b from-gray-50 to-white px-4 py-6 sm:px-6 md:py-8 lg:px-8">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="mb-4 text-center text-3xl font-bold text-cm-blue-dark md:text-4xl">Case Studies &amp; Projects</h2>
+
+          <p className="mx-auto mb-6 max-w-3xl text-center text-base text-gray-600 md:mb-8 md:text-lg">
             Explore our completed projects and see how we've transformed educational institutions.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-8">
             {caseStudies.map((study: any) => (
-              <div
-                key={study.title}
-                className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-cm-blue/20"
-              >
+              <div key={study.title} className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-md transition-all duration-300 hover:border-cm-blue/20 hover:shadow-xl">
                 <div className="h-56 overflow-hidden bg-gray-100">
-                  <img
-                    src={study.image}
-                    alt={study.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
+                  <img src={study.image} alt={study.title} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                 </div>
+
                 <div className="p-6 md:p-8">
-                  <div className="flex items-center gap-2 mb-4">
-                    <BookOpen className="w-5 h-5 text-cm-blue" />
-                    <span className="text-xs font-semibold text-cm-blue uppercase tracking-wider">Case Study</span>
+                  <div className="mb-4 flex items-center gap-2">
+                    <BookOpen className="h-5 w-5 text-cm-blue" />
+                    <span className="text-xs font-semibold uppercase tracking-wider text-cm-blue">Case Study</span>
                   </div>
-                  <h3 className="text-lg font-bold text-cm-blue-dark mb-3">
-                    {study.title}
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-6">{study.description}</p>
+
+                  <h3 className="mb-3 text-lg font-bold text-cm-blue-dark">{study.title}</h3>
+
+                  <p className="mb-6 text-sm text-gray-600">{study.description}</p>
+
                   <Link
-                    to="#"
-                    className="inline-flex items-center gap-2 text-cm-blue font-semibold text-sm hover:text-cm-blue-dark transition-colors duration-200"
+                    to={study.slug ? `/case-studies/${study.slug}` : '/contact-us'}
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-cm-blue transition-colors duration-200 hover:text-cm-blue-dark"
                   >
                     Read More
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </div>
               </div>
@@ -253,19 +398,20 @@ const Catalogues = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 md:py-16 px-4 sm:px-6 md:px-10 lg:px-16 xl:px-32 bg-cm-yellow">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-cm-blue-dark mb-6">
-            Need a Custom Solution?
-          </h2>
-          <p className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto mb-8">
+      <section className="bg-cm-yellow px-4 py-6 sm:px-6 md:py-8 lg:px-8">
+        <div className="mx-auto max-w-4xl text-center">
+          <h2 className="mb-6 text-3xl font-bold text-cm-blue-dark md:text-4xl">Need a Custom Solution?</h2>
+
+          <p className="mx-auto mb-8 max-w-2xl text-lg text-gray-700 md:text-xl">
             Our team can create customized catalogues based on your specific requirements.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+          <div className="flex flex-col justify-center gap-4 sm:flex-row">
             <Link to="/request-quote" className="btn-primary">
               Request Custom Catalogue
             </Link>
-            <Link to="/contact-us" className="bg-white text-cm-blue-dark px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors">
+
+            <Link to="/contact-us" className="rounded-full bg-white px-6 py-3 font-semibold text-cm-blue-dark transition-colors hover:bg-gray-100">
               Contact Sales
             </Link>
           </div>

@@ -4,6 +4,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Building2, Users, Target, Award, Handshake, TrendingUp } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
+import { resolveMediaUrl } from '@/lib/media-url';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -160,7 +161,7 @@ const Corporate = () => {
             <div className="relative group">
               <div className="absolute -inset-6 bg-cm-blue/10 rounded-[3rem] group-hover:rotate-1 transition-transform duration-1000" />
               <img
-                src={data.missionImage || DEFAULTS.missionImage}
+                src={resolveMediaUrl(data.missionImage) || DEFAULTS.missionImage}
                 alt="Mission"
                 className="relative rounded-[2.5rem] shadow-xl w-full translate-x-2 grayscale group-hover:grayscale-0 transition-all duration-1000"
               />
@@ -254,7 +255,7 @@ const Corporate = () => {
               <div key={member.name} className="group flex flex-col items-center">
                 <div className="relative mb-6 w-full aspect-[4/3] overflow-hidden rounded-2xl shadow-xl border border-gray-100">
                   <img
-                    src={member.image || 'https://via.placeholder.com/150'}
+                    src={resolveMediaUrl(member.image) || 'https://via.placeholder.com/150'}
                     alt={member.name}
                     className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                   />

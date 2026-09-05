@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { MessageCircle, Phone, Send } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import api from '@/api/client';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -256,18 +255,6 @@ const PartnershipForm = () => {
               </a>
             </div>
 
-            <div className="mt-8 p-6 bg-cm-blue/5 rounded-xl">
-              <h3 className="font-bold text-cm-blue-dark mb-2">Job Openings</h3>
-              <p className="text-gray-600 text-sm mb-3">
-                Join with us as Influencers and be part of the campus transformation journey.
-              </p>
-              <Link
-                to="/partnership"
-                className="text-cm-blue font-semibold text-sm hover:underline"
-              >
-                View Open Positions →
-              </Link>
-            </div>
           </div>
         </div>
       </div>

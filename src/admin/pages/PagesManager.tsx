@@ -2,14 +2,16 @@ import { useEffect, useRef, useState } from 'react';
 import { Eye, EyeOff, Pencil, X, Save, Plus, Trash2, Link as LinkIcon } from 'lucide-react';
 import api from '../api/client';
 import { pageDefaults } from '../pageDefaults';
+import MediaImageField from '../components/MediaImageField';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-interface CardItem { title: string; description: string; image?: string; href?: string; }
+interface CardItem { title: string; description: string; image?: string; href?: string; categories?: string[]; }
 interface SectionItem { heading: string; body: string; bullets?: string[]; }
 interface PageData {
     heroTitle?: string;
     heroSubtitle?: string;
     heroImage?: string;
+    filterLabel?: string;
     section1Title?: string;
     section2Title?: string;
     ctaTitle?: string;
@@ -35,6 +37,62 @@ function parsePageData(raw: string | null): PageData {
 }
 
 // ─── Small helpers ────────────────────────────────────────────────────────────
+function DocumentUploadField({ label, value, onChange }: {
+    label: string; value: string; onChange: (url: string) => void;
+}) {
+    const inputRef = useRef<HTMLInputElement>(null);
+    const [uploading, setUploading] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleFile = async (file: File) => {
+        setUploading(true);
+        setError('');
+        try {
+            const fd = new FormData();
+            fd.append('file', file);
+            const { data } = await api.post('/pages/upload-document', fd, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            onChange(data.url);
+        } catch {
+            setError('Upload failed. Please try again.');
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    return (
+        <div className="space-y-1.5">
+            <label className="block text-sm font-bold text-gray-700">{label}</label>
+            <div className="flex items-center gap-3">
+                <button
+                    type="button"
+                    onClick={() => inputRef.current?.click()}
+                    disabled={uploading}
+                    className="px-4 py-2.5 bg-blue-600 text-white text-xs font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-60 whitespace-nowrap"
+                >
+                    {uploading ? 'Uploading...' : value ? 'Replace PDF' : 'Upload PDF'}
+                </button>
+                <span className="truncate text-xs text-gray-500">
+                    {value ? value.split('/').pop() : 'No file uploaded yet'}
+                </span>
+            </div>
+            {error && <p className="text-xs text-red-600">{error}</p>}
+            <input
+                ref={inputRef}
+                type="file"
+                accept="application/pdf,.pdf"
+                className="hidden"
+                onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleFile(file);
+                    e.target.value = '';
+                }}
+            />
+        </div>
+    );
+}
+
 function Field({ label, value, onChange, multiline = false, placeholder = '', hint = '' }: {
     label: string; value: string; onChange: (v: string) => void;
     multiline?: boolean; placeholder?: string; hint?: string;
@@ -97,14 +155,19 @@ function InlinePageEditor({ page, onClose, onSaved }: {
 
     const parsedData = parsePageData(page.pageData);
     
-    // Fallback defaults for all other pages extracted dynamically
-    const genericDefaults = pageDefaults[page.template || page.slug] || {};
+    // Fallback defaults for all other pages extracted dynamically.
+    // Slug is checked first so a page can have its own defaults even if its
+    // DB `template` value still points at a shared/legacy template component.
+    const genericDefaults = pageDefaults[page.slug] || pageDefaults[page.template || ''] || {};
     const effectiveDefaults = isAboutUs ? defaultAboutUs : genericDefaults;
     
     const initialData = { ...effectiveDefaults };
     Object.entries(parsedData).forEach(([k, v]) => {
         // If the DB has saved a non-falsy value (and not an empty array), overwrite the default
-        if (v && (!Array.isArray(v) || v.length > 0)) {
+        // Older sports records did not contain card categories, so keep the complete
+        // editable defaults until that page is saved in the current content shape.
+        if (['sports-infra', 'labs', 'libraries'].includes(page.slug) && k === 'cards' && Array.isArray(v) && !v.some((card: any) => card.categories?.length)) return;
+        if (v !== undefined && v !== null && (!Array.isArray(v) || v.length > 0 || k === 'cards')) {
             (initialData as any)[k] = v;
         }
     });
@@ -117,7 +180,7 @@ function InlinePageEditor({ page, onClose, onSaved }: {
     const set = (key: string, value: any) => setData((p: any) => ({ ...p, [key]: value }));
 
     // Generic Methods
-    const setCard = (i: number, field: string, val: string) => {
+    const setCard = (i: number, field: string, val: any) => {
         const cards = [...(data.cards ?? [])]; cards[i] = { ...cards[i], [field]: val }; set('cards', cards);
     };
     const addCard = () => set('cards', [...(data.cards ?? []), { title: 'New Card', description: '' }]);
@@ -240,7 +303,7 @@ function InlinePageEditor({ page, onClose, onSaved }: {
                                     <Field label="Mission Paragraph 1" value={data.missionBody1 ?? ''} onChange={v => set('missionBody1', v)} multiline placeholder="To transform educational..." />
                                     <Field label="Mission Paragraph 2" value={data.missionBody2 ?? ''} onChange={v => set('missionBody2', v)} multiline placeholder="As the first company..." />
                                 </div>
-                                <Field label="Mission Image URL" value={data.missionImage ?? ''} onChange={v => set('missionImage', v)} placeholder="https://..." hint="Right-side representative image" />
+                                <MediaImageField label="Mission Image" value={data.missionImage ?? ''} onChange={v => set('missionImage', v)} />
                             </div>
                         </section>
 
@@ -275,8 +338,7 @@ function InlinePageEditor({ page, onClose, onSaved }: {
                                         <button onClick={() => removeTeamMember(i)} className="absolute -top-3 -right-3 bg-red-100 text-red-600 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity drop-shadow"><Trash2 className="w-4 h-4" /></button>
                                         <Field label="Name" value={t.name ?? ''} onChange={v => setTeamMember(i, 'name', v)} />
                                         <Field label="Role" value={t.role ?? ''} onChange={v => setTeamMember(i, 'role', v)} />
-                                        <Field label="Image URL" value={t.image ?? ''} onChange={v => setTeamMember(i, 'image', v)} />
-                                        {t.image && <img src={t.image} alt="preview" className="w-16 h-16 mx-auto rounded-full object-cover" />}
+                                        <MediaImageField label="Image" value={t.image ?? ''} onChange={v => setTeamMember(i, 'image', v)} previewClassName="h-16 w-16 mx-auto rounded-full" />
                                     </div>
                                 ))}
                             </div>
@@ -310,19 +372,29 @@ function InlinePageEditor({ page, onClose, onSaved }: {
                             <div className="space-y-6">
                                 <Field label="Hero Heading *" value={data.heroTitle ?? ''} onChange={v => set('heroTitle', v)} placeholder="Headline for the page..." />
                                 <Field label="Hero Sub-heading" value={data.heroSubtitle ?? ''} onChange={v => set('heroSubtitle', v)} multiline placeholder="Supporting text displayed below the headline…" />
+                                {page.slug === 'colleges-universities-for-sale' && <Field label="Search Filter Label" value={data.filterLabel ?? ''} onChange={v => set('filterLabel', v)} placeholder="cbse schools" />}
                                 
                                 {('heroImage' in effectiveDefaults) && (
                                     <>
-                                        <Field label="Hero Image Backdrop" value={data.heroImage ?? ''} onChange={v => set('heroImage', v)} placeholder="https://images.unsplash.com/..." hint="supports Unsplash, CDN images" />
-                                        {data.heroImage && (
-                                            <div className="h-48 rounded-2xl overflow-hidden border border-gray-200 shadow-inner group relative">
-                                                <img src={data.heroImage} alt="hero preview" className="w-full h-full object-cover" />
-                                            </div>
-                                        )}
+                                        <MediaImageField label="Hero Image Backdrop" value={data.heroImage ?? ''} onChange={v => set('heroImage', v)} previewClassName="h-48 rounded-2xl" />
                                     </>
                                 )}
                             </div>
                         </section>
+
+                        {/* NDA & Mandate documents (colleges-universities-for-sale only) */}
+                        {page.slug === 'colleges-universities-for-sale' && (
+                            <section className="space-y-6">
+                                <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                                    <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Business Documents</h4>
+                                </div>
+                                <p className="text-xs text-gray-500">Shown at the top of the page. Registered users can download these directly; visitors who aren't logged in are prompted to register.</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <DocumentUploadField label="NDA (Non-Disclosure Agreement)" value={data.ndaUrl ?? ''} onChange={v => set('ndaUrl', v)} />
+                                    <DocumentUploadField label="Mandate" value={data.mandateUrl ?? ''} onChange={v => set('mandateUrl', v)} />
+                                </div>
+                            </section>
+                        )}
 
                         {/* Optional Custom Labels block */}
                         {('section1Title' in effectiveDefaults || 'section2Title' in effectiveDefaults) && (
@@ -338,7 +410,7 @@ function InlinePageEditor({ page, onClose, onSaved }: {
                         )}
 
                         {/* Optional Cards block */}
-                        {('cards' in effectiveDefaults) && (
+                        {('cards' in effectiveDefaults || page.slug === 'colleges-universities-for-sale') && (
                             <section className="space-y-6">
                                 <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                                     <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Interactive Cards <span className="text-blue-500 ml-2">({(data.cards ?? []).length})</span></h4>
@@ -346,6 +418,11 @@ function InlinePageEditor({ page, onClose, onSaved }: {
                                         <Plus className="w-4 h-4" /> New Card
                                     </button>
                                 </div>
+                                {page.slug === 'catalogues' && (
+                                    <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+                                        These cards only appear on the site when no catalogues exist yet in <strong>Catalogues</strong> (the dedicated page in the sidebar). Once a catalogue is uploaded there, its real PDF cards replace these on the live page — manage the actual downloadable catalogues from that page instead.
+                                    </p>
+                                )}
                                 <div className="grid grid-cols-1 gap-6">
                                     {(data.cards ?? []).map((card: any, i: number) => (
                                         <div key={i} className="border border-gray-200 rounded-2xl p-6 bg-gray-50/30 hover:bg-white hover:shadow-lg hover:border-blue-200 transition-all group relative">
@@ -359,7 +436,36 @@ function InlinePageEditor({ page, onClose, onSaved }: {
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 <Field label="Card Title" value={card.title ?? ''} onChange={v => setCard(i, 'title', v)} />
                                                 <Field label="Card Description" value={card.description ?? ''} onChange={v => setCard(i, 'description', v)} multiline />
-                                                <Field label="Image URL (Optional)" value={card.image ?? ''} onChange={v => setCard(i, 'image', v)} />
+                                                <MediaImageField label="Image (Optional)" value={card.image ?? ''} onChange={v => setCard(i, 'image', v)} previewClassName="h-24" />
+                                                {page.slug === 'colleges-universities-for-sale' && <>
+                                                    <Field label="Location" value={card.location ?? ''} onChange={v => setCard(i, 'location', v)} placeholder="Bahraich" />
+                                                    <div className="space-y-1.5">
+                                                        <label className="block text-sm font-bold text-gray-700">Region</label>
+                                                        <select
+                                                            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm bg-white"
+                                                            value={card.region ?? ''}
+                                                            onChange={e => setCard(i, 'region', e.target.value || undefined)}
+                                                        >
+                                                            <option value="">-- Select Region --</option>
+                                                            <option value="North">North</option>
+                                                            <option value="South">South</option>
+                                                            <option value="East">East</option>
+                                                            <option value="West">West</option>
+                                                        </select>
+                                                    </div>
+                                                    <Field label="Rating" value={card.rating ?? ''} onChange={v => setCard(i, 'rating', v)} placeholder="6.8" />
+                                                    <Field label="Run Rate Sales" value={card.sales ?? ''} onChange={v => setCard(i, 'sales', v)} placeholder="INR 2.6 crore" />
+                                                    <Field label="EBITDA Margin" value={card.margin ?? ''} onChange={v => setCard(i, 'margin', v)} placeholder="40 %" />
+                                                    <Field label="Asking Price" value={card.askingPrice ?? ''} onChange={v => setCard(i, 'askingPrice', v)} placeholder="INR 20 Cr" />
+                                                </>}
+                                                {(Array.isArray(card.categories) || Array.isArray(effectiveDefaults.cards?.[i]?.categories)) && (
+                                                    <Field
+                                                        label="Categories (comma-separated)"
+                                                        value={(card.categories ?? []).join(', ')}
+                                                        onChange={v => setCard(i, 'categories', v.split(',').map((item: string) => item.trim()).filter(Boolean))}
+                                                        placeholder="Indoor, Adults"
+                                                    />
+                                                )}
                                                 {('href' in (effectiveDefaults.cards?.[i] || {})) && (
                                                     <Field label="Card Link" value={card.href ?? ''} onChange={v => setCard(i, 'href', v)} />
                                                 )}
@@ -413,6 +519,15 @@ function InlinePageEditor({ page, onClose, onSaved }: {
                             </section>
                         )}
 
+                        {('section2Description' in effectiveDefaults) && (
+                            <section className="space-y-6">
+                                <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                                    <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Section Supporting Text</h4>
+                                </div>
+                                <Field label="Features Section Description" value={data.section2Description ?? ''} onChange={v => set('section2Description', v)} multiline />
+                            </section>
+                        )}
+
                         {/* Optional Features block */}
                         {('features' in effectiveDefaults) && (
                             <section className="space-y-6">
@@ -434,6 +549,19 @@ function InlinePageEditor({ page, onClose, onSaved }: {
                             </section>
                         )}
 
+                        {('ctaTitle' in effectiveDefaults || 'ctaButtonLabel' in effectiveDefaults || 'ctaHref' in effectiveDefaults) && (
+                            <section className="space-y-6">
+                                <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                                    <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Call-to-Action Footer</h4>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    {('ctaTitle' in effectiveDefaults) && <Field label="CTA Heading" value={data.ctaTitle ?? ''} onChange={v => set('ctaTitle', v)} />}
+                                    {('ctaButtonLabel' in effectiveDefaults) && <Field label="CTA Button Label" value={data.ctaButtonLabel ?? ''} onChange={v => set('ctaButtonLabel', v)} />}
+                                    {('ctaHref' in effectiveDefaults) && <Field label="CTA Link" value={data.ctaHref ?? ''} onChange={v => set('ctaHref', v)} />}
+                                </div>
+                            </section>
+                        )}
+
                         {/* Optional Case Studies block */}
                         {('caseStudies' in effectiveDefaults) && (
                             <section className="space-y-6">
@@ -446,6 +574,11 @@ function InlinePageEditor({ page, onClose, onSaved }: {
                                         <Plus className="w-4 h-4" /> Add Project
                                     </button>
                                 </div>
+                                {page.slug === 'catalogues' && (
+                                    <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+                                        These only appear on the site when no case studies exist yet in <strong>Case Studies</strong> (the dedicated page in the sidebar). Once one is added there, its "Read More" opens a real project page — manage case studies from that page instead.
+                                    </p>
+                                )}
                                 <div className="grid grid-cols-1 gap-6">
                                     {(data.caseStudies ?? []).map((study: any, i: number) => (
                                         <div key={i} className="border border-gray-200 rounded-2xl p-6 bg-gray-50/30 group relative">
@@ -460,11 +593,11 @@ function InlinePageEditor({ page, onClose, onSaved }: {
                                                     newList[i] = { ...newList[i], title: v };
                                                     set('caseStudies', newList);
                                                 }} />
-                                                <Field label="Image URL" value={study.image ?? ''} onChange={v => {
+                                                <MediaImageField label="Image" value={study.image ?? ''} onChange={v => {
                                                     const newList = [...data.caseStudies];
                                                     newList[i] = { ...newList[i], image: v };
                                                     set('caseStudies', newList);
-                                                }} />
+                                                }} previewClassName="h-24" />
                                                 <div className="md:col-span-2">
                                                     <Field label="Description" value={study.description ?? ''} onChange={v => {
                                                         const newList = [...data.caseStudies];
@@ -513,16 +646,18 @@ const MAIN_SLUGS = new Set([
     'solutions', 'corporate', 'catalogues', 'classifieds', 'login',
     'registration', 'my-account', 'request-quote', 'not-found',
     'privacy-policy', 'terms-of-use', 'payment-policy', 'replacement-return',
-    'order-rejection', 'partnership', 'lookbook', 'ugc-guidelines',
+    'order-rejection', 'partnership', 'partner-with-colleges', 'lookbook', 'ugc-guidelines',
 ]);
 
 // Primary category / solution pages
 const CATEGORY_SLUGS = new Set([
     'campus-design', 'furniture', 'sports-infra', 'ai-ml', 'tech-infra',
     'libraries', 'labs', 'collaboration', 'innovation', 'lms',
+    'smart-classrooms', 'ar-vr-learning',
     'digital-transformation', 'campus-automation', 'assessment-system',
     'library-management', 'new-environments', 'setup-college',
-    'innovation-centres', 'ai-guide',
+    'innovation-centres', 'innovation-centers', 'science-tech-labs', 'ai-guide',
+    'campus-master-planning', 'ar-vr-experiences', 'campus-furniture-design', 'sports-infrastructure',
 ]);
 
 type Group = { label: string; badge: string; badgeColor: string; pages: Page[] };
@@ -691,9 +826,10 @@ export default function PagesManager() {
         setEditingPage(prev => prev ? { ...prev, ...updated } : prev);
     };
 
+    const normalizedSearch = (search || '').trim().replace(/^\/+/, '').toLowerCase();
     const filtered = pages.filter(p =>
-        (p.title || '').toLowerCase().includes((search || '').toLowerCase()) ||
-        (p.slug || '').toLowerCase().includes((search || '').toLowerCase())
+        (p.title || '').toLowerCase().includes(normalizedSearch) ||
+        (p.slug || '').toLowerCase().includes(normalizedSearch)
     );
 
     const groups = classifyPages(filtered);

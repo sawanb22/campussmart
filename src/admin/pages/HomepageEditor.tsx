@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Save, RotateCcw, Plus, Trash2 } from 'lucide-react';
 import api from '../api/client';
+import MediaImageField from '../components/MediaImageField';
+import { CATEGORY_ICONS, DEFAULT_CATEGORIES, type CategoryItem } from '@/components/sections/category-bar';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
     return (
@@ -35,12 +37,20 @@ function Field({ label, value, onChange, multiline = false, hint = '', placehold
 }
 
 export default function HomepageEditor() {
-    const [heroData, setHeroData] = useState<any>({ title: '', subtitle: '', image: '' });
+    const [heroData, setHeroData] = useState<any>({
+        eyebrow: 'Future-ready campus infrastructure',
+        title: 'Design. Build.\nDigitize. Operate.\nFuture-Ready Campuses.',
+        subtitle: 'Physical + Digital',
+        ctaLabel: 'Schedule Campus Audit →',
+        ctaHref: '/contact-us',
+        image: '',
+    });
     const [features, setFeatures] = useState<any[]>([]);
     const [services, setServices] = useState<any[]>([]);
     const [sidebar, setSidebar] = useState<any>({ classifieds: [], resources: [], completedProjects: [], contacts: [] });
     const [tickerAnnouncements, setTickerAnnouncements] = useState<string[]>([]);
     const [collaborations, setCollaborations] = useState<any[]>([]);
+    const [categories, setCategories] = useState<CategoryItem[]>(DEFAULT_CATEGORIES);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
@@ -49,8 +59,18 @@ export default function HomepageEditor() {
         setLoading(true);
         try {
             const { data } = await api.get('/content');
-            try { setHeroData(JSON.parse(data.home_hero || '{}')); } catch { /**/ }
-            try { setFeatures(data.home_features ? JSON.parse(data.home_features) : []); } catch { /**/ }
+            try {
+                const savedHero = JSON.parse(data.home_hero || '{}');
+                setHeroData((current: any) => ({ ...current, ...savedHero }));
+            } catch { /**/ }
+            try {
+                const savedFeatures = data.home_features ? JSON.parse(data.home_features) : [];
+                setFeatures(savedFeatures.map((feature: any) => feature.title === 'Smart Classrooms'
+                    ? { ...feature, href: '/smart-classrooms' }
+                    : feature.title === 'AR / VR Learning' || feature.title === 'AR/VR Learning'
+                        ? { ...feature, href: '/ar-vr-learning' }
+                        : feature));
+            } catch { /**/ }
             try { setServices(data.home_services ? JSON.parse(data.home_services) : []); } catch { /**/ }
             try { setSidebar(data.home_sidebar ? JSON.parse(data.home_sidebar) : { classifieds: [], resources: [], completedProjects: [], contacts: [] }); } catch { /**/ }
             try { setTickerAnnouncements(data.ticker_announcements ? JSON.parse(data.ticker_announcements) : [
@@ -60,6 +80,7 @@ export default function HomepageEditor() {
                 "Latest UGC Guidelines for Digital Campus implemented across 50+ institutions",
                 "Explore our new range of ergonomic Campus Furniture in the Lookbook",
             ]); } catch { /**/ }
+            try { setCategories(data.home_categories ? JSON.parse(data.home_categories) : DEFAULT_CATEGORIES); } catch { /**/ }
             try { setCollaborations(data.collaborations ? JSON.parse(data.collaborations) : [
                 { name: 'Stanford University' },
                 { name: 'MIT Labs' },
@@ -84,6 +105,7 @@ export default function HomepageEditor() {
                 home_features: JSON.stringify(features),
                 home_services: JSON.stringify(services),
                 home_sidebar: JSON.stringify(sidebar),
+                home_categories: JSON.stringify(categories),
                 ticker_announcements: JSON.stringify(tickerAnnouncements),
                 collaborations: JSON.stringify(collaborations),
             });
@@ -102,6 +124,11 @@ export default function HomepageEditor() {
     const addService = () => setServices([...services, { title: 'New Service', bgColor: '#3B82F6', textColor: '#ffffff', href: '/' }]);
     const upService = (i: number, k: string, v: any) => { const a = [...services]; a[i] = { ...a[i], [k]: v }; setServices(a); };
     const delService = (i: number) => setServices(services.filter((_, idx) => idx !== i));
+
+    // Category icon helpers
+    const addCategory = () => setCategories([...categories, { icon: 'Circle', label: 'New Category', href: '/' }]);
+    const upCategory = (i: number, k: keyof CategoryItem, v: string) => { const a = [...categories]; a[i] = { ...a[i], [k]: v }; setCategories(a); };
+    const delCategory = (i: number) => setCategories(categories.filter((_, idx) => idx !== i));
 
     // Sidebar helpers
     const setSidebarList = (key: string, list: any[]) => setSidebar((p: any) => ({ ...p, [key]: list }));
@@ -137,14 +164,14 @@ export default function HomepageEditor() {
             {/* ── Hero Banner ── */}
             <Section title="🖼 Hero Banner">
                 <div className="space-y-4">
-                    <Field label="Hero Title" value={heroData.title || ''} onChange={v => setHeroData((p: any) => ({ ...p, title: v }))} placeholder="Your Complete Guide to Campus Infrastructure" />
+                    <Field label="Hero Eyebrow" value={heroData.eyebrow || ''} onChange={v => setHeroData((p: any) => ({ ...p, eyebrow: v }))} placeholder="Future-ready campus infrastructure" />
+                    <Field label="Hero Title" value={heroData.title || ''} onChange={v => setHeroData((p: any) => ({ ...p, title: v }))} multiline placeholder="Design. Build.&#10;Digitize. Operate.&#10;Future-Ready Campuses." />
                     <Field label="Hero Subtitle" value={heroData.subtitle || ''} onChange={v => setHeroData((p: any) => ({ ...p, subtitle: v }))} placeholder="Physical + Digital" />
-                    <Field label="Background Image URL" hint="paste any full image URL" value={heroData.image || ''} onChange={v => setHeroData((p: any) => ({ ...p, image: v }))} placeholder="https://images.unsplash.com/..." />
-                    {heroData.image && (
-                        <div className="h-36 rounded-xl overflow-hidden border border-gray-200">
-                            <img src={heroData.image} alt="Hero preview" className="w-full h-full object-cover" />
-                        </div>
-                    )}
+                    <div className="grid grid-cols-2 gap-3">
+                        <Field label="CTA Label" value={heroData.ctaLabel || ''} onChange={v => setHeroData((p: any) => ({ ...p, ctaLabel: v }))} placeholder="Schedule Campus Audit →" />
+                        <Field label="CTA Link" value={heroData.ctaHref || ''} onChange={v => setHeroData((p: any) => ({ ...p, ctaHref: v }))} placeholder="/contact-us" />
+                    </div>
+                    <MediaImageField label="Background Image" value={heroData.image || ''} onChange={v => setHeroData((p: any) => ({ ...p, image: v }))} previewClassName="h-36 rounded-xl" />
                 </div>
             </Section>
 
@@ -184,6 +211,45 @@ export default function HomepageEditor() {
                 </div>
             </Section>
 
+            {/* ── Category Icon Bar ── */}
+            <Section title={`🔗 Category Icon Bar (${categories.length})`}>
+                <p className="text-xs text-gray-400 mb-4">The row of icon links right below the header (Campus Design, Furniture, AI/ML, etc). Rename any label, change its icon, or point it at a different page.</p>
+                <div className="space-y-3">
+                    {categories.map((cat, i) => {
+                        const Icon = CATEGORY_ICONS[cat.icon] || CATEGORY_ICONS.Circle;
+                        return (
+                            <div key={i} className="border border-gray-200 rounded-xl p-4 bg-gray-50/40">
+                                <div className="flex items-center justify-between mb-3">
+                                    <span className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wide">
+                                        <Icon className="w-4 h-4 text-gray-500" /> Icon {i + 1}
+                                    </span>
+                                    <button onClick={() => delCategory(i)} className="flex items-center gap-1 px-2 py-1 text-red-500 hover:bg-red-50 rounded-lg text-xs"><Trash2 className="w-3.5 h-3.5" /> Remove</button>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <Field label="Label" value={cat.label} onChange={v => upCategory(i, 'label', v)} placeholder="AI INFRA" />
+                                    <Field label="Link (href)" value={cat.href} onChange={v => upCategory(i, 'href', v)} placeholder="/ai-ml" />
+                                    <div className="space-y-1.5">
+                                        <label className="block text-sm font-bold text-gray-700">Icon</label>
+                                        <select
+                                            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm bg-white"
+                                            value={cat.icon}
+                                            onChange={e => upCategory(i, 'icon', e.target.value)}
+                                        >
+                                            {Object.keys(CATEGORY_ICONS).map(name => (
+                                                <option key={name} value={name}>{name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                    <button onClick={addCategory} className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition-colors">
+                        <Plus className="w-3.5 h-3.5" /> Add Icon
+                    </button>
+                </div>
+            </Section>
+
             {/* ── Feature Cards ── */}
             <Section title={`🪟 Masonry Feature Cards (${features.length})`}>
                 <p className="text-xs text-gray-400 mb-4">The masonry grid of category cards shown on the homepage. Edit title, description, tag, image, link and card height.</p>
@@ -209,10 +275,7 @@ export default function HomepageEditor() {
                                 <div className="col-span-2">
                                     <Field label="Description" value={f.description} onChange={v => upFeature(i, 'description', v)} multiline />
                                 </div>
-                                <div className="space-y-1">
-                                    <Field label="Image URL" value={f.image} onChange={v => upFeature(i, 'image', v)} placeholder="https://images.unsplash.com/..." />
-                                    {f.image && <div className="h-20 rounded-lg overflow-hidden border border-gray-200 mt-1"><img src={f.image} className="w-full h-full object-cover" /></div>}
-                                </div>
+                                <MediaImageField label="Image" value={f.image || ''} onChange={v => upFeature(i, 'image', v)} previewClassName="h-20" />
                                 <div className="space-y-3">
                                     <Field label="Link (href)" value={f.href} onChange={v => upFeature(i, 'href', v)} placeholder="/page-slug" />
                                     <div className="space-y-1">

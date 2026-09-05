@@ -2,7 +2,7 @@ import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import {
     LayoutDashboard, Package, BookOpen, ShoppingBag, Users, MessageSquare,
     Tag, BookMarked, Settings, LogOut, GraduationCap, Globe, Star,
-    FileText, ChevronRight, Bell
+    FileText, ChevronRight, Bell, Layers
 } from 'lucide-react';
 
 // ── Grouped Navigation ─────────────────────────────────────────────────────────
@@ -27,6 +27,7 @@ const navGroups = [
             { to: '/admin/products', icon: Package, label: 'Products', desc: 'Add, edit, remove items' },
             { to: '/admin/categories', icon: Tag, label: 'Categories', desc: 'Manage classifications' },
             { to: '/admin/catalogues', icon: BookMarked, label: 'Catalogues', desc: 'PDF & digital catalogues' },
+            { to: '/admin/case-studies', icon: Layers, label: 'Case Studies', desc: 'Projects showcased on Catalogues page' },
             { to: '/admin/classifieds', icon: Tag, label: 'Classifieds', desc: 'Review & approve listings' },
         ]
     },

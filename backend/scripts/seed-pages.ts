@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const PAGES = [
+    { slug: 'ar-vr-learning', title: 'AR / VR Learning', template: 'home-feature-detail' },
     { slug: 'ai-digital-design-supply', title: 'AI Digital Design Supply', template: 'ai-digital-design-supply' },
     { slug: 'ai-guide', title: 'AI Implementation Guide', template: 'ai-guide' },
     { slug: 'ai-stations', title: 'AI Learning Stations', template: 'ai-stations' },
@@ -21,12 +22,16 @@ const PAGES = [
     { slug: 'partnership', title: 'Partner Campuses', template: 'partnership' },
     { slug: 'product-catalog', title: 'Product Catalog 2025', template: 'product-catalog' },
     { slug: 'setup-college', title: 'Setting Up a College in India', template: 'setup-college' },
+    { slug: 'smart-classrooms', title: 'Smart Classrooms', template: 'home-feature-detail' },
     { slug: 'sports-design-execution', title: 'Sports Design & Execution', template: 'sports-design-execution' },
     { slug: 'sports-infra', title: 'Sports Infrastructure', template: 'sports-infra' },
     { slug: 'tech-infra', title: 'Technology Infrastructure', template: 'tech-infra' },
     { slug: 'ugc-guidelines', title: 'UGC Guidelines', template: 'ugc-guidelines' },
     // These 5 already use the hook, but let's make sure they are in the DB:
     { slug: 'labs', title: 'Laboratory Solutions', template: 'labs' },
+    { slug: 'lab-products', title: 'Lab Products', template: 'lab-products' },
+    { slug: 'library-products', title: 'Library Products', template: 'library-products' },
+    { slug: 'sports-products', title: 'Sports Products', template: 'sports-products' },
     { slug: 'innovation', title: 'Innovation Centers', template: 'innovation' },
     { slug: 'furniture', title: 'Campus Furniture', template: 'furniture' },
     { slug: 'campus-design', title: 'Campus Master Planning', template: 'campus-design' },

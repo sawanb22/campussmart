@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Plus, Pencil, Trash2, X, FolderPlus } from 'lucide-react';
 import api from '../api/client';
+import MediaImageField from '../components/MediaImageField';
 
 interface Category { id: number; name: string; slug: string; }
-interface Post { id: number; title: string; slug: string; excerpt: string; body: string; imageUrl?: string; published: boolean; publishedAt?: string; createdAt: string; categoryId?: number; category?: Category; }
+interface Post { id: number; title: string; slug: string; excerpt: string; body: string; imageUrl?: string; published: boolean; publishedAt?: string; createdAt: string; categoryId?: number; category?: Category; blogcategory?: Category; }
 
 const EMPTY: Partial<Post> = { title: '', excerpt: '', body: '', imageUrl: '', published: false, categoryId: undefined };
 
@@ -22,7 +23,7 @@ export default function Blog() {
             api.get('/blog?all=true&limit=100'),
             api.get('/blog/categories')
         ]);
-        setPosts(postsRes.data.posts);
+        setPosts(postsRes.data.posts.map((post: Post) => ({ ...post, category: post.category ?? post.blogcategory })));
         setCategories(catRes.data);
         setLoading(false);
     };
@@ -30,7 +31,7 @@ export default function Blog() {
     useEffect(() => { fetchAll(); }, []);
 
     const openAdd = () => { setEditing(EMPTY); setShowModal(true); };
-    const openEdit = (p: Post) => { setEditing(p); setShowModal(true); };
+    const openEdit = (p: Post) => { setEditing({ ...p, categoryId: p.categoryId ?? p.category?.id }); setShowModal(true); };
 
     const save = async () => {
         setSaving(true);
@@ -120,14 +121,17 @@ export default function Blog() {
                             <div><label className="form-label">Title *</label><input className="form-input" value={editing.title || ''} onChange={(e) => setEditing({ ...editing, title: e.target.value })} /></div>
                             <div>
                                 <label className="form-label">Category</label>
-                                <select className="form-input bg-white" value={editing.categoryId || ''} onChange={(e) => setEditing({ ...editing, categoryId: e.target.value ? Number(e.target.value) : undefined })}>
+                                <div className="flex gap-2">
+                                <select className="form-input bg-white flex-1" value={editing.categoryId || ''} onChange={(e) => setEditing({ ...editing, categoryId: e.target.value ? Number(e.target.value) : undefined })}>
                                     <option value="">-- Uncategorized --</option>
                                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                 </select>
+                                <button type="button" onClick={() => setShowCategoryModal(true)} className="btn-secondary whitespace-nowrap"><FolderPlus className="w-4 h-4" /> Add Category</button>
+                                </div>
                             </div>
                             <div><label className="form-label">Excerpt *</label><textarea className="form-input" rows={2} value={editing.excerpt || ''} onChange={(e) => setEditing({ ...editing, excerpt: e.target.value })} /></div>
-                            <div><label className="form-label">Body (HTML supported) *</label><textarea className="form-input" rows={10} value={editing.body || ''} onChange={(e) => setEditing({ ...editing, body: e.target.value })} style={{ fontFamily: 'monospace' }} /></div>
-                            <div><label className="form-label">Image URL</label><input className="form-input" value={editing.imageUrl || ''} onChange={(e) => setEditing({ ...editing, imageUrl: e.target.value })} /></div>
+                            <div><label className="form-label">Body *</label><textarea className="form-input" rows={10} value={editing.body || ''} onChange={(e) => setEditing({ ...editing, body: e.target.value })} placeholder="Write your article content here..." /></div>
+                            <MediaImageField label="Featured Image" value={editing.imageUrl || ''} onChange={value => setEditing({ ...editing, imageUrl: value })} previewClassName="h-40" />
                             <div className="pb-2">
                                 <label className="flex items-center gap-2 cursor-pointer inline-flex">
                                     <input type="checkbox" checked={!!editing.published} onChange={(e) => setEditing({ ...editing, published: e.target.checked })} />

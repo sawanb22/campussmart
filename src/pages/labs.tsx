@@ -1,10 +1,14 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Microscope, FlaskConical, Atom, Monitor, CheckCircle } from 'lucide-react';
+import { ArrowRight, Microscope, FlaskConical, Atom, Monitor, CheckCircle, Star, Heart, Check, Trash2 } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
+import { usePageCategories } from '@/hooks/usePageCategories';
+import { useDesignWishlist } from '@/hooks/useDesignWishlist';
+import LoginPromptModal from '@/components/login-prompt-modal';
+import { resolveMediaUrl } from '@/lib/media-url';
 
-interface Card { title: string; description: string; image?: string; name?: string; }
+interface Card { title: string; description: string; image?: string; name?: string; categories?: string[]; }
 
 const DEFAULTS = {
   heroTitle: 'Laboratory Solutions',
@@ -12,10 +16,15 @@ const DEFAULTS = {
   heroImage: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
   section1Title: 'Lab Types',
   cards: [
-    { title: 'Chemistry Lab', description: '', image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Physics Lab', description: '', image: 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Biology Lab', description: '', image: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Computer Lab', description: '', image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Chemistry Lab', description: 'Purpose-built environments for practical chemistry education and safe experimentation.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Physics Lab', description: 'Hands-on spaces for experiments, measurement, and applied physics learning.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Math Lab', description: 'Interactive learning environments that make mathematical concepts practical and visual.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=400&q=80' },
+    { title: 'Biology Lab', description: 'Well-equipped spaces for life science observation, analysis, and discovery.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Composite Skill Lab', description: 'Flexible multidisciplinary labs that support practical and vocational skill development.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=400&q=80' },
+    { title: 'AI/ML Lab', description: 'Future-ready computing environments for artificial intelligence and machine learning.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1555255707-c07966088b7b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Computer Lab', description: 'Connected, ergonomic spaces for digital learning, coding, and collaboration.', categories: ['Tech Labs'], image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'AI Stations', description: 'Specialized workstations for immersive technology and intelligent systems learning.', categories: ['Tech Labs'], image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=400&q=80' },
+    { title: 'STEM Labs', description: 'Integrated innovation spaces that bring science, technology, engineering, and math together.', categories: ['Innovation Labs'], image: 'https://images.unsplash.com/photo-1535378917042-10a22c95931a?auto=format&fit=crop&w=400&q=80' },
   ] as Card[],
 };
 
@@ -25,6 +34,8 @@ const Labs = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
   const { data } = usePageData('labs');
+  const { categories: shopCategories } = usePageCategories('labs');
+  const { isSaved, isPending, add, remove, showLoginPrompt, setShowLoginPrompt } = useDesignWishlist('labs');
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -53,10 +64,16 @@ const Labs = () => {
   const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
   const heroImage = data.heroImage ?? DEFAULTS.heroImage;
   const section1Title = data.section1Title ?? DEFAULTS.section1Title;
-  const cards: Card[] = (data.cards && data.cards.length > 0) ? data.cards : DEFAULTS.cards;
+  const allCards: Card[] = data.cards?.length > 0 ? data.cards : DEFAULTS.cards;
+  const cards = allCards.map((card, i) => ({
+    ...card,
+    categories: card.categories?.length ? card.categories.map((category) => category === 'Labs' ? 'Lab Products' : category) : ['Lab Products'],
+    image: card.image || DEFAULTS.cards[i % DEFAULTS.cards.length].image,
+  }));
 
   return (
     <main className="min-h-screen bg-white">
+      <LoginPromptModal open={showLoginPrompt} onClose={() => setShowLoginPrompt(false)} />
       {/* Standard Corporate Hero - Side by Side */}
       <section ref={heroRef} className="bg-cm-blue mx-3 sm:mx-6 lg:mx-8 rounded-[2rem] py-6 md:py-8 overflow-hidden relative shadow-inner">
         <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 relative z-10 px-4">
@@ -67,45 +84,95 @@ const Labs = () => {
             <p className="text-sm md:text-base text-white/85 leading-snug max-w-xl">
               {heroSubtitle}
             </p>
+            <div className="mt-5 flex flex-wrap gap-4">
+              <Link to="/request-quote" className="btn-secondary px-6 py-2.5 text-sm font-bold">
+                Get Quote
+              </Link>
+            </div>
           </div>
           <div className="lg:w-1/2">
-            <img src={heroImage} alt={heroTitle} className="rounded-2xl shadow-xl w-full h-[260px] object-cover border-2 border-cm-blue-dark" />
+            <img src={resolveMediaUrl(heroImage)} alt={heroTitle} className="rounded-2xl shadow-xl w-full h-[260px] object-cover border-2 border-cm-blue-dark" />
           </div>
         </div>
       </section>
 
-      {/* Lab Modules Grid Layout */}
-      <section className="py-2 md:py-4">
+      {/* Lab Types Grid Layout */}
+      <section className="py-10 md:py-14">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-8">
             <h2 className="text-2xl md:text-3xl font-bold text-cm-blue-dark tracking-tighter">
               {section1Title}
             </h2>
-            <div className="hidden md:block h-1 w-24 bg-cm-yellow rounded-full" />
+            <div className="hidden md:block h-1 w-32 bg-cm-yellow rounded-full" />
           </div>
 
-          <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {cards.map((lab, i) => {
-              const Icon = ICONS[i % ICONS.length];
-              return (
-                <div key={lab.title} className="group bg-white border border-slate-200/70 rounded-[2rem] hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)] transition duration-300 hover:-translate-y-1 flex flex-col shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] min-h-[360px] overflow-hidden">
-                  <div className="relative overflow-hidden aspect-[4/5]">
-                    <img src={lab.image} alt={lab.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent" />
-                    <div className="absolute top-4 right-4 w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20 group-hover:bg-cm-blue group-hover:scale-110 transition-all duration-500">
-                      <Icon className="w-5 h-5 text-white" />
+          <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)] gap-8">
+            <aside className="hidden lg:block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-cm-blue-dark mb-5">Categories</h3>
+              <div className="space-y-3">
+                <Link to="/labs/products" className="block w-full text-left rounded-2xl px-4 py-3 transition-all duration-200 bg-slate-50 text-slate-700 hover:bg-slate-100">
+                  All Products
+                </Link>
+                {shopCategories.map((category) => (
+                  <Link key={category.id} to={`/labs/products?category=${category.slug}`} className="block w-full text-left rounded-2xl px-4 py-3 transition-all duration-200 bg-slate-50 text-slate-700 hover:bg-slate-100">
+                    {category.name}
+                  </Link>
+                ))}
+                {shopCategories.length === 0 && (
+                  <p className="text-xs text-slate-400 px-1">No categories yet. Add one in Admin &rarr; Categories.</p>
+                )}
+              </div>
+
+              <div className="mt-8 rounded-3xl bg-cm-blue-dark/5 p-4">
+                <p className="text-sm font-semibold text-cm-blue-dark mb-3">Showing</p>
+                <p className="text-4xl font-black text-cm-blue-dark">{cards.length}</p>
+                <p className="text-sm text-slate-500 mt-2">Lab solution highlights</p>
+              </div>
+            </aside>
+
+            <div ref={cardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {cards.map((lab, i) => {
+                const Icon = ICONS[i % ICONS.length];
+                return (
+                  <div key={lab.title} className="group flex flex-col overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)]">
+                    <div className="relative overflow-hidden h-[220px] sm:h-[230px]">
+                      <img src={resolveMediaUrl(lab.image)} alt={lab.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent" />
+                      <span className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-800 shadow-sm backdrop-blur-sm">
+                        <Star className="h-3.5 w-3.5 text-cm-yellow" />
+                        {lab.categories?.[0] ?? 'Lab'}
+                      </span>
+                      <div className="absolute top-4 right-4 w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20 group-hover:bg-cm-blue group-hover:scale-110 transition-all duration-500">
+                        <Icon className="w-5 h-5 text-white" />
+                      </div>
+                    </div>
+                    <div className="flex flex-1 flex-col px-5 pb-4 pt-4">
+                      <h3 className="text-lg font-semibold text-slate-900 tracking-tight mb-2">{lab.title}</h3>
+                      {lab.description && <p className="text-sm text-slate-600 leading-relaxed mb-3">{lab.description}</p>}
+                      <div className="mt-auto flex flex-wrap gap-2 mb-3">
+                        {lab.categories?.map((category) => <span key={category} className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-slate-600">{category}</span>)}
+                      </div>
+                      <div className="flex items-center justify-between text-slate-700">
+                        {isSaved(lab) ? (
+                          <div className="flex items-center gap-1.5">
+                            <span className="flex items-center gap-1.5 rounded-lg bg-green-600 px-2.5 py-1.5 text-[10px] font-bold text-white">
+                              <Check className="h-3.5 w-3.5" /> Added to wishlist
+                            </span>
+                            <button type="button" onClick={() => remove(lab)} disabled={isPending(lab)} aria-label={`Remove ${lab.title} from wishlist`} className="flex items-center justify-center rounded-lg bg-red-50 p-1.5 text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        ) : (
+                          <button type="button" onClick={() => add(lab)} disabled={isPending(lab)} className="flex items-center gap-1.5 rounded-lg bg-cm-blue px-2.5 py-1.5 text-[10px] font-bold text-white shadow-sm transition-all hover:bg-cm-blue-dark disabled:opacity-50">
+                            <Heart className="h-3.5 w-3.5" /> Add to wishlist
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <div className="px-6 pb-6 pt-5 flex-grow flex flex-col">
-                    <h3 className="text-xl font-semibold text-slate-900 tracking-tight mb-3">{lab.title}</h3>
-                    <p className="text-sm text-slate-600 leading-relaxed mb-4 flex-grow">{lab.description || 'Specialized turnkey solutions for advanced institutional learning.'}</p>
-                    <div className="flex items-center justify-between text-slate-700">
-                       <span className="text-xs uppercase tracking-[0.28em] text-slate-400">Module</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>

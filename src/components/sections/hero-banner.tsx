@@ -8,8 +8,11 @@ gsap.registerPlugin(ScrollTrigger);
 const HeroBanner = () => {
   const { content } = useSiteContent();
   const heroData = content.home_hero || {
-    title: 'Your Complete Guide to Campus Infrastructure',
+    eyebrow: 'Future-ready campus infrastructure',
+    title: 'Design. Build.\nDigitize. Operate.\nFuture-Ready Campuses.',
     subtitle: 'Physical + Digital',
+    ctaLabel: 'Schedule Campus Audit →',
+    ctaHref: '/contact-us',
     image: 'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'
   };
 
@@ -67,7 +70,7 @@ const HeroBanner = () => {
                 ref={subtitleRef}
                 className="text-[10px] sm:text-xs md:text-sm font-black uppercase tracking-widest text-blue-300 mb-2"
               >
-                Future-ready campus infrastructure
+                {heroData.eyebrow || 'Future-ready campus infrastructure'}
               </div>
               
               <h1
@@ -75,9 +78,12 @@ const HeroBanner = () => {
                 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black leading-tight mb-2"
                 style={{ letterSpacing: '-1.5px' }}
               >
-                Design. Build.<br />
-                Digitize. Operate.<br />
-                <span style={{ color: '#8fc7ff' }}>Future-Ready Campuses.</span>
+                {String(heroData.title || '').split('\n').map((line: string, index: number, lines: string[]) => (
+                  <span key={`${line}-${index}`}>
+                    {index === lines.length - 1 ? <span style={{ color: '#8fc7ff' }}>{line}</span> : line}
+                    {index < lines.length - 1 && <br />}
+                  </span>
+                ))}
               </h1>
               
               <p className="text-sm sm:text-base text-blue-100 mb-3 max-w-3xl leading-snug">
@@ -87,10 +93,10 @@ const HeroBanner = () => {
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-3">
                 <a 
-                  href="/contact-us" 
+                  href={heroData.ctaHref || '/contact-us'} 
                   className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 border border-white/50 text-white font-black rounded-md hover:bg-white/10 transition-all duration-300 text-xs sm:text-sm"
                 >
-                  Schedule Campus Audit →
+                  {heroData.ctaLabel || 'Schedule Campus Audit →'}
                 </a>
               </div>
             </div>

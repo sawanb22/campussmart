@@ -1,6 +1,9 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
 import { Plus, Pencil, Trash2, Search, X } from 'lucide-react';
 import api from '../api/client';
+import MediaImageField from '../components/MediaImageField';
+import MediaImageListField from '../components/MediaImageListField';
+import { resolveMediaUrl } from '../../lib/media-url';
 
 interface Category { id: number; name: string; slug: string; }
 interface Product { id: number; name: string; price: number; stock: number; active: boolean; featured: boolean; rating: number; reviewCount: number; imageUrl?: string; description?: string; categoryId: number; category?: Category; sku?: string; images?: string; specifications?: string; }
@@ -259,7 +262,7 @@ export default function Products() {
                                 <tr key={p.id} className="hover:bg-blue-50/30 transition-colors group">
                                     <td className="px-6 py-4">
                                         <div className="w-12 h-12 rounded-xl overflow-hidden border border-gray-100 shadow-sm">
-                                            <img src={p.imageUrl || 'https://via.placeholder.com/40'} alt={p.name} className="w-full h-full object-cover" />
+                                            <img src={resolveMediaUrl(p.imageUrl) || 'https://via.placeholder.com/40'} alt={p.name} className="w-full h-full object-cover" />
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
@@ -414,15 +417,9 @@ export default function Products() {
                                     {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                                 </select>
                             </div>
-                            <div className="space-y-1.5">
-                                <label className="text-sm font-bold text-slate-700 uppercase tracking-widest text-[10px]">Cover Image URL</label>
-                                <input className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" value={editing.imageUrl || ''} onChange={(e) => setEditing({ ...editing, imageUrl: e.target.value })} />
-                            </div>
+                            <MediaImageField label="Cover Image" value={editing.imageUrl || ''} onChange={value => setEditing({ ...editing, imageUrl: value })} previewClassName="h-32 rounded-xl" />
 
-                            <div className="col-span-2 space-y-1.5">
-                                <label className="text-sm font-bold text-slate-700 uppercase tracking-widest text-[10px]">Gallery Images (Comma-separated list of URLs)</label>
-                                <textarea className="w-full border border-gray-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 h-20 font-mono" value={editing.images || ''} onChange={(e) => setEditing({ ...editing, images: e.target.value })} placeholder='https://site.com/1.jpg, https://site.com/2.jpg' />
-                            </div>
+                            <MediaImageListField label="Gallery Images" value={editing.images || ''} onChange={value => setEditing({ ...editing, images: value })} />
 
                             <div className="col-span-2 space-y-1.5">
                                 <label className="text-sm font-bold text-slate-700 uppercase tracking-widest text-[10px]">Technical Specifications (Line-separated Key: Value pairs)</label>
