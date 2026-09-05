@@ -2,6 +2,7 @@ node_modules
 .env
 .env.local
 .env.production
+.env.example
 backend/.env
 backend/dist/
 backend/prisma/dev.db
@@ -13,3 +14,4 @@ dist/
 *.db-journal
 uploads/
 scripts/
+backend/campusmart-backend.zip

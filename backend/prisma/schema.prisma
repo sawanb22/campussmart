@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "debian-openssl-1.1.x", "linux-musl", "linux-musl-openssl-3.0.x", "rhel-openssl-3.0.x", "rhel-openssl-1.1.x"]
 }
 
 datasource db {
@@ -37,7 +38,7 @@ model BlogPost {
   title        String
   slug         String        @unique(map: "BlogPost_slug_key")
   excerpt      String
-  body         String        @db.Text
+  body         String
   categoryId   Int?
   imageUrl     String?
   published    Boolean       @default(false)
@@ -63,12 +64,28 @@ model Catalogue {
   @@map("catalogue")
 }
 
+model CaseStudy {
+  id          Int      @id @default(autoincrement())
+  title       String
+  slug        String   @unique(map: "CaseStudy_slug_key")
+  description String?
+  body        String?
+  imageUrl    String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("casestudy")
+}
+
 model Category {
   id      Int       @id @default(autoincrement())
   name    String
   slug    String    @unique(map: "Category_slug_key")
+  page    String    @default("furniture")
   product Product[]
 
+  @@index([page], map: "Category_page_idx")
   @@map("category")
 }
 
@@ -161,9 +178,9 @@ model Page {
   id        Int      @id @default(autoincrement())
   title     String
   slug      String   @unique(map: "Page_slug_key")
-  content   String?  @db.Text
+  content   String?
   template  String?
-  pageData  String?  @db.Text
+  pageData  String?
   published Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -241,13 +258,18 @@ model User {
 }
 
 model WishlistItem {
-  id        Int     @id @default(autoincrement())
-  userId    Int
-  productId Int
-  product   Product @relation(fields: [productId], references: [id], map: "WishlistItem_product_fkey")
-  user      User    @relation(fields: [userId], references: [id], map: "WishlistItem_user_fkey")
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  productId   Int?
+  designImage String?
+  designKey   String?
+  designTitle String?
+  pageSlug    String?
+  product     Product? @relation(fields: [productId], references: [id], map: "WishlistItem_product_fkey")
+  user        User     @relation(fields: [userId], references: [id], map: "WishlistItem_user_fkey")
 
   @@unique([userId, productId], map: "WishlistItem_userId_productId_key")
+  @@unique([userId, designKey], map: "WishlistItem_userId_designKey_key")
   @@index([productId], map: "WishlistItem_productId_idx")
   @@map("wishlistitem")
 }
