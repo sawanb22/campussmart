@@ -2,7 +2,7 @@ import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import {
     LayoutDashboard, Package, BookOpen, ShoppingBag, Users, MessageSquare,
     Tag, BookMarked, Settings, LogOut, GraduationCap, Globe, Star,
-    FileText, ChevronRight, Bell, Layers
+    FileText, ChevronRight, Bell, Layers, Heart
 } from 'lucide-react';
 
 // ── Grouped Navigation ─────────────────────────────────────────────────────────
@@ -36,6 +36,7 @@ const navGroups = [
         items: [
             { to: '/admin/orders', icon: ShoppingBag, label: 'Orders', desc: 'Track & manage orders' },
             { to: '/admin/enquiries', icon: MessageSquare, label: 'Enquiries', desc: 'Quote requests & leads' },
+            { to: '/admin/wishlist-report', icon: Heart, label: 'Wishlist Reports', desc: 'Leads for quotations' },
         ]
     },
     {

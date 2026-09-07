@@ -21,7 +21,7 @@ const generateTokens = (user: { id: number; email: string; role: string }) => {
 
 // ─── POST /api/auth/send-otp ──────────────────────────────────────────────────
 // Generates a 6-digit OTP and sends it to the given email address.
-// purpose: "verify" (for registration) | "login" (for sign in)
+// purpose: "verify" (for registration) | "login" (for sign in) | "reset" (forgot password)
 router.post('/send-otp', async (req: Request, res: Response) => {
     try {
         const { email, purpose = 'verify' } = req.body;
@@ -29,6 +29,11 @@ router.post('/send-otp', async (req: Request, res: Response) => {
         if (!isValidEmail(email)) { res.status(400).json({ error: 'Please enter a valid email address' }); return; }
 
         const normalizedEmail = normalizeEmail(email);
+
+        if (purpose === 'reset') {
+            const user = await prisma.user.findFirst({ where: { email: { equals: normalizedEmail, mode: 'insensitive' } } });
+            if (!user) { res.status(404).json({ error: 'No account found with that email address' }); return; }
+        }
 
         // Invalidate old unused OTPs for this email+purpose
         await prisma.otpCode.updateMany({
@@ -40,7 +45,7 @@ router.post('/send-otp', async (req: Request, res: Response) => {
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
         await prisma.otpCode.create({ data: { email: normalizedEmail, code, purpose, expiresAt } });
-        await sendOtpEmail(normalizedEmail, code, purpose as 'verify' | 'login');
+        await sendOtpEmail(normalizedEmail, code, purpose as 'verify' | 'login' | 'reset');
 
         res.json({ message: 'OTP sent successfully' });
     } catch (err) {
@@ -153,6 +158,41 @@ router.post('/login', async (req: Request, res: Response) => {
     } catch (err) {
         console.error('Login error:', err);
         res.status(500).json({ error: 'Login failed' });
+    }
+});
+
+// ─── POST /api/auth/reset-password ────────────────────────────────────────────
+// Verifies the "reset" OTP and sets a new password in one step, so a stray
+// already-verified state is never persisted anywhere for someone else to reuse.
+router.post('/reset-password', async (req: Request, res: Response) => {
+    try {
+        const { email, code, newPassword } = req.body;
+        if (!email || !code || !newPassword) { res.status(400).json({ error: 'Email, code and new password are required' }); return; }
+        if (!isValidEmail(email)) { res.status(400).json({ error: 'Please enter a valid email address' }); return; }
+        if (newPassword.length < 6) { res.status(400).json({ error: 'Password must be at least 6 characters' }); return; }
+
+        const normalizedEmail = normalizeEmail(email);
+
+        const record = await prisma.otpCode.findFirst({
+            where: { email: normalizedEmail, code, purpose: 'reset', used: false },
+            orderBy: { createdAt: 'desc' },
+        });
+        if (!record) { res.status(400).json({ error: 'Invalid OTP code' }); return; }
+        if (record.expiresAt < new Date()) { res.status(400).json({ error: 'OTP has expired. Please request a new one.' }); return; }
+
+        const user = await prisma.user.findFirst({ where: { email: { equals: normalizedEmail, mode: 'insensitive' } } });
+        if (!user) { res.status(404).json({ error: 'No account found with that email address' }); return; }
+
+        const passwordHash = await bcrypt.hash(newPassword, 10);
+        await prisma.$transaction([
+            prisma.otpCode.update({ where: { id: record.id }, data: { used: true } }),
+            prisma.user.update({ where: { id: user.id }, data: { passwordHash } }),
+        ]);
+
+        res.json({ message: 'Password reset successfully' });
+    } catch (err) {
+        console.error('reset-password error:', err);
+        res.status(500).json({ error: 'Failed to reset password. Please try again.' });
     }
 });
 

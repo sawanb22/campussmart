@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import gsap from 'gsap';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle, MonitorPlay, Send, Sparkles } from 'lucide-react';
+import { ArrowRight, CheckCircle, Send, Sparkles } from 'lucide-react';
 import api from '@/api/client';
 import { usePageData } from '@/hooks/usePageData';
 import { resolveMediaUrl } from '@/lib/media-url';
@@ -30,11 +29,9 @@ const DEFAULTS = {
 };
 
 const SmartClassrooms = () => {
-  const heroRef = useRef<HTMLDivElement>(null);
   const { data } = usePageData('smart-classrooms');
 
   const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
-  const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
   const heroImage = resolveMediaUrl(data.heroImage) || DEFAULTS.heroImage;
   const features: string[] = data.features?.length ? data.features : DEFAULTS.features;
   const cards: CardItem[] = data.cards?.length ? data.cards : DEFAULTS.cards;
@@ -45,13 +42,6 @@ const SmartClassrooms = () => {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.fromTo(heroRef.current, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' });
-    });
-    return () => ctx.revert();
-  }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -69,41 +59,8 @@ const SmartClassrooms = () => {
 
   return (
     <main className="min-h-screen bg-white">
-      {/* Hero */}
-      <section className="px-4 pb-10 pt-10 sm:px-6 sm:pb-14 sm:pt-14 lg:px-8">
-        <div ref={heroRef} className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
-          <div>
-            <span className="mb-3 inline-block text-[11px] font-bold uppercase tracking-[0.18em] text-cm-blue">
-              Tech Infrastructure
-            </span>
-            <h1 className="max-w-xl text-4xl font-extrabold leading-[1.05] tracking-tight text-cm-blue-dark sm:text-5xl">
-              {heroTitle}
-            </h1>
-            <p className="mt-5 max-w-lg text-sm leading-relaxed text-gray-500 sm:text-base">{heroSubtitle}</p>
-            <div className="mt-8 flex flex-wrap items-center gap-4">
-              <a href="#request-form" className="btn-primary inline-flex items-center gap-2">
-                Request a Demo <ArrowRight className="h-4 w-4" />
-              </a>
-              <a href="#capabilities" className="inline-flex items-center gap-2 text-sm font-bold text-cm-blue-dark hover:text-cm-blue">
-                Explore Capabilities <ArrowRight className="h-3.5 w-3.5" />
-              </a>
-            </div>
-          </div>
-          <div className="relative mx-auto h-64 w-full max-w-md sm:h-72 lg:h-80">
-            <div className="absolute -right-6 -top-6 h-44 w-56 rounded-[48%_52%_44%_56%] bg-gradient-to-br from-cm-blue/15 to-cm-yellow/25" />
-            <div className="absolute inset-0 overflow-hidden rounded-2xl shadow-xl">
-              <img src={heroImage} alt={heroTitle} className="h-full w-full object-cover" />
-            </div>
-            <div className="absolute -bottom-5 left-4 flex items-center gap-2 rounded-xl border border-gray-100 bg-white px-4 py-3 shadow-lg">
-              <MonitorPlay className="h-4 w-4 text-cm-blue" />
-              <span className="text-xs font-bold text-cm-blue-dark">IoT-connected & analytics-ready</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Capability pills */}
-      <section className="px-4 sm:px-6 lg:px-8">
+      <section className="px-4 pt-6 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <div className="flex items-center gap-2 overflow-x-auto rounded-full bg-cm-blue-dark p-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {features.map((feature) => (
@@ -119,9 +76,9 @@ const SmartClassrooms = () => {
       </section>
 
       {/* Capability cards */}
-      <section id="capabilities" className="px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+      <section id="capabilities" className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          <h2 className="mb-8 text-2xl font-bold tracking-tight text-cm-blue-dark sm:text-3xl">What's included</h2>
+          <h2 className="mb-5 text-2xl font-bold tracking-tight text-cm-blue-dark sm:text-3xl">What's included</h2>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {cards.map((card) => (
               <div
@@ -143,7 +100,7 @@ const SmartClassrooms = () => {
       <section className="px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl overflow-hidden rounded-[28px] bg-cm-blue-dark">
           <div className="relative grid grid-cols-1 lg:grid-cols-2">
-            <div className="relative px-8 py-12 sm:px-12 sm:py-16">
+            <div className="relative px-8 py-8 sm:px-12 sm:py-10">
               <div className="pointer-events-none absolute -bottom-10 -right-10 h-40 w-40 rounded-full border border-white/10" />
               <span className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-cm-yellow">
                 <Sparkles className="h-3 w-3" /> Built for every classroom
@@ -169,7 +126,7 @@ const SmartClassrooms = () => {
       </section>
 
       {/* CTA banner */}
-      <section className="px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+      <section className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-cm-gray p-6 text-center sm:flex-row sm:p-8 sm:text-left">
           <div>
             <p className="text-lg font-bold text-cm-blue-dark">{ctaTitle}</p>
@@ -182,7 +139,7 @@ const SmartClassrooms = () => {
       </section>
 
       {/* Request info form */}
-      <section id="request-form" className="px-4 pb-16 sm:px-6 lg:px-8">
+      <section id="request-form" className="px-4 pb-8 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl rounded-2xl bg-white p-6 shadow-sm sm:p-10">
           <h2 className="mb-2 text-2xl font-bold text-cm-blue-dark">Request More Information</h2>
           <p className="mb-6 text-gray-600">Tell us what your institution needs and our team will contact you.</p>

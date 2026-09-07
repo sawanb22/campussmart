@@ -1,12 +1,13 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Microscope, FlaskConical, Atom, Monitor, CheckCircle, Star, Heart, Check, Trash2 } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Microscope, FlaskConical, Atom, Monitor, CheckCircle, Star, Heart, Check, Trash2 } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { usePageCategories } from '@/hooks/usePageCategories';
 import { useDesignWishlist } from '@/hooks/useDesignWishlist';
 import LoginPromptModal from '@/components/login-prompt-modal';
 import { resolveMediaUrl } from '@/lib/media-url';
+import Shop from '@/pages/shop';
 
 interface Card { title: string; description: string; image?: string; name?: string; categories?: string[]; }
 
@@ -36,6 +37,7 @@ const Labs = () => {
   const { data } = usePageData('labs');
   const { categories: shopCategories } = usePageCategories('labs');
   const { isSaved, isPending, add, remove, showLoginPrompt, setShowLoginPrompt } = useDesignWishlist('labs');
+  const [activeProductCategory, setActiveProductCategory] = useState<string | null>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -110,13 +112,22 @@ const Labs = () => {
             <aside className="hidden lg:block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-cm-blue-dark mb-5">Categories</h3>
               <div className="space-y-3">
-                <Link to="/labs/products" className="block w-full text-left rounded-2xl px-4 py-3 transition-all duration-200 bg-slate-50 text-slate-700 hover:bg-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setActiveProductCategory('all')}
+                  className={`block w-full text-left rounded-2xl px-4 py-3 transition-all duration-200 ${activeProductCategory === 'all' ? 'bg-cm-blue text-white shadow-lg' : 'bg-slate-50 text-slate-700 hover:bg-slate-100'}`}
+                >
                   All Products
-                </Link>
+                </button>
                 {shopCategories.map((category) => (
-                  <Link key={category.id} to={`/labs/products?category=${category.slug}`} className="block w-full text-left rounded-2xl px-4 py-3 transition-all duration-200 bg-slate-50 text-slate-700 hover:bg-slate-100">
+                  <button
+                    key={category.id}
+                    type="button"
+                    onClick={() => setActiveProductCategory(category.slug)}
+                    className={`block w-full text-left rounded-2xl px-4 py-3 transition-all duration-200 ${activeProductCategory === category.slug ? 'bg-cm-blue text-white shadow-lg' : 'bg-slate-50 text-slate-700 hover:bg-slate-100'}`}
+                  >
                     {category.name}
-                  </Link>
+                  </button>
                 ))}
                 {shopCategories.length === 0 && (
                   <p className="text-xs text-slate-400 px-1">No categories yet. Add one in Admin &rarr; Categories.</p>
@@ -130,6 +141,25 @@ const Labs = () => {
               </div>
             </aside>
 
+            <div className="min-w-0">
+            {activeProductCategory && (
+              <button
+                type="button"
+                onClick={() => setActiveProductCategory(null)}
+                className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-cm-blue hover:text-cm-blue-dark"
+              >
+                <ArrowLeft className="h-4 w-4" /> Back to {section1Title}
+              </button>
+            )}
+            {activeProductCategory ? (
+              <Shop
+                key={activeProductCategory}
+                categorySlug={activeProductCategory === 'all' ? undefined : activeProductCategory}
+                categoryPage="labs"
+                hideCategorySidebar
+                embedded
+              />
+            ) : (
             <div ref={cardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {cards.map((lab, i) => {
                 const Icon = ICONS[i % ICONS.length];
@@ -172,6 +202,8 @@ const Labs = () => {
                   </div>
                 );
               })}
+            </div>
+            )}
             </div>
           </div>
         </div>

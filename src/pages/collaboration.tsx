@@ -10,14 +10,11 @@ import { COLLAB_PAGE_SLUG, COLLAB_DEFAULTS, slugifyCollabTitle } from './collabo
 gsap.registerPlugin(ScrollTrigger);
 
 const Collaboration = () => {
-  const heroRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
   const { data } = usePageData(COLLAB_PAGE_SLUG);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo(heroRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' });
-
       const cards = cardsRef.current?.children;
       if (cards) {
         gsap.fromTo(
@@ -30,22 +27,12 @@ const Collaboration = () => {
     return () => ctx.revert();
   }, []);
 
-  const heroTitle = data.heroTitle ?? COLLAB_DEFAULTS.heroTitle;
-  const heroSubtitle = data.heroSubtitle ?? COLLAB_DEFAULTS.heroSubtitle;
   const cards = data.cards?.length ? data.cards : COLLAB_DEFAULTS.cards;
 
   return (
     <main className="min-h-screen bg-white">
-      {/* Hero */}
-      <section ref={heroRef} className="px-4 pb-10 pt-14 text-center sm:px-6 sm:pb-12 sm:pt-16">
-        <h1 className="mx-auto max-w-2xl text-4xl font-bold leading-[1.05] tracking-tight text-cm-blue-dark sm:text-5xl lg:text-6xl">
-          {heroTitle}
-        </h1>
-        <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-gray-500 sm:text-base">{heroSubtitle}</p>
-      </section>
-
       {/* Grid */}
-      <section className="px-4 pb-16 sm:px-6 lg:px-8">
+      <section className="px-4 pt-8 pb-16 sm:px-6 lg:px-8">
         <div ref={cardsRef} className="mx-auto grid max-w-6xl grid-cols-1 gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
           {cards.map((card: any) => {
             const image = resolveMediaUrl(card.image);

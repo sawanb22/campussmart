@@ -8,17 +8,23 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-export async function sendOtpEmail(to: string, otp: string, purpose: 'verify' | 'login') {
+export async function sendOtpEmail(to: string, otp: string, purpose: 'verify' | 'login' | 'reset') {
     const subject = purpose === 'verify'
         ? 'Verify your CampusMart account'
+        : purpose === 'reset'
+        ? 'Reset your CampusMart password'
         : 'Your CampusMart login OTP';
 
     const heading = purpose === 'verify'
         ? '✅ Verify your email address'
+        : purpose === 'reset'
+        ? '🔑 Reset your password'
         : '🔐 Your one-time login code';
 
     const message = purpose === 'verify'
         ? 'Please use the OTP below to verify your email and complete registration:'
+        : purpose === 'reset'
+        ? 'Use this OTP to verify it\'s you and set a new password:'
         : 'Use this OTP to complete your sign in:';
 
     const html = `

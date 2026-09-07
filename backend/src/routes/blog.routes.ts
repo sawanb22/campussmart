@@ -106,6 +106,19 @@ router.post('/categories', verifyToken, requireAdmin, async (req: AuthRequest, r
     }
 });
 
+// PUT /api/blog/categories/:id (admin)
+router.put('/categories/:id', verifyToken, requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+        const { name } = req.body;
+        if (!name || !String(name).trim()) { res.status(400).json({ error: 'Category name is required' }); return; }
+        const slug = String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const category = await prisma.blogCategory.update({ where: { id: Number(req.params.id) }, data: { name, slug } });
+        res.json(category);
+    } catch {
+        res.status(500).json({ error: 'Failed to update category' });
+    }
+});
+
 // DELETE /api/blog/categories/:id (admin)
 router.delete('/categories/:id', verifyToken, requireAdmin, async (req: AuthRequest, res: Response) => {
     try {

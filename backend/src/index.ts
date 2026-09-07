@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import fs from 'fs';
+import path from 'path';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -22,6 +23,7 @@ import contentRoutes from './routes/content.routes';
 import pagesRoutes from './routes/pages.routes';
 import mediaRoutes from './routes/media.routes';
 import { errorHandler } from './middleware/error.middleware';
+import { verifyTokenFromQueryOrHeader } from './middleware/auth.middleware';
 import { UPLOADS_DIR } from './lib/uploads-dir';
 
 const app = express();
@@ -76,7 +78,9 @@ app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Static files (uploaded images/PDFs)
+// Static files (uploaded images/PDFs). Catalogue PDFs are restricted to logged-in
+// users, so that mount is gated and registered before the general public one.
+app.use('/uploads/catalogues', verifyTokenFromQueryOrHeader, express.static(path.join(UPLOADS_DIR, 'catalogues')));
 app.use('/uploads', express.static(UPLOADS_DIR));
 
 // Health check

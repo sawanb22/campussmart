@@ -3,7 +3,6 @@ import gsap from 'gsap';
 import { Link } from 'react-router-dom';
 import { CheckCircle, Send, Star, Heart, Check, Trash2 } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
-import { usePageCategories } from '@/hooks/usePageCategories';
 import { useDesignWishlist } from '@/hooks/useDesignWishlist';
 import LoginPromptModal from '@/components/login-prompt-modal';
 import { resolveMediaUrl } from '@/lib/media-url';
@@ -41,7 +40,6 @@ const SportsInfra = ({ slug = 'sports-infra' }: { slug?: string }) => {
   const cardsRef = useRef<HTMLDivElement>(null);
   const quoteRef = useRef<HTMLDivElement>(null);
   const { data } = usePageData(slug);
-  const { categories: shopCategories } = usePageCategories('sports');
   const { isSaved, isPending, add, remove, showLoginPrompt, setShowLoginPrompt } = useDesignWishlist('sports-infra');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [submitted, setSubmitted] = useState(false);
@@ -172,7 +170,7 @@ const SportsInfra = ({ slug = 'sports-infra' }: { slug?: string }) => {
             <div className="hidden md:block h-1 w-32 bg-cm-yellow rounded-full" />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)] gap-8">
+          <div className="grid grid-cols-1 items-start lg:grid-cols-[240px_minmax(0,1fr)] gap-8">
             <aside className="hidden lg:block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-cm-blue-dark mb-5">Categories</h3>
               <div className="space-y-3">
@@ -187,22 +185,6 @@ const SportsInfra = ({ slug = 'sports-infra' }: { slug?: string }) => {
                   </button>
                 ))}
               </div>
-
-              {shopCategories.length > 0 && (
-                <>
-                  <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-cm-blue-dark mt-8 mb-5">Shop Products</h3>
-                  <div className="space-y-3">
-                    <Link to="/sports-infra/products" className="block w-full text-left rounded-2xl px-4 py-3 transition-all duration-200 bg-slate-50 text-slate-700 hover:bg-slate-100">
-                      All Products
-                    </Link>
-                    {shopCategories.map((category) => (
-                      <Link key={category.id} to={`/sports-infra/products?category=${category.slug}`} className="block w-full text-left rounded-2xl px-4 py-3 transition-all duration-200 bg-slate-50 text-slate-700 hover:bg-slate-100">
-                        {category.name}
-                      </Link>
-                    ))}
-                  </div>
-                </>
-              )}
 
               <div className="mt-8 rounded-3xl bg-cm-blue-dark/5 p-4">
                 <p className="text-sm font-semibold text-cm-blue-dark mb-3">Showing</p>

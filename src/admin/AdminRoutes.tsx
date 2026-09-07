@@ -17,6 +17,7 @@ const HomepageEditor = lazy(() => import('./pages/HomepageEditor'));
 const PagesManager = lazy(() => import('./pages/PagesManager'));
 const PageEditor = lazy(() => import('./pages/PageEditor'));
 const Categories = lazy(() => import('./pages/Categories'));
+const WishlistReports = lazy(() => import('./pages/WishlistReports'));
 
 const getAdminToken = () => sessionStorage.getItem('cm_admin_token') || sessionStorage.getItem('cm_token');
 
@@ -64,6 +65,7 @@ function AdminRoutes() {
         <Route path="orders" element={<Suspense fallback={<Loader />}><Orders /></Suspense>} />
         <Route path="users" element={<Suspense fallback={<Loader />}><Users /></Suspense>} />
         <Route path="enquiries" element={<Suspense fallback={<Loader />}><Enquiries /></Suspense>} />
+        <Route path="wishlist-report" element={<Suspense fallback={<Loader />}><WishlistReports /></Suspense>} />
         <Route path="classifieds" element={<Suspense fallback={<Loader />}><Classifieds /></Suspense>} />
         <Route path="catalogues" element={<Suspense fallback={<Loader />}><Catalogues /></Suspense>} />
         <Route path="case-studies" element={<Suspense fallback={<Loader />}><CaseStudies /></Suspense>} />

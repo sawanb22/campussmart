@@ -14,9 +14,11 @@ interface PageData {
     filterLabel?: string;
     section1Title?: string;
     section2Title?: string;
+    section2Description?: string;
     ctaTitle?: string;
     ctaSubtitle?: string;
     cards?: CardItem[];
+    section2Cards?: CardItem[];
     features?: string[];
     sections?: SectionItem[];
     lastUpdated?: string;
@@ -185,6 +187,12 @@ function InlinePageEditor({ page, onClose, onSaved }: {
     };
     const addCard = () => set('cards', [...(data.cards ?? []), { title: 'New Card', description: '' }]);
     const removeCard = (i: number) => set('cards', (data.cards ?? []).filter((_: any, idx: number) => idx !== i));
+
+    const setSection2Card = (i: number, field: string, val: any) => {
+        const cards = [...(data.section2Cards ?? [])]; cards[i] = { ...cards[i], [field]: val }; set('section2Cards', cards);
+    };
+    const addSection2Card = () => set('section2Cards', [...(data.section2Cards ?? []), { title: 'New Card', description: '' }]);
+    const removeSection2Card = (i: number) => set('section2Cards', (data.section2Cards ?? []).filter((_: any, idx: number) => idx !== i));
 
     const setSection = (i: number, field: string, value: any) => {
         const sections = [...(data.sections ?? [])]; sections[i] = { ...sections[i], [field]: value }; set('sections', sections);
@@ -410,7 +418,12 @@ function InlinePageEditor({ page, onClose, onSaved }: {
                         )}
 
                         {/* Optional Cards block */}
-                        {('cards' in effectiveDefaults || page.slug === 'colleges-universities-for-sale') && (
+                        {('cards' in effectiveDefaults || page.slug === 'colleges-universities-for-sale') && (() => {
+                            const cardsUseCategories = (effectiveDefaults.cards ?? []).some((c: any) => Array.isArray(c?.categories));
+                            const cardsUseHref = (effectiveDefaults.cards ?? []).some((c: any) => 'href' in (c || {}));
+                            const cardsUseDownloadLink = (effectiveDefaults.cards ?? []).some((c: any) => 'downloadLink' in (c || {}));
+                            const cardsUseSize = (effectiveDefaults.cards ?? []).some((c: any) => 'size' in (c || {}));
+                            return (
                             <section className="space-y-6">
                                 <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                                     <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Interactive Cards <span className="text-blue-500 ml-2">({(data.cards ?? []).length})</span></h4>
@@ -458,7 +471,7 @@ function InlinePageEditor({ page, onClose, onSaved }: {
                                                     <Field label="EBITDA Margin" value={card.margin ?? ''} onChange={v => setCard(i, 'margin', v)} placeholder="40 %" />
                                                     <Field label="Asking Price" value={card.askingPrice ?? ''} onChange={v => setCard(i, 'askingPrice', v)} placeholder="INR 20 Cr" />
                                                 </>}
-                                                {(Array.isArray(card.categories) || Array.isArray(effectiveDefaults.cards?.[i]?.categories)) && (
+                                                {(Array.isArray(card.categories) || cardsUseCategories) && (
                                                     <Field
                                                         label="Categories (comma-separated)"
                                                         value={(card.categories ?? []).join(', ')}
@@ -466,15 +479,46 @@ function InlinePageEditor({ page, onClose, onSaved }: {
                                                         placeholder="Indoor, Adults"
                                                     />
                                                 )}
-                                                {('href' in (effectiveDefaults.cards?.[i] || {})) && (
+                                                {('href' in card || cardsUseHref) && (
                                                     <Field label="Card Link" value={card.href ?? ''} onChange={v => setCard(i, 'href', v)} />
                                                 )}
-                                                {('downloadLink' in (effectiveDefaults.cards?.[i] || {})) && (
+                                                {('downloadLink' in card || cardsUseDownloadLink) && (
                                                     <Field label="Download URL" value={card.downloadLink ?? ''} onChange={v => setCard(i, 'downloadLink', v)} />
                                                 )}
-                                                {('size' in (effectiveDefaults.cards?.[i] || {})) && (
+                                                {('size' in card || cardsUseSize) && (
                                                     <Field label="File Size (e.g. 10 MB)" value={card.size ?? ''} onChange={v => setCard(i, 'size', v)} />
                                                 )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                            );
+                        })()}
+
+                        {/* Optional second cards block (e.g. "Why Go Digital" style benefit cards) */}
+                        {('section2Cards' in effectiveDefaults) && (
+                            <section className="space-y-6">
+                                <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                                    <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Additional Cards <span className="text-blue-500 ml-2">({(data.section2Cards ?? []).length})</span></h4>
+                                    <button onClick={addSection2Card} className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-blue-700 transition-all shadow-md">
+                                        <Plus className="w-4 h-4" /> New Card
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-1 gap-6">
+                                    {(data.section2Cards ?? []).map((card: any, i: number) => (
+                                        <div key={i} className="border border-gray-200 rounded-2xl p-6 bg-gray-50/30 hover:bg-white hover:shadow-lg hover:border-blue-200 transition-all group relative">
+                                            <div className="flex items-center justify-between mb-6">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="w-8 h-8 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">{i + 1}</span>
+                                                    <span className="text-xs font-black text-slate-500 uppercase tracking-widest">{card.title || 'Untitled Card'}</span>
+                                                </div>
+                                                <button onClick={() => removeSection2Card(i)} className="flex items-center gap-1.5 text-red-400 hover:text-red-600 text-[10px] font-black uppercase tracking-wider"><Trash2 className="w-3.5 h-3.5" /> Delete</button>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <Field label="Card Title" value={card.title ?? ''} onChange={v => setSection2Card(i, 'title', v)} />
+                                                <Field label="Card Description" value={card.description ?? ''} onChange={v => setSection2Card(i, 'description', v)} multiline />
+                                                <MediaImageField label="Image (Optional)" value={card.image ?? ''} onChange={v => setSection2Card(i, 'image', v)} previewClassName="h-24" />
                                             </div>
                                         </div>
                                     ))}

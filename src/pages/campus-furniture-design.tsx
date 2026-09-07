@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Armchair } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { resolveMediaUrl } from '@/lib/media-url';
 import { FURNITURE_DESIGN_PAGE_SLUG, FURNITURE_DESIGN_DEFAULTS, slugifyFurnitureDesignTitle, type FurnitureDesignCard } from './campus-furniture-design.data';
@@ -10,14 +10,12 @@ import { FURNITURE_DESIGN_PAGE_SLUG, FURNITURE_DESIGN_DEFAULTS, slugifyFurniture
 gsap.registerPlugin(ScrollTrigger);
 
 const CampusFurnitureDesign = () => {
-  const heroRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const { data } = usePageData(FURNITURE_DESIGN_PAGE_SLUG);
   const [activeCategory, setActiveCategory] = useState('All');
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo(heroRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' });
       const items = gridRef.current?.children;
       if (items) {
         gsap.fromTo(
@@ -30,9 +28,6 @@ const CampusFurnitureDesign = () => {
     return () => ctx.revert();
   }, []);
 
-  const heroTitle = data.heroTitle ?? FURNITURE_DESIGN_DEFAULTS.heroTitle;
-  const heroSubtitle = data.heroSubtitle ?? FURNITURE_DESIGN_DEFAULTS.heroSubtitle;
-  const heroImage = resolveMediaUrl(data.heroImage) || FURNITURE_DESIGN_DEFAULTS.heroImage;
   const allCards: FurnitureDesignCard[] = data.cards?.length ? data.cards : FURNITURE_DESIGN_DEFAULTS.cards;
 
   const categoryOptions = useMemo(
@@ -49,40 +44,10 @@ const CampusFurnitureDesign = () => {
 
   return (
     <main className="min-h-screen bg-white">
-      {/* Hero */}
-      <section ref={heroRef} className="bg-amber-50/60 px-4 pb-6 pt-6 sm:px-6 sm:pb-8 sm:pt-8 lg:px-8">
-        <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14">
-          <div>
-            <span className="mb-3 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-orange-600">
-              <span className="h-[2px] w-6 bg-orange-500" /> Furniture at CampusMart
-            </span>
-            <h1 className="font-playfair max-w-xl text-4xl font-semibold leading-[1.05] tracking-tight text-stone-900 sm:text-5xl">{heroTitle}</h1>
-            <p className="mt-5 max-w-lg text-sm leading-relaxed text-stone-500 sm:text-base">{heroSubtitle}</p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Link to="/request-quote" className="btn-primary inline-flex items-center gap-2">
-                Get a Furniture Quote <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                to="/furniture"
-                className="inline-flex items-center gap-2 rounded-full border border-stone-300 px-5 py-2.5 text-sm font-bold text-stone-700 transition-colors hover:border-stone-400"
-              >
-                <Armchair className="h-4 w-4" /> Shop Furniture
-              </Link>
-            </div>
-          </div>
-          <div className="relative mx-auto hidden aspect-square w-full max-w-sm lg:block">
-            <div className="absolute right-0 top-4 h-64 w-64 rounded-full bg-orange-400/90" />
-            <div className="absolute left-2 top-10 h-56 w-72 overflow-hidden rounded-2xl shadow-xl">
-              <img src={heroImage} alt={heroTitle} className="h-full w-full object-cover" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <section className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           {/* Category filter chips */}
-          <div className="mb-5 flex flex-wrap items-center gap-2">
+          <div className="mb-4 flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => setActiveCategory('All')}

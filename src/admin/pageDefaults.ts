@@ -4,15 +4,17 @@
 export const pageDefaults: Record<string, any> = {
   'ai-digital-design-supply': {
   heroTitle: 'AI/Digital Design + Supply',
-  heroSubtitle: 'Cutting-edge AI and digital solutions for modern education. Transform learning with technology.',
-  section1Title: 'Digital Solutions',
-  heroImage: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-  features: [
-    'AI Learning Stations',
-    'Digital Content',
-    'VR/AR Solutions',
-    'Smart Classrooms'
-  ]
+  heroSubtitle: 'Cutting-edge AI and digital tools for modern campuses — from space planning and smart procurement to predictive maintenance and digital twins.',
+  heroImage: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?ixlib=rb-4.0.3&auto=format&fit=crop&w=1100&q=85',
+  section1Title: 'Explore Our Digital Solutions',
+  cards: [
+    { title: 'AI Space Planning', description: 'AI-optimized campus layout and space utilization analysis that turns raw floor plans into data-backed design decisions.', categories: ['Planning'], image: 'https://images.unsplash.com/photo-1531746790731-6c087fecd65a?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=85' },
+    { title: 'Smart Procurement', description: 'Intelligent vendor selection and cost optimization that shortlists the right suppliers for every campus build.', categories: ['Procurement'], image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=85' },
+    { title: 'Predictive Maintenance', description: 'AI-driven maintenance scheduling and alerts that catch equipment issues before they become downtime.', categories: ['Maintenance'], image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=85' },
+    { title: 'Digital Twin', description: 'Virtual campus simulation before construction begins, so layout and infrastructure decisions are tested before they are built.', categories: ['Simulation'], image: 'https://images.unsplash.com/photo-1555255707-c07966088b7b?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=85' }
+  ],
+  ctaTitle: 'Ready to bring AI into your campus operations?',
+  ctaSubtitle: 'Tell us about your buildings and processes — our team will map out the right AI and digital tools for your campus.'
 },
   'ai-guide': {
   heroTitle: 'AI Implementation Guide',
@@ -292,6 +294,22 @@ export const pageDefaults: Record<string, any> = {
     { title: 'Faculty Collaboration Lounges', description: 'A calmer space for staff to plan curriculum, mentor students and work between classes.', image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=700&q=80' }
   ]
 },
+  'collaboration-spaces': {
+  heroTitle: 'Collaboration Spaces',
+  heroSubtitle: 'Foster teamwork and creativity with purpose-built collaboration environments — modern spaces designed to bring students and faculty together.',
+  heroImage: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1100&q=85',
+  section1Title: 'Explore Collaboration Spaces',
+  cards: [
+    { title: 'Breakout Discussion Pods', description: 'Compact, semi-enclosed pods where small groups can talk, video-call or work through a problem without booking a whole room.', categories: ['Pods'], image: 'https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Open Collaboration Lounges', description: 'Soft seating and flexible furniture in open zones that invite spontaneous teamwork between classes.', categories: ['Lounges'], image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Team Project Rooms', description: 'Bookable rooms with writable walls, large screens and movable furniture built around group project work.', categories: ['Project Rooms'], image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Faculty Collaboration Hubs', description: 'Shared workspaces where faculty can co-plan lessons, grade together and exchange ideas outside the staff room.', categories: ['Faculty'], image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Maker & Ideation Studios', description: 'Flexible studio space with prototyping tools and movable walls for hands-on, cross-disciplinary sessions.', categories: ['Studios'], image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Outdoor Collaboration Decks', description: 'Covered outdoor seating and work decks that extend group work into the campus courtyard on good-weather days.', categories: ['Outdoor'], image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=900&q=85' }
+  ],
+  ctaTitle: 'Ready to design your collaboration spaces?',
+  ctaSubtitle: "Tell us about your campus and we'll help you plan spaces that bring students and faculty together."
+},
   'colleges-universities-for-sale': {
   heroTitle: 'Businesses for Sale and Investment',
   heroSubtitle: 'Showing businesses for sale and investment. Buy or invest in a business listed by direct business owners and business brokers.',
@@ -391,20 +409,32 @@ export const pageDefaults: Record<string, any> = {
     { heading: 'Implement', body: 'Deploy hardware and software, migrate data, and train staff and faculty.' },
     { heading: 'Support & Scale', body: 'Monitor adoption, resolve issues quickly and expand to more campuses or buildings.' }
   ],
+  section2Title: 'Why Go Digital',
+  section2Cards: [
+    { title: 'Faster Decision-Making', description: 'Live dashboards give leadership the numbers they need the moment they need them, instead of waiting on end-of-month reports.', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80' },
+    { title: 'Lower Operating Costs', description: 'Automating routine admin work cuts paperwork and the staff hours spent on repetitive tasks.', image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=600&q=80' },
+    { title: 'Better Student Experience', description: 'Connected classrooms and digital services make everyday campus life smoother for students and parents.', image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80' },
+    { title: 'Audit-Ready Compliance', description: 'Centralised digital records make audits, inspections and accreditation reviews far less stressful.', image: 'https://images.unsplash.com/photo-1554774853-b415df9eeb92?auto=format&fit=crop&w=600&q=80' }
+  ],
+  section2Description: 'Most institutions we work with see measurable results within the first two semesters — shorter admin turnaround times, fewer manual errors, and a campus that runs on data instead of guesswork. Our team stays engaged after go-live to make sure adoption sticks across every department.',
   ctaTitle: 'Have a digital transformation project in mind?',
   ctaSubtitle: 'Tell us what you want to build, automate or connect — our team will help you plan it.'
 },
   'furniture-design-supply': {
   heroTitle: 'Furniture Design + Supply',
-  heroSubtitle: 'Complete furniture solutions for educational institutions. From design to delivery, we provide ergonomic and durable furniture.',
-  section1Title: 'Our Furniture Services',
-  heroImage: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-  features: [
-    'Custom Design',
-    'Bulk Manufacturing',
-    'Quality Assurance',
-    'Installation'
-  ]
+  heroSubtitle: 'Complete furniture solutions for educational institutions — from design and bulk manufacturing to nationwide installation, we furnish every corner of your campus.',
+  heroImage: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1100&q=85',
+  section1Title: 'Explore Our Furniture Solutions',
+  cards: [
+    { title: 'Classroom Furniture Packages', description: 'Desks, chairs and storage sized to room capacity, built to survive a full academic year of daily use.', categories: ['Classroom'], image: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Library & Reading Spaces', description: 'Modular shelving, study pods and reading tables that hold up to high footfall and reconfigure as collections grow.', categories: ['Library'], image: 'https://images.unsplash.com/photo-1568667256549-094345857637?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Laboratory Workstations', description: 'Chemical-resistant benches, stools and storage engineered for science, computer and research labs.', categories: ['Laboratory'], image: 'https://images.unsplash.com/photo-1532094349884-543290e34c7d?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Hostel & Dormitory Furniture', description: 'Space-efficient beds, wardrobes and study units manufactured for durability under daily student use.', categories: ['Hostel'], image: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Staff & Administrative Furniture', description: 'Ergonomic desks, cabins and meeting-room furniture that keep faculty and admin spaces comfortable and productive.', categories: ['Staff & Office'], image: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=900&q=85' },
+    { title: 'Outdoor & Play Furniture', description: 'Weatherproof seating and play structures built to hold up to sun, rain and daily footfall in courtyards and grounds.', categories: ['Outdoor'], image: 'https://images.unsplash.com/photo-1566454544259-f4b94c3d758c?auto=format&fit=crop&w=900&q=85' }
+  ],
+  ctaTitle: 'Ready to furnish your next campus?',
+  ctaSubtitle: 'Share your floor plan and student count — our design team will recommend the right furniture mix and manufacturing timeline.'
 },
   'furniture': {
   heroTitle: 'Furniture Solutions',

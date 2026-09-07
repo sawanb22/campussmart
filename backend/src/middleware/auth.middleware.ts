@@ -45,6 +45,35 @@ export const requireAdmin = (req: AuthRequest, res: Response, next: NextFunction
     next();
 };
 
+// Same check as verifyToken, but also accepts the token as a `?token=` query
+// param. Needed for gating static file downloads (e.g. catalogue PDFs) that are
+// reached via a plain <a href> or window.open — those never carry a custom
+// Authorization header, only fetch()/XHR calls can, so this is the fallback
+// for any request that can't attach one.
+export const verifyTokenFromQueryOrHeader = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    const authHeader = req.headers.authorization;
+    const queryToken = typeof req.query.token === 'string' ? req.query.token : undefined;
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : queryToken;
+
+    if (!token) {
+        res.status(401).json({ error: 'No token provided' });
+        return;
+    }
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: number; email: string; role: string };
+        const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+        if (!user) {
+            res.status(401).json({ error: 'User not found' });
+            return;
+        }
+        req.user = { id: user.id, email: user.email, role: user.role || 'user' };
+        next();
+    } catch (error) {
+        console.error('Token verification error:', error);
+        res.status(401).json({ error: 'Invalid token' });
+    }
+};
+
 export const optionalAuth = async (req: AuthRequest, _res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) return next();

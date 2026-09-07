@@ -54,22 +54,14 @@ const Innovation = () => {
 
   return (
     <main className="min-h-screen bg-white">
-      <section ref={heroRef} className="px-4 pt-10 sm:px-6 sm:pt-12 lg:px-8">
+      <section ref={heroRef} className="px-4 pt-5 sm:px-6 sm:pt-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <h1 className="text-4xl font-bold tracking-tight text-emerald-800 sm:text-5xl">{heroTitle}</h1>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-gray-500 sm:text-base">{heroSubtitle}</p>
 
           {/* Category pill bar */}
-          <div className="mt-6 inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-full bg-emerald-800 p-1.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <button
-              type="button"
-              onClick={() => setActiveCategory('All')}
-              className={`shrink-0 rounded-full px-3.5 py-2 text-xs font-semibold transition-colors ${
-                activeCategory === 'All' ? 'bg-white/15 text-white' : 'text-white/60 hover:text-white/90'
-              }`}
-            >
-              All
-            </button>
+          {categoryOptions.length > 0 && (
+          <div className="mt-4 inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-full bg-emerald-800 p-1.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {categoryOptions.map((category) => (
               <button
                 key={category}
@@ -83,10 +75,11 @@ const Innovation = () => {
               </button>
             ))}
           </div>
+          )}
         </div>
       </section>
 
-      <section className="px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+      <section className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           {!featured ? (
             <div className="rounded-2xl border border-gray-100 bg-gray-50 py-20 text-center text-gray-500">No programme tracks match that filter.</div>
@@ -148,7 +141,7 @@ const Innovation = () => {
 
               {/* Simple flat cards */}
               {simpleGrid.length > 0 && (
-                  <div className="mt-10 border-t border-gray-100 pt-8">
+                  <div className="mt-6 border-t border-gray-100 pt-5">
                     <h2 className="mb-5 text-2xl font-bold tracking-tight text-emerald-800">More from the ecosystem</h2>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                       {simpleGrid.map((card) => (
@@ -166,7 +159,7 @@ const Innovation = () => {
       </section>
 
       {/* CTA */}
-      <section className="px-4 py-8 sm:px-6 lg:px-8">
+      <section className="px-4 pb-6 sm:px-6 lg:px-8">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-6 rounded-3xl bg-gradient-to-br from-cm-yellow via-amber-400 to-amber-500 p-8 text-center shadow-xl shadow-amber-500/10 sm:flex-row sm:p-10 sm:text-left">
           <div>
             <h3 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{ctaTitle}</h3>

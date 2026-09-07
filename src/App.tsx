@@ -45,6 +45,7 @@ const PageTemplates: Record<string, any> = {
   'classifieds': lazy(() => import('@/pages/classifieds')),
   'colleges-universities-for-sale': lazy(() => import('@/pages/colleges-universities-for-sale')),
   'collaboration': lazy(() => import('@/pages/collaboration')),
+  'collaboration-spaces': lazy(() => import('@/pages/collaboration-spaces')),
   'contact-us': lazy(() => import('@/pages/contact-us')),
   'about-us': lazy(() => import('@/pages/corporate')),
   'corporate': lazy(() => import('@/pages/corporate')),
@@ -162,8 +163,12 @@ const ScienceTechLabsDetail = lazy(() => import('@/pages/science-tech-labs-detai
 const CampusMasterPlanningDetail = lazy(() => import('@/pages/campus-master-planning-detail'));
 const ArVrExperiencesDetail = lazy(() => import('@/pages/ar-vr-experiences-detail'));
 const CampusFurnitureDesignDetail = lazy(() => import('@/pages/campus-furniture-design-detail'));
+const FurnitureDesignSupplyDetail = lazy(() => import('@/pages/furniture-design-supply-detail'));
+const AiDigitalDesignSupplyDetail = lazy(() => import('@/pages/ai-digital-design-supply-detail'));
+const CollaborationSpacesDetail = lazy(() => import('@/pages/collaboration-spaces-detail'));
 const SportsInfrastructureDetail = lazy(() => import('@/pages/sports-infrastructure-detail'));
 const AiStationsDetail = lazy(() => import('@/pages/ai-stations-detail'));
+const DigitalTransformationDetail = lazy(() => import('@/pages/digital-transformation-detail'));
 
 function App() {
   return (
@@ -192,8 +197,12 @@ function App() {
               <Route path="/campus-master-planning/:serviceSlug" element={<Layout><CampusMasterPlanningDetail /></Layout>} />
               <Route path="/ar-vr-experiences/:experienceSlug" element={<Layout><ArVrExperiencesDetail /></Layout>} />
               <Route path="/campus-furniture-design/:rangeSlug" element={<Layout><CampusFurnitureDesignDetail /></Layout>} />
+              <Route path="/furniture-design-supply/:solutionSlug" element={<Layout><FurnitureDesignSupplyDetail /></Layout>} />
+              <Route path="/ai-digital-design-supply/:solutionSlug" element={<Layout><AiDigitalDesignSupplyDetail /></Layout>} />
+              <Route path="/collaboration-spaces/:spaceSlug" element={<Layout><CollaborationSpacesDetail /></Layout>} />
               <Route path="/sports-infrastructure/:facilitySlug" element={<Layout><SportsInfrastructureDetail /></Layout>} />
               <Route path="/ai-stations/:stationSlug" element={<Layout><AiStationsDetail /></Layout>} />
+              <Route path="/digital-transformation/:cardSlug" element={<Layout><DigitalTransformationDetail /></Layout>} />
               <Route path="/campus-design/:serviceSlug" element={<Layout><CampusDesignService /></Layout>} />
               <Route path="/smart-classrooms" element={<Layout><SmartClassrooms /></Layout>} />
               <Route path="/ar-vr-learning" element={<Layout><HomeFeatureDetail /></Layout>} />

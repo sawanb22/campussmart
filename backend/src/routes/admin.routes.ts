@@ -129,4 +129,62 @@ router.put('/enquiries/quote/:id/read', verifyToken, requireAdmin, async (req: A
     }
 });
 
+// GET /api/admin/wishlist-report - every wishlist item with the owning user's
+// contact details, for the sales team to follow up on and prepare quotations.
+router.get('/wishlist-report', verifyToken, requireAdmin, async (_req: AuthRequest, res: Response) => {
+    try {
+        const items = await prisma.wishlistItem.findMany({
+            include: {
+                user: { select: { id: true, name: true, email: true, phone: true, institution: true } },
+                product: { include: { category: true } },
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+        res.json(items);
+    } catch (error) {
+        console.error('Failed to fetch wishlist report:', error);
+        res.status(500).json({ error: 'Failed to fetch wishlist report' });
+    }
+});
+
+const escapeCsvValue = (value: string) => `"${value.replace(/"/g, '""')}"`;
+
+// GET /api/admin/wishlist-report/export - same data as a downloadable CSV file.
+router.get('/wishlist-report/export', verifyToken, requireAdmin, async (_req: AuthRequest, res: Response) => {
+    try {
+        const items = await prisma.wishlistItem.findMany({
+            include: {
+                user: { select: { name: true, email: true, phone: true, institution: true } },
+                product: { include: { category: true } },
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+
+        const header = ['User Name', 'Email', 'Phone', 'Institution', 'Item', 'Category', 'Date Added'];
+        const rows = items.map((item) => {
+            const itemName = item.product?.name ?? item.designTitle ?? '';
+            const category = item.product?.category?.name ?? item.pageSlug ?? '';
+            return [
+                item.user.name,
+                item.user.email,
+                item.user.phone ?? '',
+                item.user.institution ?? '',
+                itemName,
+                category,
+                item.createdAt.toISOString(),
+            ]
+                .map((value) => escapeCsvValue(String(value)))
+                .join(',');
+        });
+        const csv = [header.map(escapeCsvValue).join(','), ...rows].join('\n');
+
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="wishlist-report-${Date.now()}.csv"`);
+        res.send(csv);
+    } catch (error) {
+        console.error('Failed to export wishlist report:', error);
+        res.status(500).json({ error: 'Failed to export wishlist report' });
+    }
+});
+
 export default router;

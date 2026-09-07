@@ -23,6 +23,17 @@ const EMPTY = {
 
 const fileUrl = resolveMediaUrl;
 
+// Catalogue PDFs require a logged-in user server-side; a plain <a href> can't
+// carry an Authorization header, so the admin's token travels as a query param
+// instead (the backend accepts either).
+const downloadableFileUrl = (value?: string) => {
+    const resolved = fileUrl(value);
+    if (!resolved) return resolved;
+    const token = sessionStorage.getItem('cm_admin_token') || sessionStorage.getItem('cm_token');
+    if (!token) return resolved;
+    return `${resolved}${resolved.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}`;
+};
+
 export default function Catalogues() {
     const [catalogues, setCatalogues] = useState<Catalogue[]>([]);
     const [showModal, setShowModal] = useState(false);
@@ -174,7 +185,7 @@ export default function Catalogues() {
 
                             <div className="flex items-center gap-2 mt-4">
                                 <a
-                                    href={fileUrl(c.fileUrl)}
+                                    href={downloadableFileUrl(c.fileUrl)}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="btn-secondary flex items-center gap-1 text-xs flex-1 justify-center"
@@ -303,7 +314,7 @@ export default function Catalogues() {
                                 />
 
                                 <p className="text-[11px] text-gray-400">
-                                    PDF files up to 50 MB. Upload a new file to replace the existing PDF.
+                                    PDF files up to 200 MB. Upload a new file to replace the existing PDF.
                                 </p>
                             </div>
 

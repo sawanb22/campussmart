@@ -1,15 +1,11 @@
-import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useEffect, useMemo, useState, type MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { Download, FileText, BookOpen, ArrowRight, Lock, Search, FolderOpen } from 'lucide-react';
+import { Download, FileText, BookOpen, ArrowRight, Lock, Search } from 'lucide-react';
 import api from '@/api/client';
 import { usePageData } from '@/hooks/usePageData';
 import LoginPromptModal from '@/components/login-prompt-modal';
 import { resolveMediaUrl } from '@/lib/media-url';
 import { getCardCover } from '@/lib/card-covers';
-
-gsap.registerPlugin(ScrollTrigger);
 
 const normalizeCatalogDownload = (value?: string) => {
   if (!value || value === '#') return '';
@@ -103,7 +99,6 @@ const DEFAULTS = {
 };
 
 const Catalogues = () => {
-  const heroRef = useRef<HTMLDivElement>(null);
   const { data } = usePageData('catalogues');
   const [catalogueRows, setCatalogueRows] = useState<any[]>([]);
   const [caseStudyRows, setCaseStudyRows] = useState<any[]>([]);
@@ -120,9 +115,13 @@ const Catalogues = () => {
     }
 
     const filename = `${(catalogue.title || 'catalogue').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'catalogue'}.pdf`;
+    const token = localStorage.getItem('cm_token');
 
     try {
-      const response = await fetch(catalogue.downloadLink);
+      // Catalogue PDFs require a logged-in user server-side, so the token has
+      // to travel as a header on this fetch — a plain <a>/window.open navigation
+      // never carries one.
+      const response = await fetch(catalogue.downloadLink, token ? { headers: { Authorization: `Bearer ${token}` } } : undefined);
       if (!response.ok) throw new Error('Download failed');
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
@@ -135,17 +134,13 @@ const Catalogues = () => {
       URL.revokeObjectURL(blobUrl);
     } catch {
       // Fall back to opening the file directly if it can't be fetched as a blob
-      // (e.g. a cross-origin host that doesn't allow fetch reads).
-      window.open(catalogue.downloadLink, '_blank', 'noopener,noreferrer');
+      // (e.g. a cross-origin host that doesn't allow fetch reads). A direct
+      // navigation can't carry the auth header, so pass the token as a query
+      // param instead — the backend accepts either.
+      const fallbackUrl = token ? `${catalogue.downloadLink}${catalogue.downloadLink.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}` : catalogue.downloadLink;
+      window.open(fallbackUrl, '_blank', 'noopener,noreferrer');
     }
   };
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.fromTo(heroRef.current, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' });
-    });
-    return () => ctx.revert();
-  }, []);
 
   useEffect(() => {
     let active = true;
@@ -203,10 +198,6 @@ const Catalogues = () => {
     };
   }, []);
 
-  const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
-  const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
-  const heroImage = resolveMediaUrl(data.heroImage) || DEFAULTS.heroImage;
-
   const catalogues =
     catalogueRows.length > 0
       ? catalogueRows
@@ -241,33 +232,8 @@ const Catalogues = () => {
         description="Create a free account to download our product catalogues and case study PDFs."
       />
 
-      {/* Hero */}
-      <section className="px-4 pb-8 pt-10 sm:px-6 sm:pb-10 sm:pt-14 lg:px-8">
-        <div ref={heroRef} className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14">
-          <div>
-            <span className="mb-3 inline-block text-[11px] font-bold uppercase tracking-[0.18em] text-cm-blue">
-              Product Library
-            </span>
-            <h1 className="max-w-xl text-4xl font-extrabold leading-[1.05] tracking-tight text-cm-blue-dark sm:text-5xl">
-              {heroTitle}
-            </h1>
-            <p className="mt-5 max-w-lg text-sm leading-relaxed text-gray-500 sm:text-base">{heroSubtitle}</p>
-          </div>
-          <div className="relative mx-auto hidden h-52 w-full max-w-sm lg:block">
-            <div className="absolute -right-4 top-0 h-40 w-52 rounded-[48%_52%_44%_56%] bg-gradient-to-br from-cm-blue/10 to-cm-yellow/20" />
-            <div className="absolute left-2 top-6 h-36 w-64 overflow-hidden rounded-2xl shadow-xl">
-              <img src={heroImage} alt={heroTitle} className="h-full w-full object-cover" />
-            </div>
-            <div className="absolute -bottom-2 right-0 flex items-center gap-2 rounded-xl border border-gray-100 bg-white px-4 py-3 shadow-lg">
-              <FolderOpen className="h-4 w-4 text-cm-blue" />
-              <span className="text-xs font-bold text-cm-blue-dark">{catalogues.length}+ PDF downloads</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Toolbar */}
-      <section className="px-4 sm:px-6 lg:px-8">
+      <section className="px-4 pt-6 sm:px-6 lg:px-8">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 border-b border-gray-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs font-semibold text-gray-400">
             Showing {filteredCatalogues.length} of {catalogues.length} catalogues

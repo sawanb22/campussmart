@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
-import { Search, FlaskConical } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { resolveMediaUrl } from '@/lib/media-url';
 import { getCardCover } from '@/lib/card-covers';
@@ -16,7 +16,6 @@ import {
 gsap.registerPlugin(ScrollTrigger);
 
 const ScienceTechLabs = () => {
-  const heroRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const { data } = usePageData(SCIENCE_TECH_LABS_PAGE_SLUG);
   const [activeCategory, setActiveCategory] = useState('All');
@@ -24,7 +23,6 @@ const ScienceTechLabs = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo(heroRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' });
       const items = gridRef.current?.children;
       if (items) {
         gsap.fromTo(
@@ -37,8 +35,6 @@ const ScienceTechLabs = () => {
     return () => ctx.revert();
   }, []);
 
-  const heroTitle = data.heroTitle ?? SCIENCE_TECH_LABS_DEFAULTS.heroTitle;
-  const heroSubtitle = data.heroSubtitle ?? SCIENCE_TECH_LABS_DEFAULTS.heroSubtitle;
   const allCards: ScienceTechLabsCard[] = data.cards?.length ? data.cards : SCIENCE_TECH_LABS_DEFAULTS.cards;
 
   const categoryOptions = useMemo(
@@ -59,31 +55,8 @@ const ScienceTechLabs = () => {
 
   return (
     <main className="min-h-screen bg-white">
-      {/* Hero */}
-      <section ref={heroRef} className="px-4 pb-6 pt-6 sm:px-6 sm:pb-8 sm:pt-8 lg:px-8">
-        <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14">
-          <div>
-            <span className="mb-3 inline-block text-[11px] font-bold uppercase tracking-[0.16em] text-teal-600">Science &amp; Tech Labs</span>
-            <h1 className="max-w-xl text-4xl font-extrabold leading-[1.05] tracking-tight text-cm-blue-dark sm:text-5xl">{heroTitle}</h1>
-            <p className="mt-5 max-w-lg text-sm leading-relaxed text-gray-500 sm:text-base">{heroSubtitle}</p>
-          </div>
-          <div className="relative mx-auto hidden aspect-[4/3] w-full max-w-sm overflow-hidden rounded-2xl shadow-xl lg:block">
-            <img
-              src="https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?auto=format&fit=crop&w=800&q=85"
-              alt={heroTitle}
-              className="h-full w-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-cm-blue-dark/50 via-transparent to-transparent" />
-            <div className="absolute bottom-4 left-4 right-4 flex items-center gap-2 rounded-xl bg-white/95 px-4 py-3 shadow-lg backdrop-blur-sm">
-              <FlaskConical className="h-4 w-4 text-teal-600" />
-              <span className="text-xs font-bold text-cm-blue-dark">Hands-on, every session</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Toolbar */}
-      <section className="px-4 sm:px-6 lg:px-8">
+      <section className="px-4 pt-6 sm:px-6 lg:px-8">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 border-b border-gray-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-1 gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <button
@@ -122,7 +95,7 @@ const ScienceTechLabs = () => {
       </section>
 
       {/* Grid */}
-      <section className="px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+      <section className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           {filteredCards.length === 0 ? (
             <div className="rounded-2xl border border-gray-100 bg-gray-50 py-20 text-center text-gray-500">No labs found matching your criteria.</div>
@@ -153,7 +126,7 @@ const ScienceTechLabs = () => {
       </section>
 
       {/* CTA */}
-      <section className="px-4 pb-8 sm:px-6 lg:px-8">
+      <section className="px-4 pb-6 sm:px-6 lg:px-8">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-6 rounded-2xl bg-cm-blue-dark p-8 text-center text-white sm:flex-row sm:p-10 sm:text-left">
           <div>
             <h2 className="text-2xl font-bold sm:text-3xl">Ready to equip your labs?</h2>

@@ -22,14 +22,11 @@ const DEFAULTS = {
 const ICONS = [Lightbulb, Zap, Users, Target];
 
 const InnovationCentres = () => {
-  const heroRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
   const { data } = usePageData('innovation-centres');
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo(heroRef.current, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' });
-      
       const cards = cardsRef.current?.children;
       if (cards) {
         gsap.fromTo(cards, 
@@ -49,35 +46,15 @@ const InnovationCentres = () => {
     return () => ctx.revert();
   }, []);
 
-  const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
-  const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
-  const heroImage = data.heroImage ?? DEFAULTS.heroImage;
   const section1Title = data.section1Title ?? DEFAULTS.section1Title;
   const cards: Card[] = (data.cards && data.cards.length > 0) ? data.cards : DEFAULTS.cards;
 
   return (
     <main className="min-h-screen bg-white">
-      {/* Standard Corporate Hero - Side by Side */}
-      <section ref={heroRef} className="bg-cm-blue mx-3 sm:mx-6 lg:mx-8 rounded-[2rem] py-6 md:py-8 overflow-hidden relative shadow-inner">
-        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 relative z-10 px-4">
-          <div className="lg:w-1/2 text-left text-white">
-            <h1 className="text-2xl md:text-3xl font-bold mb-3 tracking-tight">
-              {heroTitle}
-            </h1>
-            <p className="text-sm md:text-base text-white/85 leading-snug max-w-xl">
-              {heroSubtitle}
-            </p>
-          </div>
-          <div className="lg:w-1/2">
-            <img src={resolveMediaUrl(heroImage)} alt={heroTitle} className="rounded-2xl shadow-xl w-full h-[260px] object-cover border-2 border-cm-blue-dark" />
-          </div>
-        </div>
-      </section>
-
       {/* Innovation Modules Grid Layout */}
-      <section className="py-12 md:py-16">
+      <section className="py-6 md:py-8">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-5">
             <h2 className="text-2xl md:text-3xl font-bold text-cm-blue-dark tracking-tighter">
               {section1Title}
             </h2>
@@ -111,9 +88,9 @@ const InnovationCentres = () => {
       </section>
 
       {/* Trust Quote */}
-      <section className="py-16 bg-cm-blue-dark text-white text-center rounded-t-[4rem] border-t-4 border-cm-yellow/50">
+      <section className="py-8 bg-cm-blue-dark text-white text-center rounded-t-[4rem] border-t-4 border-cm-yellow/50">
         <div className="max-w-4xl mx-auto px-6">
-          <h3 className="text-xl md:text-3xl font-bold mb-8 leading-relaxed max-w-2xl mx-auto">
+          <h3 className="text-xl md:text-3xl font-bold mb-6 leading-relaxed max-w-2xl mx-auto">
             "Innovation isn't just about technology; it's about creating ecosystems where ideas flourish and dreams become reality."
           </h3>
           <div className="w-12 h-1 bg-cm-yellow mx-auto mb-4 rounded-full" />

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, X, FolderPlus } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, FolderPlus, Check } from 'lucide-react';
 import api from '../api/client';
 import MediaImageField from '../components/MediaImageField';
 
@@ -15,6 +15,8 @@ export default function Blog() {
     const [showCategoryModal, setShowCategoryModal] = useState(false);
     const [editing, setEditing] = useState<Partial<Post>>(EMPTY);
     const [newCategoryName, setNewCategoryName] = useState('');
+    const [editingCategoryId, setEditingCategoryId] = useState<number | null>(null);
+    const [editingCategoryName, setEditingCategoryName] = useState('');
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
@@ -68,6 +70,24 @@ export default function Blog() {
         if (!confirm('Delete this category? Posts inside will become uncategorized.')) return;
         await api.delete(`/blog/categories/${id}`);
         await fetchAll();
+    };
+
+    const startEditCategory = (c: Category) => {
+        setEditingCategoryId(c.id);
+        setEditingCategoryName(c.name);
+    };
+
+    const saveEditedCategory = async () => {
+        if (!editingCategoryId || !editingCategoryName.trim()) return;
+        setSaving(true);
+        try {
+            await api.put(`/blog/categories/${editingCategoryId}`, { name: editingCategoryName });
+            setEditingCategoryId(null);
+            setEditingCategoryName('');
+            await fetchAll();
+        } finally {
+            setSaving(false);
+        }
     };
 
     return (
@@ -159,9 +179,26 @@ export default function Blog() {
                             <ul className="space-y-3 mb-6">
                                 {categories.length === 0 && <li className="text-gray-400 text-sm text-center py-4">No categories yet.</li>}
                                 {categories.map(c => (
-                                    <li key={c.id} className="flex flex-col sm:flex-row items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
-                                        <span className="font-semibold text-gray-800">{c.name} <span className="text-xs text-gray-400 font-normal block sm:inline">({c.slug})</span></span>
-                                        <button onClick={() => deleteCategory(c.id)} className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg mt-2 sm:mt-0 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                                    <li key={c.id} className="flex flex-col sm:flex-row items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 gap-2">
+                                        {editingCategoryId === c.id ? (
+                                            <input
+                                                autoFocus
+                                                className="form-input flex-1"
+                                                value={editingCategoryName}
+                                                onChange={(e) => setEditingCategoryName(e.target.value)}
+                                                onKeyDown={(e) => { if (e.key === 'Enter') saveEditedCategory(); if (e.key === 'Escape') setEditingCategoryId(null); }}
+                                            />
+                                        ) : (
+                                            <span className="font-semibold text-gray-800">{c.name} <span className="text-xs text-gray-400 font-normal block sm:inline">({c.slug})</span></span>
+                                        )}
+                                        <div className="flex items-center gap-1 shrink-0">
+                                            {editingCategoryId === c.id ? (
+                                                <button onClick={saveEditedCategory} disabled={saving} className="text-green-600 hover:bg-green-50 p-1.5 rounded-lg transition-colors"><Check className="w-4 h-4" /></button>
+                                            ) : (
+                                                <button onClick={() => startEditCategory(c)} className="text-blue-600 hover:bg-blue-50 p-1.5 rounded-lg transition-colors"><Pencil className="w-4 h-4" /></button>
+                                            )}
+                                            <button onClick={() => deleteCategory(c.id)} className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
+                                        </div>
                                     </li>
                                 ))}
                             </ul>

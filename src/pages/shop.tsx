@@ -18,9 +18,12 @@ interface ShopProps {
   categoryPage?: string;
   /** Hide the category sidebar — used where categories are picked on the parent page instead. */
   hideCategorySidebar?: boolean;
+  /** Render as a plain block instead of a full standalone page (no min-h-screen wrapper or
+   * page-width re-centering) — used to show product results inline on another page. */
+  embedded?: boolean;
 }
 
-const Shop = ({ categorySlug, categorySlugs, showAllCategories = false, categoryRoutes = {}, excludedCategorySlugs = [], categoryPage, hideCategorySidebar = false }: ShopProps) => {
+const Shop = ({ categorySlug, categorySlugs, showAllCategories = false, categoryRoutes = {}, excludedCategorySlugs = [], categoryPage, hideCategorySidebar = false, embedded = false }: ShopProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState(categorySlug || searchParams.get('category') || 'all');
@@ -174,11 +177,13 @@ const Shop = ({ categorySlug, categorySlugs, showAllCategories = false, category
     ? categories.filter((category) => scopedCategorySlugs.includes(category.slug))
     : categories;
 
+  const Root: 'div' | 'main' = embedded ? 'div' : 'main';
+
   return (
-    <main className="min-h-screen bg-cm-gray">
+    <Root className={embedded ? undefined : 'min-h-screen bg-cm-gray'}>
       <LoginPromptModal open={showLoginPrompt} onClose={() => setShowLoginPrompt(false)} />
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4">
+      <div className={embedded ? 'rounded-2xl border border-gray-100 bg-white' : 'bg-white border-b'}>
+        <div className={embedded ? 'px-4 py-4' : 'max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4'}>
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1 max-w-xl">
               <div className="relative">
@@ -192,14 +197,16 @@ const Shop = ({ categorySlug, categorySlugs, showAllCategories = false, category
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               </div>
             </div>
-            <Link to="/my-account" className="relative p-2 hover:bg-gray-100 rounded-lg">
-              <ShoppingCart className="w-6 h-6 text-gray-700" />
-            </Link>
+            {!embedded && (
+              <Link to="/my-account" className="relative p-2 hover:bg-gray-100 rounded-lg">
+                <ShoppingCart className="w-6 h-6 text-gray-700" />
+              </Link>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8">
+      <div className={embedded ? 'py-6' : 'max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8'}>
         <div className="flex flex-col lg:flex-row gap-2">
           {/* Sidebar */}
           {!hideCategorySidebar && (
@@ -352,7 +359,7 @@ const Shop = ({ categorySlug, categorySlugs, showAllCategories = false, category
           </div>
         </div>
       </div>
-    </main>
+    </Root>
   );
 };
 

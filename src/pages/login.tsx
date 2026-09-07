@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
 import api from '@/api/client';
+import ForgotPasswordModal from '@/components/forgot-password-modal';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,6 +84,11 @@ const Login = () => {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              <div className="text-right">
+                <button type="button" onClick={() => setShowForgotPassword(true)} className="text-xs font-semibold text-[#0a2463] hover:underline">
+                  Forgot password?
+                </button>
+              </div>
             </div>
 
             {error && (
@@ -103,6 +110,8 @@ const Login = () => {
           </p>
         </div>
       </div>
+
+      <ForgotPasswordModal open={showForgotPassword} onClose={() => setShowForgotPassword(false)} />
     </main>
   );
 };

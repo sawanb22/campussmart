@@ -19,7 +19,7 @@ const defaultFeatures = [
   { title: 'Campus Master Planning', description: 'Visionary campus planning from concept to construction, built to inspire generations.', image: 'https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=800&q=90', href: '/campus-master-planning', tag: 'Planning', color: '#F97316', h: 320 },
   { title: 'AR / VR Learning', description: 'Immersive reality experiences bringing complex concepts to vivid, unforgettable life.', image: 'https://images.unsplash.com/photo-1622979135225-d2ba269cf1ac?auto=format&fit=crop&w=800&q=90', href: '/ar-vr-experiences', tag: 'AR / VR', color: '#A855F7', h: 240 },
   { title: 'Campus Automation', description: 'Smart systems automating admissions, attendance, finance and governance seamlessly.', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=90', href: '/campus-automation', tag: 'Automation', color: '#0EA5E9', h: 200 },
-  { title: 'Collaboration Spaces', description: 'Dynamic, flexible zones engineered for productive teamwork and creative ideation.', image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=90', href: '/collaboration', tag: 'Spaces', color: '#EF4444', h: 260 },
+  { title: 'Collaboration Spaces', description: 'Dynamic, flexible zones engineered for productive teamwork and creative ideation.', image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=90', href: '/collaboration-spaces', tag: 'Spaces', color: '#EF4444', h: 260 },
 ];
 
 const defaultSidebar = {
@@ -67,7 +67,9 @@ const FeatureCards = () => {
                 ? { ...feature, href: '/campus-furniture-design' }
                 : feature.title === 'Sports Infrastructure'
                   ? { ...feature, href: '/sports-infrastructure' }
-                  : feature
+                  : feature.title === 'Collaboration Spaces'
+                    ? { ...feature, href: '/collaboration-spaces' }
+                    : feature
   );
   const rawSidebar = (typeof content.home_sidebar === 'object' && content.home_sidebar !== null) ? content.home_sidebar : defaultSidebar;
   const classifieds = (Array.isArray(rawSidebar.classifieds) ? rawSidebar.classifieds : defaultSidebar.classifieds).map((item: any) =>

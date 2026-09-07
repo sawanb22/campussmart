@@ -10,14 +10,12 @@ import { LIBRARY_MGMT_PAGE_SLUG, LIBRARY_MGMT_DEFAULTS, slugifyLibraryModuleTitl
 gsap.registerPlugin(ScrollTrigger);
 
 const LibraryManagement = () => {
-  const heroRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const { data } = usePageData(LIBRARY_MGMT_PAGE_SLUG);
   const [activeCategory, setActiveCategory] = useState('All');
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo(heroRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' });
       const items = gridRef.current?.children;
       if (items) {
         gsap.fromTo(
@@ -30,9 +28,6 @@ const LibraryManagement = () => {
     return () => ctx.revert();
   }, []);
 
-  const heroTitle = data.heroTitle ?? LIBRARY_MGMT_DEFAULTS.heroTitle;
-  const heroSubtitle = data.heroSubtitle ?? LIBRARY_MGMT_DEFAULTS.heroSubtitle;
-  const heroImage = resolveMediaUrl(data.heroImage) || LIBRARY_MGMT_DEFAULTS.heroImage;
   const allCards: LibraryManagementCard[] = data.cards?.length ? data.cards : LIBRARY_MGMT_DEFAULTS.cards;
 
   const categoryOptions = useMemo(
@@ -49,31 +44,7 @@ const LibraryManagement = () => {
 
   return (
     <main className="min-h-screen bg-white">
-      {/* Hero */}
-      <section ref={heroRef} className="bg-amber-50/60 px-4 pb-6 pt-6 sm:px-6 sm:pb-8 sm:pt-8 lg:px-8">
-        <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14">
-          <div>
-            <span className="mb-3 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-orange-600">
-              <span className="h-[2px] w-6 bg-orange-500" /> Library Management System
-            </span>
-            <h1 className="font-playfair max-w-xl text-4xl font-semibold leading-[1.05] tracking-tight text-stone-900 sm:text-5xl">{heroTitle}</h1>
-            <p className="mt-5 max-w-lg text-sm leading-relaxed text-stone-500 sm:text-base">{heroSubtitle}</p>
-            <div className="mt-7">
-              <Link to="/request-quote" className="btn-primary inline-flex items-center gap-2">
-                Request a Demo <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-          <div className="relative mx-auto hidden aspect-square w-full max-w-sm lg:block">
-            <div className="absolute right-0 top-4 h-64 w-64 rounded-full bg-orange-400/90" />
-            <div className="absolute left-2 top-10 h-56 w-72 overflow-hidden rounded-2xl shadow-xl">
-              <img src={heroImage} alt={heroTitle} className="h-full w-full object-cover" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <section className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           {/* Category filter chips */}
           <div className="mb-5 flex flex-wrap items-center gap-2">
@@ -153,7 +124,7 @@ const LibraryManagement = () => {
       </section>
 
       {/* CTA */}
-      <section className="px-4 pb-8 sm:px-6 lg:px-8">
+      <section className="px-4 pb-6 sm:px-6 lg:px-8">
         <div className="relative mx-auto max-w-5xl overflow-hidden rounded-2xl bg-stone-900 p-8 text-center text-white sm:p-10 sm:text-left">
           <div className="pointer-events-none absolute -right-14 -top-20 h-52 w-52 rounded-full border border-white/10" />
           <div className="relative flex flex-col items-center justify-between gap-6 sm:flex-row">

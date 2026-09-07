@@ -10,14 +10,12 @@ import { SPORTS_INFRASTRUCTURE_PAGE_SLUG, SPORTS_INFRASTRUCTURE_DEFAULTS, slugif
 gsap.registerPlugin(ScrollTrigger);
 
 const SportsInfrastructure = () => {
-  const heroRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const { data } = usePageData(SPORTS_INFRASTRUCTURE_PAGE_SLUG);
   const [activeCategory, setActiveCategory] = useState('All');
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo(heroRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' });
       const items = gridRef.current?.children;
       if (items) {
         gsap.fromTo(
@@ -30,9 +28,6 @@ const SportsInfrastructure = () => {
     return () => ctx.revert();
   }, []);
 
-  const heroTitle = data.heroTitle ?? SPORTS_INFRASTRUCTURE_DEFAULTS.heroTitle;
-  const heroSubtitle = data.heroSubtitle ?? SPORTS_INFRASTRUCTURE_DEFAULTS.heroSubtitle;
-  const heroImage = resolveMediaUrl(data.heroImage) || SPORTS_INFRASTRUCTURE_DEFAULTS.heroImage;
   const ctaTitle = data.ctaTitle ?? SPORTS_INFRASTRUCTURE_DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? SPORTS_INFRASTRUCTURE_DEFAULTS.ctaSubtitle;
   const ctaButtonLabel = data.ctaButtonLabel ?? SPORTS_INFRASTRUCTURE_DEFAULTS.ctaButtonLabel;
@@ -50,62 +45,10 @@ const SportsInfrastructure = () => {
 
   return (
     <main className="min-h-screen bg-[#f5f8e8]">
-      {/* Hero */}
-      <section className="px-4 pb-3 pt-5 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
-          <h1 className="font-grotesk mb-4 text-[11vw] font-bold uppercase leading-[0.85] tracking-[-0.03em] text-[#090909] sm:text-5xl lg:text-6xl">
-            {heroTitle}
-          </h1>
-
-          <div ref={heroRef} className="grid grid-cols-1 gap-2 lg:grid-cols-[1.6fr_0.6fr]">
-            {/* Large image tile */}
-            <div className="group relative h-[200px] overflow-hidden rounded-[1.75rem] lg:h-[240px]">
-              <img src={heroImage} alt={heroTitle} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4">
-                <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/80">Built to Compete</p>
-                <p className="font-grotesk max-w-xs text-lg font-bold leading-[0.95] tracking-tight text-white sm:text-xl">
-                  Championship-ready courts, tracks &amp; grounds
-                </p>
-              </div>
-            </div>
-
-            {/* Categories tile */}
-            <div className="flex flex-col rounded-[1.75rem] bg-[#d8d1f5] p-4 lg:h-[240px]">
-              <p className="font-grotesk mb-2.5 text-[10px] font-bold uppercase tracking-wide text-black">Facility Types</p>
-              <div className="flex flex-wrap gap-1.5">
-                {categoryOptions.map((category) => (
-                  <button
-                    key={category}
-                    type="button"
-                    onClick={() => setActiveCategory(category)}
-                    className={`rounded-full px-2.5 py-1.5 text-[9px] font-semibold transition-colors ${
-                      activeCategory === category ? 'bg-[#090909] text-white' : 'bg-[#a99be9] text-black hover:bg-[#090909] hover:text-white'
-                    }`}
-                  >
-                    {category}
-                  </button>
-                ))}
-              </div>
-              <div className="mt-auto pt-5">
-                <Link
-                  to="/sports-infra"
-                  className="flex h-10 w-full items-center justify-center rounded-full bg-[#090909] text-[10px] font-semibold text-white transition-colors hover:bg-white hover:text-black"
-                >
-                  View Full Catalog
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          <p className="mt-4 max-w-xl text-sm leading-relaxed text-black/60 sm:text-base">{heroSubtitle}</p>
-        </div>
-      </section>
-
       {/* Facilities grid */}
-      <section className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <section className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
             <h2 className="font-grotesk text-4xl font-bold uppercase leading-[0.9] tracking-tight text-[#090909] sm:text-5xl">
               Our
               <br />
@@ -162,7 +105,7 @@ const SportsInfrastructure = () => {
       </section>
 
       {/* CTA */}
-      <section className="px-4 pb-10 sm:px-6 lg:px-8">
+      <section className="px-4 pb-6 sm:px-6 lg:px-8">
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 rounded-[1.75rem] bg-[#d9f68b] p-8 sm:flex-row sm:items-center sm:p-12">
           <h2 className="font-grotesk max-w-lg text-4xl font-bold uppercase leading-[0.9] tracking-tight text-[#090909] sm:text-5xl">
             {ctaTitle}
