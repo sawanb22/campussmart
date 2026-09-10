@@ -1,16 +1,29 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { Link } from 'react-router-dom';
-import { Monitor, Wifi, Server, Shield, Star, Heart, Check, Trash2 } from 'lucide-react';
+import { Monitor, Wifi, Server, Shield, Star, Heart, Check, Trash2, ArrowLeft } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { usePageCategories } from '@/hooks/usePageCategories';
 import { useDesignWishlist } from '@/hooks/useDesignWishlist';
 import LoginPromptModal from '@/components/login-prompt-modal';
 import { resolveMediaUrl } from '@/lib/media-url';
+import Shop from '@/pages/shop';
 
 interface CardItem { title: string; description: string; image?: string; categories?: string[]; }
 
-const DEFAULTS = {
+export const TECH_INFRA_PAGE_SLUG = 'tech-infra';
+
+export function slugifyTechInfraTitle(title: string): string {
+  return (
+    title
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'solution'
+  );
+}
+
+export const TECH_INFRA_DEFAULTS = {
   heroTitle: 'Technology Infrastructure',
   heroSubtitle: 'Complete technology infrastructure solutions for modern campuses. From networking to security, we build the foundation for digital learning.',
   heroImage: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
@@ -31,6 +44,7 @@ const TechInfra = () => {
   const { data } = usePageData('tech-infra');
   const { categories: shopCategories } = usePageCategories('tech-infra');
   const { isSaved, isPending, add, remove, showLoginPrompt, setShowLoginPrompt } = useDesignWishlist('tech-infra');
+  const [activeProductCategory, setActiveProductCategory] = useState<string | null>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -55,15 +69,15 @@ const TechInfra = () => {
     return () => ctx.revert();
   }, []);
 
-  const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
-  const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
-  const heroImage = data.heroImage ?? DEFAULTS.heroImage;
-  const section1Title = data.section1Title ?? DEFAULTS.section1Title;
-  const allCards: CardItem[] = data.cards?.length > 0 ? data.cards : DEFAULTS.cards;
+  const heroTitle = data.heroTitle ?? TECH_INFRA_DEFAULTS.heroTitle;
+  const heroSubtitle = data.heroSubtitle ?? TECH_INFRA_DEFAULTS.heroSubtitle;
+  const heroImage = data.heroImage ?? TECH_INFRA_DEFAULTS.heroImage;
+  const section1Title = data.section1Title ?? TECH_INFRA_DEFAULTS.section1Title;
+  const allCards: CardItem[] = data.cards?.length > 0 ? data.cards : TECH_INFRA_DEFAULTS.cards;
   const cards = allCards.map((card, i) => ({
     ...card,
     categories: card.categories?.length ? card.categories : ['Networking'],
-    image: card.image || DEFAULTS.cards[i % DEFAULTS.cards.length].image,
+    image: card.image || TECH_INFRA_DEFAULTS.cards[i % TECH_INFRA_DEFAULTS.cards.length].image,
   }));
 
   return (
@@ -105,13 +119,22 @@ const TechInfra = () => {
             <aside className="hidden lg:block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-cm-blue-dark mb-5">Categories</h3>
               <div className="space-y-3">
-                <Link to="/tech-infra/products" className="block w-full text-left rounded-2xl px-4 py-3 transition-all duration-200 bg-slate-50 text-slate-700 hover:bg-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setActiveProductCategory('all')}
+                  className={`block w-full text-left rounded-2xl px-4 py-3 transition-all duration-200 ${activeProductCategory === 'all' ? 'bg-cm-blue text-white shadow-lg' : 'bg-slate-50 text-slate-700 hover:bg-slate-100'}`}
+                >
                   All Products
-                </Link>
+                </button>
                 {shopCategories.map((category) => (
-                  <Link key={category.id} to={`/tech-infra/products?category=${category.slug}`} className="block w-full text-left rounded-2xl px-4 py-3 transition-all duration-200 bg-slate-50 text-slate-700 hover:bg-slate-100">
+                  <button
+                    key={category.id}
+                    type="button"
+                    onClick={() => setActiveProductCategory(category.slug)}
+                    className={`block w-full text-left rounded-2xl px-4 py-3 transition-all duration-200 ${activeProductCategory === category.slug ? 'bg-cm-blue text-white shadow-lg' : 'bg-slate-50 text-slate-700 hover:bg-slate-100'}`}
+                  >
                     {category.name}
-                  </Link>
+                  </button>
                 ))}
                 {shopCategories.length === 0 && (
                   <p className="text-xs text-slate-400 px-1">No categories yet. Add one in Admin &rarr; Categories.</p>
@@ -125,48 +148,71 @@ const TechInfra = () => {
               </div>
             </aside>
 
-            <div ref={cardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="min-w-0">
+              {activeProductCategory && (
+                <button
+                  type="button"
+                  onClick={() => setActiveProductCategory(null)}
+                  className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-cm-blue hover:text-cm-blue-dark"
+                >
+                  <ArrowLeft className="h-4 w-4" /> Back to {section1Title}
+                </button>
+              )}
+              {activeProductCategory ? (
+                <Shop
+                  key={activeProductCategory}
+                  categorySlug={activeProductCategory === 'all' ? undefined : activeProductCategory}
+                  categoryPage="tech-infra"
+                  hideCategorySidebar
+                  embedded
+                />
+              ) : (
+              <div ref={cardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {cards.map((card, i) => {
                 const Icon = ICONS[i % ICONS.length];
                 return (
                   <div key={card.title} className="group flex flex-col overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)]">
-                    <div className="relative overflow-hidden h-[220px] sm:h-[230px]">
-                      <img src={resolveMediaUrl(card.image)} alt={card.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent" />
-                      <span className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-800 shadow-sm backdrop-blur-sm">
-                        <Star className="h-3.5 w-3.5 text-cm-yellow" />
-                        {card.categories?.[0] ?? 'Tech'}
-                      </span>
-                      <div className="absolute top-4 right-4 w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20 group-hover:bg-cm-blue group-hover:scale-110 transition-all duration-500">
-                        <Icon className="w-5 h-5 text-white" />
+                    <Link to={`/${TECH_INFRA_PAGE_SLUG}/${slugifyTechInfraTitle(card.title)}`} className="flex flex-1 flex-col">
+                      <div className="relative overflow-hidden h-[220px] sm:h-[230px]">
+                        <img src={resolveMediaUrl(card.image)} alt={card.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent" />
+                        <span className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-800 shadow-sm backdrop-blur-sm">
+                          <Star className="h-3.5 w-3.5 text-cm-yellow" />
+                          {card.categories?.[0] ?? 'Tech'}
+                        </span>
+                        <div className="absolute top-4 right-4 w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20 group-hover:bg-cm-blue group-hover:scale-110 transition-all duration-500">
+                          <Icon className="w-5 h-5 text-white" />
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex flex-1 flex-col px-5 pb-4 pt-4">
-                      <h3 className="text-lg font-semibold text-slate-900 tracking-tight mb-2">{card.title}</h3>
-                      <p className="text-sm text-slate-600 leading-relaxed mb-3">{card.description}</p>
-                      <div className="mt-auto flex flex-wrap gap-2 mb-3">
-                        {card.categories?.map((category) => <span key={category} className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-slate-600">{category}</span>)}
+                      <div className="flex flex-1 flex-col px-5 pb-2 pt-4">
+                        <h3 className="text-lg font-semibold text-slate-900 tracking-tight mb-2">{card.title}</h3>
+                        <p className="text-sm text-slate-600 leading-relaxed mb-3">{card.description}</p>
+                        <div className="mt-auto flex flex-wrap gap-2">
+                          {card.categories?.map((category) => <span key={category} className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-slate-600">{category}</span>)}
+                        </div>
                       </div>
-                      <div className="flex items-center justify-between text-slate-700">
-                        {isSaved(card) ? (
-                          <div className="flex items-center gap-1.5">
-                            <span className="flex items-center gap-1.5 rounded-lg bg-green-600 px-2.5 py-1.5 text-[10px] font-bold text-white">
-                              <Check className="h-3.5 w-3.5" /> Added to wishlist
-                            </span>
-                            <button type="button" onClick={() => remove(card)} disabled={isPending(card)} aria-label={`Remove ${card.title} from wishlist`} className="flex items-center justify-center rounded-lg bg-red-50 p-1.5 text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50">
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                        ) : (
-                          <button type="button" onClick={() => add(card)} disabled={isPending(card)} className="flex items-center gap-1.5 rounded-lg bg-cm-blue px-2.5 py-1.5 text-[10px] font-bold text-white shadow-sm transition-all hover:bg-cm-blue-dark disabled:opacity-50">
-                            <Heart className="h-3.5 w-3.5" /> Add to wishlist
+                    </Link>
+                    <div className="flex items-center justify-between px-5 pb-4 pt-3 text-slate-700">
+                      {isSaved(card) ? (
+                        <div className="flex items-center gap-1.5">
+                          <span className="flex items-center gap-1.5 rounded-lg bg-green-600 px-2.5 py-1.5 text-[10px] font-bold text-white">
+                            <Check className="h-3.5 w-3.5" /> Added to wishlist
+                          </span>
+                          <button type="button" onClick={() => remove(card)} disabled={isPending(card)} aria-label={`Remove ${card.title} from wishlist`} className="flex items-center justify-center rounded-lg bg-red-50 p-1.5 text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50">
+                            <Trash2 className="h-3.5 w-3.5" />
                           </button>
-                        )}
-                      </div>
+                        </div>
+                      ) : (
+                        <button type="button" onClick={() => add(card)} disabled={isPending(card)} className="flex items-center gap-1.5 rounded-lg bg-cm-blue px-2.5 py-1.5 text-[10px] font-bold text-white shadow-sm transition-all hover:bg-cm-blue-dark disabled:opacity-50">
+                          <Heart className="h-3.5 w-3.5" /> Add to wishlist
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
               })}
+              </div>
+              )}
             </div>
           </div>
         </div>

@@ -6,6 +6,18 @@ const transporter = nodemailer.createTransport({
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
     },
+    // Gmail's SMTP occasionally stalls instead of erroring outright; without these
+    // caps a single slow handshake hangs the request until the client gives up.
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 10_000,
+});
+
+// Fails fast at boot if the Gmail app password has been revoked/rotated, instead
+// of only surfacing as opaque "Failed to send OTP" errors once a user hits it.
+transporter.verify((err) => {
+    if (err) console.error('⚠️ Email transporter verification failed — OTP emails will not send:', err.message);
+    else console.log('✅ Email transporter ready');
 });
 
 export async function sendOtpEmail(to: string, otp: string, purpose: 'verify' | 'login' | 'reset') {
@@ -67,19 +79,25 @@ export async function sendOtpEmail(to: string, otp: string, purpose: 'verify' | 
     console.log(`   Purpose: ${purpose}`);
     console.log(`==========================================\n`);
 
+    const mail = { from: process.env.EMAIL_FROM || 'CampusMart <web.thirdeye@gmail.com>', to, subject, html };
+
+    // Gmail SMTP occasionally drops a single attempt (transient auth hiccup, slow
+    // greeting); one retry clears most of those without making genuine failures
+    // (bad credentials, invalid recipient) wait any longer to surface.
     try {
-        await transporter.sendMail({
-            from: process.env.EMAIL_FROM || 'CampusMart <web.thirdeye@gmail.com>',
-            to,
-            subject,
-            html,
-        });
-        console.log(`✅ OTP email successfully dispatched to ${to}`);
-    } catch (smtpError: any) {
-        console.error(`⚠️ SMTP Email Sending Failed: ${smtpError?.message || smtpError}`);
-        console.error(`👉 [FAIL] OTP could not be delivered to ${to}.`);
-        throw smtpError;
+        await transporter.sendMail(mail);
+    } catch (firstError: any) {
+        console.error(`⚠️ SMTP send failed, retrying once: ${firstError?.message || firstError}`);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        try {
+            await transporter.sendMail(mail);
+        } catch (smtpError: any) {
+            console.error(`⚠️ SMTP Email Sending Failed: ${smtpError?.message || smtpError}`);
+            console.error(`👉 [FAIL] OTP could not be delivered to ${to}.`);
+            throw smtpError;
+        }
     }
+    console.log(`✅ OTP email successfully dispatched to ${to}`);
 }
 
 export function generateOtp(): string {

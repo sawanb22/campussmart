@@ -7,7 +7,19 @@ import { resolveMediaUrl } from '@/lib/media-url';
 
 interface CardItem { title: string; description: string; image?: string; categories?: string[]; }
 
-const DEFAULTS = {
+export const CAMPUS_AUTOMATION_PAGE_SLUG = 'campus-automation';
+
+export function slugifyCampusAutomationTitle(title: string): string {
+  return (
+    title
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'module'
+  );
+}
+
+export const CAMPUS_AUTOMATION_DEFAULTS = {
   heroTitle: 'Turn everyday operations into automated workflows.',
   heroSubtitle: 'Admissions, attendance, finance, scheduling and reporting — automated so your staff can spend less time on paperwork and more time with students.',
   section1Title: 'Automation Modules',
@@ -71,23 +83,23 @@ const CampusAutomation = () => {
     return () => ctx.revert();
   }, []);
 
-  const section1Title = data.section1Title ?? DEFAULTS.section1Title;
-  const allCards: CardItem[] = (data.cards && data.cards.length > 0) ? data.cards : DEFAULTS.cards;
-  const ctaTitle = data.ctaTitle ?? DEFAULTS.ctaTitle;
-  const ctaSubtitle = data.ctaSubtitle ?? DEFAULTS.ctaSubtitle;
+  const section1Title = data.section1Title ?? CAMPUS_AUTOMATION_DEFAULTS.section1Title;
+  const allCards: CardItem[] = (data.cards && data.cards.length > 0) ? data.cards : CAMPUS_AUTOMATION_DEFAULTS.cards;
+  const ctaTitle = data.ctaTitle ?? CAMPUS_AUTOMATION_DEFAULTS.ctaTitle;
+  const ctaSubtitle = data.ctaSubtitle ?? CAMPUS_AUTOMATION_DEFAULTS.ctaSubtitle;
 
   const [featured, ...rest] = allCards;
   const filterOptions = useMemo(
-    () => ['All', ...Array.from(new Set(rest.flatMap((card) => card.categories ?? [])))],
+    () => Array.from(new Set(rest.flatMap((card) => card.categories ?? []))),
     [rest]
   );
   const filteredCards = activeFilter === 'All' ? rest : rest.filter((card) => card.categories?.includes(activeFilter));
 
   return (
     <main className="min-h-screen bg-white">
-      <section id="modules" className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+      <section id="modules" className="mx-auto max-w-6xl px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
         {/* Filter pills */}
-        <div className="mb-5 flex flex-wrap items-center gap-2">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
           {filterOptions.map((option) => (
             <button
               key={option}
@@ -104,16 +116,16 @@ const CampusAutomation = () => {
 
         {/* Featured module */}
         {featured && (
-          <article className="mb-6 grid grid-cols-1 overflow-hidden rounded-xl bg-cm-gray lg:grid-cols-[1.2fr_1fr]">
-            <div className="h-64 overflow-hidden lg:h-auto">
+          <article className="mb-4 grid grid-cols-1 overflow-hidden rounded-xl bg-cm-gray lg:grid-cols-[1.2fr_1fr]">
+            <div className="h-56 overflow-hidden lg:h-auto">
               <img src={resolveMediaUrl(featured.image) || featured.image} alt={featured.title} className="h-full w-full object-cover" />
             </div>
-            <div className="flex flex-col justify-center p-8 sm:p-10">
-              <span className="mb-3 text-[11px] font-bold uppercase tracking-[0.14em] text-cm-blue">
+            <div className="flex flex-col justify-center p-6 sm:p-8">
+              <span className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-cm-blue">
                 Featured {featured.categories?.[0] ? `· ${featured.categories[0]}` : ''}
               </span>
-              <h2 className="mb-4 text-2xl font-bold leading-tight text-cm-blue-dark sm:text-3xl">{featured.title}</h2>
-              <p className="mb-6 text-sm leading-relaxed text-gray-600">{featured.description}</p>
+              <h2 className="mb-3 text-2xl font-bold leading-tight text-cm-blue-dark sm:text-3xl">{featured.title}</h2>
+              <p className="mb-4 text-sm leading-relaxed text-gray-600">{featured.description}</p>
               <Link to="/contact-us" className="inline-flex w-fit items-center gap-2 border-b-2 border-cm-blue-dark pb-1 text-sm font-bold text-cm-blue-dark">
                 Talk to us about it <ArrowRight className="h-3.5 w-3.5" />
               </Link>
@@ -122,42 +134,46 @@ const CampusAutomation = () => {
         )}
 
         {/* Modules grid */}
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-bold text-cm-blue-dark sm:text-2xl">{section1Title}</h2>
         </div>
         {filteredCards.length === 0 ? (
           <div className="rounded-xl border border-gray-100 bg-gray-50 py-16 text-center text-gray-500">No modules in this category yet.</div>
         ) : (
-          <div ref={cardsRef} className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div ref={cardsRef} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filteredCards.map((card) => (
-              <div key={card.title} className="overflow-hidden rounded-lg bg-cm-gray transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+              <Link
+                key={card.title}
+                to={`/${CAMPUS_AUTOMATION_PAGE_SLUG}/${slugifyCampusAutomationTitle(card.title)}`}
+                className="block overflow-hidden rounded-lg bg-cm-gray transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+              >
                 <div className="h-44 overflow-hidden">
                   <img src={resolveMediaUrl(card.image) || card.image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 hover:scale-105" />
                 </div>
-                <div className="p-5">
+                <div className="p-4">
                   <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-cm-blue">{card.categories?.[0] ?? 'Module'}</span>
-                  <h3 className="mt-2 mb-2 text-lg font-bold leading-snug text-cm-blue-dark">{card.title}</h3>
-                  <p className="mb-4 text-sm leading-relaxed text-gray-500">{card.description}</p>
+                  <h3 className="mt-2 mb-1.5 text-lg font-bold leading-snug text-cm-blue-dark">{card.title}</h3>
+                  <p className="mb-3 text-sm leading-relaxed text-gray-500">{card.description}</p>
                   <div className="flex items-center justify-between text-[11px] text-gray-400">
                     <span className="font-bold uppercase tracking-wide text-cm-blue-dark/70">{card.categories?.[0] ?? 'Automation'}</span>
                     <span>Fully automated</span>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
       </section>
 
       {/* CTA */}
-      <section className="px-4 pb-6 sm:px-6 lg:px-8">
-        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-xl bg-cm-blue-dark px-8 py-12 sm:px-12">
+      <section className="px-4 pb-4 sm:px-6 lg:px-8">
+        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-xl bg-cm-blue-dark px-6 py-8 sm:px-8">
           <div className="pointer-events-none absolute -right-14 -top-20 h-52 w-52 rounded-full border border-white/15" aria-hidden="true" />
-          <div className="relative z-10 flex flex-col items-start justify-between gap-8 sm:flex-row sm:items-center">
+          <div className="relative z-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div>
               <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-cm-yellow">Stay Ahead</span>
               <h2 className="mt-2 max-w-md text-2xl font-bold text-white sm:text-3xl">{ctaTitle}</h2>
-              <p className="mt-3 max-w-md text-sm leading-relaxed text-white/70">{ctaSubtitle}</p>
+              <p className="mt-2 max-w-md text-sm leading-relaxed text-white/70">{ctaSubtitle}</p>
             </div>
             <Link to="/contact-us" className="btn-secondary inline-flex flex-shrink-0 items-center gap-2">
               Talk to Us <ArrowRight className="h-4 w-4" />

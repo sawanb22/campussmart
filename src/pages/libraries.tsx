@@ -11,7 +11,19 @@ import Shop from '@/pages/shop';
 
 interface CardItem { title: string; description: string; image?: string; categories?: string[]; }
 
-const DEFAULTS = {
+export const LIBRARIES_PAGE_SLUG = 'libraries';
+
+export function slugifyLibraryTitle(title: string): string {
+  return (
+    title
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'feature'
+  );
+}
+
+export const LIBRARIES_DEFAULTS = {
   heroTitle: 'Library Solutions',
   heroSubtitle: 'Modern library solutions that blend traditional resources with digital innovation. Create spaces that inspire learning and research.',
   heroImage: 'https://images.unsplash.com/photo-1568667256549-094345857637?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
@@ -61,15 +73,15 @@ const Libraries = () => {
     return () => ctx.revert();
   }, []);
 
-  const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
-  const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
-  const heroImage = data.heroImage ?? DEFAULTS.heroImage;
-  const section1Title = data.section1Title ?? DEFAULTS.section1Title;
-  const allCards: CardItem[] = data.cards?.length > 0 ? data.cards : DEFAULTS.cards;
+  const heroTitle = data.heroTitle ?? LIBRARIES_DEFAULTS.heroTitle;
+  const heroSubtitle = data.heroSubtitle ?? LIBRARIES_DEFAULTS.heroSubtitle;
+  const heroImage = data.heroImage ?? LIBRARIES_DEFAULTS.heroImage;
+  const section1Title = data.section1Title ?? LIBRARIES_DEFAULTS.section1Title;
+  const allCards: CardItem[] = data.cards?.length > 0 ? data.cards : LIBRARIES_DEFAULTS.cards;
   const cards = allCards.map((card, i) => ({
     ...card,
     categories: card.categories?.length ? card.categories : ['Libraries'],
-    image: card.image || DEFAULTS.cards[i % DEFAULTS.cards.length].image,
+    image: card.image || LIBRARIES_DEFAULTS.cards[i % LIBRARIES_DEFAULTS.cards.length].image,
   }));
 
   return (
@@ -164,39 +176,41 @@ const Libraries = () => {
               const Icon = ICONS[i % ICONS.length];
               return (
                 <div key={f.title} className="group flex flex-col overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)]">
-                  <div className="relative overflow-hidden h-[220px] sm:h-[230px]">
-                    <img src={resolveMediaUrl(f.image)} alt={f.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent" />
-                    <span className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-800 shadow-sm backdrop-blur-sm">
-                      <Star className="h-3.5 w-3.5 text-cm-yellow" />
-                      {f.categories?.[0] ?? 'Library'}
-                    </span>
-                    <div className="absolute top-4 right-4 w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20 group-hover:bg-cm-blue group-hover:scale-110 transition-all duration-500">
-                      <Icon className="w-5 h-5 text-white" />
+                  <Link to={`/${LIBRARIES_PAGE_SLUG}/${slugifyLibraryTitle(f.title)}`} className="flex flex-1 flex-col">
+                    <div className="relative overflow-hidden h-[220px] sm:h-[230px]">
+                      <img src={resolveMediaUrl(f.image)} alt={f.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent" />
+                      <span className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-800 shadow-sm backdrop-blur-sm">
+                        <Star className="h-3.5 w-3.5 text-cm-yellow" />
+                        {f.categories?.[0] ?? 'Library'}
+                      </span>
+                      <div className="absolute top-4 right-4 w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20 group-hover:bg-cm-blue group-hover:scale-110 transition-all duration-500">
+                        <Icon className="w-5 h-5 text-white" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex flex-1 flex-col px-5 pb-4 pt-4">
-                    <h3 className="text-lg font-semibold text-slate-900 tracking-tight mb-2">{f.title}</h3>
-                    <p className="text-sm text-slate-600 leading-relaxed mb-3">{f.description}</p>
-                    <div className="mt-auto flex flex-wrap gap-2 mb-3">
-                      {f.categories?.map((category) => <span key={category} className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-slate-600">{category}</span>)}
+                    <div className="flex flex-1 flex-col px-5 pb-2 pt-4">
+                      <h3 className="text-lg font-semibold text-slate-900 tracking-tight mb-2">{f.title}</h3>
+                      <p className="text-sm text-slate-600 leading-relaxed mb-3">{f.description}</p>
+                      <div className="mt-auto flex flex-wrap gap-2">
+                        {f.categories?.map((category) => <span key={category} className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-slate-600">{category}</span>)}
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between text-slate-700">
-                      {isSaved(f) ? (
-                        <div className="flex items-center gap-1.5">
-                          <span className="flex items-center gap-1.5 rounded-lg bg-green-600 px-2.5 py-1.5 text-[10px] font-bold text-white">
-                            <Check className="h-3.5 w-3.5" /> Added to wishlist
-                          </span>
-                          <button type="button" onClick={() => remove(f)} disabled={isPending(f)} aria-label={`Remove ${f.title} from wishlist`} className="flex items-center justify-center rounded-lg bg-red-50 p-1.5 text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50">
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      ) : (
-                        <button type="button" onClick={() => add(f)} disabled={isPending(f)} className="flex items-center gap-1.5 rounded-lg bg-cm-blue px-2.5 py-1.5 text-[10px] font-bold text-white shadow-sm transition-all hover:bg-cm-blue-dark disabled:opacity-50">
-                          <Heart className="h-3.5 w-3.5" /> Add to wishlist
+                  </Link>
+                  <div className="flex items-center justify-between px-5 pb-4 pt-3 text-slate-700">
+                    {isSaved(f) ? (
+                      <div className="flex items-center gap-1.5">
+                        <span className="flex items-center gap-1.5 rounded-lg bg-green-600 px-2.5 py-1.5 text-[10px] font-bold text-white">
+                          <Check className="h-3.5 w-3.5" /> Added to wishlist
+                        </span>
+                        <button type="button" onClick={() => remove(f)} disabled={isPending(f)} aria-label={`Remove ${f.title} from wishlist`} className="flex items-center justify-center rounded-lg bg-red-50 p-1.5 text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50">
+                          <Trash2 className="h-3.5 w-3.5" />
                         </button>
-                      )}
-                    </div>
+                      </div>
+                    ) : (
+                      <button type="button" onClick={() => add(f)} disabled={isPending(f)} className="flex items-center gap-1.5 rounded-lg bg-cm-blue px-2.5 py-1.5 text-[10px] font-bold text-white shadow-sm transition-all hover:bg-cm-blue-dark disabled:opacity-50">
+                        <Heart className="h-3.5 w-3.5" /> Add to wishlist
+                      </button>
+                    )}
                   </div>
                 </div>
               );

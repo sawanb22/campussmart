@@ -239,7 +239,7 @@ export default function CollegesUniversitiesForSale() {
                 <MapPin className="h-4 w-4 text-[#087ea4]" /> Region
               </h3>
               <ul className="space-y-1">
-                {(['All', ...REGIONS] as const).map((region) => (
+                {REGIONS.map((region) => (
                   <li key={region}>
                     <button
                       type="button"
@@ -250,7 +250,7 @@ export default function CollegesUniversitiesForSale() {
                           : 'text-slate-600 hover:bg-slate-100'
                       }`}
                     >
-                      <span>{region === 'All' ? 'All Regions' : region + ' India'}</span>
+                      <span>{region + ' India'}</span>
                       <span className={`text-xs ${selectedRegion === region ? 'text-white/80' : 'text-slate-400'}`}>{regionCounts[region]}</span>
                     </button>
                   </li>

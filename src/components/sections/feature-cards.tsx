@@ -32,16 +32,16 @@ const defaultSidebar = {
     { label: 'Complete Guide on AI Implementation', href: '/ai-guide' },
     { label: 'Setting Up a College in India', href: '/setup-college' },
     { label: 'UGC Guidelines for Digital Campus', href: '/ugc-guidelines' },
-    { label: 'Product Catalog 2025', href: '/product-catalog' },
-    { label: 'Lookbook – Play Furniture', href: '/lookbook' },
+    { label: 'Product Catalog 2025', href: '/catalogues' },
+    { label: 'Lookbook – Play Furniture', href: '/furniture' },
   ],
   completedProjects: [
-    { label: 'Campus Master Planning', href: '/catalogues' },
-    { label: '20 Stunning College Buildings', href: '/catalogues' },
-    { label: 'Academic buildings', href: '/catalogues' },
-    { label: 'Research facilities', href: '/catalogues' },
-    { label: 'Student life centers', href: '/catalogues' },
-    { label: 'Athletic complexes', href: '/catalogues' },
+    { label: 'Campus Master Planning', href: '/campus-master-planning' },
+    { label: '20 Stunning College Buildings', href: '/campus-master-planning' },
+    { label: 'Academic buildings', href: '/campus-master-planning' },
+    { label: 'Research facilities', href: '/innovation-centers' },
+    { label: 'Student life centers', href: '/innovation-centers' },
+    { label: 'Athletic complexes', href: '/sports-infrastructure' },
   ],
   contacts: [
     { bg: '#FFD700', title: 'DESIGN & ARCHITECTURE', contact: 'info@campusmart.in', href: 'mailto:info@campusmart.in', isEmail: true, queryText: 'FOR QUERIES ON' },
@@ -77,8 +77,18 @@ const FeatureCards = () => {
       ? { ...item, href: '/colleges-universities-for-sale' }
       : item
   );
-  const resources = Array.isArray(rawSidebar.resources) ? rawSidebar.resources : defaultSidebar.resources;
-  const completedProjects = Array.isArray(rawSidebar.completedProjects) ? rawSidebar.completedProjects : defaultSidebar.completedProjects;
+  const resources = (Array.isArray(rawSidebar.resources) ? rawSidebar.resources : defaultSidebar.resources).map((item: any) =>
+    item.label?.toLowerCase().includes('product catalog') || item.label?.toLowerCase().includes('product catalogue')
+      ? { ...item, href: '/catalogues' }
+      : item
+  );
+  const completedProjects = (Array.isArray(rawSidebar.completedProjects) ? rawSidebar.completedProjects : defaultSidebar.completedProjects).map((item: any) =>
+    item.label === 'Research facilities' || item.label === 'Student life centers'
+      ? { ...item, href: '/innovation-centers' }
+      : item.label === 'Athletic complexes'
+        ? { ...item, href: '/sports-infrastructure' }
+        : { ...item, href: '/campus-master-planning' }
+  );
   const contacts = Array.isArray(rawSidebar.contacts) ? rawSidebar.contacts : defaultSidebar.contacts;
 
   const sectionRef = useRef<HTMLElement>(null);

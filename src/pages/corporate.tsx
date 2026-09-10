@@ -214,31 +214,6 @@ const Corporate = () => {
         </div>
       </section>
 
-      {/* Highlights / Why Us */}
-      <section className="py-16 bg-cm-blue-dark text-white relative">
-        <div className="absolute bottom-0 right-0 p-8 opacity-5 pointer-events-none">
-          <Target className="w-[300px] h-[300px]" />
-        </div>
-        <div className="w-full mx-auto px-4 sm:px-8 max-w-6xl">
-          <div className="max-w-5xl mx-auto">
-            <h2 className="text-3xl md:text-5xl font-bold mb-12 tracking-tighter text-center leading-tight">
-              The Campus Mart Advantage.
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-               {(data.whyBullets ?? DEFAULTS.whyBullets).map((bullet: string, i: number) => (
-                    <div key={i} className="flex items-start gap-4 group">
-                      <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-cm-yellow transition-colors border border-white/10">
-                        <Award className="w-5 h-5 text-white group-hover:text-cm-blue-dark" />
-                      </div>
-                      <p className="text-lg font-semibold leading-tight group-hover:text-cm-yellow transition-colors font-opensans">
-                        {bullet}
-                      </p>
-                    </div>
-               ))}
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Executive Profiles */}
       <section id="team" className="py-20 md:py-24">

@@ -1,40 +1,32 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
+import { Link } from 'react-router-dom';
 import { Lightbulb, Zap, Users, Target } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { resolveMediaUrl } from '@/lib/media-url';
-
-interface Card { title: string; description: string; image?: string; }
-
-const DEFAULTS = {
-  heroTitle: 'Innovation Centres',
-  heroSubtitle: 'Create spaces that foster creativity and innovation. From maker spaces to research labs, we build environments for breakthrough thinking.',
-  heroImage: 'https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
-  section1Title: 'Innovation Solutions',
-  cards: [
-    { title: 'Maker Spaces', description: 'Collaborative spaces for hands-on creation and experimentation', image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Research Labs', description: 'Advanced facilities for student research and discovery', image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Innovation Hubs', description: 'Dynamic ecosystems for ideation and prototyping', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Startup Incubators', description: 'Business development spaces for student entrepreneurs', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-  ] as Card[],
-};
+import {
+  INNOVATION_CENTRES_PAGE_SLUG,
+  INNOVATION_CENTRES_DEFAULTS,
+  slugifyInnovationCentreTitle,
+  type InnovationCentresCard,
+} from './innovation-centres.data';
 
 const ICONS = [Lightbulb, Zap, Users, Target];
 
 const InnovationCentres = () => {
   const cardsRef = useRef<HTMLDivElement>(null);
-  const { data } = usePageData('innovation-centres');
+  const { data } = usePageData(INNOVATION_CENTRES_PAGE_SLUG);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
       const cards = cardsRef.current?.children;
       if (cards) {
-        gsap.fromTo(cards, 
-          { opacity: 0, y: 30 }, 
-          { 
-            opacity: 1, y: 0, 
-            duration: 0.6, 
-            stagger: 0.1, 
+        gsap.fromTo(cards,
+          { opacity: 0, y: 30 },
+          {
+            opacity: 1, y: 0,
+            duration: 0.6,
+            stagger: 0.1,
             scrollTrigger: {
               trigger: cardsRef.current,
               start: 'top 85%',
@@ -46,8 +38,10 @@ const InnovationCentres = () => {
     return () => ctx.revert();
   }, []);
 
-  const section1Title = data.section1Title ?? DEFAULTS.section1Title;
-  const cards: Card[] = (data.cards && data.cards.length > 0) ? data.cards : DEFAULTS.cards;
+  const section1Title = data.section1Title ?? INNOVATION_CENTRES_DEFAULTS.section1Title;
+  const cards: InnovationCentresCard[] = (data.cards && data.cards.length > 0) ? data.cards : INNOVATION_CENTRES_DEFAULTS.cards;
+
+  const cardLink = (card: InnovationCentresCard) => `/${INNOVATION_CENTRES_PAGE_SLUG}/${slugifyInnovationCentreTitle(card.title)}`;
 
   return (
     <main className="min-h-screen bg-white">
@@ -65,7 +59,11 @@ const InnovationCentres = () => {
             {cards.map((item, i) => {
               const Icon = ICONS[i % ICONS.length];
               return (
-                <div key={item.title} className="group bg-white border border-slate-200/70 rounded-[2rem] hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)] transition duration-300 hover:-translate-y-1 flex flex-col shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] min-h-[360px] overflow-hidden">
+                <Link
+                  key={item.title}
+                  to={cardLink(item)}
+                  className="group bg-white border border-slate-200/70 rounded-[2rem] hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)] transition duration-300 hover:-translate-y-1 flex flex-col shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] min-h-[360px] overflow-hidden"
+                >
                   <div className="relative overflow-hidden aspect-[4/5]">
                     <img src={resolveMediaUrl(item.image)} alt={item.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent" />
@@ -80,7 +78,7 @@ const InnovationCentres = () => {
                        <span className="text-xs uppercase tracking-[0.28em] text-slate-400">Innovation</span>
                     </div>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>

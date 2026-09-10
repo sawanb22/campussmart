@@ -7,7 +7,19 @@ import { usePageData } from '@/hooks/usePageData';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const DEFAULTS = {
+export const NEW_ENVIRONMENTS_PAGE_SLUG = 'new-environments';
+
+export function slugifyNewEnvironmentCard(title: string): string {
+  return (
+    title
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'space'
+  );
+}
+
+export const NEW_ENVIRONMENTS_DEFAULTS = {
   heroTitle: 'New Learning Environments',
   heroSubtitle: 'Create innovative spaces that inspire learning, foster creativity, and adapt to the evolving needs of modern education.',
   heroImage: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
@@ -59,7 +71,7 @@ const ICONS = [Sparkles, Users, Palette, Music, Microscope, Zap];
 const NewEnvironments = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
-  const { data } = usePageData('new-environments');
+  const { data } = usePageData(NEW_ENVIRONMENTS_PAGE_SLUG);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -85,18 +97,17 @@ const NewEnvironments = () => {
     return () => ctx.revert();
   }, []);
 
-  const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
-  const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
-  const heroImage = data.heroImage ?? DEFAULTS.heroImage;
-  const section1Title = data.section1Title ?? DEFAULTS.section1Title;
+  const heroTitle = data.heroTitle ?? NEW_ENVIRONMENTS_DEFAULTS.heroTitle;
+  const heroSubtitle = data.heroSubtitle ?? NEW_ENVIRONMENTS_DEFAULTS.heroSubtitle;
+  const heroImage = data.heroImage ?? NEW_ENVIRONMENTS_DEFAULTS.heroImage;
+  const section1Title = data.section1Title ?? NEW_ENVIRONMENTS_DEFAULTS.section1Title;
 
   const cards: Card[] = (data.cards && data.cards.length > 0)
     ? data.cards.map((c: any, i: number) => ({
       ...c,
-      image: c.image || DEFAULTS.cards[i]?.image || DEFAULTS.cards[0].image,
-      href: c.href || DEFAULTS.cards[i]?.href || '/furniture'
+      image: c.image || NEW_ENVIRONMENTS_DEFAULTS.cards[i]?.image || NEW_ENVIRONMENTS_DEFAULTS.cards[0].image,
     }))
-    : DEFAULTS.cards;
+    : NEW_ENVIRONMENTS_DEFAULTS.cards;
 
   return (
     <main className="min-h-screen bg-white">
@@ -131,7 +142,7 @@ const NewEnvironments = () => {
             {cards.map((space, i) => {
               const Icon = ICONS[i % ICONS.length];
               return (
-                <Link key={space.title} to={space.href || '/furniture'} className="group bg-white border border-slate-200/70 rounded-[2rem] hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)] transition duration-300 hover:-translate-y-1 flex flex-col shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] min-h-[360px] overflow-hidden">
+                <Link key={space.title} to={`/${NEW_ENVIRONMENTS_PAGE_SLUG}/${slugifyNewEnvironmentCard(space.title)}`} className="group bg-white border border-slate-200/70 rounded-[2rem] hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)] transition duration-300 hover:-translate-y-1 flex flex-col shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] min-h-[360px] overflow-hidden">
                   <div className="relative overflow-hidden aspect-[4/5]">
                     <img src={space.image} alt={space.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent" />

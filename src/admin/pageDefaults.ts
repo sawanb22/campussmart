@@ -17,16 +17,32 @@ export const pageDefaults: Record<string, any> = {
   ctaSubtitle: 'Tell us about your buildings and processes — our team will map out the right AI and digital tools for your campus.'
 },
   'ai-guide': {
-  heroTitle: 'AI Implementation Guide',
-  heroSubtitle: 'A comprehensive guide for implementing AI in educational institutions.',
-  section1Title: "What's Inside",
-  features: [
-    'Understanding AI in Education',
-    'Implementation Roadmap',
-    'Technology Requirements',
-    'Best Practices',
-    'Case Studies'
-  ]
+  sectionLabel: 'Explore the guide',
+  sectionTitle: 'AI, your way.',
+  sectionDescription: 'Helpful perspectives for leaders, faculty and teams shaping the next generation of learning environments.',
+  featured: {
+    category: 'Featured · Strategy',
+    title: 'Where should your campus begin with AI?',
+    description: 'A thoughtful starting point can turn a complex technology decision into a sequence of useful, measurable steps for your institution.',
+    image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=85'
+  },
+  filters: ['All', 'Strategy', 'Learning', 'Operations', 'People'],
+  cards: [
+    { category: 'Learning', title: 'Design an AI-ready learning space', description: 'The practical ingredients that help students experiment, collaborate and build confidence with emerging tools.', readTime: '5 min read', image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=85' },
+    { category: 'Operations', title: 'Start with the campus problems worth solving', description: 'A focused way to find high-value opportunities for automation without losing the human side of campus life.', readTime: '6 min read', image: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=800&q=85' },
+    { category: 'People', title: 'Help faculty lead the change', description: 'Build the trust, skills and shared language teams need before introducing AI into everyday work.', readTime: '4 min read', image: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=800&q=85' },
+    { category: 'Strategy', title: 'A simple roadmap for responsible AI', description: 'Move from first conversation to pilot project with governance that is useful rather than intimidating.', readTime: '7 min read', image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=85' },
+    { category: 'Learning', title: 'Make AI literacy part of campus culture', description: 'Small, consistent learning moments can make new technology feel accessible across every department.', readTime: '4 min read', image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=85' },
+    { category: 'Operations', title: 'Measure what better looks like', description: 'Choose signals that show whether a new digital tool is improving learning, time and experience on campus.', readTime: '5 min read', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=85' }
+  ],
+  latestTitle: 'Latest insights',
+  viewAllLabel: 'View all',
+  readMoreLabel: 'Read article',
+  newsletterLabel: 'Stay curious',
+  newsletterTitle: 'Good ideas, occasionally.',
+  newsletterDescription: 'Get useful campus technology ideas, new guides and practical stories delivered to your inbox. No noise, just things worth reading.',
+  newsletterPlaceholder: 'Your email address',
+  newsletterButtonLabel: 'Subscribe'
 },
   'ai-ml': {
   heroTitle: 'AI & Machine Learning, made classroom-ready',
@@ -274,14 +290,29 @@ export const pageDefaults: Record<string, any> = {
   ]
 },
   'classifieds': {
-  heroTitle: 'Classifieds',
-  heroSubtitle: 'Explore opportunities in the education sector. Colleges for sale, funding options, and partnerships.',
+  heroTitle: 'Education opportunities, thoughtfully matched.',
+  heroSubtitle: 'Explore institutions, funding pathways, partnerships and roles shaping the future of education.',
+  categories: ['All opportunities', 'Institutions', 'Funding', 'Partnerships', 'Careers'],
+  featured: {
+    eyebrow: 'Featured opportunity',
+    title: 'Find the right next step for your institution',
+    description: 'From acquisition and funding to strategic partnerships, discover practical ways to move an education project forward.',
+    image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1200&q=85'
+  },
+  ctaTitle: 'Have an opportunity to share?',
+  ctaSubtitle: 'Connect with the CampusMart team and reach education leaders looking for their next move.',
+  ctaButtonLabel: 'Send an enquiry',
   cards: [
-    { title: 'Colleges for Sale', description: 'Browse educational institutions available for acquisition', href: '/colleges-universities-for-sale' },
-    { title: 'Education Funding', description: 'Explore funding options for your institution', href: '' },
-    { title: 'Partnership Opportunities', description: 'Find partnership opportunities with running colleges', href: '/partner-with-colleges' },
+    { title: 'Colleges for Sale', category: 'Institutions', description: 'Browse educational institutions available for acquisition.', image: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=900&q=85', href: '/colleges-universities-for-sale' },
+    { title: 'Education Funding', category: 'Funding', description: 'Explore funding options for your institution.', image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=900&q=85', href: '' },
+    { title: 'Partnership Opportunities', category: 'Partnerships', description: 'Find partnership opportunities with running colleges.', image: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=900&q=85', href: '/partner-with-colleges' },
+    { title: 'Job Openings', category: 'Careers', description: 'Apply for current opportunities with our team.', image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=900&q=85', href: '/job-openings' },
   ],
 },
+  'job-openings': {
+    heroTitle: 'Job Openings',
+    heroSubtitle: 'Tell us about your experience and the opportunity you would like to pursue.',
+  },
   'collaboration': {
   heroTitle: 'Spaces built for working together',
   heroSubtitle: "Flexible rooms, pods and studios that turn group work, discussion and presentation into a normal part of campus life.",
@@ -715,16 +746,41 @@ export const pageDefaults: Record<string, any> = {
     ]
 },
   'setup-college': {
-  heroTitle: 'Setting Up a College in India',
-  heroSubtitle: 'Step-by-step guide to establishing a new college in India.',
-  section1Title: 'Guide Contents',
-  features: [
-    'Regulatory Requirements',
-    'Infrastructure Planning',
-    'Faculty Recruitment',
-    'Curriculum Development',
-    'Accreditation Process'
-  ]
+  pageTitle: 'CAMPUS SETUP',
+  featured: {
+    category: 'Planning · Campus Setup',
+    title: 'HOW TO PLAN A FUTURE-READY COLLEGE CAMPUS',
+    image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1200&q=85',
+    href: '/campus-master-planning'
+  },
+  greenFeature: {
+    category: 'Guide · Strategy',
+    title: 'BUILD A STRONG FOUNDATION FOR YOUR NEW COLLEGE',
+    description: 'A clear sequence helps founders move from an ambitious idea to a campus that is ready for students, faculty and long-term growth.'
+  },
+  greenTopics: ['START WITH YOUR INSTITUTIONAL VISION', 'MAP THE RIGHT ACADEMIC PROGRAMS', 'PLAN FOR PHASED CAMPUS GROWTH'],
+  smallFeature: {
+    category: 'Infrastructure · Campus Life',
+    title: 'DESIGN SPACES THAT HELP STUDENTS THRIVE',
+    image: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=900&q=85',
+    href: '/campus-design-execution'
+  },
+  categoriesTitle: 'Explore Topics',
+  categoriesButtonLabel: 'View All Topics',
+  categories: ['Planning', 'Infrastructure', 'Academics', 'Compliance', 'Faculty', 'Technology', 'Campus Life', 'Funding', 'Admissions', 'Operations'],
+  latestTitle: 'LATEST\nCAMPUS GUIDES',
+  filterLabel: 'All Topics',
+  cards: [
+    { category: 'Planning', readTime: '06 MIN READ', title: 'THE COMPLETE ROADMAP FOR STARTING A COLLEGE', image: 'https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?auto=format&fit=crop&w=1000&q=85', href: '/campus-master-planning' },
+    { category: 'Infrastructure', readTime: '05 MIN READ', title: 'ESSENTIAL SPACES EVERY MODERN CAMPUS NEEDS', image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1000&q=85', href: '/campus-design-execution' },
+    { category: 'Academics', readTime: '04 MIN READ', title: 'HOW TO BUILD AN ACADEMIC MODEL THAT LASTS', image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1000&q=85', href: '/ai-ml' },
+    { category: 'Compliance', readTime: '07 MIN READ', title: 'A PRACTICAL GUIDE TO APPROVALS AND ACCREDITATION', image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1000&q=85', href: '/services' },
+    { category: 'Faculty', readTime: '05 MIN READ', title: 'ATTRACTING THE RIGHT FACULTY TO YOUR CAMPUS', image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1000&q=85', href: '/partner-with-colleges' },
+    { category: 'Technology', readTime: '06 MIN READ', title: 'THE DIGITAL SYSTEMS TO PLAN BEFORE OPENING DAY', image: 'https://images.unsplash.com/photo-1516321318423-f06a051b3e14?auto=format&fit=crop&w=1000&q=85', href: '/digital-transformation' }
+  ],
+  ctaTitle: 'BUILD A CAMPUS\nTHAT MOVES\nEDUCATION FORWARD.',
+  ctaButtonLabel: 'START PLANNING',
+  ctaHref: '/partnership'
 },
   'solutions': {
     heroTitle: 'Functional Solutions',
@@ -853,15 +909,37 @@ export const pageDefaults: Record<string, any> = {
   ]
 },
   'ugc-guidelines': {
-  heroTitle: 'UGC Guidelines for Digital Campus',
-  heroSubtitle: 'Latest UGC guidelines for digital transformation of campuses.',
-  section1Title: 'Key Guidelines',
-  features: [
-    'Digital Infrastructure Requirements',
-    'Online Learning Standards',
-    'Data Security Protocols',
-    'Student Privacy Guidelines',
-    'Compliance Checklist'
-  ]
+  brandName: 'CampusMart Journal',
+  headerActionLabel: 'Explore Campus Solutions',
+  headerActionHref: '/solutions',
+  navLinks: ['Guidelines', 'Campus Planning', 'Technology', 'Resources'],
+  pageTitle: 'Campus Digital Journal',
+  categories: ['All guidance', 'Digital Campus', 'Governance', 'Technology', 'Student Experience', 'UGC'],
+  featured: {
+    eyebrow: 'Featured guidance',
+    title: 'Building a responsible digital campus from the ground up',
+    description: 'A practical starting point for education teams planning connected learning environments, secure data practices and better digital experiences for every student.',
+    image: 'https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?auto=format&fit=crop&w=1200&q=85',
+    href: '/digital-transformation',
+    readMoreLabel: 'Read the guidance'
+  },
+  cards: [
+    { category: 'Digital Campus', readTime: '5 min read', title: 'What a connected campus needs before launch', description: 'A clear checklist for infrastructure, systems and teams preparing for a more connected institution.', image: 'https://images.unsplash.com/photo-1516321318423-f06a051b3e14?auto=format&fit=crop&w=900&q=85', author: 'CampusMart Team', authorImage: 'https://i.pravatar.cc/80?img=12', href: '/tech-infra' },
+    { category: 'Governance', readTime: '6 min read', title: 'Make student data privacy part of the design', description: 'Build trust into campus technology with practical privacy and access decisions from day one.', image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=900&q=85', author: 'CampusMart Team', authorImage: 'https://i.pravatar.cc/80?img=32', href: '/services' },
+    { category: 'Student Experience', readTime: '4 min read', title: 'Digital services that keep students moving', description: 'Thoughtful digital touchpoints can make everyday campus journeys simpler and more inclusive.', image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=900&q=85', author: 'CampusMart Team', authorImage: 'https://i.pravatar.cc/80?img=47', href: '/campus-automation' }
+  ],
+  moreTitle: 'More campus resources',
+  moreCards: [
+    { category: 'Campus planning', title: 'Plan spaces around the way students learn', description: 'Shape learning environments around real student journeys.', image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=900&q=85', href: '/campus-master-planning' },
+    { category: 'Operations', title: 'Spend less time on manual campus work', description: 'Connect everyday workflows so staff can focus on students.', image: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=900&q=85', href: '/campus-automation' },
+    { category: 'Technology', title: 'Choose tools that help teams do more', description: 'Build a practical digital foundation for your institution.', image: 'https://images.unsplash.com/photo-1516321318423-f06a051b3e14?auto=format&fit=crop&w=900&q=85', href: '/digital-transformation' },
+  ],
+  footerDescription: 'Practical guidance for education leaders building safer, smarter and more human campuses.',
+  footerColumns: [
+    { title: 'Explore', links: ['Campus Planning', 'Technology', 'Resources'] },
+    { title: 'Company', links: ['About CampusMart', 'Contact', 'Partnerships'] },
+    { title: 'Connect', links: ['LinkedIn', 'Instagram', 'YouTube'] }
+  ],
+  copyright: '© 2026 CampusMart. All rights reserved.'
 },
 };

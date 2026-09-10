@@ -13,6 +13,7 @@ const PartnershipForm = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
     institution: '',
     message: '',
   });
@@ -112,14 +113,15 @@ const PartnershipForm = () => {
       await api.post('/contact', {
         name: formData.name,
         email: formData.email,
+        phone: formData.phone,
         institution: formData.institution,
         subject: 'Partnership Enquiry',
         message: formData.message,
       });
       setSubmitted(true);
-      setFormData({ name: '', email: '', institution: '', message: '' });
-    } catch {
-      setSubmitError('Failed to submit your enquiry. Please try again.');
+      setFormData({ name: '', email: '', phone: '', institution: '', message: '' });
+    } catch (err: any) {
+      setSubmitError(err.response?.data?.error || 'Failed to submit your enquiry. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -133,12 +135,12 @@ const PartnershipForm = () => {
           <form
             ref={formRef}
             onSubmit={handleSubmit}
-            className="bg-cm-gray rounded-2xl p-8"
+            className="bg-cm-gray rounded-2xl p-6"
           >
-            <h2 className="text-2xl font-bold text-cm-blue-dark mb-2">
+            <h2 className="text-2xl font-bold text-cm-blue-dark mb-1">
               Partnership Enquiry Form
             </h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 mb-4">
               Please fill out the form and we'll get back to you as soon as possible.
             </p>
             {submitted && (
@@ -152,7 +154,7 @@ const PartnershipForm = () => {
               </div>
             )}
 
-            <div className="space-y-5">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
               <div className="form-field">
                 <label htmlFor="partnership-name" className="form-label">
                   Full Name <span className="text-cm-red">*</span>
@@ -185,6 +187,24 @@ const PartnershipForm = () => {
               </div>
 
               <div className="form-field">
+                <label htmlFor="partnership-phone" className="form-label">
+                  Phone Number <span className="text-cm-red">*</span>
+                </label>
+                <input
+                  type="tel"
+                  pattern="(?:\+91[ -]?)?[6-9][0-9]{9}"
+                  minLength={10}
+                  maxLength={14}
+                  id="partnership-phone"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="form-input"
+                  placeholder="+91 98765 43210"
+                  required
+                />
+              </div>
+
+              <div className="form-field">
                 <label htmlFor="partnership-institution" className="form-label">
                   Institution
                 </label>
@@ -198,7 +218,7 @@ const PartnershipForm = () => {
                 />
               </div>
 
-              <div className="form-field">
+              <div className="form-field lg:col-span-2">
                 <label htmlFor="partnership-message" className="form-label">
                   Message <span className="text-cm-red">*</span>
                 </label>
@@ -206,7 +226,7 @@ const PartnershipForm = () => {
                   id="partnership-message"
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  className="form-input min-h-[120px] resize-none"
+                  className="form-input min-h-[88px] resize-none"
                   placeholder="Tell us about your requirements..."
                   required
                 />
@@ -215,7 +235,7 @@ const PartnershipForm = () => {
               <button
                 type="submit"
                 disabled={submitting}
-                className="btn-primary w-full flex items-center justify-center gap-2"
+                className="btn-primary w-full lg:col-span-2 flex items-center justify-center gap-2"
               >
                 <Send className="w-5 h-5" />
                 {submitting ? 'Submitting...' : 'Submit Enquiry'}

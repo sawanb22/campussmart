@@ -15,3 +15,7 @@ import path from 'path';
 export const UPLOADS_DIR = process.env.UPLOADS_DIR
     ? path.resolve(process.env.UPLOADS_DIR)
     : path.resolve(process.cwd(), 'uploads');
+
+export const RESUMES_DIR = process.env.RESUMES_DIR
+    ? path.resolve(process.env.RESUMES_DIR)
+    : path.resolve(process.cwd(), 'private-resumes');

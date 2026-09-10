@@ -5,16 +5,48 @@ import { pageDefaults } from '../pageDefaults';
 import MediaImageField from '../components/MediaImageField';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-interface CardItem { title: string; description: string; image?: string; href?: string; categories?: string[]; }
+interface CardItem { title: string; description: string; image?: string; href?: string; category?: string; readTime?: string; categories?: string[]; }
+interface MoreCardItem { title: string; category: string; description?: string; image?: string; href?: string; }
 interface SectionItem { heading: string; body: string; bullets?: string[]; }
 interface PageData {
+    pageTitle?: string;
+    heroLabel?: string;
     heroTitle?: string;
     heroSubtitle?: string;
     heroImage?: string;
     filterLabel?: string;
+    sectionLabel?: string;
     section1Title?: string;
+    sectionDescription?: string;
     section2Title?: string;
     section2Description?: string;
+    latestTitle?: string;
+    viewAllLabel?: string;
+    readMoreLabel?: string;
+    newsletterLabel?: string;
+    newsletterTitle?: string;
+    newsletterDescription?: string;
+    newsletterPlaceholder?: string;
+    newsletterButtonLabel?: string;
+    featured?: { category?: string; eyebrow?: string; title?: string; description?: string; image?: string; href?: string; readMoreLabel?: string };
+    brandName?: string;
+    headerActionLabel?: string;
+    headerActionHref?: string;
+    navLinks?: string[];
+    moreTitle?: string;
+    moreCards?: MoreCardItem[];
+    footerDescription?: string;
+    footerColumns?: { title: string; links: string[] }[];
+    copyright?: string;
+    greenFeature?: { category?: string; title?: string; description?: string };
+    smallFeature?: { category?: string; title?: string; image?: string; href?: string };
+    greenTopics?: string[];
+    categoriesTitle?: string;
+    categoriesButtonLabel?: string;
+    categories?: string[];
+    ctaButtonLabel?: string;
+    ctaHref?: string;
+    filters?: string[];
     ctaTitle?: string;
     ctaSubtitle?: string;
     cards?: CardItem[];
@@ -187,6 +219,39 @@ function InlinePageEditor({ page, onClose, onSaved }: {
     };
     const addCard = () => set('cards', [...(data.cards ?? []), { title: 'New Card', description: '' }]);
     const removeCard = (i: number) => set('cards', (data.cards ?? []).filter((_: any, idx: number) => idx !== i));
+    const setFeatured = (field: string, value: string) => set('featured', { ...(data.featured ?? {}), [field]: value });
+    const setGreenFeature = (field: string, value: string) => set('greenFeature', { ...(data.greenFeature ?? {}), [field]: value });
+    const setSmallFeature = (field: string, value: string) => set('smallFeature', { ...(data.smallFeature ?? {}), [field]: value });
+    const setGreenTopic = (i: number, value: string) => {
+        const topics = [...(data.greenTopics ?? [])]; topics[i] = value; set('greenTopics', topics);
+    };
+    const addGreenTopic = () => set('greenTopics', [...(data.greenTopics ?? []), 'NEW CAMPUS PLANNING TOPIC']);
+    const removeGreenTopic = (i: number) => set('greenTopics', (data.greenTopics ?? []).filter((_: string, idx: number) => idx !== i));
+    const setUgcArrayItem = (key: string, i: number, value: string) => {
+        const values = [...(data[key] ?? [])]; values[i] = value; set(key, values);
+    };
+    const addUgcArrayItem = (key: string, value: string) => set(key, [...(data[key] ?? []), value]);
+    const removeUgcArrayItem = (key: string, i: number) => set(key, (data[key] ?? []).filter((_: string, idx: number) => idx !== i));
+    const setMoreCard = (i: number, field: string, value: string) => {
+        const cards = [...(data.moreCards ?? [])]; cards[i] = { ...cards[i], [field]: value }; set('moreCards', cards);
+    };
+    const addMoreCard = () => set('moreCards', [...(data.moreCards ?? []), { title: 'New resource', category: 'Topic', href: '' }]);
+    const removeMoreCard = (i: number) => set('moreCards', (data.moreCards ?? []).filter((_: MoreCardItem, idx: number) => idx !== i));
+    const setFooterColumn = (i: number, field: string, value: any) => {
+        const columns = [...(data.footerColumns ?? [])]; columns[i] = { ...columns[i], [field]: value }; set('footerColumns', columns);
+    };
+    const addFooterColumn = () => set('footerColumns', [...(data.footerColumns ?? []), { title: 'New column', links: ['New link'] }]);
+    const removeFooterColumn = (i: number) => set('footerColumns', (data.footerColumns ?? []).filter((_: any, idx: number) => idx !== i));
+    const setCategory = (i: number, value: string) => {
+        const categories = [...(data.categories ?? [])]; categories[i] = value; set('categories', categories);
+    };
+    const addCategory = () => set('categories', [...(data.categories ?? []), 'New Topic']);
+    const removeCategory = (i: number) => set('categories', (data.categories ?? []).filter((_: string, idx: number) => idx !== i));
+    const setFilter = (i: number, value: string) => {
+        const filters = [...(data.filters ?? [])]; filters[i] = value; set('filters', filters);
+    };
+    const addFilter = () => set('filters', [...(data.filters ?? []), 'New filter']);
+    const removeFilter = (i: number) => set('filters', (data.filters ?? []).filter((_: string, idx: number) => idx !== i));
 
     const setSection2Card = (i: number, field: string, val: any) => {
         const cards = [...(data.section2Cards ?? [])]; cards[i] = { ...cards[i], [field]: val }; set('section2Cards', cards);
@@ -372,8 +437,7 @@ function InlinePageEditor({ page, onClose, onSaved }: {
                 ) : (
                     // ─── GENERIC TEMPLATE EDITOR ──────────────────────────────────────────────────
                     <>
-                        {/* Always show Hero text as every page uses it. Image is conditional. */}
-                        <section className="space-y-6">
+                        {page.slug !== 'ai-guide' && page.slug !== 'ugc-guidelines' && <section className="space-y-6">
                             <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
                                 <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Hero Banner Content</h4>
                             </div>
@@ -388,7 +452,173 @@ function InlinePageEditor({ page, onClose, onSaved }: {
                                     </>
                                 )}
                             </div>
-                        </section>
+                        </section>}
+
+                        {page.slug === 'ai-guide' && (
+                            <>
+                                <section className="space-y-6">
+                                    <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Journal Layout Content</h4>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <Field label="Section Eyebrow" value={data.sectionLabel ?? ''} onChange={v => set('sectionLabel', v)} />
+                                        <Field label="Section Heading" value={data.sectionTitle ?? ''} onChange={v => set('sectionTitle', v)} />
+                                        <Field label="Section Description" value={data.sectionDescription ?? ''} onChange={v => set('sectionDescription', v)} multiline />
+                                        <Field label="Latest Articles Heading" value={data.latestTitle ?? ''} onChange={v => set('latestTitle', v)} />
+                                        <Field label="View All Label" value={data.viewAllLabel ?? ''} onChange={v => set('viewAllLabel', v)} />
+                                        <Field label="Featured Link Label" value={data.readMoreLabel ?? ''} onChange={v => set('readMoreLabel', v)} />
+                                    </div>
+                                </section>
+
+                                <section className="space-y-6">
+                                    <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Featured Article</h4>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <Field label="Category Label" value={data.featured?.category ?? ''} onChange={v => setFeatured('category', v)} />
+                                        <Field label="Article Title" value={data.featured?.title ?? ''} onChange={v => setFeatured('title', v)} />
+                                        <Field label="Article Description" value={data.featured?.description ?? ''} onChange={v => setFeatured('description', v)} multiline />
+                                        <MediaImageField label="Featured Image" value={data.featured?.image ?? ''} onChange={v => setFeatured('image', v)} previewClassName="h-32" />
+                                    </div>
+                                </section>
+
+                                <section className="space-y-6">
+                                    <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Article Filters</h4>
+                                        <button onClick={addFilter} className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-amber-700 transition-all shadow-md"><Plus className="w-4 h-4" /> Add Filter</button>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                        {(data.filters ?? []).map((filter: string, i: number) => <div key={i} className="flex items-center gap-2"><input className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm" value={filter} onChange={e => setFilter(i, e.target.value)} /><button onClick={() => removeFilter(i)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button></div>)}
+                                    </div>
+                                </section>
+
+                                <section className="space-y-6">
+                                    <div className="flex items-center gap-2 pb-2 border-b border-gray-100"><h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Newsletter Block</h4></div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <Field label="Eyebrow" value={data.newsletterLabel ?? ''} onChange={v => set('newsletterLabel', v)} />
+                                        <Field label="Heading" value={data.newsletterTitle ?? ''} onChange={v => set('newsletterTitle', v)} />
+                                        <Field label="Description" value={data.newsletterDescription ?? ''} onChange={v => set('newsletterDescription', v)} multiline />
+                                        <Field label="Email Placeholder" value={data.newsletterPlaceholder ?? ''} onChange={v => set('newsletterPlaceholder', v)} />
+                                        <Field label="Button Label" value={data.newsletterButtonLabel ?? ''} onChange={v => set('newsletterButtonLabel', v)} />
+                                    </div>
+                                </section>
+                            </>
+                        )}
+
+                        {page.slug === 'setup-college' && (
+                            <>
+                                <section className="space-y-6">
+                                    <div className="flex items-center gap-2 pb-2 border-b border-gray-100"><h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Campus Guide Layout</h4></div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <Field label="Page Title" value={data.pageTitle ?? ''} onChange={v => set('pageTitle', v)} />
+                                        <Field label="Latest Guides Heading" value={data.latestTitle ?? ''} onChange={v => set('latestTitle', v)} multiline />
+                                        <Field label="Topics Heading" value={data.categoriesTitle ?? ''} onChange={v => set('categoriesTitle', v)} />
+                                        <Field label="Topics Button Label" value={data.categoriesButtonLabel ?? ''} onChange={v => set('categoriesButtonLabel', v)} />
+                                        <Field label="Article Filter Label" value={data.filterLabel ?? ''} onChange={v => set('filterLabel', v)} />
+                                    </div>
+                                </section>
+
+                                <section className="space-y-6">
+                                    <div className="flex items-center gap-2 pb-2 border-b border-gray-100"><h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Large Feature</h4></div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <Field label="Category" value={data.featured?.category ?? ''} onChange={v => setFeatured('category', v)} />
+                                        <Field label="Title" value={data.featured?.title ?? ''} onChange={v => setFeatured('title', v)} />
+                                        <Field label="Link" value={data.featured?.href ?? ''} onChange={v => setFeatured('href', v)} />
+                                        <MediaImageField label="Image" value={data.featured?.image ?? ''} onChange={v => setFeatured('image', v)} previewClassName="h-32" />
+                                    </div>
+                                </section>
+
+                                <section className="space-y-6">
+                                    <div className="flex items-center gap-2 pb-2 border-b border-gray-100"><h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Green Guide Feature</h4></div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <Field label="Category" value={data.greenFeature?.category ?? ''} onChange={v => setGreenFeature('category', v)} />
+                                        <Field label="Title" value={data.greenFeature?.title ?? ''} onChange={v => setGreenFeature('title', v)} />
+                                        <Field label="Description" value={data.greenFeature?.description ?? ''} onChange={v => setGreenFeature('description', v)} multiline />
+                                    </div>
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between"><label className="block text-sm font-bold text-gray-700">Topic Rows</label><button onClick={addGreenTopic} className="text-xs font-bold text-blue-600 hover:text-blue-800">+ Add topic</button></div>
+                                        {(data.greenTopics ?? []).map((topic: string, i: number) => <div key={i} className="flex items-center gap-3"><input className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm" value={topic} onChange={e => setGreenTopic(i, e.target.value)} /><button onClick={() => removeGreenTopic(i)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button></div>)}
+                                    </div>
+                                </section>
+
+                                <section className="space-y-6">
+                                    <div className="flex items-center gap-2 pb-2 border-b border-gray-100"><h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Small Feature</h4></div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <Field label="Category" value={data.smallFeature?.category ?? ''} onChange={v => setSmallFeature('category', v)} />
+                                        <Field label="Title" value={data.smallFeature?.title ?? ''} onChange={v => setSmallFeature('title', v)} />
+                                        <Field label="Link" value={data.smallFeature?.href ?? ''} onChange={v => setSmallFeature('href', v)} />
+                                        <MediaImageField label="Image" value={data.smallFeature?.image ?? ''} onChange={v => setSmallFeature('image', v)} previewClassName="h-32" />
+                                    </div>
+                                </section>
+
+                                <section className="space-y-6">
+                                    <div className="flex items-center justify-between pb-2 border-b border-gray-100"><h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Topic Rail</h4><button onClick={addCategory} className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-amber-700 transition-all shadow-md"><Plus className="w-4 h-4" /> Add Topic</button></div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">{(data.categories ?? []).map((category: string, i: number) => <div key={i} className="flex items-center gap-2"><input className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm" value={category} onChange={e => setCategory(i, e.target.value)} /><button onClick={() => removeCategory(i)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button></div>)}</div>
+                                </section>
+
+                                <section className="space-y-6">
+                                    <div className="flex items-center gap-2 pb-2 border-b border-gray-100"><h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Planning CTA</h4></div>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6"><Field label="CTA Heading" value={data.ctaTitle ?? ''} onChange={v => set('ctaTitle', v)} multiline /><Field label="Button Label" value={data.ctaButtonLabel ?? ''} onChange={v => set('ctaButtonLabel', v)} /><Field label="Button Link" value={data.ctaHref ?? ''} onChange={v => set('ctaHref', v)} /></div>
+                                </section>
+                            </>
+                        )}
+
+                        {page.slug === 'ugc-guidelines' && (
+                            <>
+                                <section className="space-y-6">
+                                    <div className="flex items-center gap-2 pb-2 border-b border-gray-100"><h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Journal Frame & Navigation</h4></div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <Field label="Brand Name" value={data.brandName ?? ''} onChange={v => set('brandName', v)} />
+                                        <Field label="Page Title" value={data.pageTitle ?? ''} onChange={v => set('pageTitle', v)} />
+                                        <Field label="Header Action Label" value={data.headerActionLabel ?? ''} onChange={v => set('headerActionLabel', v)} />
+                                        <Field label="Header Action Link" value={data.headerActionHref ?? ''} onChange={v => set('headerActionHref', v)} />
+                                    </div>
+                                    <div className="space-y-3"><div className="flex items-center justify-between"><label className="block text-sm font-bold text-gray-700">Navigation Links</label><button onClick={() => addUgcArrayItem('navLinks', 'New link')} className="text-xs font-bold text-blue-600 hover:text-blue-800">+ Add link</button></div>{(data.navLinks ?? []).map((link: string, i: number) => <div key={i} className="flex items-center gap-3"><input className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm" value={link} onChange={e => setUgcArrayItem('navLinks', i, e.target.value)} /><button onClick={() => removeUgcArrayItem('navLinks', i)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button></div>)}</div>
+                                </section>
+                                <section className="space-y-6">
+                                    <div className="flex items-center gap-2 pb-2 border-b border-gray-100"><h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Categories</h4></div>
+                                    <div className="space-y-3"><div className="flex items-center justify-between"><label className="block text-sm font-bold text-gray-700">Category Pills</label><button onClick={() => addUgcArrayItem('categories', 'New category')} className="text-xs font-bold text-blue-600 hover:text-blue-800">+ Add category</button></div><div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">{(data.categories ?? []).map((category: string, i: number) => <div key={i} className="flex items-center gap-2"><input className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm" value={category} onChange={e => setUgcArrayItem('categories', i, e.target.value)} /><button onClick={() => removeUgcArrayItem('categories', i)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button></div>)}</div></div>
+                                </section>
+                                <section className="space-y-6">
+                                    <div className="flex items-center gap-2 pb-2 border-b border-gray-100"><h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Featured Guidance</h4></div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6"><Field label="Eyebrow" value={data.featured?.eyebrow ?? ''} onChange={v => setFeatured('eyebrow', v)} /><Field label="Title" value={data.featured?.title ?? ''} onChange={v => setFeatured('title', v)} /><Field label="Description" value={data.featured?.description ?? ''} onChange={v => setFeatured('description', v)} multiline /><Field label="Link" value={data.featured?.href ?? ''} onChange={v => setFeatured('href', v)} /><Field label="Read Link Label" value={data.featured?.readMoreLabel ?? ''} onChange={v => setFeatured('readMoreLabel', v)} /><MediaImageField label="Featured Image" value={data.featured?.image ?? ''} onChange={v => setFeatured('image', v)} previewClassName="h-32" /></div>
+                                </section>
+                                <section className="space-y-6">
+                                    <div className="flex items-center gap-2 pb-2 border-b border-gray-100"><h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">More Resources</h4></div><Field label="Section Heading" value={data.moreTitle ?? ''} onChange={v => set('moreTitle', v)} /><div className="flex justify-end"><button onClick={addMoreCard} className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-blue-700 transition-all shadow-md"><Plus className="w-4 h-4" /> Add Resource</button></div><div className="grid grid-cols-1 md:grid-cols-3 gap-4">{(data.moreCards ?? []).map((card: MoreCardItem, i: number) => <div key={i} className="relative space-y-3 rounded-2xl border border-gray-200 bg-gray-50/30 p-4"><button onClick={() => removeMoreCard(i)} className="absolute right-3 top-3 text-red-400 hover:text-red-600"><Trash2 className="w-4 h-4" /></button><Field label="Category" value={card.category ?? ''} onChange={v => setMoreCard(i, 'category', v)} /><Field label="Title" value={card.title ?? ''} onChange={v => setMoreCard(i, 'title', v)} multiline /><Field label="Description" value={card.description ?? ''} onChange={v => setMoreCard(i, 'description', v)} multiline /><Field label="Link" value={card.href ?? ''} onChange={v => setMoreCard(i, 'href', v)} /><MediaImageField label="Card Image" value={card.image ?? ''} onChange={v => setMoreCard(i, 'image', v)} previewClassName="h-24" /></div>)}</div>
+                                </section>
+                                <section className="space-y-6">
+                                    <div className="flex items-center gap-2 pb-2 border-b border-gray-100"><h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Journal Footer</h4></div><Field label="Footer Description" value={data.footerDescription ?? ''} onChange={v => set('footerDescription', v)} multiline /><Field label="Copyright" value={data.copyright ?? ''} onChange={v => set('copyright', v)} /><div className="flex justify-end"><button onClick={addFooterColumn} className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-amber-700 transition-all shadow-md"><Plus className="w-4 h-4" /> Add Footer Column</button></div><div className="grid grid-cols-1 md:grid-cols-3 gap-4">{(data.footerColumns ?? []).map((column: { title: string; links: string[] }, i: number) => <div key={i} className="relative space-y-3 rounded-2xl border border-gray-200 bg-gray-50/30 p-4"><button onClick={() => removeFooterColumn(i)} className="absolute right-3 top-3 text-red-400 hover:text-red-600"><Trash2 className="w-4 h-4" /></button><Field label="Column Title" value={column.title ?? ''} onChange={v => setFooterColumn(i, 'title', v)} /><Field label="Links (comma-separated)" value={(column.links ?? []).join(', ')} onChange={v => setFooterColumn(i, 'links', v.split(',').map(link => link.trim()).filter(Boolean))} multiline /></div>)}</div>
+                                </section>
+                            </>
+                        )}
+
+                        {page.slug === 'classifieds' && (
+                            <>
+                                <section className="space-y-6">
+                                    <div className="flex items-center gap-2 border-b border-gray-100 pb-2"><h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800">Classifieds Journal Content</h4></div>
+                                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                        <Field label="Page Heading" value={data.heroTitle ?? ''} onChange={v => set('heroTitle', v)} />
+                                        <Field label="Page Description" value={data.heroSubtitle ?? ''} onChange={v => set('heroSubtitle', v)} multiline />
+                                        <Field label="CTA Heading" value={data.ctaTitle ?? ''} onChange={v => set('ctaTitle', v)} />
+                                        <Field label="CTA Description" value={data.ctaSubtitle ?? ''} onChange={v => set('ctaSubtitle', v)} multiline />
+                                        <Field label="CTA Button Label" value={data.ctaButtonLabel ?? ''} onChange={v => set('ctaButtonLabel', v)} />
+                                    </div>
+                                </section>
+                                <section className="space-y-6">
+                                    <div className="flex items-center gap-2 border-b border-gray-100 pb-2"><h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800">Featured Opportunity</h4></div>
+                                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                        <Field label="Eyebrow" value={data.featured?.eyebrow ?? ''} onChange={v => setFeatured('eyebrow', v)} />
+                                        <Field label="Title" value={data.featured?.title ?? ''} onChange={v => setFeatured('title', v)} />
+                                        <Field label="Description" value={data.featured?.description ?? ''} onChange={v => setFeatured('description', v)} multiline />
+                                        <MediaImageField label="Featured Image" value={data.featured?.image ?? ''} onChange={v => setFeatured('image', v)} previewClassName="h-32" />
+                                    </div>
+                                </section>
+                                <section className="space-y-6">
+                                    <div className="flex items-center gap-2 border-b border-gray-100 pb-2"><h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800">Opportunity Categories</h4></div>
+                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">{(data.categories ?? []).map((category: string, i: number) => <div key={i} className="flex items-center gap-2"><input className="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm" value={category} onChange={e => setUgcArrayItem('categories', i, e.target.value)} /><button onClick={() => removeUgcArrayItem('categories', i)} className="p-2 text-red-400 hover:bg-red-50"><Trash2 className="h-4 w-4" /></button></div>)}</div>
+                                </section>
+                            </>
+                        )}
 
                         {/* NDA & Mandate documents (colleges-universities-for-sale only) */}
                         {page.slug === 'colleges-universities-for-sale' && (
@@ -449,6 +679,10 @@ function InlinePageEditor({ page, onClose, onSaved }: {
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 <Field label="Card Title" value={card.title ?? ''} onChange={v => setCard(i, 'title', v)} />
                                                 <Field label="Card Description" value={card.description ?? ''} onChange={v => setCard(i, 'description', v)} multiline />
+                                                {(page.slug === 'ai-guide' || page.slug === 'setup-college' || page.slug === 'ugc-guidelines' || page.slug === 'classifieds') && <>
+                                                    <Field label="Article Category" value={card.category ?? ''} onChange={v => setCard(i, 'category', v)} placeholder="Strategy" />
+                                                    <Field label="Read Time" value={card.readTime ?? ''} onChange={v => setCard(i, 'readTime', v)} placeholder="5 min read" />
+                                                </>}
                                                 <MediaImageField label="Image (Optional)" value={card.image ?? ''} onChange={v => setCard(i, 'image', v)} previewClassName="h-24" />
                                                 {page.slug === 'colleges-universities-for-sale' && <>
                                                     <Field label="Location" value={card.location ?? ''} onChange={v => setCard(i, 'location', v)} placeholder="Bahraich" />
@@ -655,7 +889,7 @@ function InlinePageEditor({ page, onClose, onSaved }: {
                                 </div>
                             </section>
                         )}
-                        <section className="space-y-6">
+                        {page.slug !== 'setup-college' && <section className="space-y-6">
                             <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
                                 <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Conversion / CTA Footer</h4>
                             </div>
@@ -663,7 +897,7 @@ function InlinePageEditor({ page, onClose, onSaved }: {
                                 <Field label="Call-to-Action Text" value={data.ctaTitle ?? ''} onChange={v => set('ctaTitle', v)} placeholder="Heading for footer..." />
                                 <Field label="Sub-text Description" value={data.ctaSubtitle ?? ''} onChange={v => set('ctaSubtitle', v)} multiline placeholder="Actionable subtitle text…" />
                             </div>
-                        </section>
+                        </section>}
                     </>
                 )}
 
@@ -690,7 +924,7 @@ const MAIN_SLUGS = new Set([
     'solutions', 'corporate', 'catalogues', 'classifieds', 'login',
     'registration', 'my-account', 'request-quote', 'not-found',
     'privacy-policy', 'terms-of-use', 'payment-policy', 'replacement-return',
-    'order-rejection', 'partnership', 'partner-with-colleges', 'lookbook', 'ugc-guidelines',
+    'order-rejection', 'partnership', 'job-openings', 'partner-with-colleges', 'lookbook', 'ugc-guidelines',
 ]);
 
 // Primary category / solution pages

@@ -1,7 +1,7 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { UPLOADS_DIR } from '../lib/uploads-dir';
+import { RESUMES_DIR, UPLOADS_DIR } from '../lib/uploads-dir';
 
 const createStorage = (folder: string) =>
     multer.diskStorage({
@@ -49,5 +49,28 @@ export const uploadDocument = multer({
     fileFilter: (_req, file, cb) => {
         if (file.mimetype === 'application/pdf') cb(null, true);
         else cb(new Error('Only PDF files are allowed'));
+    },
+});
+
+export const uploadResume = multer({
+    storage: multer.diskStorage({
+        destination: (_req, _file, cb) => {
+            if (!fs.existsSync(RESUMES_DIR)) fs.mkdirSync(RESUMES_DIR, { recursive: true });
+            cb(null, RESUMES_DIR);
+        },
+        filename: (_req, file, cb) => {
+            const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+            cb(null, `${unique}${path.extname(file.originalname).toLowerCase()}`);
+        },
+    }),
+    limits: { fileSize: 10 * 1024 * 1024 },
+    fileFilter: (_req, file, cb) => {
+        const allowedTypes = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ];
+        if (allowedTypes.includes(file.mimetype)) cb(null, true);
+        else cb(new Error('Resume must be a PDF, DOC, or DOCX file'));
     },
 });

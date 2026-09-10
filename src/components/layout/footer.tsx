@@ -1,18 +1,30 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Youtube, Instagram, Linkedin } from 'lucide-react';
+import { useSiteContent } from '@/contexts/SiteContentContext';
 
-gsap.registerPlugin(ScrollTrigger);
+const DEFAULT_SOCIAL_URLS: Record<string, string> = {
+  social_facebook: 'https://www.facebook.com/schoolmart.in/',
+  social_twitter: 'https://x.com/schoolmartindia',
+  social_youtube: 'https://www.youtube.com/@schoolinnovationindia',
+  social_instagram: 'https://www.instagram.com/schoolmart.in/',
+  social_linkedin: 'https://www.linkedin.com/school/13397648/admin/inbox/thread/2-YTIyNjJhZTMtZDRhOS00OWJmLWE2YTEtMzU2MWQ4OTc0ZTg2XzEwMA==/',
+  social_pinterest: 'https://in.pinterest.com/schoolmartindia/',
+};
 
 const Footer = () => {
   const footerRef = useRef<HTMLElement>(null);
   const columnsRef = useRef<HTMLDivElement>(null);
+  const { content } = useSiteContent();
+
+  const resolveSocialUrl = (key: string) => (key in content ? content[key] : DEFAULT_SOCIAL_URLS[key]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Footer wipe up
+      // Footer wipe up (plays on mount rather than being scroll-gated, so a short
+      // page never leaves the footer permanently clipped if the scroll trigger's
+      // start position ends up past the page's actual max scroll)
       gsap.fromTo(
         footerRef.current,
         { clipPath: 'inset(100% 0 0 0)' },
@@ -20,11 +32,6 @@ const Footer = () => {
           clipPath: 'inset(0% 0 0 0)',
           duration: 0.8,
           ease: 'power3.out',
-          scrollTrigger: {
-            trigger: footerRef.current,
-            start: 'top 90%',
-            toggleActions: 'play none none none',
-          },
         }
       );
 
@@ -41,11 +48,6 @@ const Footer = () => {
             stagger: 0.1,
             delay: 0.2,
             ease: 'power3.out',
-            scrollTrigger: {
-              trigger: footerRef.current,
-              start: 'top 90%',
-              toggleActions: 'play none none none',
-            },
           }
         );
       }
@@ -118,21 +120,23 @@ const Footer = () => {
   ];
 
   const socialLinks = [
-    { icon: Facebook, href: 'https://www.facebook.com/schoolmart.in/', label: 'Facebook' },
-    { icon: Twitter, href: 'https://x.com/schoolmartindia', label: 'X' },
-    { icon: Youtube, href: 'https://www.youtube.com/@schoolinnovationindia', label: 'YouTube' },
-    { icon: Instagram, href: 'https://www.instagram.com/schoolmart.in/', label: 'Instagram' },
-    { icon: Linkedin, href: 'https://www.linkedin.com/school/13397648/admin/inbox/thread/2-YTIyNjJhZTMtZDRhOS00OWJmLWE2YTEtMzU2MWQ4OTc0ZTg2XzEwMA==/', label: 'LinkedIn' },
-    { 
+    { icon: Facebook, key: 'social_facebook', label: 'Facebook' },
+    { icon: Twitter, key: 'social_twitter', label: 'X' },
+    { icon: Youtube, key: 'social_youtube', label: 'YouTube' },
+    { icon: Instagram, key: 'social_instagram', label: 'Instagram' },
+    { icon: Linkedin, key: 'social_linkedin', label: 'LinkedIn' },
+    {
       icon: () => (
         <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
           <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.965 1.406-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.261 7.929-7.261 4.162 0 7.398 2.967 7.398 6.931 0 4.135-2.607 7.462-6.225 7.462-1.214 0-2.354-.63-2.744-1.37l-.749 2.848c-.27 1.031-1.002 2.324-1.492 3.125 1.063.329 2.186.505 3.355.505 6.619 0 11.988-5.37 11.988-11.987C23.991 5.385 18.636 0 12.017 0z"/>
         </svg>
-      ), 
-      href: 'https://in.pinterest.com/schoolmartindia/', 
-      label: 'Pinterest' 
+      ),
+      key: 'social_pinterest',
+      label: 'Pinterest',
     },
-  ];
+  ]
+    .map((social) => ({ ...social, href: resolveSocialUrl(social.key) }))
+    .filter((social) => social.href);
 
   return (
     <footer ref={footerRef} className="footer">

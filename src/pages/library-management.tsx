@@ -44,19 +44,10 @@ const LibraryManagement = () => {
 
   return (
     <main className="min-h-screen bg-white">
-      <section className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+      <section className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
         <div className="mx-auto max-w-6xl">
           {/* Category filter chips */}
-          <div className="mb-5 flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setActiveCategory('All')}
-              className={`rounded-full border px-4 py-2 text-xs font-semibold transition-colors ${
-                activeCategory === 'All' ? 'border-stone-900 bg-stone-900 text-white' : 'border-stone-200 text-stone-600 hover:border-stone-400'
-              }`}
-            >
-              All
-            </button>
+          <div className="mb-3 flex flex-wrap items-center gap-2">
             {categoryOptions.map((category) => (
               <button
                 key={category}
@@ -86,13 +77,13 @@ const LibraryManagement = () => {
                     />
                   )}
                 </div>
-                <div className="flex flex-col justify-center p-6 sm:p-8">
-                  <span className="mb-2.5 text-xs font-bold uppercase tracking-[0.13em] text-orange-600">
+                <div className="flex flex-col justify-center p-5 sm:p-6">
+                  <span className="mb-2 text-xs font-bold uppercase tracking-[0.13em] text-orange-600">
                     Featured &middot; {featured.categories?.[0] ?? 'Module'}
                   </span>
                   <h2 className="font-playfair text-2xl font-semibold leading-tight text-stone-900 sm:text-3xl">{featured.title}</h2>
-                  {featured.description && <p className="mt-3 text-sm leading-relaxed text-stone-500">{featured.description}</p>}
-                  <span className="mt-5 inline-flex w-fit items-center gap-2 border-b border-stone-900 pb-1 text-sm font-bold text-stone-900">
+                  {featured.description && <p className="mt-2 text-sm leading-relaxed text-stone-500">{featured.description}</p>}
+                  <span className="mt-3 inline-flex w-fit items-center gap-2 border-b border-stone-900 pb-1 text-sm font-bold text-stone-900">
                     Read more <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
                   </span>
                 </div>
@@ -100,7 +91,7 @@ const LibraryManagement = () => {
 
               {/* Grid */}
               {rest.length > 0 && (
-                <div ref={gridRef} className="mt-6 grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+                <div ref={gridRef} className="mt-4 grid grid-cols-1 gap-x-5 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
                   {rest.map((card) => {
                     const image = resolveMediaUrl(card.image);
                     return (
@@ -124,10 +115,10 @@ const LibraryManagement = () => {
       </section>
 
       {/* CTA */}
-      <section className="px-4 pb-6 sm:px-6 lg:px-8">
-        <div className="relative mx-auto max-w-5xl overflow-hidden rounded-2xl bg-stone-900 p-8 text-center text-white sm:p-10 sm:text-left">
+      <section className="px-4 pb-4 sm:px-6 lg:px-8">
+        <div className="relative mx-auto max-w-5xl overflow-hidden rounded-2xl bg-stone-900 p-6 text-center text-white sm:p-8 sm:text-left">
           <div className="pointer-events-none absolute -right-14 -top-20 h-52 w-52 rounded-full border border-white/10" />
-          <div className="relative flex flex-col items-center justify-between gap-6 sm:flex-row">
+          <div className="relative flex flex-col items-center justify-between gap-4 sm:flex-row">
             <div>
               <h2 className="font-playfair text-2xl font-semibold sm:text-3xl">Ready to modernise your library?</h2>
               <p className="mt-2 max-w-md text-sm text-white/60">See a live walkthrough of the system and get a rollout plan for your campus.</p>

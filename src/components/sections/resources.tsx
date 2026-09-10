@@ -37,7 +37,7 @@ const resourceItems = [
     image: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&q=80&w=800',
     color: '#ef4444',
     tag: 'CATALOGUE',
-    href: '/product-catalog',
+    href: '/catalogues',
   },
   {
     title: 'Lookbook – Play Furniture',
@@ -45,7 +45,7 @@ const resourceItems = [
     image: 'https://images.unsplash.com/photo-1566454544259-f4b94c3d758c?auto=format&fit=crop&q=80&w=800',
     color: '#8b5cf6',
     tag: 'PORTFOLIO',
-    href: '/lookbook',
+    href: '/furniture',
   },
   {
     title: '20 Stunning College Buildings',
@@ -112,7 +112,7 @@ const Resources = () => {
             <Link
               key={index}
               to={item.href}
-              className="group relative h-[280px] rounded-2xl overflow-hidden cursor-pointer block transform-gpu"
+              className="group relative h-[200px] rounded-2xl overflow-hidden cursor-pointer block transform-gpu"
             >
               {/* Background Image */}
               <div className="absolute inset-0">
@@ -125,20 +125,20 @@ const Resources = () => {
               </div>
 
               {/* Tag Pin */}
-              <div className="absolute top-4 left-4 z-10">
+              <div className="absolute top-3 left-3 z-10">
                 <span
-                  className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] sm:text-xs font-bold tracking-widest text-white border border-white/20 uppercase"
+                  className="px-2.5 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-bold tracking-widest text-white border border-white/20 uppercase"
                 >
                   {item.tag}
                 </span>
               </div>
 
               {/* Bottom Read More Box */}
-              <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col justify-end h-full">
-                <h3 className="text-white font-extrabold text-xl md:text-2xl leading-tight mb-2 drop-shadow-lg group-hover:-translate-y-1 transition-transform duration-300">
+              <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col justify-end h-full">
+                <h3 className="text-white font-extrabold text-base md:text-lg leading-tight mb-1 drop-shadow-lg group-hover:-translate-y-1 transition-transform duration-300">
                   {item.title}
                 </h3>
-                <p className="text-white/80 text-sm md:text-base leading-relaxed mb-4 group-hover:-translate-y-1 transition-transform duration-300 delay-75">
+                <p className="text-white/80 text-xs md:text-sm leading-relaxed mb-2 line-clamp-2 group-hover:-translate-y-1 transition-transform duration-300 delay-75">
                   {item.description}
                 </p>
 

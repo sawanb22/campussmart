@@ -25,6 +25,9 @@ const CaseStudyDetail = lazy(() => import('@/pages/case-study-detail'));
 const CampusDesignService = lazy(() => import('@/pages/campus-design-service'));
 const HomeFeatureDetail = lazy(() => import('@/pages/home-feature-detail'));
 const SmartClassrooms = lazy(() => import('@/pages/smart-classrooms'));
+const AIGuideArticle = lazy(() => import('@/pages/ai-guide-article'));
+const SetupCollegeArticle = lazy(() => import('@/pages/setup-college-article'));
+const UGCGuidelineArticle = lazy(() => import('@/pages/ugc-guideline-article'));
 
 // Existing page templates map
 const PageTemplates: Record<string, any> = {
@@ -159,6 +162,7 @@ const InnovationDetail = lazy(() => import('@/pages/innovation-detail'));
 const AiMlDetail = lazy(() => import('@/pages/ai-ml-detail'));
 const LibraryManagementDetail = lazy(() => import('@/pages/library-management-detail'));
 const InnovationCentersDetail = lazy(() => import('@/pages/innovation-centers-detail'));
+const InnovationCentresDetail = lazy(() => import('@/pages/innovation-centres-detail'));
 const ScienceTechLabsDetail = lazy(() => import('@/pages/science-tech-labs-detail'));
 const CampusMasterPlanningDetail = lazy(() => import('@/pages/campus-master-planning-detail'));
 const ArVrExperiencesDetail = lazy(() => import('@/pages/ar-vr-experiences-detail'));
@@ -169,6 +173,12 @@ const CollaborationSpacesDetail = lazy(() => import('@/pages/collaboration-space
 const SportsInfrastructureDetail = lazy(() => import('@/pages/sports-infrastructure-detail'));
 const AiStationsDetail = lazy(() => import('@/pages/ai-stations-detail'));
 const DigitalTransformationDetail = lazy(() => import('@/pages/digital-transformation-detail'));
+const NewEnvironmentsDetail = lazy(() => import('@/pages/new-environments-detail'));
+const SportsInfraDetail = lazy(() => import('@/pages/sports-infra-detail'));
+const TechInfraDetail = lazy(() => import('@/pages/tech-infra-detail'));
+const LabsDetail = lazy(() => import('@/pages/labs-detail'));
+const LibrariesDetail = lazy(() => import('@/pages/libraries-detail'));
+const CampusAutomationDetail = lazy(() => import('@/pages/campus-automation-detail'));
 
 function App() {
   return (
@@ -193,6 +203,7 @@ function App() {
               <Route path="/ai-ml/:moduleSlug" element={<Layout><AiMlDetail /></Layout>} />
               <Route path="/library-management/:moduleSlug" element={<Layout><LibraryManagementDetail /></Layout>} />
               <Route path="/innovation-centers/:spaceSlug" element={<Layout><InnovationCentersDetail /></Layout>} />
+              <Route path="/innovation-centres/:spaceSlug" element={<Layout><InnovationCentresDetail /></Layout>} />
               <Route path="/science-tech-labs/:labSlug" element={<Layout><ScienceTechLabsDetail /></Layout>} />
               <Route path="/campus-master-planning/:serviceSlug" element={<Layout><CampusMasterPlanningDetail /></Layout>} />
               <Route path="/ar-vr-experiences/:experienceSlug" element={<Layout><ArVrExperiencesDetail /></Layout>} />
@@ -203,8 +214,17 @@ function App() {
               <Route path="/sports-infrastructure/:facilitySlug" element={<Layout><SportsInfrastructureDetail /></Layout>} />
               <Route path="/ai-stations/:stationSlug" element={<Layout><AiStationsDetail /></Layout>} />
               <Route path="/digital-transformation/:cardSlug" element={<Layout><DigitalTransformationDetail /></Layout>} />
+              <Route path="/new-environments/:spaceSlug" element={<Layout><NewEnvironmentsDetail /></Layout>} />
+              <Route path="/sports-infra/:facilitySlug" element={<Layout><SportsInfraDetail /></Layout>} />
+              <Route path="/tech-infra/:solutionSlug" element={<Layout><TechInfraDetail /></Layout>} />
+              <Route path="/labs/:labSlug" element={<Layout><LabsDetail /></Layout>} />
+              <Route path="/libraries/:featureSlug" element={<Layout><LibrariesDetail /></Layout>} />
+              <Route path="/campus-automation/:moduleSlug" element={<Layout><CampusAutomationDetail /></Layout>} />
               <Route path="/campus-design/:serviceSlug" element={<Layout><CampusDesignService /></Layout>} />
               <Route path="/smart-classrooms" element={<Layout><SmartClassrooms /></Layout>} />
+              <Route path="/ai-guide/:articleSlug" element={<Layout><AIGuideArticle /></Layout>} />
+              <Route path="/setup-college/:articleSlug" element={<Layout><SetupCollegeArticle /></Layout>} />
+              <Route path="/ugc-guidelines/:articleSlug" element={<Layout><UGCGuidelineArticle /></Layout>} />
               <Route path="/ar-vr-learning" element={<Layout><HomeFeatureDetail /></Layout>} />
               <Route path="/admin/*" element={<AdminRoutes />} />
 

@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Mail, Phone, Check, Building2 } from 'lucide-react';
+import { Mail, Phone, Check, Building2, Download, BriefcaseBusiness } from 'lucide-react';
 import api from '../api/client';
 
-interface ContactEnquiry { id: number; name: string; email: string; phone?: string; subject?: string; message: string; read: boolean; createdAt: string; }
+interface ContactEnquiry { id: number; name: string; email: string; phone?: string; subject?: string; role?: string; message: string; resumeOriginalName?: string; read: boolean; createdAt: string; }
 interface QuoteRequest { id: number; name: string; email: string; phone?: string; institution?: string; items?: string; message: string; read: boolean; createdAt: string; }
 
 export default function Enquiries() {
     const [contacts, setContacts] = useState<ContactEnquiry[]>([]);
     const [quotes, setQuotes] = useState<QuoteRequest[]>([]);
-    const [tab, setTab] = useState<'contact' | 'quote'>('contact');
+    const [tab, setTab] = useState<'contact' | 'quote' | 'jobs'>('contact');
     const [loading, setLoading] = useState(true);
 
     const fetch = async () => {
@@ -26,7 +26,17 @@ export default function Enquiries() {
         else setQuotes((prev) => prev.map((e) => (e.id === id ? { ...e, read: true } : e)));
     };
 
-    const data = tab === 'contact' ? contacts : quotes;
+    const downloadResume = async (enquiry: ContactEnquiry) => {
+        const response = await api.get(`/admin/enquiries/contact/${enquiry.id}/resume`, { responseType: 'blob' });
+        const url = URL.createObjectURL(response.data);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = enquiry.resumeOriginalName || 'resume';
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const data = tab === 'quote' ? quotes : tab === 'jobs' ? contacts.filter((e) => Boolean(e.resumeOriginalName)) : contacts.filter((e) => !e.resumeOriginalName);
     const unread = (arr: { read: boolean }[]) => arr.filter((e) => !e.read).length;
 
     return (
@@ -42,6 +52,10 @@ export default function Enquiries() {
                         )}
                     </button>
                 ))}
+                <button onClick={() => setTab('jobs')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${tab === 'jobs' ? 'bg-cm-blue text-white' : 'bg-white text-gray-600 border hover:bg-gray-50'}`}>
+                    <BriefcaseBusiness className="mr-1 inline-block h-4 w-4" /> Job Applications
+                    {unread(contacts.filter((e) => Boolean(e.resumeOriginalName))) > 0 && <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">{unread(contacts.filter((e) => Boolean(e.resumeOriginalName)))}</span>}
+                </button>
             </div>
 
             {loading ? <div className="text-gray-400">Loading...</div> : (
@@ -60,12 +74,14 @@ export default function Enquiries() {
                                         {'institution' in e && e.institution && <span className="flex items-center gap-1"><Building2 className="w-3.5 h-3.5" />{e.institution}</span>}
                                     </div>
                                     {'subject' in e && e.subject && <div className="text-sm font-medium text-gray-700 mb-1">{e.subject as string}</div>}
+                                    {'role' in e && (e as ContactEnquiry).role && <div className="text-sm font-medium text-cm-blue mb-1">Role: {(e as ContactEnquiry).role}</div>}
                                     {'items' in e && (e as QuoteRequest).items && <div className="text-sm text-gray-500 mb-2"><strong>Items:</strong> {(e as QuoteRequest).items}</div>}
                                     <p className="text-gray-700 text-sm bg-gray-50 p-3 rounded-lg">{e.message}</p>
+                                    {'resumeOriginalName' in e && (e as ContactEnquiry).resumeOriginalName && <button type="button" onClick={() => downloadResume(e as ContactEnquiry)} className="mt-3 inline-flex items-center gap-2 rounded-lg border border-cm-blue px-3 py-2 text-sm font-medium text-cm-blue hover:bg-blue-50"><Download className="h-4 w-4" /> Download {(e as ContactEnquiry).resumeOriginalName}</button>}
                                     <div className="mt-2 text-xs text-gray-400">{new Date(e.createdAt).toLocaleString('en-IN')}</div>
                                 </div>
                                 {!e.read && (
-                                    <button onClick={() => markRead(tab, e.id)} className="ml-4 flex items-center gap-1 text-xs text-green-600 hover:bg-green-50 px-3 py-1.5 rounded-lg transition-colors border border-green-200">
+                                    <button onClick={() => markRead(tab === 'quote' ? 'quote' : 'contact', e.id)} className="ml-4 flex items-center gap-1 text-xs text-green-600 hover:bg-green-50 px-3 py-1.5 rounded-lg transition-colors border border-green-200">
                                         <Check className="w-3.5 h-3.5" /> Mark Read
                                     </button>
                                 )}

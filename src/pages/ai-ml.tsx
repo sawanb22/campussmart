@@ -57,15 +57,15 @@ const AIML = () => {
       <LoginPromptModal open={showLoginPrompt} onClose={() => setShowLoginPrompt(false)} />
 
       {/* Hero */}
-      <section ref={heroRef} className="bg-amber-50/60 px-4 pb-6 pt-6 sm:px-6 sm:pb-8 sm:pt-8 lg:px-8">
-        <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14">
+      <section ref={heroRef} className="bg-amber-50/60 px-4 pb-4 pt-3 sm:px-6 sm:pb-5 sm:pt-5 lg:px-8">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-7 lg:grid-cols-[1.15fr_0.85fr] lg:gap-10">
           <div>
             <span className="mb-3 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-orange-600">
               <span className="h-[2px] w-6 bg-orange-500" /> AI &amp; ML at CampusMart
             </span>
             <h1 className="font-playfair max-w-xl text-4xl font-semibold leading-[1.05] tracking-tight text-stone-900 sm:text-5xl">{heroTitle}</h1>
-            <p className="mt-5 max-w-lg text-sm leading-relaxed text-stone-500 sm:text-base">{heroSubtitle}</p>
-            <div className="mt-7 flex flex-wrap gap-3">
+            <p className="mt-4 max-w-lg text-sm leading-relaxed text-stone-500 sm:text-base">{heroSubtitle}</p>
+            <div className="mt-5 flex flex-wrap gap-3">
               <Link to="/request-quote" className="btn-primary inline-flex items-center gap-2">
                 Deploy Solutions <ArrowRight className="h-4 w-4" />
               </Link>
@@ -86,19 +86,10 @@ const AIML = () => {
         </div>
       </section>
 
-      <section className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <section className="px-4 py-3 sm:px-6 sm:py-5 lg:px-8">
         <div className="mx-auto max-w-6xl">
           {/* Category filter chips */}
           <div className="mb-5 flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setActiveCategory('All')}
-              className={`rounded-full border px-4 py-2 text-xs font-semibold transition-colors ${
-                activeCategory === 'All' ? 'border-stone-900 bg-stone-900 text-white' : 'border-stone-200 text-stone-600 hover:border-stone-400'
-              }`}
-            >
-              All
-            </button>
             {categoryOptions.map((category) => (
               <button
                 key={category}
@@ -142,7 +133,7 @@ const AIML = () => {
 
               {/* Grid */}
               {rest.length > 0 && (
-                <div ref={gridRef} className="mt-6 grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+                <div ref={gridRef} className="mt-4 grid grid-cols-1 gap-x-5 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
                   {rest.map((card) => {
                     const image = resolveMediaUrl(card.image);
                     return (
@@ -193,7 +184,7 @@ const AIML = () => {
           )}
 
           {shopCategories.length > 0 && (
-            <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-stone-100 pt-5">
+            <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-stone-100 pt-4">
               <span className="mr-1 text-xs font-bold uppercase tracking-wide text-stone-400">Shop by category:</span>
               {shopCategories.map((category) => (
                 <Link
@@ -210,8 +201,8 @@ const AIML = () => {
       </section>
 
       {/* CTA */}
-      <section className="px-4 pb-8 sm:px-6 lg:px-8">
-        <div className="relative mx-auto max-w-5xl overflow-hidden rounded-2xl bg-stone-900 p-8 text-center text-white sm:p-10 sm:text-left">
+      <section className="px-4 pb-4 sm:px-6 lg:px-8">
+        <div className="relative mx-auto max-w-5xl overflow-hidden rounded-2xl bg-stone-900 p-6 text-center text-white sm:p-8 sm:text-left">
           <div className="pointer-events-none absolute -right-14 -top-20 h-52 w-52 rounded-full border border-white/10" />
           <div className="relative flex flex-col items-center justify-between gap-6 sm:flex-row">
             <div>

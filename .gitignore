@@ -13,5 +13,6 @@ dist/
 *.db
 *.db-journal
 uploads/
+backend/private-resumes/
 scripts/
 backend/campusmart-backend.zip

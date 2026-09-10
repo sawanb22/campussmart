@@ -1,175 +1,42 @@
-import { useEffect, useRef, useState } from 'react';
-import gsap from 'gsap';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Building2, ArrowRight, DollarSign, Handshake, BriefcaseBusiness, Send, X, type LucideIcon } from 'lucide-react';
+import { ArrowRight, Building2, BriefcaseBusiness, DollarSign, Handshake, Send, X, type LucideIcon } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import api from '@/api/client';
+import { resolveMediaUrl } from '@/lib/media-url';
 
-interface Listing { title: string; description?: string; desc?: string; href?: string; link: string; icon: LucideIcon; }
-
+interface Listing { title: string; description?: string; desc?: string; href?: string; link: string; image?: string; category?: string; icon: LucideIcon; }
 const EMPTY_ENQUIRY = { name: '', email: '', phone: '', message: '' };
+const DEFAULTS = {
+  heroTitle: 'Education opportunities, thoughtfully matched.',
+  heroSubtitle: 'Explore institutions, funding pathways, partnerships and roles shaping the future of education.',
+  categories: ['All opportunities', 'Institutions', 'Funding', 'Partnerships', 'Careers'],
+  featured: { eyebrow: 'Featured opportunity', title: 'Find the right next step for your institution', description: 'From acquisition and funding to strategic partnerships, discover practical ways to move an education project forward.', image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1200&q=85' },
+  ctaTitle: 'Have an opportunity to share?', ctaSubtitle: 'Connect with the CampusMart team and reach education leaders looking for their next move.', ctaButtonLabel: 'Send an enquiry',
+};
 
 const Classifieds = () => {
-  const heroRef = useRef<HTMLDivElement>(null);
-  const { data } = usePageData('classifieds');
+  const { data } = usePageData<any>('classifieds');
+  const [activeCategory, setActiveCategory] = useState('All opportunities');
   const [enquiryListing, setEnquiryListing] = useState<Listing | null>(null);
   const [enquiryForm, setEnquiryForm] = useState(EMPTY_ENQUIRY);
-  const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [formError, setFormError] = useState('');
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.fromTo(heroRef.current, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' });
-    });
-    return () => ctx.revert();
-  }, []);
-
-  const defaultListings: Listing[] = [
-    { title: 'Colleges for Sale', icon: Building2, desc: 'Browse educational institutions available for acquisition', link: '/colleges-universities-for-sale' },
-    { title: 'Education Funding', icon: DollarSign, desc: 'Explore funding options for your institution', link: '#' },
-    { title: 'Partnership Opportunities', icon: Handshake, desc: 'Find partnership opportunities with running colleges', link: '/partner-with-colleges' },
+  const [submitting, setSubmitting] = useState(false); const [submitted, setSubmitted] = useState(false); const [formError, setFormError] = useState('');
+  const categories: string[] = data.categories?.length ? data.categories : DEFAULTS.categories;
+  const featured = { ...DEFAULTS.featured, ...(data.featured ?? {}) };
+  const defaults: Listing[] = [
+    { title: 'Colleges for Sale', category: 'Institutions', desc: 'Browse educational institutions available for acquisition.', image: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=900&q=85', link: '/colleges-universities-for-sale', icon: Building2 },
+    { title: 'Education Funding', category: 'Funding', desc: 'Explore funding options for your institution.', image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=900&q=85', link: '#', icon: DollarSign },
+    { title: 'Partnership Opportunities', category: 'Partnerships', desc: 'Find partnership opportunities with running colleges.', image: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=900&q=85', link: '/partner-with-colleges', icon: Handshake },
+    { title: 'Job Openings', category: 'Careers', desc: 'Apply for current opportunities with our team.', image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=900&q=85', link: '/job-openings', icon: BriefcaseBusiness },
   ];
-  const cmsListings = data.cards?.length ? data.cards : defaultListings;
-  const listingsWithJobs = cmsListings.some((item: any) => item.title === 'Job Openings')
-    ? cmsListings
-    : [...cmsListings, { title: 'Job Openings', desc: 'Apply for current opportunities with our team', link: '/job-openings' }];
-  const listings: Listing[] = listingsWithJobs.map((item: any, index: number) => ({
-    ...item,
-    icon: [Building2, DollarSign, Handshake, BriefcaseBusiness][index % 4],
-    desc: item.description ?? item.desc,
-    link: item.href ?? item.link ?? '#',
-  }));
+  const listings: Listing[] = (data.cards?.length ? data.cards : defaults).map((item: any, index: number) => ({ ...item, icon: [Building2, DollarSign, Handshake, BriefcaseBusiness][index % 4], desc: item.description ?? item.desc, category: item.category ?? categories[(index + 1) % categories.length], link: /job|career/i.test(item.title) ? '/job-openings' : item.href ?? item.link ?? '#' }));
+  const visibleListings = useMemo(() => activeCategory === categories[0] ? listings : listings.filter(item => item.category === activeCategory), [activeCategory, categories, listings]);
+  const openEnquiry = (listing: Listing) => { setEnquiryListing(listing); setEnquiryForm({ ...EMPTY_ENQUIRY, message: `I'm interested in "${listing.title}". Please share more details.` }); setSubmitted(false); setFormError(''); };
+  const submitEnquiry = async (event: React.FormEvent) => { event.preventDefault(); if (!enquiryListing) return; setSubmitting(true); setFormError(''); try { await api.post('/contact', { ...enquiryForm, subject: `Classifieds enquiry: ${enquiryListing.title}` }); setSubmitted(true); } catch (err: any) { setFormError(err.response?.data?.error || 'Failed to send your enquiry. Please try again.'); } finally { setSubmitting(false); } };
 
-  const openEnquiry = (listing: Listing) => {
-    setEnquiryListing(listing);
-    setEnquiryForm({ ...EMPTY_ENQUIRY, message: `I'm interested in "${listing.title}". Please share more details.` });
-    setSubmitted(false);
-    setFormError('');
-  };
-
-  const closeEnquiry = () => setEnquiryListing(null);
-
-  const submitEnquiry = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!enquiryListing) return;
-    setSubmitting(true);
-    setFormError('');
-    try {
-      await api.post('/contact', {
-        name: enquiryForm.name,
-        email: enquiryForm.email,
-        phone: enquiryForm.phone,
-        subject: `Classifieds enquiry: ${enquiryListing.title}`,
-        message: enquiryForm.message,
-      });
-      setSubmitted(true);
-    } catch (err: any) {
-      setFormError(err.response?.data?.error || 'Failed to send your enquiry. Please try again.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  return (
-    <main className="min-h-screen bg-white">
-      <section className="py-4 sm:py-6 md:py-8 px-4 sm:px-6 lg:px-8">
-        <div ref={heroRef} className="bg-gradient-to-r from-cm-blue to-blue-700 rounded-2xl py-8 sm:py-10 md:py-12 px-6 sm:px-8 lg:px-12 max-w-5xl mx-auto">
-          <div className="text-center">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6">{data.heroTitle ?? 'Classifieds'}</h1>
-            <p className="text-lg sm:text-xl text-white/90 max-w-3xl mx-auto leading-relaxed">
-              {data.heroSubtitle ?? 'Explore opportunities in the education sector. Colleges for sale, funding options, and partnerships.'}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-gray-50 min-h-screen">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-            {listings.map((item) => {
-              const hasRealLink = Boolean(item.link) && item.link !== '#';
-              const cardBody = (
-                <>
-                  <item.icon className="w-16 h-16 text-cm-blue mb-6" />
-                  <h3 className="text-xl md:text-2xl font-bold text-cm-blue-dark mb-3">{item.title}</h3>
-                  <p className="text-gray-600 text-base mb-6">{item.desc}</p>
-                  <span className="inline-flex items-center gap-2 text-cm-blue font-bold text-sm hover:gap-3 transition-all">
-                    Explore <ArrowRight className="w-5 h-5" />
-                  </span>
-                </>
-              );
-
-              return hasRealLink ? (
-                <Link key={item.title} to={item.link} className="bg-white rounded-2xl p-8 md:p-10 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-3 border border-gray-100">
-                  {cardBody}
-                </Link>
-              ) : (
-                <button
-                  key={item.title}
-                  type="button"
-                  onClick={() => openEnquiry(item)}
-                  className="bg-white rounded-2xl p-8 md:p-10 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-3 border border-gray-100 text-left"
-                >
-                  {cardBody}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {enquiryListing && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm" role="dialog" aria-modal="true">
-          <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-start justify-between border-b border-slate-100 p-6">
-              <div>
-                <h2 className="text-lg font-bold text-slate-950">{enquiryListing.title}</h2>
-                <p className="mt-1 text-sm text-slate-500">Tell us a bit about what you're looking for and our team will get back to you.</p>
-              </div>
-              <button type="button" onClick={closeEnquiry} aria-label="Close" className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="p-6">
-              {submitted ? (
-                <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-green-700">
-                  Thank you. Your enquiry has been sent — our team will get back to you soon.
-                </div>
-              ) : (
-                <form onSubmit={submitEnquiry} className="space-y-4">
-                  {formError && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">{formError}</div>}
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                      <label className="form-label">Full Name *</label>
-                      <input className="form-input" required value={enquiryForm.name} onChange={(event) => setEnquiryForm({ ...enquiryForm, name: event.target.value })} />
-                    </div>
-                    <div>
-                      <label className="form-label">Email *</label>
-                      <input type="email" className="form-input" required value={enquiryForm.email} onChange={(event) => setEnquiryForm({ ...enquiryForm, email: event.target.value })} />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="form-label">Phone *</label>
-                    <input type="tel" pattern="(?:\+91[ -]?)?[6-9][0-9]{9}" className="form-input" required value={enquiryForm.phone} onChange={(event) => setEnquiryForm({ ...enquiryForm, phone: event.target.value })} placeholder="+91 98765 43210" />
-                  </div>
-                  <div>
-                    <label className="form-label">Message *</label>
-                    <textarea className="form-input min-h-[110px]" required value={enquiryForm.message} onChange={(event) => setEnquiryForm({ ...enquiryForm, message: event.target.value })} />
-                  </div>
-                  <button type="submit" disabled={submitting} className="flex w-full items-center justify-center gap-2 rounded bg-cm-blue px-4 py-3 font-semibold text-white hover:bg-cm-blue-dark disabled:opacity-60">
-                    <Send className="h-4 w-4" />
-                    {submitting ? 'Sending...' : 'Send Enquiry'}
-                  </button>
-                </form>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </main>
-  );
+  return <main className="classifieds-page"><style>{`
+    .classifieds-page{--cl-cream:#f5f4ef;--cl-paper:#fffdf8;--cl-green:#155b51;--cl-green-soft:#dfe9e4;--cl-orange:#f47b20;background:var(--cl-cream);color:#173e39;min-height:100vh;font-family:"DM Sans","Open Sans",sans-serif;padding:24px 5vw}.classifieds-page *{box-sizing:border-box}.classifieds-page a{text-decoration:none;color:inherit}.classifieds-shell{width:min(1160px,100%);margin:auto;overflow:hidden;border:1px solid #fff;border-radius:28px;background:var(--cl-paper);box-shadow:0 18px 50px rgba(14,35,30,.12)}.classifieds-header{height:64px;display:flex;align-items:center;padding:0 54px}.classifieds-logo{display:flex;align-items:center;gap:8px;color:var(--cl-green);font-size:15px;font-weight:700}.classifieds-mark{width:22px;height:22px;border:2px solid var(--cl-orange);border-radius:50%}.classifieds-main{padding:26px 54px 46px}.classifieds-title{max-width:700px;margin:0;color:var(--cl-green);font-size:clamp(36px,5vw,64px);line-height:.93;letter-spacing:-3px;font-weight:700}.classifieds-subtitle{max-width:520px;margin:14px 0 20px;color:#6b7772;font-size:13px;line-height:1.6}.classifieds-categories{display:flex;gap:5px;overflow-x:auto;margin-bottom:18px;padding:4px 6px;border-radius:24px;background:var(--cl-green);scrollbar-width:none}.classifieds-category{flex:0 0 auto;border:0;border-radius:20px;padding:7px 13px;background:transparent;color:rgba(255,255,255,.72);cursor:pointer;font-size:9px;font-weight:700}.classifieds-category.active,.classifieds-category:hover{background:rgba(255,255,255,.16);color:#fff}.classifieds-featured{display:grid;grid-template-columns:1fr 1fr;overflow:hidden;min-height:270px;border-radius:22px;background:var(--cl-green);color:#fff}.classifieds-featured-copy{display:flex;flex-direction:column;justify-content:center;padding:32px 36px}.classifieds-eyebrow{margin-bottom:12px;color:#9fc1b8;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}.classifieds-featured h2{max-width:440px;margin:0;font-size:clamp(28px,3.5vw,44px);line-height:.97;letter-spacing:-2px}.classifieds-featured p{max-width:410px;margin:14px 0 20px;color:rgba(255,255,255,.74);font-size:10px;line-height:1.6}.classifieds-featured-image{min-height:270px;overflow:hidden}.classifieds-featured-image img{height:100%;object-fit:cover}.classifieds-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:20px}.classifieds-card{overflow:hidden;border-radius:16px;background:#e8ede8;transition:transform .25s ease,box-shadow .25s ease}.classifieds-card:hover{transform:translateY(-4px);box-shadow:0 14px 28px rgba(14,35,30,.12)}.classifieds-card-image{height:170px;overflow:hidden;background:var(--cl-green-soft)}.classifieds-card-image img{height:100%;object-fit:cover;transition:transform .4s ease}.classifieds-card:hover img{transform:scale(1.05)}.classifieds-card-body{padding:18px}.classifieds-card-category{color:var(--cl-orange);font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}.classifieds-card h3{margin:8px 0 7px;color:var(--cl-green);font-size:19px;line-height:1.05}.classifieds-card p{min-height:38px;color:#6b7772;font-size:10px;line-height:1.5}.classifieds-card-link{display:inline-flex;align-items:center;gap:7px;margin-top:14px;color:var(--cl-green);font-size:10px;font-weight:700}.classifieds-card-link span{display:grid;width:20px;height:20px;place-items:center;border-radius:50%;background:var(--cl-orange);color:#fff}.classifieds-cta{display:flex;align-items:center;justify-content:space-between;gap:25px;margin-top:38px;padding:28px 34px;border-radius:20px;background:var(--cl-green-soft)}.classifieds-cta h2{margin:0;color:var(--cl-green);font-size:28px;line-height:1;letter-spacing:-1px}.classifieds-cta p{margin:7px 0 0;color:#6b7772;font-size:10px}.classifieds-cta-button{border:0;border-radius:22px;padding:12px 18px;background:var(--cl-green);color:#fff;font-size:10px;font-weight:700}.classifieds-dialog{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(15,23,42,.6);backdrop-filter:blur(5px)}.classifieds-dialog-card{width:100%;max-width:520px;border-radius:18px;background:#fff;box-shadow:0 25px 70px rgba(0,0,0,.2)}.classifieds-dialog-head{display:flex;justify-content:space-between;gap:16px;padding:22px;border-bottom:1px solid #eef2f2}.classifieds-dialog-body{padding:22px}.classifieds-form{display:grid;gap:14px}.classifieds-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.classifieds-form label{display:grid;gap:5px;color:#475569;font-size:11px;font-weight:700}.classifieds-form input,.classifieds-form textarea{width:100%;border:1px solid #dbe3e1;border-radius:8px;padding:10px 11px;font:inherit;font-size:12px}.classifieds-form textarea{min-height:100px;resize:vertical}@media(max-width:760px){.classifieds-page{padding:0}.classifieds-shell{min-height:100vh;border:0;border-radius:0;box-shadow:none}.classifieds-header{height:60px;padding:0 22px}.classifieds-main{padding:22px 22px 34px}.classifieds-featured{grid-template-columns:1fr}.classifieds-featured-image{min-height:210px;order:-1}.classifieds-grid{grid-template-columns:1fr;gap:14px}.classifieds-card-image{height:210px}.classifieds-cta{display:block;padding:24px}.classifieds-cta-button{display:inline-block;margin-top:16px}.classifieds-form-grid{grid-template-columns:1fr}}
+  `}</style><div className="classifieds-shell"><header className="classifieds-header"><Link to="/" className="classifieds-logo"><span className="classifieds-mark" />CampusMart Opportunities</Link></header><main className="classifieds-main"><h1 className="classifieds-title">{data.heroTitle ?? DEFAULTS.heroTitle}</h1><p className="classifieds-subtitle">{data.heroSubtitle ?? DEFAULTS.heroSubtitle}</p><div className="classifieds-categories">{categories.map(category => <button key={category} type="button" className={`classifieds-category ${activeCategory === category ? 'active' : ''}`} onClick={() => setActiveCategory(category)}>{category}</button>)}</div><section className="classifieds-featured"><div className="classifieds-featured-copy"><div className="classifieds-eyebrow">{featured.eyebrow}</div><h2>{featured.title}</h2><p>{featured.description}</p><a href="#classified-opportunities" className="classifieds-card-link" style={{ color: '#fff' }}>Explore opportunities <span><ArrowRight size={13} /></span></a></div><div className="classifieds-featured-image"><img src={resolveMediaUrl(featured.image)} alt={featured.title} /></div></section><section id="classified-opportunities" className="classifieds-grid">{visibleListings.map(item => { const card = <><div className="classifieds-card-image"><img src={resolveMediaUrl(item.image)} alt={item.title} /></div><div className="classifieds-card-body"><div className="classifieds-card-category">{item.category}</div><h3>{item.title}</h3><p>{item.desc}</p><span className="classifieds-card-link">{item.link === '#' ? 'Send enquiry' : 'Explore'} <span><ArrowRight size={13} /></span></span></div></>; return item.link !== '#' ? <Link key={item.title} to={item.link} className="classifieds-card">{card}</Link> : <button key={item.title} type="button" className="classifieds-card text-left" onClick={() => openEnquiry(item)}>{card}</button>; })}</section><section className="classifieds-cta"><div><h2>{data.ctaTitle ?? DEFAULTS.ctaTitle}</h2><p>{data.ctaSubtitle ?? DEFAULTS.ctaSubtitle}</p></div><button type="button" className="classifieds-cta-button" onClick={() => openEnquiry(listings[0])}>{data.ctaButtonLabel ?? DEFAULTS.ctaButtonLabel}</button></section></main></div>{enquiryListing && <div className="classifieds-dialog" role="dialog" aria-modal="true"><div className="classifieds-dialog-card"><div className="classifieds-dialog-head"><div><h2 className="font-bold text-slate-950">{enquiryListing.title}</h2><p className="mt-1 text-sm text-slate-500">Tell us what you are looking for and our team will respond.</p></div><button type="button" onClick={() => setEnquiryListing(null)} aria-label="Close" className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"><X className="h-5 w-5" /></button></div><div className="classifieds-dialog-body">{submitted ? <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-green-700">Thank you. Your enquiry has been sent.</div> : <form className="classifieds-form" onSubmit={submitEnquiry}>{formError && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">{formError}</div>}<div className="classifieds-form-grid"><label>Full Name *<input required value={enquiryForm.name} onChange={e => setEnquiryForm({ ...enquiryForm, name: e.target.value })} /></label><label>Email *<input type="email" required value={enquiryForm.email} onChange={e => setEnquiryForm({ ...enquiryForm, email: e.target.value })} /></label></div><label>Phone *<input type="tel" required value={enquiryForm.phone} onChange={e => setEnquiryForm({ ...enquiryForm, phone: e.target.value })} /></label><label>Message *<textarea required value={enquiryForm.message} onChange={e => setEnquiryForm({ ...enquiryForm, message: e.target.value })} /></label><button type="submit" disabled={submitting} className="flex items-center justify-center gap-2 rounded-lg bg-cm-blue px-4 py-3 font-semibold text-white disabled:opacity-60"><Send className="h-4 w-4" />{submitting ? 'Sending...' : 'Send Enquiry'}</button></form>}</div></div></div>}</main>;
 };
 
 export default Classifieds;

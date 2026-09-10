@@ -125,7 +125,12 @@ model ContactEnquiry {
   email     String
   phone     String?
   subject   String?
+  role      String?
   message   String
+  resumeFilename     String?
+  resumeOriginalName String?
+  resumeMimeType     String?
+  resumeSize         Int?
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 

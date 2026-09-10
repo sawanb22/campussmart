@@ -31,6 +31,7 @@ async function ensureCollegeSalePage() {
 }
 
 const PARTNER_SLUG = 'partner-with-colleges';
+const JOB_OPENINGS_SLUG = 'job-openings';
 
 // Makes sure the "Partner With Running Colleges" page (linked from the Classifieds
 // "Partnership Opportunities" card) always has a DB row so it shows up in the admin
@@ -47,6 +48,29 @@ async function ensurePartnerPage() {
             published: true,
             pageData: JSON.stringify({}),
         },
+    });
+}
+
+async function ensureJobOpeningsPage() {
+    const existing = await prisma.page.findUnique({ where: { slug: JOB_OPENINGS_SLUG } });
+    if (existing) return existing;
+    return prisma.page.create({
+        data: {
+            title: 'Job Openings',
+            slug: JOB_OPENINGS_SLUG,
+            template: JOB_OPENINGS_SLUG,
+            published: true,
+            pageData: JSON.stringify({}),
+        },
+    });
+}
+
+async function restorePartnershipIdentity() {
+    const existing = await prisma.page.findUnique({ where: { slug: 'partnership' } });
+    if (!existing || !/job|career/i.test(existing.title)) return existing;
+    return prisma.page.update({
+        where: { id: existing.id },
+        data: { title: 'Partnership Enquiry', template: 'partnership' },
     });
 }
 
@@ -67,6 +91,8 @@ router.get('/', verifyToken, requireAdmin, async (_req: AuthRequest, res: Respon
     try {
         await ensureCollegeSalePage();
         await ensurePartnerPage();
+        await ensureJobOpeningsPage();
+        await restorePartnershipIdentity();
         await ensureSimplePage('innovation-centers', 'Innovation Centers');
         await ensureSimplePage('science-tech-labs', 'Science & Tech Labs');
         await ensureSimplePage('campus-master-planning', 'Campus Master Planning');

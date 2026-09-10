@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState, type MouseEvent } from 'react';
+import { useEffect, useState, type MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { Download, FileText, BookOpen, ArrowRight, Lock, Search } from 'lucide-react';
+import { Download, FileText, BookOpen, ArrowRight, Lock } from 'lucide-react';
 import api from '@/api/client';
 import { usePageData } from '@/hooks/usePageData';
 import LoginPromptModal from '@/components/login-prompt-modal';
@@ -103,7 +103,6 @@ const Catalogues = () => {
   const [catalogueRows, setCatalogueRows] = useState<any[]>([]);
   const [caseStudyRows, setCaseStudyRows] = useState<any[]>([]);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const isLoggedIn = Boolean(localStorage.getItem('cm_token'));
 
@@ -212,14 +211,8 @@ const Catalogues = () => {
   const caseStudies =
     caseStudyRows.length > 0 ? caseStudyRows : data.caseStudies && data.caseStudies.length > 0 ? data.caseStudies : DEFAULTS.caseStudies;
 
-  const filteredCatalogues = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    if (!query) return catalogues;
-    return catalogues.filter((item: any) => `${item.title} ${item.description}`.toLowerCase().includes(query));
-  }, [catalogues, searchQuery]);
-
-  const visibleCatalogues = filteredCatalogues.slice(0, visibleCount);
-  const hasMore = visibleCount < filteredCatalogues.length;
+  const visibleCatalogues = catalogues.slice(0, visibleCount);
+  const hasMore = visibleCount < catalogues.length;
 
   return (
     <main className="min-h-screen bg-white">
@@ -233,29 +226,16 @@ const Catalogues = () => {
       />
 
       {/* Toolbar */}
-      <section className="px-4 pt-6 sm:px-6 lg:px-8">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 border-b border-gray-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
+      <section className="px-4 pt-1 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-6xl flex-col gap-2 border-b border-gray-100 pb-2 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs font-semibold text-gray-400">
-            Showing {filteredCatalogues.length} of {catalogues.length} catalogues
+            Showing {catalogues.length} catalogues
           </p>
-          <label className="flex shrink-0 items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-xs text-gray-500 sm:w-56">
-            <Search className="h-3.5 w-3.5" />
-            <input
-              type="text"
-              placeholder="Search catalogues..."
-              value={searchQuery}
-              onChange={(event) => {
-                setSearchQuery(event.target.value);
-                setVisibleCount(PAGE_SIZE);
-              }}
-              className="w-full bg-transparent outline-none placeholder:text-gray-400"
-            />
-          </label>
         </div>
       </section>
 
       {/* Catalogues Grid */}
-      <section className="px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+      <section className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           {visibleCatalogues.length === 0 ? (
             <div className="rounded-2xl border border-gray-100 bg-gray-50 py-20 text-center text-gray-500">No catalogues found.</div>
@@ -324,7 +304,7 @@ const Catalogues = () => {
       </section>
 
       {/* Case Studies */}
-      <section className="bg-gradient-to-b from-gray-50 to-white px-4 py-6 sm:px-6 md:py-8 lg:px-8">
+      <section className="bg-gradient-to-b from-gray-50 to-white px-4 py-4 sm:px-6 md:py-5 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <h2 className="mb-4 text-center text-3xl font-bold text-cm-blue-dark md:text-4xl">Case Studies &amp; Projects</h2>
 
@@ -364,7 +344,7 @@ const Catalogues = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-cm-yellow px-4 py-6 sm:px-6 md:py-8 lg:px-8">
+      <section className="bg-cm-yellow px-4 py-4 sm:px-6 md:py-5 lg:px-8">
         <div className="mx-auto max-w-4xl text-center">
           <h2 className="mb-6 text-3xl font-bold text-cm-blue-dark md:text-4xl">Need a Custom Solution?</h2>
 

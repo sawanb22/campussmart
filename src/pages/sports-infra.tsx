@@ -8,7 +8,19 @@ import LoginPromptModal from '@/components/login-prompt-modal';
 import { resolveMediaUrl } from '@/lib/media-url';
 import api from '@/api/client';
 
-const DEFAULTS = {
+export const SPORTS_INFRA_PAGE_SLUG = 'sports-infra';
+
+export function slugifySportsInfraTitle(title: string): string {
+  return (
+    title
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'facility'
+  );
+}
+
+export const SPORTS_INFRA_DEFAULTS = {
   heroTitle: 'Sports Infrastructure',
   heroSubtitle: 'World-class sports facilities designed to promote physical fitness and athletic excellence in educational institutions.',
   heroImage: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
@@ -117,16 +129,16 @@ const SportsInfra = ({ slug = 'sports-infra' }: { slug?: string }) => {
     return () => ctx.revert();
   }, []);
 
-  const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
-  const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
-  const heroImage = data.heroImage ?? DEFAULTS.heroImage;
-  const section1Title = data.section1Title ?? DEFAULTS.section1Title;
-  const section2Title = data.section2Title ?? DEFAULTS.section2Title;
-  const section2Description = data.section2Description ?? DEFAULTS.section2Description;
-  const ctaTitle = data.ctaTitle ?? DEFAULTS.ctaTitle;
-  const ctaButtonLabel = data.ctaButtonLabel ?? DEFAULTS.ctaButtonLabel;
-  const ctaHref = data.ctaHref ?? DEFAULTS.ctaHref;
-  const allCards = data.cards?.length > 0 ? data.cards : DEFAULTS.cards;
+  const heroTitle = data.heroTitle ?? SPORTS_INFRA_DEFAULTS.heroTitle;
+  const heroSubtitle = data.heroSubtitle ?? SPORTS_INFRA_DEFAULTS.heroSubtitle;
+  const heroImage = data.heroImage ?? SPORTS_INFRA_DEFAULTS.heroImage;
+  const section1Title = data.section1Title ?? SPORTS_INFRA_DEFAULTS.section1Title;
+  const section2Title = data.section2Title ?? SPORTS_INFRA_DEFAULTS.section2Title;
+  const section2Description = data.section2Description ?? SPORTS_INFRA_DEFAULTS.section2Description;
+  const ctaTitle = data.ctaTitle ?? SPORTS_INFRA_DEFAULTS.ctaTitle;
+  const ctaButtonLabel = data.ctaButtonLabel ?? SPORTS_INFRA_DEFAULTS.ctaButtonLabel;
+  const ctaHref = data.ctaHref ?? SPORTS_INFRA_DEFAULTS.ctaHref;
+  const allCards = data.cards?.length > 0 ? data.cards : SPORTS_INFRA_DEFAULTS.cards;
   const cards = allCards.map((card: any) => ({
     ...card,
     categories: card.categories?.length ? card.categories : ['All'],
@@ -135,7 +147,7 @@ const SportsInfra = ({ slug = 'sports-infra' }: { slug?: string }) => {
   const filteredCards = selectedCategory === 'All'
     ? cards
     : cards.filter((card: any) => card.categories.includes(selectedCategory));
-  const features = (data.features && data.features.length > 0) ? data.features : DEFAULTS.features;
+  const features = (data.features && data.features.length > 0) ? data.features : SPORTS_INFRA_DEFAULTS.features;
 
   return (
     <main className="min-h-screen bg-white text-opensans">
@@ -195,42 +207,44 @@ const SportsInfra = ({ slug = 'sports-infra' }: { slug?: string }) => {
 
             <div ref={cardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredCards.map((s: any, i: number) => {
-                const image = s.image || DEFAULTS.cards[i % DEFAULTS.cards.length].image;
+                const image = s.image || SPORTS_INFRA_DEFAULTS.cards[i % SPORTS_INFRA_DEFAULTS.cards.length].image;
                 const wishlistCard = { title: s.title, image };
                 return (
                   <div key={s.title} className="group flex flex-col overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)]">
-                    <div className="relative overflow-hidden h-[220px] sm:h-[230px]">
-                      <img src={resolveMediaUrl(image)} alt={s.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent" />
-                      <span className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-800 shadow-sm backdrop-blur-sm">
-                        <Star className="h-3.5 w-3.5 text-cm-yellow" />
-                        {s.categories?.[0] ?? 'Facility'}
-                      </span>
-                    </div>
-                    <div className="flex flex-1 flex-col px-5 pb-4 pt-4">
-                      <h3 className="text-lg font-semibold text-slate-900 tracking-tight mb-2">{s.title}</h3>
-                      {s.description && <p className="text-sm text-slate-600 leading-relaxed mb-3">{s.description}</p>}
-                      <div className="mt-auto flex flex-wrap gap-2 mb-3">
-                        {s.categories?.map((category: string) => (
-                          <span key={category} className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-slate-600">{category}</span>
-                        ))}
+                    <Link to={`/${SPORTS_INFRA_PAGE_SLUG}/${slugifySportsInfraTitle(s.title)}`} className="flex flex-1 flex-col">
+                      <div className="relative overflow-hidden h-[220px] sm:h-[230px]">
+                        <img src={resolveMediaUrl(image)} alt={s.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent" />
+                        <span className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-800 shadow-sm backdrop-blur-sm">
+                          <Star className="h-3.5 w-3.5 text-cm-yellow" />
+                          {s.categories?.[0] ?? 'Facility'}
+                        </span>
                       </div>
-                      <div className="flex items-center justify-between text-slate-700">
-                        {isSaved(wishlistCard) ? (
-                          <div className="flex items-center gap-1.5">
-                            <span className="flex items-center gap-1.5 rounded-lg bg-green-600 px-2.5 py-1.5 text-[10px] font-bold text-white">
-                              <Check className="h-3.5 w-3.5" /> Added to wishlist
-                            </span>
-                            <button type="button" onClick={() => remove(wishlistCard)} disabled={isPending(wishlistCard)} aria-label={`Remove ${s.title} from wishlist`} className="flex items-center justify-center rounded-lg bg-red-50 p-1.5 text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50">
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                        ) : (
-                          <button type="button" onClick={() => add(wishlistCard)} disabled={isPending(wishlistCard)} className="flex items-center gap-1.5 rounded-lg bg-cm-blue px-2.5 py-1.5 text-[10px] font-bold text-white shadow-sm transition-all hover:bg-cm-blue-dark disabled:opacity-50">
-                            <Heart className="h-3.5 w-3.5" /> Add to wishlist
+                      <div className="flex flex-1 flex-col px-5 pb-2 pt-4">
+                        <h3 className="text-lg font-semibold text-slate-900 tracking-tight mb-2">{s.title}</h3>
+                        {s.description && <p className="text-sm text-slate-600 leading-relaxed mb-3">{s.description}</p>}
+                        <div className="mt-auto flex flex-wrap gap-2">
+                          {s.categories?.map((category: string) => (
+                            <span key={category} className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-slate-600">{category}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </Link>
+                    <div className="flex items-center justify-between px-5 pb-4 pt-3 text-slate-700">
+                      {isSaved(wishlistCard) ? (
+                        <div className="flex items-center gap-1.5">
+                          <span className="flex items-center gap-1.5 rounded-lg bg-green-600 px-2.5 py-1.5 text-[10px] font-bold text-white">
+                            <Check className="h-3.5 w-3.5" /> Added to wishlist
+                          </span>
+                          <button type="button" onClick={() => remove(wishlistCard)} disabled={isPending(wishlistCard)} aria-label={`Remove ${s.title} from wishlist`} className="flex items-center justify-center rounded-lg bg-red-50 p-1.5 text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50">
+                            <Trash2 className="h-3.5 w-3.5" />
                           </button>
-                        )}
-                      </div>
+                        </div>
+                      ) : (
+                        <button type="button" onClick={() => add(wishlistCard)} disabled={isPending(wishlistCard)} className="flex items-center gap-1.5 rounded-lg bg-cm-blue px-2.5 py-1.5 text-[10px] font-bold text-white shadow-sm transition-all hover:bg-cm-blue-dark disabled:opacity-50">
+                          <Heart className="h-3.5 w-3.5" /> Add to wishlist
+                        </button>
+                      )}
                     </div>
                   </div>
                 );

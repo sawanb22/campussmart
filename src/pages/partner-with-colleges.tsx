@@ -59,10 +59,10 @@ const PartnerWithColleges = () => {
   return (
     <main className="min-h-screen bg-white">
       {/* Hero */}
-      <section className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <section className="px-4 pb-1 pt-3 sm:px-6 sm:pb-1 sm:pt-4 lg:px-8">
         <div
           ref={heroRef}
-          className="relative mx-auto max-w-6xl overflow-hidden rounded-[2rem] bg-gradient-to-br from-cm-blue-dark via-cm-blue to-[#0f6fd6] px-6 py-14 sm:px-10 sm:py-16 lg:px-14"
+          className="relative mx-auto max-w-6xl overflow-hidden rounded-[2rem] bg-gradient-to-br from-cm-blue-dark via-cm-blue to-[#0f6fd6] px-6 py-8 sm:px-10 sm:py-10 lg:px-14"
         >
           <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full border border-white/10" />
           <div className="pointer-events-none absolute -right-10 -top-10 h-52 w-52 rounded-full border border-white/10" />
@@ -100,11 +100,11 @@ const PartnerWithColleges = () => {
       </section>
 
       {/* Partnership models */}
-      <section id="partnership-models" className="px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+      <section id="partnership-models" className="px-4 pb-8 pt-2 sm:px-6 sm:pb-10 sm:pt-3 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          <div className="mx-auto mb-12 max-w-2xl text-center">
+          <div className="mx-auto mb-3 max-w-2xl text-center">
             <h2 className="text-3xl font-bold text-cm-blue-dark sm:text-4xl">{section2Title}</h2>
-            <p className="mt-3 text-sm text-gray-500">Flexible ways to collaborate, structured around what your institution needs most.</p>
+            <p className="mt-1.5 text-sm text-gray-500">Flexible ways to collaborate, structured around what your institution needs most.</p>
           </div>
           <div ref={cardsRef} className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {cards.map((card, index) => {
@@ -140,8 +140,8 @@ const PartnerWithColleges = () => {
       </section>
 
       {/* CTA */}
-      <section className="px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-8 rounded-[2rem] bg-gradient-to-br from-cm-blue-dark to-cm-blue px-8 py-14 text-center sm:flex-row sm:px-14 sm:text-left">
+      <section className="px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 rounded-[2rem] bg-gradient-to-br from-cm-blue-dark to-cm-blue px-8 py-8 text-center sm:flex-row sm:px-14 sm:text-left">
           <div>
             <h2 className="text-2xl font-bold text-white sm:text-3xl">{ctaTitle}</h2>
             <p className="mt-3 max-w-xl text-sm text-white/80 sm:text-base">{ctaSubtitle}</p>

@@ -21,12 +21,14 @@ interface UserGroup {
 export default function WishlistReports() {
     const [items, setItems] = useState<WishlistItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState('');
     const [search, setSearch] = useState('');
     const [exporting, setExporting] = useState(false);
 
     useEffect(() => {
         api.get('/admin/wishlist-report')
             .then(({ data }) => setItems(data))
+            .catch((err) => setLoadError(err.response?.data?.error || 'Failed to load wishlist report. Please try again.'))
             .finally(() => setLoading(false));
     }, []);
 
@@ -102,6 +104,8 @@ export default function WishlistReports() {
 
             {loading ? (
                 <div className="text-gray-400">Loading...</div>
+            ) : loadError ? (
+                <div className="card border-red-200 bg-red-50 text-center text-red-700 py-8">{loadError}</div>
             ) : (
                 <div className="space-y-4">
                     {filteredGroups.map((group) => (

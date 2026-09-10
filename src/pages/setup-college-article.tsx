@@ -1,0 +1,41 @@
+import { Link, useParams } from 'react-router-dom';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { usePageData } from '@/hooks/usePageData';
+import { resolveMediaUrl } from '@/lib/media-url';
+import { DEFAULTS, type SetupArticle } from './setup-college';
+
+const slugify = (title: string) => title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+const SetupCollegeArticle = () => {
+  const { articleSlug } = useParams();
+  const { data, loading } = usePageData<any>('setup-college');
+  const cards: SetupArticle[] = data.cards?.length ? data.cards : DEFAULTS.cards;
+  const article = cards.find(card => slugify(card.title) === articleSlug);
+
+  if (loading) {
+    return <main className="min-h-[60vh] flex items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-cm-blue border-t-transparent" aria-label="Loading guide" /></main>;
+  }
+
+  if (!article) {
+    return <main className="min-h-[60vh] flex flex-col items-center justify-center gap-5 px-4"><h1 className="text-3xl font-bold text-cm-blue-dark">Guide not found</h1><Link to="/setup-college" className="btn-primary">Back to Setup College</Link></main>;
+  }
+
+  return (
+    <main className="min-h-screen bg-[#f5f8e8] py-8 sm:py-12">
+      <article className="mx-auto max-w-4xl px-4 sm:px-8">
+        <Link to="/setup-college" className="mb-7 inline-flex items-center gap-2 text-sm font-semibold text-[#3d718f] hover:text-[#090909]"><ArrowLeft size={16} /> Back to Setup College</Link>
+        <div className="overflow-hidden rounded-[22px] bg-white shadow-sm">
+          <img src={resolveMediaUrl(article.image)} alt={article.title} className="h-64 w-full object-cover sm:h-[440px]" />
+          <div className="px-6 py-8 sm:px-12 sm:py-11">
+            <div className="mb-4 text-[10px] font-bold uppercase tracking-[0.14em] text-[#89614d]">{article.category}{article.readTime ? ` · ${article.readTime}` : ''}</div>
+            <h1 className="mb-6 font-sans text-4xl font-bold leading-tight tracking-tight text-[#090909] sm:text-6xl">{article.title}</h1>
+            <p className="max-w-2xl border-l-2 border-[#d9f68b] pl-5 text-base leading-8 text-[#3c2f26] sm:text-lg">{article.description || `A practical ${article.category.toLowerCase()} guide for planning and building a stronger college campus.`}</p>
+          </div>
+        </div>
+        <Link to="/setup-college" className="mt-7 inline-flex items-center gap-2 text-sm font-bold text-[#090909]">Explore more guides <ArrowRight size={15} /></Link>
+      </article>
+    </main>
+  );
+};
+
+export default SetupCollegeArticle;

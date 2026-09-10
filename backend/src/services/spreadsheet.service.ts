@@ -6,6 +6,8 @@ interface SpreadsheetRow {
     phone?: string | null;
     institution?: string | null;
     subject?: string | null;
+    role?: string | null;
+    resumeOriginalName?: string | null;
     items?: string | null;
     message: string;
     createdAt: Date;

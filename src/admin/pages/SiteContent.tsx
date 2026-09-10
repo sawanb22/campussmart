@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Save, RotateCcw } from 'lucide-react';
+import { Save, RotateCcw, Facebook, Twitter, Youtube, Instagram, Linkedin, Link2 } from 'lucide-react';
 import api from '../api/client';
 
 interface ContentMap { [key: string]: string; }
@@ -12,6 +12,15 @@ const CONTENT_LABELS: Record<string, string> = {
     contact_email: 'Contact Email',
     contact_address: 'Contact Address',
 };
+
+const SOCIAL_LINKS: { key: string; label: string; icon: typeof Facebook; placeholder: string }[] = [
+    { key: 'social_facebook', label: 'Facebook', icon: Facebook, placeholder: 'https://www.facebook.com/yourpage' },
+    { key: 'social_twitter', label: 'X (Twitter)', icon: Twitter, placeholder: 'https://x.com/yourhandle' },
+    { key: 'social_youtube', label: 'YouTube', icon: Youtube, placeholder: 'https://www.youtube.com/@yourchannel' },
+    { key: 'social_instagram', label: 'Instagram', icon: Instagram, placeholder: 'https://www.instagram.com/yourpage' },
+    { key: 'social_linkedin', label: 'LinkedIn', icon: Linkedin, placeholder: 'https://www.linkedin.com/company/yourpage' },
+    { key: 'social_pinterest', label: 'Pinterest', icon: Link2, placeholder: 'https://in.pinterest.com/yourpage' },
+];
 
 export default function SiteContent() {
     const [content, setContent] = useState<ContentMap>({});
@@ -96,6 +105,32 @@ export default function SiteContent() {
                     </div>
                 </div>
 
+                {/* Social Media Links Section */}
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div className="px-6 py-4 bg-gray-50/50 border-b border-gray-100">
+                        <h2 className="font-bold text-gray-900 flex items-center gap-2">
+                            <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
+                            Social Media Links
+                        </h2>
+                        <p className="text-xs text-gray-500 mt-0.5">Shown in the site header and footer. Leave a field blank to hide that icon.</p>
+                    </div>
+                    <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {SOCIAL_LINKS.map(({ key, label, icon: Icon, placeholder }) => (
+                            <div key={key} className="space-y-1.5">
+                                <label className="flex items-center gap-2 text-sm font-bold text-gray-700">
+                                    <Icon className="w-4 h-4 text-blue-600" /> {label}
+                                </label>
+                                <input
+                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                                    placeholder={placeholder}
+                                    value={content[key] || ''}
+                                    onChange={(e) => setContent({ ...content, [key]: e.target.value })}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
                 {/* Custom Content Section */}
                 <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                     <div className="px-6 py-4 bg-gray-50/50 border-b border-gray-100">
@@ -108,7 +143,7 @@ export default function SiteContent() {
                         <p className="text-sm text-gray-500">Generic configuration keys for various site components.</p>
                         <div className="space-y-3">
                             {Object.entries(content)
-                                .filter(([key]) => !CONTENT_LABELS[key])
+                                .filter(([key]) => !CONTENT_LABELS[key] && !SOCIAL_LINKS.some((s) => s.key === key))
                                 .map(([key, value]) => (
                                     <div key={key} className="flex gap-4 items-start bg-gray-50/50 p-4 rounded-xl border border-gray-100">
                                         <div className="flex-shrink-0 w-32 truncate text-xs font-bold bg-blue-50 text-blue-700 px-3 py-2 rounded-lg mt-0.5 border border-blue-100 text-center">{key}</div>

@@ -1,6 +1,9 @@
 import { Router, Response } from 'express';
+import fs from 'fs';
+import path from 'path';
 import prisma from '../lib/prisma';
 import { verifyToken, requireAdmin, AuthRequest } from '../middleware/auth.middleware';
+import { RESUMES_DIR } from '../lib/uploads-dir';
 
 const router = Router();
 
@@ -106,6 +109,25 @@ router.get('/enquiries', verifyToken, requireAdmin, async (_req: AuthRequest, re
         res.json({ contacts, quotes });
     } catch {
         res.status(500).json({ error: 'Failed to fetch enquiries' });
+    }
+});
+
+// GET /api/admin/enquiries/contact/:id/resume
+router.get('/enquiries/contact/:id/resume', verifyToken, requireAdmin, async (req: AuthRequest, res: Response) => {
+    try {
+        const enquiry = await prisma.contactEnquiry.findUnique({ where: { id: Number(req.params.id) } });
+        if (!enquiry?.resumeFilename) {
+            res.status(404).json({ error: 'Resume not found' });
+            return;
+        }
+        const filePath = path.resolve(RESUMES_DIR, enquiry.resumeFilename);
+        if (!filePath.startsWith(`${path.resolve(RESUMES_DIR)}${path.sep}`) || !fs.existsSync(filePath)) {
+            res.status(404).json({ error: 'Resume file not found' });
+            return;
+        }
+        res.download(filePath, enquiry.resumeOriginalName || enquiry.resumeFilename);
+    } catch {
+        res.status(500).json({ error: 'Failed to download resume' });
     }
 });
 
