@@ -9,8 +9,15 @@ const router = Router();
 router.get('/', verifyToken, async (req: AuthRequest, res: Response) => {
     try {
         const items = await prisma.wishlistItem.findMany({
-            where: { userId: req.user!.id },
+            where: {
+                userId: req.user!.id,
+                OR: [
+                    { productId: null },
+                    { product: { active: true } },
+                ],
+            },
             include: { product: { include: { category: true } } },
+            orderBy: { createdAt: 'desc' },
         });
         res.json(items);
     } catch {
@@ -24,25 +31,42 @@ router.get('/', verifyToken, async (req: AuthRequest, res: Response) => {
 router.post('/', verifyToken, async (req: AuthRequest, res: Response) => {
     try {
         const { productId, designKey, designTitle, designImage, pageSlug } = req.body;
-        if (productId) {
+        if (productId !== undefined && productId !== null) {
+            const numId = Number(productId);
+            if (!Number.isInteger(numId) || numId <= 0) {
+                res.status(400).json({ error: 'Invalid productId' });
+                return;
+            }
+            const product = await prisma.product.findUnique({
+                where: { id: numId },
+                include: { category: true },
+            });
+            if (!product) {
+                res.status(404).json({ error: 'Product not found' });
+                return;
+            }
+            if (!product.active) {
+                res.status(400).json({ error: 'Product is no longer available' });
+                return;
+            }
             const item = await prisma.wishlistItem.upsert({
-                where: { userId_productId: { userId: req.user!.id, productId: Number(productId) } },
+                where: { userId_productId: { userId: req.user!.id, productId: numId } },
                 update: {},
-                create: { userId: req.user!.id, productId: Number(productId) },
-                include: { product: true },
+                create: { userId: req.user!.id, productId: numId },
+                include: { product: { include: { category: true } } },
             });
             return res.status(201).json(item);
         }
         if (designKey && designTitle) {
             const item = await prisma.wishlistItem.upsert({
-                where: { userId_designKey: { userId: req.user!.id, designKey: String(designKey) } },
+                where: { userId_designKey: { userId: req.user!.id, designKey: String(designKey).trim() } },
                 update: {},
                 create: {
                     userId: req.user!.id,
-                    designKey: String(designKey),
-                    designTitle: String(designTitle),
+                    designKey: String(designKey).trim(),
+                    designTitle: String(designTitle).trim(),
                     designImage: designImage ? String(designImage) : null,
-                    pageSlug: pageSlug ? String(pageSlug) : null,
+                    pageSlug: pageSlug ? String(pageSlug).trim() : null,
                 },
             });
             return res.status(201).json(item);

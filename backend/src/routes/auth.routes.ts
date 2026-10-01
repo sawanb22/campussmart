@@ -78,7 +78,7 @@ router.post('/verify-otp', async (req: Request, res: Response) => {
         // If verifying email for a new registration, mark user as verified
         if (purpose === 'verify') {
             await prisma.user.updateMany({
-                where: { email },
+                where: { email: { equals: normalizedEmail, mode: 'insensitive' } },
                 data: { emailVerified: true },
             });
         }
@@ -119,16 +119,57 @@ router.post('/register', async (req: Request, res: Response) => {
         const exists = await prisma.user.findFirst({
             where: { email: { equals: normalizedEmail, mode: 'insensitive' } }
         });
-        if (exists) { res.status(409).json({ error: 'Email already registered' }); return; }
+
+        if (exists) {
+            if (exists.emailVerified) {
+                res.status(409).json({ error: 'Email already registered. Please sign in.' });
+                return;
+            }
+
+            // User exists but has NOT verified their email yet.
+            // Safely update unverified account with newest details & fresh password hash.
+            const passwordHash = await bcrypt.hash(password, 10);
+            const updatedUser = await prisma.user.update({
+                where: { id: exists.id },
+                data: {
+                    name,
+                    passwordHash,
+                    phone: phone || exists.phone,
+                    institution: institution || exists.institution,
+                },
+            });
+
+            res.status(200).json({
+                message: 'Account pending verification. Please verify your OTP to complete registration.',
+                user: {
+                    id: updatedUser.id,
+                    name: updatedUser.name,
+                    email: updatedUser.email,
+                    role: updatedUser.role,
+                    phone: updatedUser.phone,
+                    institution: updatedUser.institution,
+                    emailVerified: false,
+                },
+            });
+            return;
+        }
 
         const passwordHash = await bcrypt.hash(password, 10);
         const user = await prisma.user.create({
             data: { name, email: normalizedEmail, passwordHash, phone, institution, emailVerified: false },
         });
-        const tokens = generateTokens(user);
+
         res.status(201).json({
-            user: { id: user.id, name: user.name, email: user.email, role: user.role, phone: user.phone, institution: user.institution, emailVerified: user.emailVerified },
-            ...tokens,
+            message: 'Account created. Please verify your OTP to complete registration.',
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                phone: user.phone,
+                institution: user.institution,
+                emailVerified: false,
+            },
         });
     } catch (err) {
         console.error('Registration Error:', err);
@@ -150,6 +191,34 @@ router.post('/login', async (req: Request, res: Response) => {
         if (!user) { res.status(401).json({ error: 'Invalid credentials' }); return; }
         const valid = await bcrypt.compare(password, user.passwordHash);
         if (!valid) { res.status(401).json({ error: 'Invalid credentials' }); return; }
+
+        if (!user.emailVerified) {
+            // Automatically invalidate old verify OTPs and dispatch a fresh one
+            await prisma.otpCode.updateMany({
+                where: { email: normalizedEmail, purpose: 'verify', used: false },
+                data: { used: true },
+            });
+
+            const code = generateOtp();
+            const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+            await prisma.otpCode.create({
+                data: { email: normalizedEmail, code, purpose: 'verify', expiresAt },
+            });
+
+            try {
+                await sendOtpEmail(normalizedEmail, code, 'verify');
+            } catch (emailErr) {
+                console.error('Failed to send verification OTP on login attempt:', emailErr);
+            }
+
+            res.status(403).json({
+                error: 'Please verify your email address before signing in. A fresh verification OTP has been sent to your email.',
+                code: 'EMAIL_NOT_VERIFIED',
+                email: user.email,
+            });
+            return;
+        }
+
         const tokens = generateTokens(user);
         res.json({
             user: { id: user.id, name: user.name, email: user.email, role: user.role, phone: user.phone, institution: user.institution, emailVerified: user.emailVerified },

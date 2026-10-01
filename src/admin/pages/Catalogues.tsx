@@ -3,6 +3,7 @@ import { Plus, Trash2, ExternalLink, X, Pencil, Upload, Loader2 } from 'lucide-r
 import api from '../api/client';
 import MediaImageField from '../components/MediaImageField';
 import { resolveMediaUrl } from '../../lib/media-url';
+import { getAdminToken } from '../lib/auth';
 
 interface Catalogue {
     id: number;
@@ -29,7 +30,7 @@ const fileUrl = resolveMediaUrl;
 const downloadableFileUrl = (value?: string) => {
     const resolved = fileUrl(value);
     if (!resolved) return resolved;
-    const token = sessionStorage.getItem('cm_admin_token') || sessionStorage.getItem('cm_token');
+    const token = getAdminToken();
     if (!token) return resolved;
     return `${resolved}${resolved.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}`;
 };

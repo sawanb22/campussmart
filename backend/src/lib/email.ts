@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import crypto from 'crypto';
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -72,14 +73,31 @@ export async function sendOtpEmail(to: string, otp: string, purpose: 'verify' | 
     </html>
     `;
 
-    console.log(`\n==========================================`);
-    console.log(`🔑 [CAMPUSMART OTP CODE]`);
-    console.log(`   To:      ${to}`);
-    console.log(`   OTP:     ${otp}`);
-    console.log(`   Purpose: ${purpose}`);
-    console.log(`==========================================\n`);
+    if (process.env.NODE_ENV !== 'production') {
+        console.log(`\n==========================================`);
+        console.log(`🔑 [CAMPUSMART OTP CODE]`);
+        console.log(`   To:      ${to}`);
+        console.log(`   OTP:     ${otp}`);
+        console.log(`   Purpose: ${purpose}`);
+        console.log(`==========================================\n`);
+    } else {
+        console.log(`🔑 [CAMPUSMART OTP DISPATCHED] To: ${to} | Purpose: ${purpose}`);
+    }
 
-    const mail = { from: process.env.EMAIL_FROM || 'CampusMart <web.thirdeye@gmail.com>', to, subject, html };
+    const text = `${heading}\n\n${message}\n\nYour OTP code is: ${otp}\n\n⏱ Expires in 10 minutes.\nIf you did not request this, you can safely ignore this email.\nNever share your OTP with anyone.`;
+
+    const mail = {
+        from: process.env.EMAIL_FROM || 'CampusMart <web.thirdeye@gmail.com>',
+        to,
+        subject,
+        text,
+        html,
+        headers: {
+            'X-Priority': '1',
+            'X-MSMail-Priority': 'High',
+            'Importance': 'high',
+        },
+    };
 
     // Gmail SMTP occasionally drops a single attempt (transient auth hiccup, slow
     // greeting); one retry clears most of those without making genuine failures
@@ -101,5 +119,5 @@ export async function sendOtpEmail(to: string, otp: string, purpose: 'verify' | 
 }
 
 export function generateOtp(): string {
-    return String(Math.floor(100000 + Math.random() * 900000));
+    return String(crypto.randomInt(100000, 1000000));
 }

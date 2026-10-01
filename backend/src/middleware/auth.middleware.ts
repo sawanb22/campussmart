@@ -22,6 +22,10 @@ export const verifyToken = async (req: AuthRequest, res: Response, next: NextFun
             res.status(401).json({ error: 'User not found' }); 
             return; 
         }
+        if (!user.emailVerified) {
+            res.status(403).json({ error: 'Email verification required', code: 'EMAIL_NOT_VERIFIED' });
+            return;
+        }
         // Use database role, not JWT role, for accurate permission checks
         req.user = { id: user.id, email: user.email, role: user.role || 'user' };
         next();
@@ -66,6 +70,10 @@ export const verifyTokenFromQueryOrHeader = async (req: AuthRequest, res: Respon
             res.status(401).json({ error: 'User not found' });
             return;
         }
+        if (!user.emailVerified) {
+            res.status(403).json({ error: 'Email verification required', code: 'EMAIL_NOT_VERIFIED' });
+            return;
+        }
         req.user = { id: user.id, email: user.email, role: user.role || 'user' };
         next();
     } catch (error) {
@@ -80,7 +88,10 @@ export const optionalAuth = async (req: AuthRequest, _res: Response, next: NextF
     const token = authHeader.split(' ')[1];
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: number; email: string; role: string };
-        req.user = decoded;
+        const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+        if (user && user.emailVerified) {
+            req.user = { id: user.id, email: user.email, role: user.role || 'user' };
+        }
     } catch { /* ignore */ }
     next();
 };

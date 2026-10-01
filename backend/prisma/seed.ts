@@ -25,8 +25,7 @@ async function main() {
     console.log('🌱 Seeding database...');
 
     // Admin user
-    const adminEmail = 'admin@campusmart.in';
-    const adminHash = await bcrypt.hash('Admin@1234', 10);
+    const adminEmail = process.env.ADMIN_INITIAL_EMAIL || 'admin@campusmart.in';
     const existingAdmin = await prisma.user.findFirst({
         where: { email: { equals: adminEmail, mode: 'insensitive' } },
     });
@@ -35,37 +34,40 @@ async function main() {
         await withRetry(() => prisma.user.update({
             where: { id: existingAdmin.id },
             data: {
-                email: adminEmail,
-                passwordHash: adminHash,
                 role: 'admin',
-                name: 'CampusMart Admin',
-                phone: '+91 98765 00000',
-                institution: 'CampusMart',
+                emailVerified: true,
+                name: existingAdmin.name || 'CampusMart Admin',
             },
         }));
+        console.log(`✓ Admin user verified: ${adminEmail} (existing credentials preserved)`);
     } else {
+        const initialPassword = process.env.ADMIN_INITIAL_PASSWORD || 'Admin@1234';
+        const adminHash = await bcrypt.hash(initialPassword, 10);
         await withRetry(() => prisma.user.create({
             data: {
                 name: 'CampusMart Admin',
                 email: adminEmail,
                 passwordHash: adminHash,
                 role: 'admin',
+                emailVerified: true,
                 phone: '+91 98765 00000',
                 institution: 'CampusMart',
             },
         }));
+        console.log(`✓ Initial admin user created: ${adminEmail}`);
     }
 
     // Demo user
     const userHash = await bcrypt.hash('User@1234', 10);
     await withRetry(() => prisma.user.upsert({
         where: { email: 'demo@campusmart.in' },
-        update: {},
+        update: { emailVerified: true },
         create: {
             name: 'Demo User',
             email: 'demo@campusmart.in',
             passwordHash: userHash,
             role: 'user',
+            emailVerified: true,
             phone: '+91 98765 43210',
             institution: 'ABC International School',
         },
@@ -242,8 +244,7 @@ async function main() {
     }
 
     console.log('✅ Database seeded successfully!');
-    console.log('📧 Admin: admin@campusmart.in / Admin@1234');
-    console.log('📧 Demo User: demo@campusmart.in / User@1234');
+    console.log(`📧 Admin seeded: ${adminEmail}`);
 }
 
 main()

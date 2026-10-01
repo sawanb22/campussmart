@@ -1,18 +1,63 @@
-node_modules
-.env
-.env.local
-.env.production
-.env.example
-backend/.env
-backend/dist/
-backend/prisma/dev.db
-backend/prisma/dev.db-journal
-backend/test_extract/
-backend/testout.txt
+# Dependencies
+node_modules/
+*/node_modules/
+backend/node_modules/
+
+# Production builds
 dist/
+build/
+backend/dist/
+
+# Environment and sensitive keys
+.env
+.env.*
+!.env.example
+!.env.local.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# Database files and SQLite journals
 *.db
 *.db-journal
+*.sqlite
+*.sqlite3
+dev.db
+backend/dev.db
+backend/prisma/dev.db
+backend/prisma/dev.db-journal
+
+# Uploads, local media and user generated files
 uploads/
+backend/uploads/
 backend/private-resumes/
-scripts/
+test_extract/
+backend/test_extract/
+
+# Logs and debug files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+backend/*.log
+backend/testout.txt
+backend/prisma_out.txt
+puppeteer-error.png
+
+# Archives and binaries
+*.zip
+*.tar.gz
+*.rar
 backend/campusmart-backend.zip
+
+# OS and Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.claude/

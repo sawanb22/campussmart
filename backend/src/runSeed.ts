@@ -522,8 +522,7 @@ async function seed() {
     console.log('🌱 Running production seed...');
 
     // ── Admin user ────────────────────────────────────────────────────────
-    const adminEmail = 'admin@campusmart.in';
-    const adminHash = await bcrypt.hash('Admin@1234', 10);
+    const adminEmail = process.env.ADMIN_INITIAL_EMAIL || 'admin@campusmart.in';
     const existingAdmin = await prisma.user.findFirst({
         where: { email: { equals: adminEmail, mode: 'insensitive' } },
     });
@@ -532,16 +531,15 @@ async function seed() {
         await prisma.user.update({
             where: { id: existingAdmin.id },
             data: {
-                email: adminEmail,
-                passwordHash: adminHash,
                 role: 'admin',
                 emailVerified: true,
-                name: 'CampusMart Admin',
-                phone: '+91 98765 00000',
-                institution: 'CampusMart',
+                name: existingAdmin.name || 'CampusMart Admin',
             },
         });
+        console.log(`✓ Admin user verified: ${adminEmail} (existing credentials preserved)`);
     } else {
+        const initialPassword = process.env.ADMIN_INITIAL_PASSWORD || 'Admin@1234';
+        const adminHash = await bcrypt.hash(initialPassword, 10);
         await prisma.user.create({
             data: {
                 name: 'CampusMart Admin',
@@ -553,8 +551,8 @@ async function seed() {
                 institution: 'CampusMart',
             },
         });
+        console.log(`✓ Initial admin user created: ${adminEmail}`);
     }
-    console.log('✓ Admin user ready: admin@campusmart.in / Admin@1234');
 
     // ── Hero banner ───────────────────────────────────────────────────────
     await prisma.siteContent.upsert({

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getAdminToken, clearAdminSession } from '../lib/auth';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://api.campusmart.in/api';
 
@@ -8,9 +9,7 @@ const api = axios.create({
 
 // Add auth token to all requests
 api.interceptors.request.use((config) => {
-    const token =
-        sessionStorage.getItem('cm_admin_token') ||
-        sessionStorage.getItem('cm_token');
+    const token = getAdminToken();
 
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -24,14 +23,7 @@ api.interceptors.response.use(
     (res) => res,
     (err) => {
         if (err.response?.status === 401) {
-            sessionStorage.removeItem('cm_admin_token');
-            sessionStorage.removeItem('cm_token');
-            sessionStorage.removeItem('cm_user');
-
-            localStorage.removeItem('cm_admin_token');
-            localStorage.removeItem('cm_token');
-            localStorage.removeItem('cm_user');
-
+            clearAdminSession();
             window.location.href = '/admin/login';
         }
 

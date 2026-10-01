@@ -8,6 +8,23 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+function validateEnv() {
+    const required = ['DATABASE_URL', 'JWT_SECRET'];
+    const missing = required.filter((key) => !process.env[key]);
+    if (missing.length > 0) {
+        throw new Error(`CRITICAL: Missing required environment variables: ${missing.join(', ')}`);
+    }
+    if (process.env.NODE_ENV === 'production') {
+        if (
+            process.env.JWT_SECRET === 'your_super_secret_jwt_key_here' ||
+            process.env.JWT_SECRET === 'your-jwt-secret'
+        ) {
+            throw new Error('CRITICAL: Insecure default JWT_SECRET cannot be used in production.');
+        }
+    }
+}
+validateEnv();
+
 import authRoutes from './routes/auth.routes';
 import productRoutes from './routes/products.routes';
 import blogRoutes from './routes/blog.routes';

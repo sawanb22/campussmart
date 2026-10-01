@@ -58,8 +58,10 @@ const SearchBar = () => {
       { terms: ['technology', 'tech infra', 'interactive board', 'school management'], route: '/tech-infra' },
       { terms: ['ai', 'machine learning', 'ai station'], route: '/ai-ml' },
       { terms: ['campus design', 'architecture', 'master planning'], route: '/campus-design' },
-      { terms: ['digital transformation', 'digitisation', 'ar vr'], route: '/digital-transformation' },
-      { terms: ['partnership', 'partner', 'career', 'job'], route: '/partnership' },
+      { terms: ['career', 'job', 'vacancy', 'openings', 'resume', 'hiring'], route: '/job-openings' },
+      { terms: ['partnership', 'partner', 'vendor', 'collab'], route: '/partnership' },
+      { terms: ['resource', 'guide', 'handbook', 'guideline'], route: '/resources' },
+      { terms: ['catalog', 'catalogue', 'brochure', 'pdf download'], route: '/catalogues' },
     ];
     const matchingPage = pageRoutes.find(({ terms }) => terms.some((term) => normalizedQuery.includes(term)));
 

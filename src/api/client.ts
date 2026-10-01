@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { clearUserSession } from '@/lib/auth-session';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://api.campusmart.in/api';
 
@@ -26,8 +27,7 @@ api.interceptors.response.use(
     (res) => res,
     (err) => {
         if (err.response?.status === 401) {
-            localStorage.removeItem('cm_token');
-            localStorage.removeItem('cm_user');
+            clearUserSession();
         }
 
         return Promise.reject(err);

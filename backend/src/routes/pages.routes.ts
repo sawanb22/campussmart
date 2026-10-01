@@ -165,10 +165,15 @@ router.post('/', verifyToken, requireAdmin, async (req: AuthRequest, res: Respon
             return;
         }
 
+        const payload = { ...req.body };
+        if (payload.pageData !== undefined && payload.pageData !== null && typeof payload.pageData === 'object') {
+            payload.pageData = JSON.stringify(payload.pageData);
+        }
+
         const page = await prisma.page.create({
             data: {
-                ...req.body,
-                published: req.body.published !== undefined ? req.body.published : true
+                ...payload,
+                published: payload.published !== undefined ? payload.published : true
             }
         });
         console.log(`Page created by admin ${req.user?.id}: ${page.slug}`);
@@ -197,11 +202,16 @@ router.put('/:id', verifyToken, requireAdmin, async (req: AuthRequest, res: Resp
             return;
         }
 
+        const payload = { ...req.body };
+        if (payload.pageData !== undefined && payload.pageData !== null && typeof payload.pageData === 'object') {
+            payload.pageData = JSON.stringify(payload.pageData);
+        }
+
         // Update page
         const page = await prisma.page.update({
             where: { id },
             data: {
-                ...req.body,
+                ...payload,
                 updatedAt: new Date() // Ensure updatedAt is set
             }
         });

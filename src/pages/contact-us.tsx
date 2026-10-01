@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Phone, Mail, Clock, Send, MessageCircle, type LucideIcon } from 'lucide-react';
 import api from '@/api/client';
 import { usePageData } from '@/hooks/usePageData';
+import { useSiteContent } from '@/contexts/SiteContentContext';
 
 interface ContactInfoItem { title: string; content?: string; description?: string; icon: LucideIcon; }
 
@@ -23,6 +24,7 @@ const subCategories: Record<string, string[]> = {
 
 const ContactUs = () => {
   const { data } = usePageData('contact-us');
+  const { content } = useSiteContent();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -48,6 +50,7 @@ const ContactUs = () => {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
+        institution: formData.collegeName,
         subject: formData.category,
         message: `College / University: ${formData.collegeName}\nAuthorised Person: ${formData.authorisedPerson}\nAddress: ${formData.address}\nCategory: ${formData.category}\nSub-category: ${formData.subCategory || 'Not applicable'}\n\n${formData.message}`,
       });
@@ -70,16 +73,19 @@ const ContactUs = () => {
     }
   };
 
+  const phoneVal = content.contact_phone || '+91 9966109191\n+91 9866091111';
+  const emailVal = content.contact_email || 'info@campusmart.in\nsupport@campusmart.in';
+
   const defaultContactInfo: ContactInfoItem[] = [
     {
       icon: Phone,
       title: 'Phone',
-      content: '+91 9966109191\n+91 9866091111',
+      content: phoneVal,
     },
     {
       icon: Mail,
       title: 'Email',
-      content: 'info@campusmart.in\nsupport@campusmart.in',
+      content: emailVal,
     },
     {
       icon: Clock,

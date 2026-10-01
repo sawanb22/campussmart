@@ -48,7 +48,7 @@ const PartnershipModelDetail = () => {
 
         <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl bg-gradient-to-br from-cm-blue-dark to-cm-blue p-6 text-center sm:flex-row sm:p-8 sm:text-left">
           <p className="text-sm font-semibold text-white sm:text-base">Interested in the {card.title.toLowerCase()} model?</p>
-          <Link to="/partnership" className="btn-secondary inline-flex flex-shrink-0 items-center gap-2 px-6 py-3 text-sm font-bold">
+          <Link to={`/partnership?model=${encodeURIComponent(card.title)}`} className="btn-secondary inline-flex flex-shrink-0 items-center gap-2 px-6 py-3 text-sm font-bold">
             Submit Enquiry <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

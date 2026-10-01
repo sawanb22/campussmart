@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Link } from 'react-router-dom';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -46,16 +47,16 @@ const Ecosystem = () => {
 
           <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2 md:gap-3">
             {ecosystemItems.map((item) => (
-              <a
+              <Link
                 key={item.number}
-                href={item.href}
+                to={item.href}
                 className="eco-item bg-blue-800/40 backdrop-blur-sm hover:bg-blue-700/60 transition-all duration-300 p-3 sm:p-4 text-center rounded-lg border border-blue-700/50"
               >
                 <div className="text-lg sm:text-xl font-black text-blue-300 mb-1">{item.number}</div>
                 <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider whitespace-pre-line leading-tight text-sm">
                   {item.title}
                 </p>
-              </a>
+              </Link>
             ))}
           </div>
         </div>

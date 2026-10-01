@@ -5,12 +5,12 @@ import { Facebook, Twitter, Youtube, Instagram, Linkedin } from 'lucide-react';
 import { useSiteContent } from '@/contexts/SiteContentContext';
 
 const DEFAULT_SOCIAL_URLS: Record<string, string> = {
-  social_facebook: 'https://www.facebook.com/schoolmart.in/',
-  social_twitter: 'https://x.com/schoolmartindia',
-  social_youtube: 'https://www.youtube.com/@schoolinnovationindia',
-  social_instagram: 'https://www.instagram.com/schoolmart.in/',
-  social_linkedin: 'https://www.linkedin.com/school/13397648/admin/inbox/thread/2-YTIyNjJhZTMtZDRhOS00OWJmLWE2YTEtMzU2MWQ4OTc0ZTg2XzEwMA==/',
-  social_pinterest: 'https://in.pinterest.com/schoolmartindia/',
+  social_facebook: 'https://www.facebook.com/campusmart.in/',
+  social_twitter: 'https://x.com/campusmartindia',
+  social_youtube: 'https://www.youtube.com/@campusmartindia',
+  social_instagram: 'https://www.instagram.com/campusmart.in/',
+  social_linkedin: 'https://www.linkedin.com/company/campusmart/',
+  social_pinterest: 'https://in.pinterest.com/campusmartindia/',
 };
 
 const Footer = () => {

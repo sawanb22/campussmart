@@ -1,5 +1,5 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
-import { Plus, Pencil, Trash2, Search, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, X, RotateCcw } from 'lucide-react';
 import api from '../api/client';
 import MediaImageField from '../components/MediaImageField';
 import MediaImageListField from '../components/MediaImageListField';
@@ -14,13 +14,14 @@ export default function Products() {
     const [products, setProducts] = useState<Product[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [search, setSearch] = useState('');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
     const [showModal, setShowModal] = useState(false);
     const [editing, setEditing] = useState<Partial<Product>>(EMPTY);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
     const fetchProducts = async () => {
-        const { data } = await api.get('/products?limit=100');
+        const { data } = await api.get('/products?limit=250&active=all');
         setProducts(data.products);
         setLoading(false);
     };
@@ -89,12 +90,33 @@ export default function Products() {
     };
 
     const deleteProduct = async (id: number) => {
-        if (!confirm('Deactivate this product?')) return;
+        if (!confirm('Deactivate this product? It will be hidden from the public shop but preserved in admin inventory.')) return;
         await api.delete(`/products/${id}`);
         await fetchProducts();
     };
 
-    const filtered = products.filter(p => (p.name || '').toLowerCase().includes((search || '').toLowerCase()));
+    const restoreProduct = async (id: number) => {
+        try {
+            await api.patch(`/products/${id}/restore`);
+            await fetchProducts();
+        } catch (err: any) {
+            alert(err.response?.data?.error || 'Failed to reactivate product');
+        }
+    };
+
+    const filtered = products.filter(p => {
+        const query = (search || '').toLowerCase().trim();
+        const matchesSearch = !query ||
+            (p.name || '').toLowerCase().includes(query) ||
+            (p.sku || '').toLowerCase().includes(query) ||
+            (p.category?.name || '').toLowerCase().includes(query);
+        const matchesStatus = statusFilter === 'all'
+            ? true
+            : statusFilter === 'active'
+                ? p.active
+                : !p.active;
+        return matchesSearch && matchesStatus;
+    });
 
     // Bulk Upload State
     const [showBulkModal, setShowBulkModal] = useState(false);
@@ -234,11 +256,43 @@ export default function Products() {
             </div>
 
             {/* ... existing search and table code ... */}
-            {/* Search */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4">
-                <div className="relative max-w-sm">
+            {/* Search & Status Filters */}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="relative w-full sm:max-w-sm">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search catalog..." className="w-full border border-gray-200 rounded-xl pl-11 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
+                    <input
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Search by name, SKU, category..."
+                        className="w-full border border-gray-200 rounded-xl pl-11 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    />
+                </div>
+                <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl self-stretch sm:self-auto">
+                    {(['all', 'active', 'inactive'] as const).map((tab) => {
+                        const count = tab === 'all'
+                            ? products.length
+                            : tab === 'active'
+                                ? products.filter((p) => p.active).length
+                                : products.filter((p) => !p.active).length;
+                        return (
+                            <button
+                                key={tab}
+                                onClick={() => setStatusFilter(tab)}
+                                className={`px-4 py-1.5 rounded-lg text-xs font-bold capitalize transition-all flex items-center gap-1.5 ${
+                                    statusFilter === tab
+                                        ? 'bg-white text-blue-600 shadow-sm'
+                                        : 'text-slate-500 hover:text-slate-900'
+                                }`}
+                            >
+                                <span>{tab}</span>
+                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                                    statusFilter === tab ? 'bg-blue-50 text-blue-600' : 'bg-slate-200 text-slate-600'
+                                }`}>
+                                    {count}
+                                </span>
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 
@@ -291,8 +345,12 @@ export default function Products() {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-2">
-                                            <button onClick={() => openEdit(p)} className="p-2 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl transition-all shadow-sm border border-transparent hover:border-blue-600 scale-90 hover:scale-100"><Pencil className="w-4 h-4" /></button>
-                                            <button onClick={() => deleteProduct(p.id)} className="p-2 text-red-600 hover:bg-red-600 hover:text-white rounded-xl transition-all shadow-sm border border-transparent hover:border-red-600 scale-90 hover:scale-100"><Trash2 className="w-4 h-4" /></button>
+                                            <button title="Edit product" onClick={() => openEdit(p)} className="p-2 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl transition-all shadow-sm border border-transparent hover:border-blue-600 scale-90 hover:scale-100"><Pencil className="w-4 h-4" /></button>
+                                            {p.active ? (
+                                                <button title="Deactivate product" onClick={() => deleteProduct(p.id)} className="p-2 text-red-600 hover:bg-red-600 hover:text-white rounded-xl transition-all shadow-sm border border-transparent hover:border-red-600 scale-90 hover:scale-100"><Trash2 className="w-4 h-4" /></button>
+                                            ) : (
+                                                <button title="Reactivate product" onClick={() => restoreProduct(p.id)} className="p-2 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-xl transition-all shadow-sm border border-transparent hover:border-emerald-600 scale-90 hover:scale-100"><RotateCcw className="w-4 h-4" /></button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ShoppingCart, Check, Share2, Award, Truck, ShieldCheck, Heart, ArrowLeft } from 'lucide-react';
+import { Check, Share2, Award, Truck, ShieldCheck, Heart, ArrowLeft, Send } from 'lucide-react';
 import api from '@/api/client';
 import LoginPromptModal from '@/components/login-prompt-modal';
 import { resolveMediaUrl } from '@/lib/media-url';
@@ -30,7 +30,8 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [gallery, setGallery] = useState<string[]>([]);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-  const { refresh: refreshWishlistCount } = useWishlist();
+  const [feedbackMsg, setFeedbackMsg] = useState('');
+  const { isInWishlist, addProduct, removeProduct } = useWishlist();
 
   useEffect(() => {
     setLoading(true);
@@ -82,29 +83,62 @@ const ProductDetail = () => {
   const formatPrice = (price: number) =>
     new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(price);
 
-  const addToWishlist = async () => {
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    const shareData = {
+      title: product?.name || 'CampusMart Product',
+      text: product?.description ? product.description.slice(0, 100) : 'Check out this product on CampusMart',
+      url: shareUrl,
+    };
+
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (err: any) {
+        if (err.name === 'AbortError') return;
+      }
+    }
+
     try {
-      await api.post('/wishlist', { productId: product.id });
-      alert('Added to wishlist');
-      refreshWishlistCount();
-    } catch (err: any) {
-      if (err.response?.status === 401) setShowLoginPrompt(true);
-      else alert(err.response?.data?.error || 'Failed to add to wishlist');
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      const textArea = document.createElement('textarea');
+      textArea.value = shareUrl;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
-  const addToCart = async () => {
-    try {
-      await api.post('/wishlist', { productId: product.id });
-      alert('Product added to cart!');
-      refreshWishlistCount();
-    } catch (err: any) {
-      if (err.response?.status === 401) {
-        setShowLoginPrompt(true);
+  const inWishlist = isInWishlist(product.id);
+
+  const handleToggleWishlist = async () => {
+    if (inWishlist) {
+      const res = await removeProduct(product.id);
+      if (res.success) {
+        setFeedbackMsg('Removed from wishlist');
       } else {
-        alert(err.response?.data?.error || 'Failed to add to cart.');
+        setFeedbackMsg(res.error || 'Failed to remove from wishlist');
+      }
+    } else {
+      const res = await addProduct(product.id);
+      if (res.unauthenticated) {
+        setShowLoginPrompt(true);
+      } else if (res.success) {
+        setFeedbackMsg('Product saved to wishlist!');
+      } else {
+        setFeedbackMsg(res.error || 'Failed to add to wishlist');
       }
     }
+    setTimeout(() => setFeedbackMsg(''), 3000);
   };
 
   return (
@@ -123,7 +157,9 @@ const ProductDetail = () => {
           <span>/</span>
           {product.category && (
             <>
-              <Link to={`/shop`} className="hover:text-cm-blue transition-colors">{product.category.name}</Link>
+              <Link to={`/shop?category=${encodeURIComponent(product.category.slug)}`} className="hover:text-cm-blue transition-colors">
+                {product.category.name}
+              </Link>
               <span>/</span>
             </>
           )}
@@ -156,6 +192,23 @@ const ProductDetail = () => {
           {/* Info Column */}
           <div className="flex flex-col">
             <div className="pb-6 border-b border-slate-100">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded">
+                  {product.category?.name || 'General'}
+                </span>
+                {product.sku && (
+                  <span className="text-xs font-mono text-slate-400">SKU: {product.sku}</span>
+                )}
+                {product.stock <= 0 ? (
+                  <span className="text-xs font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded">
+                    Out of Stock
+                  </span>
+                ) : (
+                  <span className="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
+                    In Stock ({product.stock} available)
+                  </span>
+                )}
+              </div>
               <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-snug">
                 {product.name}
               </h1>
@@ -164,11 +217,17 @@ const ProductDetail = () => {
             <div className="py-6 border-b border-slate-100 space-y-4">
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-black text-cm-blue">{formatPrice(product.price)}</span>
-                <span className="text-xs text-slate-400 font-medium">Incl. all taxes</span>
+                <span className="text-xs text-slate-400 font-medium">Institutional pricing (excl. bulk discount)</span>
               </div>
             </div>
 
             <div className="py-6 space-y-4">
+              {feedbackMsg && (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-bold text-emerald-700 animate-in fade-in">
+                  {feedbackMsg}
+                </div>
+              )}
+
               <div className="flex items-center gap-4">
                 <div className="flex items-center border border-slate-200 rounded-xl bg-white overflow-hidden h-12">
                   <button 
@@ -182,19 +241,40 @@ const ProductDetail = () => {
                   >+</button>
                 </div>
 
-                <button onClick={addToCart} className="h-12 flex-1 bg-cm-blue hover:bg-cm-blue-dark text-white rounded-xl shadow-lg shadow-cm-blue/20 font-bold flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5">
-                  <ShoppingCart className="w-5 h-5" />
-                  Add to Cart
-                </button>
+                <Link
+                  to={`/request-quote?product=${encodeURIComponent(product.slug)}&qty=${quantity}`}
+                  className="h-12 flex-1 bg-cm-blue hover:bg-cm-blue-dark text-white rounded-xl shadow-lg shadow-cm-blue/20 font-bold flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 text-sm"
+                >
+                  <Send className="w-4 h-4" />
+                  Request Formal Quote
+                </Link>
               </div>
 
               <div className="flex gap-2">
-                 <button onClick={addToWishlist} className="flex-1 h-11 border border-slate-200 rounded-xl hover:bg-slate-50 font-bold text-sm text-slate-700 flex items-center justify-center gap-2 transition-colors">
-                    <Heart className="w-4 h-4" />
-                    Wishlist
+                 <button
+                   onClick={handleToggleWishlist}
+                   className={`flex-1 h-11 border rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${
+                     inWishlist
+                       ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                       : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                   }`}
+                 >
+                    {inWishlist ? <Check className="w-4 h-4 text-emerald-600" /> : <Heart className="w-4 h-4 text-rose-500" />}
+                    {inWishlist ? 'Saved in Wishlist' : 'Add to Wishlist'}
                  </button>
-                 <button className="w-11 h-11 flex items-center justify-center border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-600 transition-colors">
-                    <Share2 className="w-4 h-4" />
+                 <button
+                   type="button"
+                   onClick={handleShare}
+                   title={copied ? 'Link copied!' : 'Share product'}
+                   aria-label="Share product"
+                   className="relative w-11 h-11 flex items-center justify-center border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-600 transition-colors"
+                 >
+                   <Share2 className="w-4 h-4" />
+                   {copied && (
+                     <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2 py-0.5 rounded shadow whitespace-nowrap z-10">
+                       Copied!
+                     </span>
+                   )}
                  </button>
               </div>
             </div>

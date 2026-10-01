@@ -26,7 +26,7 @@ const defaultSidebar = {
   classifieds: [
     { label: 'Colleges / Universities for Sale', href: '/colleges-universities-for-sale' },
     { label: 'Education Infra Funding', href: '/classifieds' },
-    { label: 'Partner with Running Colleges', href: '/partnership' },
+    { label: 'Partner with Running Colleges', href: '/partner-with-colleges' },
   ],
   resources: [
     { label: 'Complete Guide on AI Implementation', href: '/ai-guide' },
@@ -50,27 +50,36 @@ const defaultSidebar = {
   ]
 };
 
+const getCanonicalFeatureHref = (title: string): string | null => {
+  switch (title) {
+    case 'Smart Classrooms': return '/smart-classrooms';
+    case 'AR / VR Learning':
+    case 'AR/VR Learning': return '/ar-vr-experiences';
+    case 'Innovation Centres':
+    case 'Innovation Centers': return '/innovation-centers';
+    case 'Science & Tech Labs': return '/science-tech-labs';
+    case 'Campus Master Planning': return '/campus-master-planning';
+    case 'Campus Furniture Design': return '/campus-furniture-design';
+    case 'Sports Infrastructure': return '/sports-infrastructure';
+    case 'Collaboration Spaces': return '/collaboration-spaces';
+    default: return null;
+  }
+};
+
+const getCanonicalProjectHref = (label: string): string => {
+  if (label === 'Research facilities' || label === 'Student life centers') return '/innovation-centers';
+  if (label === 'Athletic complexes') return '/sports-infrastructure';
+  return '/campus-master-planning';
+};
+
 const FeatureCards = () => {
   const { content } = useSiteContent();
-  const features = ((Array.isArray(content.home_features) ? content.home_features : null) || defaultFeatures).map((feature: any) =>
-    feature.title === 'Smart Classrooms'
-      ? { ...feature, href: '/smart-classrooms' }
-      : feature.title === 'AR / VR Learning' || feature.title === 'AR/VR Learning'
-        ? { ...feature, href: '/ar-vr-experiences' }
-        : feature.title === 'Innovation Centres' || feature.title === 'Innovation Centers'
-          ? { ...feature, href: '/innovation-centers' }
-          : feature.title === 'Science & Tech Labs'
-            ? { ...feature, href: '/science-tech-labs' }
-            : feature.title === 'Campus Master Planning'
-              ? { ...feature, href: '/campus-master-planning' }
-              : feature.title === 'Campus Furniture Design'
-                ? { ...feature, href: '/campus-furniture-design' }
-                : feature.title === 'Sports Infrastructure'
-                  ? { ...feature, href: '/sports-infrastructure' }
-                  : feature.title === 'Collaboration Spaces'
-                    ? { ...feature, href: '/collaboration-spaces' }
-                    : feature
-  );
+  const features = ((Array.isArray(content.home_features) ? content.home_features : null) || defaultFeatures).map((feature: any) => ({
+    ...feature,
+    href: (feature.href && feature.href !== '/')
+      ? feature.href
+      : (getCanonicalFeatureHref(feature.title) || feature.href || '/'),
+  }));
   const rawSidebar = (typeof content.home_sidebar === 'object' && content.home_sidebar !== null) ? content.home_sidebar : defaultSidebar;
   const classifieds = (Array.isArray(rawSidebar.classifieds) ? rawSidebar.classifieds : defaultSidebar.classifieds).map((item: any) =>
     item.label === 'Colleges / Universities for Sale'
@@ -82,13 +91,10 @@ const FeatureCards = () => {
       ? { ...item, href: '/catalogues' }
       : item
   );
-  const completedProjects = (Array.isArray(rawSidebar.completedProjects) ? rawSidebar.completedProjects : defaultSidebar.completedProjects).map((item: any) =>
-    item.label === 'Research facilities' || item.label === 'Student life centers'
-      ? { ...item, href: '/innovation-centers' }
-      : item.label === 'Athletic complexes'
-        ? { ...item, href: '/sports-infrastructure' }
-        : { ...item, href: '/campus-master-planning' }
-  );
+  const completedProjects = (Array.isArray(rawSidebar.completedProjects) ? rawSidebar.completedProjects : defaultSidebar.completedProjects).map((item: any) => ({
+    ...item,
+    href: (item.href && item.href !== '/') ? item.href : (getCanonicalProjectHref(item.label) || item.href || '/'),
+  }));
   const contacts = Array.isArray(rawSidebar.contacts) ? rawSidebar.contacts : defaultSidebar.contacts;
 
   const sectionRef = useRef<HTMLElement>(null);

@@ -58,10 +58,15 @@ export default function Categories() {
         if (!editing.name) return;
         setSaving(true);
         try {
+            const payload = {
+                ...editing,
+                name: editing.name.trim(),
+                slug: editing.slug ? editing.slug.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : undefined,
+            };
             if (editing.id) {
-                await api.put(`/products/categories/${editing.id}`, editing);
+                await api.put(`/products/categories/${editing.id}`, payload);
             } else {
-                await api.post('/products/categories', editing);
+                await api.post('/products/categories', payload);
             }
             await fetchCategories();
             setShowModal(false);

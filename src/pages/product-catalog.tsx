@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { Download } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { usePageData } from '@/hooks/usePageData';
 
 const DEFAULTS = {
@@ -49,10 +50,10 @@ const ProductCatalog = () => {
             />
             <h2 className="text-2xl font-bold text-cm-blue-dark mb-4">{section1Title}</h2>
             <p className="text-gray-600 mb-6">Browse our complete range of products and solutions.</p>
-            <button className="btn-primary inline-flex items-center gap-2">
+            <Link to="/catalogues" className="btn-primary inline-flex items-center gap-2">
               <Download className="w-5 h-5" />
               Download PDF
-            </button>
+            </Link>
           </div>
         </div>
       </section>

@@ -1,12 +1,16 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User, Phone, Building2, ArrowRight, CheckCircle, Shield } from 'lucide-react';
 import api from '@/api/client';
+import { setUserSession } from '@/lib/auth-session';
 
 type Step = 'form' | 'otp' | 'done';
 
 const Registration = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+
   const [step, setStep] = useState<Step>('form');
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -17,6 +21,27 @@ const Registration = () => {
     name: '', email: '', password: '', phone: '', institution: '', pincode: '',
   });
 
+  useEffect(() => {
+    const paramStep = searchParams.get('step');
+    const paramEmail = searchParams.get('email');
+    const stateEmail = location.state?.email;
+    const statePassword = location.state?.password;
+    const stateStep = location.state?.step;
+
+    const emailToUse = paramEmail || stateEmail;
+    if (emailToUse) {
+      setFormData(prev => ({
+        ...prev,
+        email: emailToUse,
+        password: statePassword || prev.password,
+      }));
+    }
+
+    if (paramStep === 'otp' || stateStep === 'otp') {
+      setStep('otp');
+    }
+  }, [searchParams, location.state]);
+
   const set = (k: keyof typeof formData) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setFormData(p => ({ ...p, [k]: e.target.value }));
 
@@ -26,7 +51,7 @@ const Registration = () => {
     setError('');
     setSending(true);
     try {
-      // Create the account first
+      // Create or update unverified account first
       await api.post('/auth/register', formData);
       // Then send OTP for email verification
       await api.post('/auth/send-otp', { email: formData.email, purpose: 'verify' });
@@ -44,15 +69,21 @@ const Registration = () => {
     setLoading(true);
     try {
       await api.post('/auth/verify-otp', { email: formData.email, code: otp, purpose: 'verify' });
-      // Auto-login after verification
-      const { data } = await api.post('/auth/login', {
-        email: formData.email,
-        password: formData.password,
-      });
-      localStorage.setItem('cm_token', data.accessToken);
-      localStorage.setItem('cm_user', JSON.stringify(data.user));
-      setStep('done');
-      setTimeout(() => navigate('/my-account'), 1500);
+
+      // If password is available (from form submission or passed from login state), auto-login
+      if (formData.password) {
+        const { data } = await api.post('/auth/login', {
+          email: formData.email,
+          password: formData.password,
+        });
+        setUserSession(data.accessToken, data.user);
+        setStep('done');
+        setTimeout(() => navigate(data.user?.role === 'admin' ? '/admin/dashboard' : '/my-account'), 1500);
+      } else {
+        // Password not in memory (e.g. user refreshed OTP screen) -> send to login with verified notice
+        setStep('done');
+        setTimeout(() => navigate('/login?verified=true'), 1500);
+      }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Invalid OTP. Please try again.');
     }

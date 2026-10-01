@@ -2,15 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GraduationCap, Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import api from '../api/client';
-
-const clearAdminSession = () => {
-    localStorage.removeItem('cm_admin_token');
-    localStorage.removeItem('cm_token');
-    localStorage.removeItem('cm_user');
-    sessionStorage.removeItem('cm_admin_token');
-    sessionStorage.removeItem('cm_token');
-    sessionStorage.removeItem('cm_user');
-};
+import { isAdminLoggedIn, syncAdminSession } from '../lib/auth';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -21,8 +13,10 @@ export default function Login() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        clearAdminSession();
-    }, []);
+        if (isAdminLoggedIn()) {
+            navigate('/admin/dashboard', { replace: true });
+        }
+    }, [navigate]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -34,9 +28,7 @@ export default function Login() {
                 setError('Admin access only. Use admin credentials.');
                 return;
             }
-            sessionStorage.setItem('cm_admin_token', data.accessToken);
-            sessionStorage.setItem('cm_token', data.accessToken);
-            sessionStorage.setItem('cm_user', JSON.stringify(data.user));
+            syncAdminSession(data.accessToken, data.user);
             navigate('/admin/dashboard');
         } catch (err: unknown) {
             const msg = (err as { response?: { data?: { error?: string } } }).response?.data?.error;

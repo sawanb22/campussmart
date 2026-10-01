@@ -75,6 +75,9 @@ const DigitalTransformation = () => {
     return () => ctx.revert();
   }, []);
 
+  const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
+  const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
+  const heroImage = data.heroImage ?? DEFAULTS.heroImage;
   const section1Title = data.section1Title ?? DEFAULTS.section1Title;
   const cards: CardItem[] = (data.cards && data.cards.length > 0) ? data.cards : DEFAULTS.cards;
   const steps: Step[] = (data.sections && data.sections.length > 0) ? data.sections : DEFAULTS.sections;
@@ -86,6 +89,37 @@ const DigitalTransformation = () => {
 
   return (
     <main className="min-h-screen bg-white">
+      {/* Standard Hero Section */}
+      <section className="bg-cm-blue mx-3 sm:mx-6 lg:mx-8 rounded-[2rem] py-6 md:py-8 overflow-hidden relative shadow-inner mt-4 mb-4">
+        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 relative z-10 px-4">
+          <div className="lg:w-1/2 text-left text-white">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-blue-200 text-xs font-bold uppercase tracking-wider mb-3">
+              <span>Campus Innovation</span>
+              <span className="text-white/60">/</span>
+              <span className="text-white">Digital Transformation</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-3 tracking-tight text-white leading-tight">
+              {heroTitle}
+            </h1>
+            <p className="text-sm md:text-base text-white/85 leading-relaxed max-w-xl">
+              {heroSubtitle}
+            </p>
+            <div className="mt-5 flex flex-wrap gap-4">
+              <Link to="/contact-us" className="btn-secondary px-6 py-2.5 text-sm font-bold shadow-md">
+                Schedule Campus Audit
+              </Link>
+            </div>
+          </div>
+          <div className="lg:w-1/2 relative w-full">
+            <img
+              src={resolveMediaUrl(heroImage)}
+              alt={heroTitle}
+              className="rounded-2xl shadow-xl w-full h-[240px] sm:h-[260px] object-cover border-2 border-cm-blue-dark relative z-10"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Why go digital — image cards */}
       <section id="why-digital" className="bg-cm-gray px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <div className="mx-auto max-w-6xl">

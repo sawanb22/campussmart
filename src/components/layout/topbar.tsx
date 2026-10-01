@@ -4,14 +4,15 @@ import { Mail, Phone, Facebook, Twitter, Youtube, Instagram, Linkedin } from 'lu
 import { Link, useNavigate } from 'react-router-dom';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useSiteContent } from '@/contexts/SiteContentContext';
+import { getUserSession, isUserLoggedIn, clearUserSession } from '@/lib/auth-session';
 
 const DEFAULT_SOCIAL_URLS: Record<string, string> = {
-  social_facebook: 'https://www.facebook.com/schoolmart.in/',
-  social_twitter: 'https://x.com/schoolmartindia',
-  social_youtube: 'https://www.youtube.com/@schoolinnovationindia',
-  social_instagram: 'https://www.instagram.com/schoolmart.in/',
-  social_linkedin: 'https://www.linkedin.com/school/13397648/admin/inbox/thread/2-YTIyNjJhZTMtZDRhOS00OWJmLWE2YTEtMzU2MWQ4OTc0ZTg2XzEwMA==/',
-  social_pinterest: 'https://in.pinterest.com/schoolmartindia/',
+  social_facebook: 'https://www.facebook.com/campusmart.in/',
+  social_twitter: 'https://x.com/campusmartindia',
+  social_youtube: 'https://www.youtube.com/@campusmartindia',
+  social_instagram: 'https://www.instagram.com/campusmart.in/',
+  social_linkedin: 'https://www.linkedin.com/company/campusmart/',
+  social_pinterest: 'https://in.pinterest.com/campusmartindia/',
 };
 
 const TopBar = () => {
@@ -55,9 +56,8 @@ const TopBar = () => {
   }, []);
 
   const navigate = useNavigate();
-  const storedUser = localStorage.getItem('cm_user');
-  const currentUser = storedUser ? JSON.parse(storedUser) : null;
-  const isLoggedIn = !!localStorage.getItem('cm_token') && !!currentUser;
+  const currentUser = getUserSession();
+  const isLoggedIn = isUserLoggedIn();
   const userName = currentUser?.name || currentUser?.email || '';
   const { count: wishlistCount, refresh: refreshWishlist } = useWishlist();
 
@@ -66,8 +66,7 @@ const TopBar = () => {
   }, [isLoggedIn, refreshWishlist]);
 
   const handleLogout = () => {
-    localStorage.removeItem('cm_token');
-    localStorage.removeItem('cm_user');
+    clearUserSession();
     navigate('/');
   };
 
@@ -97,19 +96,19 @@ const TopBar = () => {
           {/* Left - Contact Info */}
           <div ref={leftContentRef} className="flex min-w-0 items-center gap-2 text-[10px] sm:gap-4 sm:text-sm">
             <a
-              href="mailto:info@campusmart.in"
+              href={`mailto:${content.contact_email || 'info@campusmart.in'}`}
               className="flex items-center gap-1.5 text-white/90 hover:text-cm-yellow transition-colors duration-200 sm:gap-2"
             >
               <Mail className="w-3.5 h-3.5 shrink-0 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">info@campusmart.in</span>
+              <span className="hidden sm:inline">{content.contact_email || 'info@campusmart.in'}</span>
             </a>
             <span className="hidden md:inline text-blue-300">|</span>
             <a
-              href="tel:+919966109191"
+              href={`tel:${String(content.contact_phone || '+91 9966109191').replace(/\s+/g, '')}`}
               className="flex items-center gap-1.5 text-white/90 hover:text-cm-yellow transition-colors duration-200 sm:gap-2"
             >
               <Phone className="w-3.5 h-3.5 shrink-0 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">+91 9966109191</span>
+              <span className="hidden sm:inline">{content.contact_phone || '+91 9966109191'}</span>
             </a>
           </div>
 

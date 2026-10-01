@@ -7,13 +7,14 @@ gsap.registerPlugin(ScrollTrigger);
 
 const HeroBanner = () => {
   const { content } = useSiteContent();
-  const heroData = content.home_hero || {
-    eyebrow: 'Future-ready campus infrastructure',
-    title: 'Design. Build.\nDigitize. Operate.\nFuture-Ready Campuses.',
-    subtitle: 'Physical + Digital',
-    ctaLabel: 'Schedule Campus Audit →',
-    ctaHref: '/contact-us',
-    image: 'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'
+  const rawHero = content.home_hero || {};
+  const heroData = {
+    eyebrow: rawHero.eyebrow || 'Future-ready campus infrastructure',
+    title: rawHero.title || content.hero_title || 'Design. Build.\nDigitize. Operate.\nFuture-Ready Campuses.',
+    subtitle: rawHero.subtitle || content.hero_subtitle || 'Physical + Digital',
+    ctaLabel: rawHero.ctaLabel || 'Schedule Campus Audit →',
+    ctaHref: rawHero.ctaHref || '/contact-us',
+    image: rawHero.image || 'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'
   };
 
   const containerRef = useRef<HTMLDivElement>(null);

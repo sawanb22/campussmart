@@ -74,31 +74,6 @@ router.put('/users/:id/role', verifyToken, requireAdmin, async (req: AuthRequest
     }
 });
 
-// POST /api/admin/ensure-admin - Ensure current user is admin (useful for first-time setup)
-router.post('/ensure-admin', verifyToken, async (req: AuthRequest, res: Response) => {
-    try {
-        // This endpoint allows a verified user to become admin
-        // In production, you'd want additional verification (e.g., secret key)
-        const secretKey = req.headers['x-admin-secret'];
-        const expectedSecret = process.env.ADMIN_SECRET_KEY || 'admin-secret-key-not-set';
-        
-        if (secretKey !== expectedSecret) {
-            res.status(403).json({ error: 'Invalid admin secret' });
-            return;
-        }
-        
-        const user = await prisma.user.update({
-            where: { id: req.user!.id },
-            data: { role: 'admin' }
-        });
-        console.log(`User ${user.id} promoted to admin via ensure-admin endpoint`);
-        res.json({ message: 'Admin role granted', user: { id: user.id, email: user.email, role: user.role } });
-    } catch (error) {
-        console.error('Failed to ensure admin:', error);
-        res.status(500).json({ error: 'Failed to ensure admin status' });
-    }
-});
-
 // GET /api/admin/enquiries
 router.get('/enquiries', verifyToken, requireAdmin, async (_req: AuthRequest, res: Response) => {
     try {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { Link } from 'react-router-dom';
 import {
@@ -24,7 +24,7 @@ import {
   Palette,
   type LucideIcon,
 } from 'lucide-react';
-import api from '@/api/client';
+import { useSiteContent } from '@/contexts/SiteContentContext';
 
 export const CATEGORY_ICONS: Record<string, LucideIcon> = {
   Ruler,
@@ -70,22 +70,13 @@ export const DEFAULT_CATEGORIES: CategoryItem[] = [
 const CategoryBar = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const iconsRef = useRef<HTMLDivElement>(null);
-  const [categories, setCategories] = useState<CategoryItem[]>(DEFAULT_CATEGORIES);
+  const { content } = useSiteContent();
 
-  useEffect(() => {
-    let active = true;
-    api
-      .get('/content')
-      .then(({ data }) => {
-        if (!active || !data.home_categories) return;
-        try {
-          const parsed = JSON.parse(data.home_categories);
-          if (Array.isArray(parsed) && parsed.length > 0) setCategories(parsed);
-        } catch { /* noop */ }
-      })
-      .catch(() => { /* keep defaults */ });
-    return () => { active = false; };
-  }, []);
+  const categories: CategoryItem[] = (
+    content.home_categories && Array.isArray(content.home_categories) && content.home_categories.length > 0
+  )
+    ? content.home_categories
+    : DEFAULT_CATEGORIES;
 
   useEffect(() => {
     const ctx = gsap.context(() => {

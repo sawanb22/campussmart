@@ -1,25 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { User, ShoppingBag, Heart, MapPin, LogOut, Edit, Package } from 'lucide-react';
+import { User, ShoppingBag, Heart, MapPin, LogOut, Edit, Package, Check, Send } from 'lucide-react';
 import api from '@/api/client';
 import { resolveMediaUrl } from '@/lib/media-url';
 import { useWishlist } from '@/contexts/WishlistContext';
-
-interface WishlistItem {
-  id: number;
-  product: {
-    id: number;
-    name: string;
-    price: number;
-    imageUrl?: string;
-    slug: string;
-    category?: { name: string; slug: string };
-  } | null;
-  designKey?: string | null;
-  designTitle?: string | null;
-  designImage?: string | null;
-  pageSlug?: string | null;
-}
+import { getUserSession, isUserLoggedIn, clearUserSession, setUserSession, getUserToken } from '@/lib/auth-session';
 
 interface Address {
   id: number;
@@ -29,6 +14,7 @@ interface Address {
   city: string;
   state: string;
   pincode: string;
+  isDefault?: boolean;
 }
 
 interface Order {
@@ -37,6 +23,7 @@ interface Order {
   status: string;
   createdAt: string;
   orderitem: { id: number; qty: number; product: { name: string } }[];
+  items?: { id: number; qty: number; product: { name: string } }[];
 }
 
 type AddressForm = Omit<Address, 'id'>;
@@ -48,20 +35,21 @@ const emptyAddress: AddressForm = {
   city: '',
   state: '',
   pincode: '',
+  isDefault: false,
 };
 
 const MyAccount = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const storedUser = localStorage.getItem('cm_user');
-  const currentUser = storedUser ? JSON.parse(storedUser) : null;
-  const isLoggedIn = !!localStorage.getItem('cm_token') && !!currentUser;
+  const currentUser = getUserSession();
+  const isLoggedIn = isUserLoggedIn();
   const initialTab = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState(
     initialTab && ['profile', 'orders', 'wishlist', 'addresses'].includes(initialTab) ? initialTab : 'profile'
   );
-  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
-  const [wishlistLoading, setWishlistLoading] = useState(false);
+
+  const { items: wishlist, loading: wishlistLoading, removeProduct, removeDesign } = useWishlist();
+
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [addressesLoading, setAddressesLoading] = useState(false);
   const [addressForm, setAddressForm] = useState<AddressForm>(emptyAddress);
@@ -75,21 +63,11 @@ const MyAccount = () => {
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileError, setProfileError] = useState('');
   const [profileForm, setProfileForm] = useState({ name: currentUser?.name || '', phone: currentUser?.phone || '', institution: currentUser?.institution || '' });
-  const { refresh: refreshWishlistCount } = useWishlist();
+
   const handleLogout = () => {
-    localStorage.removeItem('cm_token');
-    localStorage.removeItem('cm_user');
+    clearUserSession();
     navigate('/login');
   };
-
-  useEffect(() => {
-    if (!isLoggedIn) return;
-    setWishlistLoading(true);
-    api.get('/wishlist')
-      .then(({ data }) => setWishlist(data))
-      .catch(() => setWishlist([]))
-      .finally(() => setWishlistLoading(false));
-  }, [isLoggedIn]);
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -116,47 +94,14 @@ const MyAccount = () => {
     }
   }, [searchParams]);
 
-  const removeFromWishlist = async (productId: number) => {
-    try {
-      await api.delete(`/wishlist/${productId}`);
-      setWishlist((prev) => prev.filter((item) => item.product?.id !== productId));
-      refreshWishlistCount();
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to remove from wishlist');
-    }
-  };
-
-  const removeDesignFromWishlist = async (designKey: string) => {
-    try {
-      await api.delete(`/wishlist/design/${encodeURIComponent(designKey)}`);
-      setWishlist((prev) => prev.filter((item) => item.designKey !== designKey));
-      refreshWishlistCount();
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to remove from wishlist');
-    }
-  };
-
-  const moveToCart = async (productId: number) => {
-    try {
-      await api.post('/wishlist', { productId });
-      alert('Product added to cart (wishlist).');
-      refreshWishlistCount();
-    } catch (err: any) {
-      if (err.response?.status === 401) {
-        alert('Please login to add products to cart.');
-      } else {
-        alert(err.response?.data?.error || 'Failed to add to cart.');
-      }
-    }
-  };
-
   const saveProfile = async (event: React.FormEvent) => {
     event.preventDefault();
     setProfileSaving(true);
     setProfileError('');
     try {
       const { data } = await api.put('/auth/profile', profileForm);
-      localStorage.setItem('cm_user', JSON.stringify(data));
+      const token = getUserToken() || '';
+      setUserSession(token, data);
       setProfileEditing(false);
       window.location.reload();
     } catch (err: any) {
@@ -189,6 +134,7 @@ const MyAccount = () => {
       city: address.city,
       state: address.state,
       pincode: address.pincode,
+      isDefault: Boolean(address.isDefault),
     });
     setAddressError('');
     setAddressFormOpen(true);
@@ -200,12 +146,20 @@ const MyAccount = () => {
     setAddressError('');
     try {
       const request = editingAddressId
-        ? api.put(`/addresses/${editingAddressId}`, { ...addressForm, isDefault: false })
-        : api.post('/addresses', { ...addressForm, isDefault: false });
+        ? api.put(`/addresses/${editingAddressId}`, addressForm)
+        : api.post('/addresses', addressForm);
       const { data } = await request;
-      setAddresses((current) => editingAddressId
-        ? current.map((address) => address.id === editingAddressId ? data : address)
-        : [...current, data]);
+      setAddresses((current) => {
+        if (data.isDefault) {
+          const updated = current.map((address) => ({ ...address, isDefault: false }));
+          return editingAddressId
+            ? updated.map((address) => (address.id === editingAddressId ? data : address))
+            : [data, ...updated];
+        }
+        return editingAddressId
+          ? current.map((address) => (address.id === editingAddressId ? data : address))
+          : [...current, data];
+      });
       setAddressFormOpen(false);
     } catch (err: any) {
       setAddressError(err.response?.data?.error || 'Failed to save address.');
@@ -214,11 +168,26 @@ const MyAccount = () => {
     }
   };
 
+  const setDefaultAddress = async (id: number) => {
+    try {
+      await api.patch(`/addresses/${id}/default`);
+      setAddresses((current) =>
+        current.map((address) => ({
+          ...address,
+          isDefault: address.id === id,
+        })).sort((a, b) => (b.id === id ? 1 : 0) - (a.id === id ? 1 : 0))
+      );
+    } catch (err: any) {
+      setAddressError(err.response?.data?.error || 'Failed to set default address.');
+    }
+  };
+
   const deleteAddress = async (id: number) => {
     if (!window.confirm('Delete this address?')) return;
     try {
       await api.delete(`/addresses/${id}`);
-      setAddresses((current) => current.filter((address) => address.id !== id));
+      const { data } = await api.get('/addresses');
+      setAddresses(data);
     } catch (err: any) {
       setAddressError(err.response?.data?.error || 'Failed to delete address.');
     }
@@ -341,75 +310,129 @@ const MyAccount = () => {
             {activeTab === 'orders' && (
               <div className="bg-white rounded-xl p-8 shadow-card">
                 <h2 className="text-xl font-bold text-cm-blue-dark mb-6">My Orders</h2>
-                {ordersLoading ? <p className="text-sm text-gray-500">Loading orders...</p> : orders.length === 0 ? <div className="py-12 text-center"><Package className="mx-auto mb-4 h-12 w-12 text-gray-300" /><p className="text-gray-600">No orders yet.</p><p className="mt-2 text-sm text-gray-500">Completed orders will appear here after checkout.</p></div> : <div className="space-y-4">
-                  {orders.map((order) => (
-                    <div key={order.id} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <p className="font-bold text-cm-blue-dark">Order #{order.id}</p>
-                          <p className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString('en-IN')}</p>
+                {ordersLoading ? (
+                  <p className="text-sm text-gray-500">Loading orders...</p>
+                ) : orders.length === 0 ? (
+                  <div className="py-12 text-center">
+                    <Package className="mx-auto mb-4 h-12 w-12 text-gray-300" />
+                    <p className="text-gray-600">No orders yet.</p>
+                    <p className="mt-2 text-sm text-gray-500">Completed institutional orders will appear here.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {orders.map((order) => {
+                      const items = order.items || order.orderitem || [];
+                      const totalQty = items.reduce((total, item) => total + (item?.qty || 0), 0);
+                      return (
+                        <div key={order.id} className="border border-slate-200 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-4">
+                            <div>
+                              <p className="font-bold text-cm-blue-dark">Order #{order.id}</p>
+                              <p className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString('en-IN')}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-bold text-cm-blue">₹{order.total.toLocaleString('en-IN')}</p>
+                              <span className={`text-xs uppercase tracking-wider font-semibold px-2.5 py-1 rounded-full ${order.status === 'delivered'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-yellow-100 text-yellow-700'
+                                }`}>
+                                {order.status}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                            <Package className="w-4 h-4" />
+                            {totalQty} item{totalQty === 1 ? '' : 's'}
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-bold text-cm-blue">₹{order.total.toLocaleString('en-IN')}</p>
-                          <span className={`text-sm px-2 py-1 rounded-full ${order.status === 'delivered'
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-yellow-100 text-yellow-700'
-                            }`}>
-                            {order.status}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-gray-600">
-                        <Package className="w-4 h-4" />
-                        {order.orderitem.reduce((total, item) => total + item.qty, 0)} items
-                      </div>
-                    </div>
-                  ))}
-                </div>}
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
 
             {activeTab === 'wishlist' && (
               <div className="bg-white rounded-xl p-8 shadow-card">
-                <h2 className="text-xl font-bold text-cm-blue-dark mb-6">My Wishlist {wishlist.length > 0 && <span className="text-base font-semibold text-gray-400">({wishlist.length})</span>}</h2>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                  <h2 className="text-xl font-bold text-cm-blue-dark">
+                    My Wishlist {wishlist.length > 0 && <span className="text-base font-semibold text-gray-400">({wishlist.length})</span>}
+                  </h2>
+                  {wishlist.length > 0 && (
+                    <Link
+                      to="/request-quote?fromWishlist=true"
+                      className="btn-primary text-sm flex items-center justify-center gap-2 self-start sm:self-auto"
+                    >
+                      <Send className="w-4 h-4" /> Request Quote for Wishlist
+                    </Link>
+                  )}
+                </div>
                 {wishlistLoading ? (
                   <div className="text-sm text-slate-500">Loading wishlist...</div>
                 ) : wishlist.length === 0 ? (
-                  <div className="text-sm text-slate-500">Your wishlist is empty. Add items from the product page or shop.</div>
+                  <div className="py-12 text-center">
+                    <Heart className="mx-auto mb-4 h-12 w-12 text-gray-300" />
+                    <p className="text-gray-600 font-medium">Your wishlist is empty.</p>
+                    <p className="mt-1 text-sm text-gray-500">Save products or custom designs while browsing our catalog.</p>
+                    <Link to="/shop" className="btn-primary inline-block mt-4 text-sm">
+                      Explore Products
+                    </Link>
+                  </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {wishlist.map((item) => item.product ? (
-                      <div key={item.id} className="border rounded-lg p-4 flex gap-4">
-                        <img
-                          src={resolveMediaUrl(item.product.imageUrl) || 'https://via.placeholder.com/160'}
-                          alt={item.product.name}
-                          className="w-20 h-20 object-cover rounded-lg"
-                        />
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-cm-blue-dark">{item.product.name}</h3>
-                          <p className="text-cm-blue font-bold">₹{item.product.price.toLocaleString()}</p>
-                          <div className="flex gap-3 mt-3">
-                            <button onClick={() => moveToCart(item.product!.id)} className="text-sm text-cm-blue hover:underline">
-                              Move to Cart
-                            </button>
-                            <button onClick={() => removeFromWishlist(item.product!.id)} className="text-sm text-red-600 hover:underline">
+                      <div key={item.id} className="border border-slate-200 rounded-lg p-4 flex gap-4 hover:border-slate-300 transition-colors">
+                        <Link to={`/product/${item.product.slug}`} className="shrink-0">
+                          <img
+                            src={resolveMediaUrl(item.product.imageUrl) || 'https://via.placeholder.com/160'}
+                            alt={item.product.name}
+                            className="w-20 h-20 object-cover rounded-lg bg-slate-50 border border-slate-100"
+                          />
+                        </Link>
+                        <div className="flex-1 min-w-0">
+                          <Link to={`/product/${item.product.slug}`} className="font-semibold text-cm-blue-dark hover:text-cm-blue line-clamp-1">
+                            {item.product.name}
+                          </Link>
+                          <p className="text-cm-blue font-bold mt-1">₹{item.product.price.toLocaleString()}</p>
+                          <div className="flex flex-wrap items-center gap-3 mt-3">
+                            <Link
+                              to={`/request-quote?product=${encodeURIComponent(item.product.name)}&qty=1`}
+                              className="text-xs font-semibold text-cm-blue hover:underline"
+                            >
+                              Request Quote
+                            </Link>
+                            <span className="text-gray-300">|</span>
+                            <button
+                              onClick={() => removeProduct(item.product!.id)}
+                              className="text-xs font-semibold text-red-600 hover:underline"
+                            >
                               Remove
                             </button>
                           </div>
                         </div>
                       </div>
                     ) : (
-                      <div key={item.id} className="border rounded-lg p-4 flex gap-4">
+                      <div key={item.id} className="border border-slate-200 rounded-lg p-4 flex gap-4 hover:border-slate-300 transition-colors">
                         <img
                           src={resolveMediaUrl(item.designImage || undefined) || 'https://via.placeholder.com/160'}
                           alt={item.designTitle || 'Design'}
-                          className="w-20 h-20 object-cover rounded-lg"
+                          className="w-20 h-20 object-cover rounded-lg bg-slate-50 border border-slate-100 shrink-0"
                         />
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-cm-blue-dark">{item.designTitle}</h3>
-                          <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mt-1">Saved design</p>
-                          <div className="flex gap-3 mt-3">
-                            <button onClick={() => removeDesignFromWishlist(item.designKey!)} className="text-sm text-red-600 hover:underline">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-cm-blue-dark line-clamp-1">{item.designTitle || 'Custom Design'}</h3>
+                          <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mt-1">Saved Design</p>
+                          <div className="flex flex-wrap items-center gap-3 mt-3">
+                            <Link
+                              to="/request-quote?fromWishlist=true"
+                              className="text-xs font-semibold text-cm-blue hover:underline"
+                            >
+                              Quote Design
+                            </Link>
+                            <span className="text-gray-300">|</span>
+                            <button
+                              onClick={() => removeDesign(item.designKey!)}
+                              className="text-xs font-semibold text-red-600 hover:underline"
+                            >
                               Remove
                             </button>
                           </div>
@@ -440,6 +463,18 @@ const MyAccount = () => {
                       <input required value={addressForm.city} onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })} className="form-input" placeholder="City" />
                       <input required value={addressForm.state} onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })} className="form-input" placeholder="State" />
                     </div>
+                    <div className="flex items-center gap-2 pt-1">
+                      <input
+                        type="checkbox"
+                        id="addressIsDefault"
+                        checked={Boolean(addressForm.isDefault)}
+                        onChange={(e) => setAddressForm({ ...addressForm, isDefault: e.target.checked })}
+                        className="h-4 w-4 rounded border-gray-300 text-cm-blue focus:ring-cm-blue"
+                      />
+                      <label htmlFor="addressIsDefault" className="text-sm font-medium text-gray-700 cursor-pointer">
+                        Set as default address
+                      </label>
+                    </div>
                     <div className="flex gap-3">
                       <button type="submit" disabled={addressSaving} className="btn-primary disabled:opacity-60">{addressSaving ? 'Saving...' : editingAddressId ? 'Save Changes' : 'Add Address'}</button>
                       <button type="button" onClick={() => setAddressFormOpen(false)} className="px-4 py-2 text-sm text-gray-600">Cancel</button>
@@ -451,14 +486,24 @@ const MyAccount = () => {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {addresses.map((address) => (
-                      <div key={address.id} className="border rounded-lg p-4">
+                      <div key={address.id} className={`border rounded-lg p-4 transition-all ${address.isDefault ? 'border-cm-blue bg-blue-50/20 shadow-sm' : ''}`}>
                         <div className="flex items-center justify-between mb-2">
-                          <span className="font-semibold text-cm-blue-dark">{address.type}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-cm-blue-dark">{address.type}</span>
+                            {address.isDefault && (
+                              <span className="inline-flex items-center gap-1 bg-cm-blue text-white text-[11px] font-semibold px-2 py-0.5 rounded-full">
+                                <Check className="w-3 h-3" /> Default
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <p className="text-gray-600 text-sm">{[address.line1, address.line2, address.city, address.state, address.pincode].filter(Boolean).join(', ')}</p>
-                        <div className="mt-4 flex gap-3">
+                        <div className="mt-4 flex items-center gap-3">
                           <button onClick={() => openEditAddressForm(address)} className="text-sm text-cm-blue hover:underline">Edit</button>
                           <button onClick={() => deleteAddress(address.id)} className="text-sm text-red-600 hover:underline">Delete</button>
+                          {!address.isDefault && (
+                            <button onClick={() => setDefaultAddress(address.id)} className="text-sm text-gray-600 hover:text-cm-blue ml-auto font-medium">Set as Default</button>
+                          )}
                         </div>
                       </div>
                     ))}

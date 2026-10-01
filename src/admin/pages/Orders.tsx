@@ -1,7 +1,16 @@
 import { useEffect, useState } from 'react';
 import api from '../api/client';
 
-interface Order { id: number; total: number; status: string; notes?: string; createdAt: string; user: { name: string; email: string }; items: { qty: number; unitPrice: number; product: { name: string } }[]; }
+interface Order {
+    id: number;
+    total: number;
+    status: string;
+    notes?: string;
+    createdAt: string;
+    user?: { name: string; email: string };
+    items?: { qty: number; unitPrice: number; product?: { name: string } }[];
+    orderitem?: { qty: number; unitPrice: number; product?: { name: string } }[];
+}
 
 const STATUS_OPTIONS = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
 
@@ -44,26 +53,33 @@ export default function Orders() {
                         </thead>
                         <tbody className="divide-y divide-gray-50">
                             {loading ? <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
-                                : orders.map((o) => (
-                                    <tr key={o.id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="px-4 py-3 font-mono font-medium text-gray-700">#{String(o.id).padStart(4, '0')}</td>
-                                        <td className="px-4 py-3">
-                                            <div className="font-medium text-gray-900">{o.user.name}</div>
-                                            <div className="text-gray-400 text-xs">{o.user.email}</div>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <div className="text-xs text-gray-600">{o.items.map((i) => `${i.product.name} x${i.qty}`).join(', ')}</div>
-                                        </td>
-                                        <td className="px-4 py-3 font-semibold text-cm-blue">₹{o.total.toLocaleString('en-IN')}</td>
-                                        <td className="px-4 py-3"><span className={statusColor(o.status)}>{o.status.charAt(0).toUpperCase() + o.status.slice(1)}</span></td>
-                                        <td className="px-4 py-3 text-gray-500 text-xs">{new Date(o.createdAt).toLocaleDateString('en-IN')}</td>
-                                        <td className="px-4 py-3">
-                                            <select value={o.status} onChange={(e) => updateStatus(o.id, e.target.value)} className="input w-auto py-1 text-xs">
-                                                {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
-                                            </select>
-                                        </td>
-                                    </tr>
-                                ))}
+                                : orders.map((o) => {
+                                    const items = o.items || o.orderitem || [];
+                                    return (
+                                        <tr key={o.id} className="hover:bg-gray-50 transition-colors">
+                                            <td className="px-4 py-3 font-mono font-medium text-gray-700">#{String(o.id).padStart(4, '0')}</td>
+                                            <td className="px-4 py-3">
+                                                <div className="font-medium text-gray-900">{o.user?.name || 'Anonymous User'}</div>
+                                                <div className="text-gray-400 text-xs">{o.user?.email || 'No email'}</div>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <div className="text-xs text-gray-600">
+                                                    {items.length > 0
+                                                        ? items.map((i) => `${i.product?.name || 'Item'} x${i.qty}`).join(', ')
+                                                        : 'No items'}
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3 font-semibold text-cm-blue">₹{o.total.toLocaleString('en-IN')}</td>
+                                            <td className="px-4 py-3"><span className={statusColor(o.status)}>{o.status.charAt(0).toUpperCase() + o.status.slice(1)}</span></td>
+                                            <td className="px-4 py-3 text-gray-500 text-xs">{new Date(o.createdAt).toLocaleDateString('en-IN')}</td>
+                                            <td className="px-4 py-3">
+                                                <select value={o.status} onChange={(e) => updateStatus(o.id, e.target.value)} className="input w-auto py-1 text-xs">
+                                                    {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+                                                </select>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                         </tbody>
                     </table>
                 </div>

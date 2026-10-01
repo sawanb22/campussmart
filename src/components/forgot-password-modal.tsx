@@ -123,6 +123,9 @@ const ForgotPasswordModal = ({ open, onClose }: ForgotPasswordModalProps) => {
               <p className="text-sm text-gray-500">
                 Enter the code sent to <strong>{email}</strong> and choose a new password.
               </p>
+              <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                Please check your Spam or Junk folder if you don't see the OTP in your inbox.
+              </p>
               <div className="space-y-1">
                 <label className="text-sm font-semibold text-gray-700">OTP Code</label>
                 <div className="relative">

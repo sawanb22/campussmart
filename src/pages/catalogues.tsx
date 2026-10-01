@@ -24,7 +24,7 @@ const formatDate = (value?: string) => {
 const DEFAULTS = {
   heroTitle: 'Catalogues & Downloads',
   heroSubtitle:
-    'Every SchoolMart product range, brief and design guide in one library — download the PDFs your team needs to plan and spec a campus.',
+    'Every CampusMart product range, brief and design guide in one library — download the PDFs your team needs to plan and spec a campus.',
   heroImage: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80',
   cards: [
     {
@@ -37,9 +37,9 @@ const DEFAULTS = {
       size: '12 MB',
     },
     {
-      title: 'SCHOOLMART BRIEF PROFILE [PDF]',
+      title: 'CAMPUSMART BRIEF PROFILE [PDF]',
       description:
-        "An overview of SchoolMart's mission, services, and extensive experience in educational infrastructure.",
+        "An overview of CampusMart's mission, services, and extensive experience in educational infrastructure.",
       image:
         'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
       downloadLink: '',

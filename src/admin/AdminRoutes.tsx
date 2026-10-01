@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 import Layout from './components/Layout';
 import Login from './pages/Login';
+import { isAdminLoggedIn, ensureSessionSynced } from './lib/auth';
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Products = lazy(() => import('./pages/Products'));
@@ -19,22 +20,9 @@ const PageEditor = lazy(() => import('./pages/PageEditor'));
 const Categories = lazy(() => import('./pages/Categories'));
 const WishlistReports = lazy(() => import('./pages/WishlistReports'));
 
-const getAdminToken = () => sessionStorage.getItem('cm_admin_token') || sessionStorage.getItem('cm_token');
-
-const isLoggedIn = () => {
-  const token = getAdminToken();
-  const userRaw = sessionStorage.getItem('cm_user');
-  if (!token) return false;
-  try {
-    const user = userRaw ? JSON.parse(userRaw) : null;
-    return user?.role === 'admin';
-  } catch {
-    return false;
-  }
-};
-
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  return isLoggedIn() ? <>{children}</> : <Navigate to="/admin/login" replace />;
+  ensureSessionSynced();
+  return isAdminLoggedIn() ? <>{children}</> : <Navigate to="/admin/login" replace />;
 }
 
 function Loader() {

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Eye, EyeOff, Pencil, X, Save, Plus, Trash2, Link as LinkIcon } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Eye, EyeOff, Pencil, X, Save, Plus, Trash2, Link as LinkIcon, ExternalLink } from 'lucide-react';
 import api from '../api/client';
 import { pageDefaults } from '../pageDefaults';
 import MediaImageField from '../components/MediaImageField';
@@ -999,6 +1000,13 @@ function PageCard({ page, isEditing, onToggleEdit, onTogglePublish, onDelete }: 
                         <LinkIcon className="w-3.5 h-3.5" /> View Live
                     </a>
                     <div className="flex items-center gap-2">
+                        <Link
+                            to={`/admin/pages/${page.id}/edit`}
+                            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-all"
+                            title="Open full page editor"
+                        >
+                            <ExternalLink className="w-3.5 h-3.5" /> Full Editor
+                        </Link>
                         <button
                             onClick={onDelete}
                             className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition-all"
@@ -1014,7 +1022,7 @@ function PageCard({ page, isEditing, onToggleEdit, onTogglePublish, onDelete }: 
                                     : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm shadow-blue-200'
                             }`}
                         >
-                            {isEditing ? <><X className="w-3.5 h-3.5" /> Close</> : <><Pencil className="w-3.5 h-3.5" /> Edit</>}
+                            {isEditing ? <><X className="w-3.5 h-3.5" /> Close</> : <><Pencil className="w-3.5 h-3.5" /> Quick Edit</>}
                         </button>
                     </div>
                 </div>

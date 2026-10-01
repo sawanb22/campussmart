@@ -58,7 +58,7 @@ const MainHeader = () => {
     { label: 'Home', href: '/' },
     {
       label: 'Corporate',
-      href: null, // dropdown only, no direct page navigation
+      href: '/about-us',
       hasDropdown: true,
       dropdownItems: [
         { label: 'About Us', href: '/about-us' },
@@ -68,9 +68,10 @@ const MainHeader = () => {
     },
     {
       label: 'Services',
-      href: null, // dropdown only, no page navigation
+      href: '/services',
       hasDropdown: true,
       dropdownItems: [
+        { label: 'All Services (Overview)', href: '/services' },
         { label: 'Campus Design & Execution', href: '/campus-design-execution' },
         { label: 'Furniture Design & Supply', href: '/furniture-design-supply' },
         { label: 'Sports Design & Execution', href: '/sports-design-execution' },
@@ -79,9 +80,10 @@ const MainHeader = () => {
     },
     {
       label: 'Solutions',
-      href: null, // dropdown only, no page navigation
+      href: '/solutions',
       hasDropdown: true,
       dropdownItems: [
+        { label: 'All Solutions (Overview)', href: '/solutions' },
         { label: 'Laboratories', href: '/labs' },
         { label: 'Libraries', href: '/libraries' },
         { label: 'Innovation Centres', href: '/innovation-centres' },

@@ -22,6 +22,16 @@ const SOCIAL_LINKS: { key: string; label: string; icon: typeof Facebook; placeho
     { key: 'social_pinterest', label: 'Pinterest', icon: Link2, placeholder: 'https://in.pinterest.com/yourpage' },
 ];
 
+const HOMEPAGE_MANAGED_KEYS = new Set([
+    'home_hero',
+    'home_features',
+    'home_services',
+    'home_sidebar',
+    'home_categories',
+    'ticker_announcements',
+    'collaborations',
+]);
+
 export default function SiteContent() {
     const [content, setContent] = useState<ContentMap>({});
     const [original, setOriginal] = useState<ContentMap>({});
@@ -131,6 +141,25 @@ export default function SiteContent() {
                     </div>
                 </div>
 
+                {/* Homepage Sections Notice */}
+                <div className="bg-blue-50/60 rounded-2xl border border-blue-100 p-6 flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+                        <Link2 className="w-5 h-5" />
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-gray-900 text-sm">Managing Homepage Sections?</h3>
+                        <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                            Hero Banner, Service Cards, Feature Cards, Categories, Ticker Announcements, and Partner Institutions are structured objects protected from text corruption and managed in the Homepage Editor.
+                        </p>
+                        <a
+                            href="/admin/homepage-editor"
+                            className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 mt-2.5 bg-white px-3 py-1.5 rounded-lg border border-blue-200 shadow-sm"
+                        >
+                            Open Homepage Editor →
+                        </a>
+                    </div>
+                </div>
+
                 {/* Custom Content Section */}
                 <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                     <div className="px-6 py-4 bg-gray-50/50 border-b border-gray-100">
@@ -143,7 +172,7 @@ export default function SiteContent() {
                         <p className="text-sm text-gray-500">Generic configuration keys for various site components.</p>
                         <div className="space-y-3">
                             {Object.entries(content)
-                                .filter(([key]) => !CONTENT_LABELS[key] && !SOCIAL_LINKS.some((s) => s.key === key))
+                                .filter(([key]) => !CONTENT_LABELS[key] && !SOCIAL_LINKS.some((s) => s.key === key) && !HOMEPAGE_MANAGED_KEYS.has(key))
                                 .map(([key, value]) => (
                                     <div key={key} className="flex gap-4 items-start bg-gray-50/50 p-4 rounded-xl border border-gray-100">
                                         <div className="flex-shrink-0 w-32 truncate text-xs font-bold bg-blue-50 text-blue-700 px-3 py-2 rounded-lg mt-0.5 border border-blue-100 text-center">{key}</div>

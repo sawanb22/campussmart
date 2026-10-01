@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation, useParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, useParams, Navigate } from 'react-router-dom';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { SiteContentProvider } from '@/contexts/SiteContentContext';
 import { WishlistProvider } from '@/contexts/WishlistContext';
@@ -28,6 +28,7 @@ const SmartClassrooms = lazy(() => import('@/pages/smart-classrooms'));
 const AIGuideArticle = lazy(() => import('@/pages/ai-guide-article'));
 const SetupCollegeArticle = lazy(() => import('@/pages/setup-college-article'));
 const UGCGuidelineArticle = lazy(() => import('@/pages/ugc-guideline-article'));
+const GenericPageRenderer = lazy(() => import('@/components/cms/GenericPageRenderer'));
 
 // Existing page templates map
 const PageTemplates: Record<string, any> = {
@@ -61,8 +62,10 @@ const PageTemplates: Record<string, any> = {
   'science-tech-labs': lazy(() => import('@/pages/science-tech-labs')),
   'job-openings': lazy(() => import('@/pages/job-openings')),
   'labs': lazy(() => import('@/pages/labs')),
+  'lab-products': lazy(() => import('@/pages/lab-products')),
   'labs/products': lazy(() => import('@/pages/lab-products')),
   'libraries': lazy(() => import('@/pages/libraries')),
+  'library-products': lazy(() => import('@/pages/library-products')),
   'libraries/products': lazy(() => import('@/pages/library-products')),
   'library-management': lazy(() => import('@/pages/library-management')),
   'lms': lazy(() => import('@/pages/lms')),
@@ -77,11 +80,13 @@ const PageTemplates: Record<string, any> = {
   'privacy-policy': lazy(() => import('@/pages/privacy-policy')),
   'product-catalog': lazy(() => import('@/pages/product-catalog')),
   'request-quote': lazy(() => import('@/pages/request-quote')),
+  'resources': lazy(() => import('@/pages/resources')),
   'setup-college': lazy(() => import('@/pages/setup-college')),
   'shop': lazy(() => import('@/pages/shop')),
   'sports-design-execution': lazy(() => import('@/pages/sports-design-execution')),
   'sports-infra': lazy(() => import('@/pages/sports-infra')),
   'sports-infrastructure': lazy(() => import('@/pages/sports-infrastructure')),
+  'sports-products': lazy(() => import('@/pages/sports-products')),
   'sports-infra/products': lazy(() => import('@/pages/sports-products')),
   'tech-infra': lazy(() => import('@/pages/tech-infra')),
   'tech-infra/products': lazy(() => import('@/pages/tech-infra-products')),
@@ -89,6 +94,7 @@ const PageTemplates: Record<string, any> = {
   'ugc-guidelines': lazy(() => import('@/pages/ugc-guidelines')),
   'services': lazy(() => import('@/pages/services')),
   'solutions': lazy(() => import('@/pages/solutions')),
+  'home': Home,
 };
 
 function PageLoader() {
@@ -117,7 +123,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 const DynamicPageRoute = () => {
   const { slug } = useParams();
   const [pageStatus, setPageStatus] = useState<number>(0);
-  const [templateId, setTemplateId] = useState<string | null>(null);
+  const [pageRecord, setPageRecord] = useState<any>(null);
 
   useEffect(() => {
     const verifyPage = async () => {
@@ -126,7 +132,7 @@ const DynamicPageRoute = () => {
         if (!data.published) {
           setPageStatus(404);
         } else {
-          setTemplateId(data.template);
+          setPageRecord(data);
           setPageStatus(200);
         }
       } catch (err: any) {
@@ -139,19 +145,32 @@ const DynamicPageRoute = () => {
   if (pageStatus === 0) return <PageLoader />;
   if (pageStatus === 404) return <NotFound />;
 
-  // Resolve existing template component if specified
-  if (templateId && PageTemplates[templateId]) {
-    const Component = PageTemplates[templateId];
+  const templateId = pageRecord?.template;
+
+  // Resolve existing template component if specified (with alias normalization)
+  const resolvedTemplate = templateId
+    ? (PageTemplates[templateId]
+       || (templateId === 'lab-products' ? PageTemplates['labs/products'] : null)
+       || (templateId === 'library-products' ? PageTemplates['libraries/products'] : null)
+       || (templateId === 'sports-products' ? PageTemplates['sports-infra/products'] : null)
+       || (templateId === 'tech-infra-products' ? PageTemplates['tech-infra/products'] : null)
+       || (templateId === 'home' || slug === 'home' ? Home : null))
+    : null;
+
+  if (resolvedTemplate) {
+    const Component = resolvedTemplate;
     return <Component />;
   }
 
-  // Default: Return basic HTML fallback if no template
-  return (
-    <div className="p-8 text-center text-gray-500">
-      <h1>Dynamic CMS Page</h1>
-      <p className="max-w-xl mx-auto mt-4">This page exists in the published database, but the HTML body renderer has not yet been implemented for pages without `.tsx` templates.</p>
-    </div>
-  );
+  // Gracefully render dynamic CMS page content using GenericPageRenderer (SOLID SRP fallback)
+  let parsedPageData = {};
+  try {
+    parsedPageData = pageRecord?.pageData ? JSON.parse(pageRecord.pageData) : {};
+  } catch {
+    parsedPageData = {};
+  }
+
+  return <GenericPageRenderer page={pageRecord} pageData={parsedPageData} />;
 };
 
 const ProductDetail = lazy(() => import('@/pages/product-detail'));
@@ -227,6 +246,8 @@ function App() {
               <Route path="/ugc-guidelines/:articleSlug" element={<Layout><UGCGuidelineArticle /></Layout>} />
               <Route path="/ar-vr-learning" element={<Layout><HomeFeatureDetail /></Layout>} />
               <Route path="/admin/*" element={<AdminRoutes />} />
+              <Route path="/wishlist" element={<Navigate to="/my-account?tab=wishlist" replace />} />
+              <Route path="/cart" element={<Navigate to="/my-account?tab=wishlist" replace />} />
 
               {/* Static pages explicitly mapped so they always work */}
               {Object.keys(PageTemplates).map((path) => {
@@ -236,6 +257,9 @@ function App() {
 
               {/* Dynamic Catch-All Route matching DB Pages (fallback) */}
               <Route path="/:slug" element={<Layout><DynamicPageRoute /></Layout>} />
+
+              {/* Global Wildcard Catch-All for Multi-Segment Unmatched Routes */}
+              <Route path="*" element={<Layout><NotFound /></Layout>} />
             </Routes>
           </Suspense>
         </BrowserRouter>

@@ -4,6 +4,7 @@ import {
     Tag, BookMarked, Settings, LogOut, GraduationCap, Globe, Star,
     FileText, ChevronRight, Bell, Layers, Heart
 } from 'lucide-react';
+import { clearAdminSession } from '../lib/auth';
 
 // ── Grouped Navigation ─────────────────────────────────────────────────────────
 const navGroups = [
@@ -58,12 +59,7 @@ export default function Layout() {
     const location = useLocation();
 
     const handleLogout = () => {
-        sessionStorage.removeItem('cm_admin_token');
-        sessionStorage.removeItem('cm_token');
-        sessionStorage.removeItem('cm_user');
-        localStorage.removeItem('cm_admin_token');
-        localStorage.removeItem('cm_token');
-        localStorage.removeItem('cm_user');
+        clearAdminSession();
         navigate('/admin/login');
     };
 

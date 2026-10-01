@@ -1,13 +1,18 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Eye, EyeOff, Mail, Lock, ArrowRight, CheckCircle2 } from 'lucide-react';
 import api from '@/api/client';
+import { setUserSession } from '@/lib/auth-session';
 import ForgotPasswordModal from '@/components/forgot-password-modal';
 
 const Login = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const verifiedSuccess = searchParams.get('verified') === 'true';
+
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [unverifiedEmail, setUnverifiedEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -15,25 +20,40 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setUnverifiedEmail('');
     setLoading(true);
     try {
       const { data } = await api.post('/auth/login', {
         email: formData.email,
         password: formData.password,
       });
-      localStorage.setItem('cm_token', data.accessToken);
-      localStorage.setItem('cm_user', JSON.stringify(data.user));
+      setUserSession(data.accessToken, data.user);
       if (data.user?.role === 'admin') {
-        localStorage.setItem('cm_admin_token', data.accessToken);
         navigate('/admin/dashboard');
       } else {
         navigate('/my-account');
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Invalid email or password');
+      if (err.response?.data?.code === 'EMAIL_NOT_VERIFIED') {
+        setUnverifiedEmail(err.response?.data?.email || formData.email);
+        setError(err.response?.data?.error || 'Please verify your email address before signing in.');
+      } else {
+        setError(err.response?.data?.error || 'Invalid email or password');
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoToVerify = () => {
+    navigate('/registration?step=otp', {
+      state: {
+        email: unverifiedEmail || formData.email,
+        password: formData.password,
+        fromLogin: true,
+        step: 'otp',
+      },
+    });
   };
 
   return (
@@ -52,6 +72,13 @@ const Login = () => {
         <div className="bg-white rounded-lg shadow-sm w-full border border-gray-100 p-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-1">Welcome back</h1>
           <p className="text-sm text-gray-500 mb-6">Sign in to your CampusMart account</p>
+
+          {verifiedSuccess && !error && (
+            <div className="mb-4 flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 p-3.5 text-sm text-green-800">
+              <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-green-600" />
+              <span>Email verified successfully! Please sign in with your password.</span>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1">
@@ -92,7 +119,18 @@ const Login = () => {
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">{error}</div>
+              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 space-y-2">
+                <p>{error}</p>
+                {unverifiedEmail && (
+                  <button
+                    type="button"
+                    onClick={handleGoToVerify}
+                    className="inline-flex items-center gap-1 font-semibold text-[#0a2463] underline hover:text-[#1a3a8f] text-xs"
+                  >
+                    Enter Verification Code <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
             )}
 
             <button type="submit" disabled={loading}
