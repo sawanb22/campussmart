@@ -39,6 +39,7 @@
 | `UI-004` | 2026-10-02 17:20 | Category Navigation & Furniture Filter | Unified side panel subcategory filtering across Labs, Libraries, Tech Infra with Sports Infra parity; removed "All Products" from Furniture starting directly on "CHAIRS" and excluding "Uncategorized"; added Admin card categories editor; synced DB and hardened backend pagination. | 8 files (frontend, admin, backend) + DB | Completed |
 | `CMS-003` | 2026-10-02 18:40 | CMS Reliability & Precision Override | Hardened CMS save-and-render pipeline under SOLID principles. Prevented card resurrection via read-only GET lookups, added atomic prisma.$transaction for content upserts, 500 error status on DB failure, Cache-Control: no-store middleware, cross-tab BroadcastChannel invalidation, safe JSON parsing, SiteContent payload scoping, HomepageEditor loading guard, PagesManager empty array [] support, Array.isArray fallback standardization across 65 page templates, and automated 14-assertion test suite. | 73 files (backend, admin, frontend, test) | Completed |
 | `CMS-004` | 2026-10-02 19:00 | CMS Precision, Error Surface & Channel Hardening | Fixed silent error swallowing and missing BroadcastChannel in PageEditor, resolved service cards resurrection regression on home_services [], sanitized POST /pages extra fields, added 400 validation on invalid PUT /content payloads, fixed express error middleware client status codes, standardized remaining 7 page template array fallbacks, and upgraded automated test suite to 21 real assertions including live database error injection. | 17 files (frontend, admin, backend, test) | Completed |
+| `UI-005` | 2026-10-03 00:02 | Admin Pages Manager UI | Redesigned PagesManager PageCard adhering to SOLID principles: separated utility icon actions (View Live, Delete) to card header, converted card footer to balanced 50/50 dual-button row (Full Editor, Quick Edit), widened container to max-w-7xl, and updated grid breakpoints to eliminate card button clipping and horizontal overflow. | 1 file (admin) | Completed |
 
 ---
 
@@ -1071,6 +1072,41 @@
     - Root Frontend (`npx tsc --noEmit`): 0 errors.
     - Backend (`npx tsc --noEmit`): 0 errors.
     - Frontend Production Build (`npm run build`): Succeeded in 7.35s with 0 errors.
+
+---
+
+### [UI-005] 2026-10-03 00:02 IST - Admin Pages Management UI Card Redesign & Responsive Architecture
+- **Author/Agent**: Antigravity Pair Programmer
+- **Scope / Category**: Admin UI, Layout & Responsive Design, Usability
+- **Files Modified / Created**:
+  - `[MODIFY] campusmart_final/src/admin/pages/PagesManager.tsx`
+- **Description & Rationale**:
+  - **SOLID Principles Compliance**:
+    - *Single Responsibility Principle (SRP)*:
+      - Separated utility and deletion actions from primary editing workflows.
+      - **Header Tier**: Relocated secondary utility actions (`View Live` external link and `Delete` page icon button) to the top right of the card header alongside the `Live`/`Draft` status toggle and `REACT`/`HTML` template badges.
+      - **Body Tier**: Page title and slug are given dedicated space with `line-clamp-1` and `truncate`.
+      - **Footer Tier**: Dedicated 2-column primary action row (`grid grid-cols-2 gap-2`) exclusively for `Full Editor` (secondary button) and `Quick Edit` (primary action), with 50/50 balanced button widths.
+    - *Open/Closed Principle (OCP)*:
+      - `PageCard` accepts action callback props (`onToggleEdit`, `onTogglePublish`, `onDelete`), preserving the contract for future action expansion without breaking card rendering.
+    - *Liskov Substitution Principle (LSP)*:
+      - Both React-templated and dynamic HTML pages render with identical dimensions, balance, and visual hierarchy.
+    - *Interface Segregation Principle (ISP)*:
+      - Maintained focused `PageCard` props strictly typed to `page`, `isEditing`, and the 3 action callbacks.
+    - *Dependency Inversion Principle (DIP)*:
+      - Eradicated rigid horizontal flex layouts that assumed arbitrarily wide cards. Built on responsive design tokens, Tailwind CSS grid primitives (`grid-cols-2`), and standard Lucide icon abstractions.
+  - **Horizontal Overflow & Button Clipping Elimination**:
+    - Previously, 4 separate buttons (`View Live`, `Full Editor`, `Delete`, and `Quick Edit`) were crammed horizontally onto a single row in cards as narrow as 240px under `xl:grid-cols-4`.
+    - This caused the blue `Quick Edit` button to clip and spill across the card boundaries onto neighboring cards.
+    - Added `overflow-hidden` to `PageCard` to ensure zero boundary bleed.
+    - Widened the page container from `max-w-6xl` to `max-w-7xl` and adjusted card grid breakpoints to `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4`.
+    - On standard laptop/desktop displays (1024px-1536px), cards now render in 3 spacious columns (~360px+ each), providing ample breathing room and a modern SaaS interface.
+- **Validation**:
+  - **Frontend TypeScript & Build Verification**:
+    - `npm run build` (`tsc -b && vite build`): Succeeded with exit code 0 in 8.49s.
+    - Clean compilation into `dist/assets/PagesManager-CjkbO6e3.js`.
+  - **Zero Regression**:
+    - Verified all existing page management functions (`onToggleEdit`, `onTogglePublish`, `deletePage`, `createPage`, inline page editor) remain fully wired and operational.
 
 ---
 

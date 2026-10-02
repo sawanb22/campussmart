@@ -987,65 +987,91 @@ function PageCard({ page, isEditing, onToggleEdit, onTogglePublish, onDelete }: 
     onDelete: () => void;
 }) {
     return (
-        <div className={`bg-white rounded-2xl border transition-all shadow-sm hover:shadow-md ${
+        <div className={`bg-white rounded-2xl border transition-all shadow-sm hover:shadow-md overflow-hidden flex flex-col justify-between ${
             isEditing ? 'border-blue-400 ring-2 ring-blue-100' : 'border-gray-200 hover:border-gray-300'
         }`}>
-            <div className="p-5">
-                <div className="flex items-center justify-between mb-3">
-                    <button
-                        onClick={onTogglePublish}
-                        title="Toggle publish status"
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
-                            page.published
-                                ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
-                                : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-                        }`}
-                    >
-                        {page.published ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                        {page.published ? 'Live' : 'Draft'}
-                    </button>
-                    <span className="text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-500 px-2 py-0.5 rounded-md">
-                        {page.template ? 'REACT' : 'HTML'}
-                    </span>
-                </div>
-                <h3 className="font-bold text-gray-900 text-sm mb-1 leading-tight line-clamp-1">{page.title}</h3>
-                <p className="text-xs text-gray-400 font-mono mb-4 truncate">/{page.slug}</p>
-                <div className="border-t border-gray-100 pt-4 flex items-center justify-between gap-2">
-                    <a
-                        href={`/${page.slug}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center gap-1.5 text-xs text-gray-400 font-semibold hover:text-blue-600 transition-colors"
-                    >
-                        <LinkIcon className="w-3.5 h-3.5" /> View Live
-                    </a>
-                    <div className="flex items-center gap-2">
-                        <Link
-                            to={`/admin/pages/${page.id}/edit`}
-                            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-all"
-                            title="Open full page editor"
-                        >
-                            <ExternalLink className="w-3.5 h-3.5" /> Full Editor
-                        </Link>
-                        <button
-                            onClick={onDelete}
-                            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition-all"
-                            title="Delete page"
-                        >
-                            <Trash2 className="w-3.5 h-3.5" /> Delete
-                        </button>
-                        <button
-                            onClick={onToggleEdit}
-                            className={`flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl transition-all ${
-                                isEditing
-                                    ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm shadow-blue-200'
-                            }`}
-                        >
-                            {isEditing ? <><X className="w-3.5 h-3.5" /> Close</> : <><Pencil className="w-3.5 h-3.5" /> Quick Edit</>}
-                        </button>
+            <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
+                <div>
+                    {/* Header: Status, Template, and Utility Icons */}
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                            <button
+                                onClick={onTogglePublish}
+                                title="Toggle publish status"
+                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-colors cursor-pointer ${
+                                    page.published
+                                        ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                                        : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                                }`}
+                            >
+                                {page.published ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                                {page.published ? 'Live' : 'Draft'}
+                            </button>
+                            <span className="text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-500 px-2 py-0.5 rounded-md">
+                                {page.template ? 'REACT' : 'HTML'}
+                            </span>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                            <a
+                                href={`/${page.slug}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                title="View live page in new tab"
+                            >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                            <button
+                                onClick={onDelete}
+                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Delete page"
+                            >
+                                <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                        </div>
                     </div>
+
+                    {/* Page Details */}
+                    <h3 className="font-bold text-gray-900 text-sm mb-1 leading-snug line-clamp-1" title={page.title}>
+                        {page.title}
+                    </h3>
+                    <p className="text-xs text-gray-400 font-mono truncate" title={`/${page.slug}`}>
+                        /{page.slug}
+                    </p>
                 </div>
+            </div>
+
+            {/* Primary Action Buttons: Dual Split Row */}
+            <div className="border-t border-gray-100 bg-gray-50/70 p-3 grid grid-cols-2 gap-2">
+                <Link
+                    to={`/admin/pages/${page.id}/edit`}
+                    className="inline-flex items-center justify-center gap-1.5 px-2.5 py-2 text-xs font-semibold rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-all shadow-xs"
+                    title="Open full page editor"
+                >
+                    <ExternalLink className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                    <span className="truncate">Full Editor</span>
+                </Link>
+                <button
+                    onClick={onToggleEdit}
+                    className={`inline-flex items-center justify-center gap-1.5 px-2.5 py-2 text-xs font-bold rounded-xl transition-all shadow-xs ${
+                        isEditing
+                            ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200'
+                    }`}
+                >
+                    {isEditing ? (
+                        <>
+                            <X className="w-3.5 h-3.5 shrink-0" />
+                            <span>Close</span>
+                        </>
+                    ) : (
+                        <>
+                            <Pencil className="w-3.5 h-3.5 shrink-0" />
+                            <span>Quick Edit</span>
+                        </>
+                    )}
+                </button>
             </div>
         </div>
     );
@@ -1147,7 +1173,7 @@ export default function PagesManager() {
     );
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
+        <div className="max-w-7xl mx-auto space-y-8">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
@@ -1227,7 +1253,7 @@ export default function PagesManager() {
                         <span className="ml-auto text-xs text-gray-400 font-semibold">{group.pages.length} pages</span>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
                         {group.pages.map(page => (
                             <PageCard
                                 key={page.id}
