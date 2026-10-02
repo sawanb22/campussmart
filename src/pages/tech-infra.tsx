@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { Link } from 'react-router-dom';
-import { Shield, Star, Heart, Check, Trash2, ArrowLeft } from 'lucide-react';
+import { Shield, Star, Heart, Check, Trash2 } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
-import { usePageCategories } from '@/hooks/usePageCategories';
 import { useDesignWishlist } from '@/hooks/useDesignWishlist';
 import LoginPromptModal from '@/components/login-prompt-modal';
 import { resolveMediaUrl } from '@/lib/media-url';
-import Shop from '@/pages/shop';
 
 interface CardItem { title: string; description: string; image?: string; categories?: string[]; }
 
@@ -29,10 +27,10 @@ export const TECH_INFRA_DEFAULTS = {
   heroImage: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
   section1Title: 'Campus Technology Solutions',
   cards: [
-    { title: 'Interactive Displays', description: '4K interactive flat panels with zero-lag optical bonding, multi-touch stylus support, and unified digital whiteboard suites.', categories: ['Classroom Tech'], image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Network Solutions', description: 'High-density 802.11ax Wi-Fi 6 APs and structured optical fiber backbones engineered for seamless campus connectivity.', categories: ['Networking'], image: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Server Infrastructure', description: 'Hybrid on-premise blade servers and scalable academic cloud setups delivering low latency and enterprise uptime.', categories: ['Networking'], image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Cybersecurity', description: 'Next-generation firewalls, encrypted endpoint threat protection, and automated student data access control.', categories: ['Security'], image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Interactive Displays', description: '4K interactive flat panels with zero-lag optical bonding, multi-touch stylus support, and unified digital whiteboard suites.', categories: ['Classroom Tech', 'Displays'], image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Network Solutions', description: 'High-density 802.11ax Wi-Fi 6 APs and structured optical fiber backbones engineered for seamless campus connectivity.', categories: ['Networking', 'Wi-Fi & Fiber'], image: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Server Infrastructure', description: 'Hybrid on-premise blade servers and scalable academic cloud setups delivering low latency and enterprise uptime.', categories: ['Networking', 'Servers & Cloud'], image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Cybersecurity', description: 'Next-generation firewalls, encrypted endpoint threat protection, and automated student data access control.', categories: ['Security', 'Firewall & Safety'], image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
   ] as CardItem[],
 };
 
@@ -40,9 +38,8 @@ const TechInfra = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
   const { data } = usePageData('tech-infra');
-  const { categories: shopCategories } = usePageCategories('tech-infra');
   const { isSaved, isPending, add, remove, showLoginPrompt, setShowLoginPrompt } = useDesignWishlist('tech-infra');
-  const [activeProductCategory, setActiveProductCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -71,12 +68,29 @@ const TechInfra = () => {
   const heroSubtitle = data.heroSubtitle ?? TECH_INFRA_DEFAULTS.heroSubtitle;
   const heroImage = data.heroImage ?? TECH_INFRA_DEFAULTS.heroImage;
   const section1Title = data.section1Title ?? TECH_INFRA_DEFAULTS.section1Title;
-  const allCards: CardItem[] = data.cards?.length > 0 ? data.cards : TECH_INFRA_DEFAULTS.cards;
-  const cards = allCards.map((card, i) => ({
-    ...card,
-    categories: card.categories?.length ? card.categories : ['Networking'],
-    image: card.image || TECH_INFRA_DEFAULTS.cards[i % TECH_INFRA_DEFAULTS.cards.length].image,
-  }));
+  const allCards: CardItem[] = Array.isArray(data.cards) ? data.cards : TECH_INFRA_DEFAULTS.cards;
+  const cards = allCards.map((card, i) => {
+    const defaultCard = TECH_INFRA_DEFAULTS.cards.find((c) => c.title === card.title) || TECH_INFRA_DEFAULTS.cards[i % TECH_INFRA_DEFAULTS.cards.length];
+    const rawCats = card.categories?.filter(Boolean) || [];
+    const categories = rawCats.length > 0 ? rawCats : (defaultCard.categories || ['Classroom Tech']);
+    return {
+      ...card,
+      categories,
+      image: card.image || defaultCard.image,
+    };
+  });
+
+  const categoryOptions: string[] = Array.from(
+    new Set<string>(cards.flatMap((card) => card.categories ?? []))
+  ).filter((option) => Boolean(option) && option !== 'All');
+
+  const activeCategory = selectedCategory && categoryOptions.includes(selectedCategory)
+    ? selectedCategory
+    : (categoryOptions[0] || '');
+
+  const filteredCards = activeCategory
+    ? cards.filter((card) => card.categories?.includes(activeCategory))
+    : cards;
 
   return (
     <main className="min-h-screen bg-white">
@@ -117,50 +131,32 @@ const TechInfra = () => {
             <aside className="hidden lg:block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-cm-blue-dark mb-5">Categories</h3>
               <div className="space-y-3">
-                {shopCategories.map((category) => (
+                {categoryOptions.map((option) => (
                   <button
-                    key={category.id}
+                    key={option}
                     type="button"
-                    onClick={() => setActiveProductCategory(category.slug)}
-                    className={`block w-full text-left rounded-2xl px-4 py-3 transition-all duration-200 ${activeProductCategory === category.slug ? 'bg-cm-blue text-white shadow-lg' : 'bg-slate-50 text-slate-700 hover:bg-slate-100'}`}
+                    onClick={() => setSelectedCategory(option)}
+                    className={`w-full text-left rounded-2xl px-4 py-3 transition-all duration-200 ${
+                      activeCategory === option ? 'bg-cm-blue text-white shadow-lg' : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                    }`}
                   >
-                    {category.name}
+                    {option}
                   </button>
                 ))}
-                {shopCategories.length === 0 && (
-                  <p className="text-xs text-slate-400 px-1">No categories yet. Add one in Admin &rarr; Categories.</p>
-                )}
               </div>
 
               <div className="mt-8 rounded-3xl bg-cm-blue-dark/5 p-4">
                 <p className="text-sm font-semibold text-cm-blue-dark mb-3">Showing</p>
-                <p className="text-4xl font-black text-cm-blue-dark">{cards.length}</p>
-                <p className="text-sm text-slate-500 mt-2">Infrastructure solution highlights</p>
+                <p className="text-4xl font-black text-cm-blue-dark">{filteredCards.length}</p>
+                <p className="text-sm text-slate-500 mt-2">{activeCategory ? `${activeCategory} highlights` : 'Infrastructure highlights'}</p>
               </div>
             </aside>
 
             <div className="min-w-0">
-              {activeProductCategory && (
-                <button
-                  type="button"
-                  onClick={() => setActiveProductCategory(null)}
-                  className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-cm-blue hover:text-cm-blue-dark"
-                >
-                  <ArrowLeft className="h-4 w-4" /> Back to {section1Title}
-                </button>
-              )}
-              {activeProductCategory ? (
-                <Shop
-                  key={activeProductCategory}
-                  categorySlug={activeProductCategory}
-                  categoryPage="tech-infra"
-                  hideCategorySidebar
-                  embedded
-                />
-              ) : (
               <div ref={cardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {cards.map((card, i) => {
-                const fallback = TECH_INFRA_DEFAULTS.cards[i % TECH_INFRA_DEFAULTS.cards.length]?.image || '';
+              {filteredCards.map((card, i) => {
+                const defaultCard = TECH_INFRA_DEFAULTS.cards.find((c) => c.title === card.title) || TECH_INFRA_DEFAULTS.cards[i % TECH_INFRA_DEFAULTS.cards.length];
+                const fallback = defaultCard.image;
                 return (
                   <div key={card.title} className="group flex flex-col overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)]">
                     <Link to={`/${TECH_INFRA_PAGE_SLUG}/${slugifyTechInfraTitle(card.title)}`} className="flex flex-1 flex-col">
@@ -210,7 +206,6 @@ const TechInfra = () => {
                 );
               })}
               </div>
-              )}
             </div>
           </div>
         </div>

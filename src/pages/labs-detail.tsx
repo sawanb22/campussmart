@@ -7,7 +7,7 @@ import { LABS_PAGE_SLUG, LABS_DEFAULTS, slugifyLabTitle } from './labs';
 const LabsDetail = () => {
   const { labSlug } = useParams();
   const { data, loading } = usePageData(LABS_PAGE_SLUG);
-  const cards = data.cards?.length ? data.cards : LABS_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : LABS_DEFAULTS.cards;
   const card = cards.find((item: any) => slugifyLabTitle(item.title) === labSlug);
 
   if (loading) {

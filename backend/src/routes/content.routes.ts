@@ -13,8 +13,7 @@ router.get('/', async (_req: Request, res: Response) => {
         res.json(contentMap);
     } catch (err) {
         console.error('Database connection error on GET /api/content:', err);
-        // Fallback to empty content object so frontend context handles defaults cleanly
-        res.json({});
+        res.status(500).json({ error: 'Database unavailable' });
     }
 });
 
@@ -22,6 +21,10 @@ router.get('/', async (_req: Request, res: Response) => {
 router.put('/', verifyToken, requireAdmin, async (req: AuthRequest, res: Response) => {
     try {
         const updates: Record<string, any> = req.body;
+        if (!updates || typeof updates !== 'object' || Array.isArray(updates)) {
+            res.status(400).json({ error: 'Invalid content payload: expected an object of key-value pairs' });
+            return;
+        }
         const promises = Object.entries(updates).map(([key, value]) => {
             const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
             return prisma.siteContent.upsert({
@@ -30,7 +33,9 @@ router.put('/', verifyToken, requireAdmin, async (req: AuthRequest, res: Respons
                 create: { key, value: stringValue },
             });
         });
-        await Promise.all(promises);
+        if (promises.length > 0) {
+            await prisma.$transaction(promises);
+        }
         res.json({ message: 'Content updated successfully' });
     } catch {
         res.status(500).json({ error: 'Failed to update content' });

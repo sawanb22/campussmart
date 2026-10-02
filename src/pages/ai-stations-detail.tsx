@@ -7,7 +7,7 @@ import { AI_STATIONS_DEFAULTS, AI_STATIONS_PAGE_SLUG, slugifyAIStationTitle } fr
 const AIStationsDetail = () => {
   const { stationSlug } = useParams();
   const { data, loading } = usePageData(AI_STATIONS_PAGE_SLUG);
-  const cards = data.cards?.length ? data.cards : AI_STATIONS_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : AI_STATIONS_DEFAULTS.cards;
   const card = cards.find((item: any) => slugifyAIStationTitle(item.title) === stationSlug);
 
   if (loading) {

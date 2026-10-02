@@ -5,6 +5,7 @@ import MediaImageField from '../components/MediaImageField';
 import { CATEGORY_ICONS, DEFAULT_CATEGORIES, type CategoryItem } from '@/components/sections/category-bar';
 import { useSiteContent } from '@/contexts/SiteContentContext';
 import { defaultServices } from '@/components/sections/service-cards';
+import { broadcastCmsInvalidation } from '@/hooks/usePageData';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
     return (
@@ -57,6 +58,7 @@ export default function HomepageEditor() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
+    const [saveError, setSaveError] = useState<string | null>(null);
 
     const fetchContent = async () => {
         setLoading(true);
@@ -75,9 +77,10 @@ export default function HomepageEditor() {
                         : feature));
             } catch { /**/ }
             try {
-                setServices(data.home_services !== undefined && data.home_services !== null
+                const parsedServices = data.home_services !== undefined && data.home_services !== null
                     ? JSON.parse(data.home_services)
-                    : defaultServices);
+                    : null;
+                setServices(Array.isArray(parsedServices) ? parsedServices : defaultServices);
             } catch {
                 setServices(defaultServices);
             }
@@ -107,7 +110,9 @@ export default function HomepageEditor() {
     useEffect(() => { fetchContent(); }, []);
 
     const saveContent = async () => {
+        if (loading) return;
         setSaving(true);
+        setSaveError(null);
         try {
             await api.put('/content', {
                 home_hero: JSON.stringify(heroData),
@@ -119,10 +124,20 @@ export default function HomepageEditor() {
                 collaborations: JSON.stringify(collaborations),
             });
             await refresh();
+
+            // Broadcast cache invalidation across all tabs
+            broadcastCmsInvalidation({ type: 'INVALIDATE_ALL' });
+
             setSaved(true);
             setTimeout(() => setSaved(false), 2500);
-        } catch (e) { console.error(e); }
-        setSaving(false);
+        } catch (e: any) {
+            console.error('Failed to save homepage content:', e);
+            const msg = e?.response?.data?.error || 'Failed to save homepage changes. Please try again.';
+            setSaveError(msg);
+            alert(`Save failed: ${msg}`);
+        } finally {
+            setSaving(false);
+        }
     };
 
     // Feature helpers
@@ -162,13 +177,20 @@ export default function HomepageEditor() {
                     <button onClick={fetchContent} className="px-4 py-2 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all flex items-center gap-2">
                         <RotateCcw className="w-4 h-4" /> Reset
                     </button>
-                    <button onClick={saveContent} disabled={saving}
-                        className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all active:scale-95 ${saving ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}>
+                    <button onClick={saveContent} disabled={saving || loading}
+                        className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all active:scale-95 ${saving || loading ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}>
                         <Save className="w-4 h-4" />
                         {saving ? 'Saving…' : saved ? '✓ Changes Saved!' : 'Save All Changes'}
                     </button>
                 </div>
             </div>
+
+            {saveError && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-semibold flex items-center justify-between">
+                    <span>⚠️ {saveError}</span>
+                    <button onClick={() => setSaveError(null)} className="text-red-500 hover:text-red-700 font-bold ml-4">✕</button>
+                </div>
+            )}
 
 
             {/* ── Hero Banner ── */}
@@ -422,8 +444,8 @@ export default function HomepageEditor() {
 
             {/* Bottom Save */}
             <div className="flex justify-end pb-8">
-                <button onClick={saveContent} disabled={saving}
-                    className="flex items-center gap-2 px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-60 shadow-md">
+                <button onClick={saveContent} disabled={saving || loading}
+                    className={`flex items-center gap-2 px-8 py-3 rounded-xl font-bold transition-colors shadow-md ${saving || loading ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}>
                     <Save className="w-4 h-4" />
                     {saving ? 'Saving…' : saved ? '✓ All Changes Saved!' : 'Save All Changes'}
                 </button>

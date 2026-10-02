@@ -7,7 +7,7 @@ import { DIGITAL_TRANSFORMATION_PAGE_SLUG, DIGITAL_TRANSFORMATION_DEFAULTS, slug
 const DigitalTransformationDetail = () => {
   const { cardSlug } = useParams();
   const { data, loading } = usePageData(DIGITAL_TRANSFORMATION_PAGE_SLUG);
-  const cards = data.section2Cards?.length ? data.section2Cards : DIGITAL_TRANSFORMATION_DEFAULTS.section2Cards;
+  const cards = Array.isArray(data.section2Cards) ? data.section2Cards : DIGITAL_TRANSFORMATION_DEFAULTS.section2Cards;
   const card = cards.find((item: any) => slugifyDigitalTransformationCard(item.title) === cardSlug);
 
   if (loading) {

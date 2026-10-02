@@ -34,6 +34,8 @@ interface ShopProps {
   categoryPage?: string;
   hideCategorySidebar?: boolean;
   embedded?: boolean;
+  hideAllCategoriesOption?: boolean;
+  defaultCategorySlug?: string;
 }
 
 const PAGE_SIZE = 24;
@@ -47,10 +49,14 @@ const Shop = ({
   categoryPage,
   hideCategorySidebar = false,
   embedded = false,
+  hideAllCategoriesOption = false,
+  defaultCategorySlug,
 }: ShopProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
-  const [selectedCategory, setSelectedCategory] = useState(categorySlug || searchParams.get('category') || 'all');
+  const urlCategory = searchParams.get('category');
+  const initialSelectedCategory = categorySlug || (urlCategory && urlCategory !== 'all' ? urlCategory : (hideAllCategoriesOption ? (defaultCategorySlug || '') : 'all'));
+  const [selectedCategory, setSelectedCategory] = useState(initialSelectedCategory);
   const [sort, setSort] = useState(searchParams.get('sort') || 'newest');
   const [inStockOnly, setInStockOnly] = useState(searchParams.get('inStock') === 'true');
   const [page, setPage] = useState(Number(searchParams.get('page')) || 1);
@@ -200,12 +206,30 @@ const Shop = ({
   const formatPrice = (price: number) =>
     new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(price || 0);
 
+  const availableCategories = excludedCategorySlugs.length
+    ? categories.filter((c) => !excludedCategorySlugs.some((ex) => ex.toLowerCase() === c.slug.toLowerCase()))
+    : categories;
+
   const scopedCategorySlugs = showAllCategories
-    ? excludedCategorySlugs.length ? categories.map((c) => c.slug).filter((s) => !excludedCategorySlugs.includes(s)) : []
+    ? []
     : categorySlugs?.length ? categorySlugs : categorySlug ? [categorySlug] : [];
   const shopCategories = scopedCategorySlugs.length
-    ? categories.filter((c) => scopedCategorySlugs.includes(c.slug))
-    : categories;
+    ? availableCategories.filter((c) => scopedCategorySlugs.includes(c.slug))
+    : availableCategories;
+
+  useEffect(() => {
+    if (hideAllCategoriesOption && categoriesLoaded && shopCategories.length > 0) {
+      const urlCat = searchParams.get('category');
+      const isSelectedValid = shopCategories.some((c) => c.slug.toLowerCase() === selectedCategory.toLowerCase());
+      if (!urlCat || urlCat === 'all' || !isSelectedValid) {
+        const preferred = (defaultCategorySlug && shopCategories.find((c) => c.slug.toLowerCase() === defaultCategorySlug.toLowerCase())?.slug)
+          || shopCategories[0]?.slug;
+        if (preferred && selectedCategory !== preferred) {
+          setSelectedCategory(preferred);
+        }
+      }
+    }
+  }, [hideAllCategoriesOption, categoriesLoaded, shopCategories, defaultCategorySlug, searchParams, selectedCategory]);
 
   const totalPages = Math.ceil(totalProducts / PAGE_SIZE) || 1;
   const Root: 'div' | 'main' = embedded ? 'div' : 'main';
@@ -263,20 +287,22 @@ const Shop = ({
                   <h3 className="font-bold text-cm-blue-dark text-base">Categories</h3>
                 </div>
                 <ul className="space-y-1.5 text-sm">
-                  <li>
-                    <button
-                      onClick={() => {
-                        setSelectedCategory('all');
-                        setPage(1);
-                      }}
-                      className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center justify-between ${
-                        selectedCategory === 'all' ? 'bg-cm-blue text-white font-bold' : 'hover:bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      <span>All Products</span>
-                      <span className="text-xs opacity-80">{totalProducts}</span>
-                    </button>
-                  </li>
+                  {!hideAllCategoriesOption && (
+                    <li>
+                      <button
+                        onClick={() => {
+                          setSelectedCategory('all');
+                          setPage(1);
+                        }}
+                        className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center justify-between ${
+                          selectedCategory === 'all' ? 'bg-cm-blue text-white font-bold' : 'hover:bg-gray-100 text-gray-700'
+                        }`}
+                      >
+                        <span>All Products</span>
+                        <span className="text-xs opacity-80">{totalProducts}</span>
+                      </button>
+                    </li>
+                  )}
                   {shopCategories.map((cat) => (
                     <li key={cat.id}>
                       {categoryRoutes[cat.slug] ? (

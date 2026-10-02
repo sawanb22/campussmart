@@ -7,7 +7,7 @@ import { NEW_ENVIRONMENTS_PAGE_SLUG, NEW_ENVIRONMENTS_DEFAULTS, slugifyNewEnviro
 const NewEnvironmentsDetail = () => {
   const { spaceSlug } = useParams();
   const { data, loading } = usePageData(NEW_ENVIRONMENTS_PAGE_SLUG);
-  const cards = data.cards?.length ? data.cards : NEW_ENVIRONMENTS_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : NEW_ENVIRONMENTS_DEFAULTS.cards;
   const card = cards.find((item: any) => slugifyNewEnvironmentCard(item.title) === spaceSlug);
 
   if (loading) {

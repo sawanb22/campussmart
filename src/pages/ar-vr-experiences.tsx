@@ -39,7 +39,7 @@ const ArVrExperiences = () => {
   }, []);
 
   const section2Title = data.section2Title ?? AR_VR_DEFAULTS.section2Title;
-  const cards: any[] = data.cards?.length ? data.cards : AR_VR_DEFAULTS.cards;
+  const cards: any[] = Array.isArray(data.cards) ? data.cards : AR_VR_DEFAULTS.cards;
   const ctaTitle = data.ctaTitle ?? AR_VR_DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? AR_VR_DEFAULTS.ctaSubtitle;
 

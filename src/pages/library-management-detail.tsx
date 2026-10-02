@@ -7,7 +7,7 @@ import { LIBRARY_MGMT_PAGE_SLUG, LIBRARY_MGMT_DEFAULTS, slugifyLibraryModuleTitl
 const LibraryManagementDetail = () => {
   const { moduleSlug } = useParams();
   const { data, loading } = usePageData(LIBRARY_MGMT_PAGE_SLUG);
-  const cards = data.cards?.length ? data.cards : LIBRARY_MGMT_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : LIBRARY_MGMT_DEFAULTS.cards;
   const card = cards.find((item: any) => slugifyLibraryModuleTitle(item.title) === moduleSlug);
 
   if (loading) {

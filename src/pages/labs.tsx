@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ArrowLeft, Atom, Microscope, CheckCircle, Star, Heart, Check, Trash2 } from 'lucide-react';
+import { ArrowRight, Atom, Microscope, CheckCircle, Star, Heart, Check, Trash2 } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
-import { usePageCategories } from '@/hooks/usePageCategories';
 import { useDesignWishlist } from '@/hooks/useDesignWishlist';
 import LoginPromptModal from '@/components/login-prompt-modal';
 import { resolveMediaUrl } from '@/lib/media-url';
-import Shop from '@/pages/shop';
 
 interface Card { title: string; description: string; image?: string; name?: string; categories?: string[]; }
 
@@ -29,15 +27,15 @@ export const LABS_DEFAULTS = {
   heroImage: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
   section1Title: 'Specialized Laboratory Environments',
   cards: [
-    { title: 'Chemistry Lab', description: 'Purpose-built environments for practical chemistry education and safe experimentation.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Physics Lab', description: 'Hands-on spaces for experiments, measurement, and applied physics learning.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80' },
-    { title: 'Math Lab', description: 'Interactive learning environments that make mathematical concepts practical and visual.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=400&q=80' },
-    { title: 'Biology Lab', description: 'Well-equipped spaces for life science observation, analysis, and discovery.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Composite Skill Lab', description: 'Flexible multidisciplinary labs that support practical and vocational skill development.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=400&q=80' },
-    { title: 'AI/ML Lab', description: 'Future-ready computing environments for artificial intelligence and machine learning.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1555255707-c07966088b7b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Computer Lab', description: 'Connected, ergonomic spaces for digital learning, coding, and collaboration.', categories: ['Tech Labs'], image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'AI Stations', description: 'Specialized workstations for immersive technology and intelligent systems learning.', categories: ['Tech Labs'], image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=400&q=80' },
-    { title: 'STEM Labs', description: 'Integrated innovation spaces that bring science, technology, engineering, and math together.', categories: ['Innovation Labs'], image: 'https://images.unsplash.com/photo-1535378917042-10a22c95931a?auto=format&fit=crop&w=400&q=80' },
+    { title: 'Chemistry Lab', description: 'Purpose-built environments for practical chemistry education and safe experimentation.', categories: ['Science Labs', 'Safety & Wet Labs'], image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Physics Lab', description: 'Hands-on spaces for experiments, measurement, and applied physics learning.', categories: ['Science Labs', 'Applied Physics'], image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80' },
+    { title: 'Math Lab', description: 'Interactive learning environments that make mathematical concepts practical and visual.', categories: ['Skill Labs', 'Interactive Learning'], image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=400&q=80' },
+    { title: 'Biology Lab', description: 'Well-equipped spaces for life science observation, analysis, and discovery.', categories: ['Science Labs', 'Life Sciences'], image: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Composite Skill Lab', description: 'Flexible multidisciplinary labs that support practical and vocational skill development.', categories: ['Skill Labs', 'Vocational'], image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=400&q=80' },
+    { title: 'AI/ML Lab', description: 'Future-ready computing environments for artificial intelligence and machine learning.', categories: ['Tech Labs', 'Advanced Computing'], image: 'https://images.unsplash.com/photo-1555255707-c07966088b7b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Computer Lab', description: 'Connected, ergonomic spaces for digital learning, coding, and collaboration.', categories: ['Tech Labs', 'Digital Classrooms'], image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'AI Stations', description: 'Specialized workstations for immersive technology and intelligent systems learning.', categories: ['Tech Labs', 'Advanced Computing'], image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=400&q=80' },
+    { title: 'STEM Labs', description: 'Integrated innovation spaces that bring science, technology, engineering, and math together.', categories: ['STEM & Innovation', 'Hands-on Learning'], image: 'https://images.unsplash.com/photo-1535378917042-10a22c95931a?auto=format&fit=crop&w=400&q=80' },
   ] as Card[],
 };
 
@@ -45,9 +43,8 @@ const Labs = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
   const { data } = usePageData('labs');
-  const { categories: shopCategories } = usePageCategories('labs');
   const { isSaved, isPending, add, remove, showLoginPrompt, setShowLoginPrompt } = useDesignWishlist('labs');
-  const [activeProductCategory, setActiveProductCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -76,12 +73,31 @@ const Labs = () => {
   const heroSubtitle = data.heroSubtitle ?? LABS_DEFAULTS.heroSubtitle;
   const heroImage = data.heroImage ?? LABS_DEFAULTS.heroImage;
   const section1Title = data.section1Title ?? LABS_DEFAULTS.section1Title;
-  const allCards: Card[] = data.cards?.length > 0 ? data.cards : LABS_DEFAULTS.cards;
-  const cards = allCards.map((card, i) => ({
-    ...card,
-    categories: card.categories?.length ? card.categories.map((category) => category === 'Labs' ? 'Lab Products' : category) : ['Lab Products'],
-    image: card.image || LABS_DEFAULTS.cards[i % LABS_DEFAULTS.cards.length].image,
-  }));
+  const allCards: Card[] = Array.isArray(data.cards) ? data.cards : LABS_DEFAULTS.cards;
+  const cards = allCards.map((card, i) => {
+    const defaultCard = LABS_DEFAULTS.cards.find((c) => c.title === card.title) || LABS_DEFAULTS.cards[i % LABS_DEFAULTS.cards.length];
+    const rawCats = card.categories?.filter(Boolean) || [];
+    const categories = (rawCats.length > 0 && !(rawCats.length === 1 && rawCats[0] === 'Lab Products'))
+      ? rawCats
+      : (defaultCard.categories || ['Science Labs']);
+    return {
+      ...card,
+      categories,
+      image: card.image || defaultCard.image,
+    };
+  });
+
+  const categoryOptions: string[] = Array.from(
+    new Set<string>(cards.flatMap((card) => card.categories ?? []))
+  ).filter((option) => Boolean(option) && option !== 'All');
+
+  const activeCategory = selectedCategory && categoryOptions.includes(selectedCategory)
+    ? selectedCategory
+    : (categoryOptions[0] || '');
+
+  const filteredCards = activeCategory
+    ? cards.filter((card) => card.categories?.includes(activeCategory))
+    : cards;
 
   return (
     <main className="min-h-screen bg-white">
@@ -122,100 +138,81 @@ const Labs = () => {
             <aside className="hidden lg:block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-cm-blue-dark mb-5">Categories</h3>
               <div className="space-y-3">
-                {shopCategories.map((category) => (
+                {categoryOptions.map((option) => (
                   <button
-                    key={category.id}
+                    key={option}
                     type="button"
-                    onClick={() => setActiveProductCategory(category.slug)}
-                    className={`block w-full text-left rounded-2xl px-4 py-3 transition-all duration-200 ${activeProductCategory === category.slug ? 'bg-cm-blue text-white shadow-lg' : 'bg-slate-50 text-slate-700 hover:bg-slate-100'}`}
+                    onClick={() => setSelectedCategory(option)}
+                    className={`w-full text-left rounded-2xl px-4 py-3 transition-all duration-200 ${
+                      activeCategory === option ? 'bg-cm-blue text-white shadow-lg' : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                    }`}
                   >
-                    {category.name}
+                    {option}
                   </button>
                 ))}
-                {shopCategories.length === 0 && (
-                  <p className="text-xs text-slate-400 px-1">No categories yet. Add one in Admin &rarr; Categories.</p>
-                )}
               </div>
 
               <div className="mt-8 rounded-3xl bg-cm-blue-dark/5 p-4">
                 <p className="text-sm font-semibold text-cm-blue-dark mb-3">Showing</p>
-                <p className="text-4xl font-black text-cm-blue-dark">{cards.length}</p>
-                <p className="text-sm text-slate-500 mt-2">Lab solution highlights</p>
+                <p className="text-4xl font-black text-cm-blue-dark">{filteredCards.length}</p>
+                <p className="text-sm text-slate-500 mt-2">{activeCategory ? `${activeCategory} solutions` : 'Lab highlights'}</p>
               </div>
             </aside>
 
             <div className="min-w-0">
-            {activeProductCategory && (
-              <button
-                type="button"
-                onClick={() => setActiveProductCategory(null)}
-                className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-cm-blue hover:text-cm-blue-dark"
-              >
-                <ArrowLeft className="h-4 w-4" /> Back to {section1Title}
-              </button>
-            )}
-            {activeProductCategory ? (
-              <Shop
-                key={activeProductCategory}
-                categorySlug={activeProductCategory}
-                categoryPage="labs"
-                hideCategorySidebar
-                embedded
-              />
-            ) : (
-            <div ref={cardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {cards.map((lab, i) => {
-                const fallback = LABS_DEFAULTS.cards[i % LABS_DEFAULTS.cards.length]?.image || '';
-                return (
-                  <div key={lab.title} className="group flex flex-col overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)]">
-                    <Link to={`/${LABS_PAGE_SLUG}/${slugifyLabTitle(lab.title)}`} className="flex flex-1 flex-col">
-                      <div className="relative overflow-hidden h-[220px] sm:h-[230px]">
-                        <img
-                          src={resolveMediaUrl(lab.image) || fallback}
-                          alt={lab.title}
-                          onError={(e) => {
-                            const target = e.currentTarget;
-                            if (fallback && target.src !== fallback) {
-                              target.src = fallback;
-                            }
-                          }}
-                          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent" />
-                        <span className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-800 shadow-sm backdrop-blur-sm">
-                          <Star className="h-3.5 w-3.5 text-cm-yellow" />
-                          {lab.categories?.[0] ?? 'Lab'}
-                        </span>
-                      </div>
-                      <div className="flex flex-1 flex-col px-5 pb-2 pt-4">
-                        <h3 className="text-lg font-semibold text-slate-900 tracking-tight mb-2">{lab.title}</h3>
-                        {lab.description && <p className="text-sm text-slate-600 leading-relaxed mb-3">{lab.description}</p>}
-                        <div className="mt-auto flex flex-wrap gap-2">
-                          {lab.categories?.map((category) => <span key={category} className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-slate-600">{category}</span>)}
-                        </div>
-                      </div>
-                    </Link>
-                    <div className="flex items-center justify-between px-5 pb-4 pt-3 text-slate-700">
-                      {isSaved(lab) ? (
-                        <div className="flex items-center gap-1.5">
-                          <span className="flex items-center gap-1.5 rounded-lg bg-green-600 px-2.5 py-1.5 text-[10px] font-bold text-white">
-                            <Check className="h-3.5 w-3.5" /> Added to wishlist
+              <div ref={cardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredCards.map((lab, i) => {
+                  const defaultCard = LABS_DEFAULTS.cards.find((c) => c.title === lab.title) || LABS_DEFAULTS.cards[i % LABS_DEFAULTS.cards.length];
+                  const fallback = defaultCard.image;
+                  return (
+                    <div key={lab.title} className="group flex flex-col overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)]">
+                      <Link to={`/${LABS_PAGE_SLUG}/${slugifyLabTitle(lab.title)}`} className="flex flex-1 flex-col">
+                        <div className="relative overflow-hidden h-[220px] sm:h-[230px]">
+                          <img
+                            src={resolveMediaUrl(lab.image) || fallback}
+                            alt={lab.title}
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              if (fallback && target.src !== fallback) {
+                                target.src = fallback;
+                              }
+                            }}
+                            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent" />
+                          <span className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-800 shadow-sm backdrop-blur-sm">
+                            <Star className="h-3.5 w-3.5 text-cm-yellow" />
+                            {lab.categories?.[0] ?? 'Lab'}
                           </span>
-                          <button type="button" onClick={() => remove(lab)} disabled={isPending(lab)} aria-label={`Remove ${lab.title} from wishlist`} className="flex items-center justify-center rounded-lg bg-red-50 p-1.5 text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50">
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
                         </div>
-                      ) : (
-                        <button type="button" onClick={() => add(lab)} disabled={isPending(lab)} className="flex items-center gap-1.5 rounded-lg bg-cm-blue px-2.5 py-1.5 text-[10px] font-bold text-white shadow-sm transition-all hover:bg-cm-blue-dark disabled:opacity-50">
-                          <Heart className="h-3.5 w-3.5" /> Add to wishlist
-                        </button>
-                      )}
+                        <div className="flex flex-1 flex-col px-5 pb-2 pt-4">
+                          <h3 className="text-lg font-semibold text-slate-900 tracking-tight mb-2">{lab.title}</h3>
+                          {lab.description && <p className="text-sm text-slate-600 leading-relaxed mb-3">{lab.description}</p>}
+                          <div className="mt-auto flex flex-wrap gap-2">
+                            {lab.categories?.map((category) => <span key={category} className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-slate-600">{category}</span>)}
+                          </div>
+                        </div>
+                      </Link>
+                      <div className="flex items-center justify-between px-5 pb-4 pt-3 text-slate-700">
+                        {isSaved(lab) ? (
+                          <div className="flex items-center gap-1.5">
+                            <span className="flex items-center gap-1.5 rounded-lg bg-green-600 px-2.5 py-1.5 text-[10px] font-bold text-white">
+                              <Check className="h-3.5 w-3.5" /> Added to wishlist
+                            </span>
+                            <button type="button" onClick={() => remove(lab)} disabled={isPending(lab)} aria-label={`Remove ${lab.title} from wishlist`} className="flex items-center justify-center rounded-lg bg-red-50 p-1.5 text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        ) : (
+                          <button type="button" onClick={() => add(lab)} disabled={isPending(lab)} className="flex items-center gap-1.5 rounded-lg bg-cm-blue px-2.5 py-1.5 text-[10px] font-bold text-white shadow-sm transition-all hover:bg-cm-blue-dark disabled:opacity-50">
+                            <Heart className="h-3.5 w-3.5" /> Add to wishlist
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-            )}
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>

@@ -11,7 +11,7 @@ const PaymentPolicy = () => {
           <h1 className="text-3xl font-bold text-cm-blue-dark mb-6">{heroTitle}</h1>
 
           <div className="space-y-6 text-gray-700">
-            {data.sections?.length ? data.sections.map((section: any) => (
+            {Array.isArray(data.sections) ? data.sections.map((section: any) => (
               <section key={section.heading}>
                 <h2 className="text-xl font-bold text-cm-blue-dark mb-3">{section.heading}</h2>
                 <p className="whitespace-pre-line">{section.body}</p>

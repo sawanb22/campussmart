@@ -7,7 +7,7 @@ import { COLLAB_PAGE_SLUG, COLLAB_DEFAULTS, slugifyCollabTitle } from './collabo
 const CollaborationDetail = () => {
   const { itemSlug } = useParams();
   const { data, loading } = usePageData(COLLAB_PAGE_SLUG);
-  const cards = data.cards?.length ? data.cards : COLLAB_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : COLLAB_DEFAULTS.cards;
   const card = cards.find((item: any) => slugifyCollabTitle(item.title) === itemSlug);
 
   if (loading) {

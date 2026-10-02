@@ -28,7 +28,7 @@ const CampusFurnitureDesign = () => {
     return () => ctx.revert();
   }, []);
 
-  const allCards: FurnitureDesignCard[] = data.cards?.length ? data.cards : FURNITURE_DESIGN_DEFAULTS.cards;
+  const allCards: FurnitureDesignCard[] = Array.isArray(data.cards) ? data.cards : FURNITURE_DESIGN_DEFAULTS.cards;
 
   const categoryOptions = useMemo(
     () => Array.from(new Set(allCards.flatMap((card) => card.categories ?? []).filter(Boolean))),

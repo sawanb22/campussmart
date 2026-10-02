@@ -64,7 +64,7 @@ const CampusDesign = () => {
   const section1Title = data.section1Title ?? DEFAULTS.section1Title;
   const ctaTitle = data.ctaTitle ?? DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? DEFAULTS.ctaSubtitle;
-  const cards: Card[] = (data.cards && data.cards.length > 0) ? data.cards : DEFAULTS.cards;
+  const cards: Card[] = Array.isArray(data.cards) ? data.cards : DEFAULTS.cards;
 
   return (
     <main className="min-h-screen bg-white">

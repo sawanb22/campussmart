@@ -7,7 +7,7 @@ import { CDE_PAGE_SLUG, CDE_DEFAULTS, slugifyStepTitle } from './campus-design-e
 const CampusDesignExecutionDetail = () => {
   const { stepSlug } = useParams();
   const { data, loading } = usePageData(CDE_PAGE_SLUG);
-  const cards = data.cards?.length ? data.cards : CDE_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : CDE_DEFAULTS.cards;
   const card = cards.find((item: any) => slugifyStepTitle(item.title) === stepSlug);
 
   if (loading) {

@@ -7,7 +7,7 @@ import { AI_DIGITAL_SUPPLY_PAGE_SLUG, AI_DIGITAL_SUPPLY_DEFAULTS, slugifyAiDigit
 const AiDigitalDesignSupplyDetail = () => {
   const { solutionSlug } = useParams();
   const { data, loading } = usePageData(AI_DIGITAL_SUPPLY_PAGE_SLUG);
-  const cards = data.cards?.length ? data.cards : AI_DIGITAL_SUPPLY_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : AI_DIGITAL_SUPPLY_DEFAULTS.cards;
   const card = cards.find((item: any) => slugifyAiDigitalSupplyTitle(item.title) === solutionSlug);
 
   if (loading) {

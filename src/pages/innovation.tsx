@@ -34,7 +34,7 @@ const Innovation = () => {
   const heroSubtitle = data.heroSubtitle ?? INNOVATION_DEFAULTS.heroSubtitle;
   const ctaTitle = data.ctaTitle ?? INNOVATION_DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? INNOVATION_DEFAULTS.ctaSubtitle;
-  const allCards: InnovationCard[] = data.cards?.length ? data.cards : INNOVATION_DEFAULTS.cards;
+  const allCards: InnovationCard[] = Array.isArray(data.cards) ? data.cards : INNOVATION_DEFAULTS.cards;
 
   const categoryOptions = useMemo(
     () => Array.from(new Set(allCards.flatMap((card) => card.categories ?? []).filter(Boolean))),

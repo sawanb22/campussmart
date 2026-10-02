@@ -7,7 +7,7 @@ import { SCIENCE_TECH_LABS_PAGE_SLUG, SCIENCE_TECH_LABS_DEFAULTS, slugifyScience
 const ScienceTechLabsDetail = () => {
   const { labSlug } = useParams();
   const { data, loading } = usePageData(SCIENCE_TECH_LABS_PAGE_SLUG);
-  const cards = data.cards?.length ? data.cards : SCIENCE_TECH_LABS_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : SCIENCE_TECH_LABS_DEFAULTS.cards;
   const card = cards.find((item: any) => slugifyScienceLabTitle(item.title) === labSlug);
 
   if (loading) {

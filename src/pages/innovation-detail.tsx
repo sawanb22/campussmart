@@ -7,7 +7,7 @@ import { INNOVATION_PAGE_SLUG, INNOVATION_DEFAULTS, slugifyInnovationTitle } fro
 const InnovationDetail = () => {
   const { trackSlug } = useParams();
   const { data, loading } = usePageData(INNOVATION_PAGE_SLUG);
-  const cards = data.cards?.length ? data.cards : INNOVATION_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : INNOVATION_DEFAULTS.cards;
   const card = cards.find((item: any) => slugifyInnovationTitle(item.title) === trackSlug);
 
   if (loading) {

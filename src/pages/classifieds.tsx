@@ -21,7 +21,7 @@ const Classifieds = () => {
   const [enquiryListing, setEnquiryListing] = useState<Listing | null>(null);
   const [enquiryForm, setEnquiryForm] = useState(EMPTY_ENQUIRY);
   const [submitting, setSubmitting] = useState(false); const [submitted, setSubmitted] = useState(false); const [formError, setFormError] = useState('');
-  const categories: string[] = data.categories?.length ? data.categories : DEFAULTS.categories;
+  const categories: string[] = Array.isArray(data.categories) ? data.categories : DEFAULTS.categories;
   const featured = { ...DEFAULTS.featured, ...(data.featured ?? {}) };
   const defaults: Listing[] = [
     { title: 'Colleges for Sale', category: 'Institutions', desc: 'Browse educational institutions available for acquisition.', image: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=900&q=85', link: '/colleges-universities-for-sale', icon: Building2 },
@@ -29,7 +29,7 @@ const Classifieds = () => {
     { title: 'Partnership Opportunities', category: 'Partnerships', desc: 'Find partnership opportunities with running colleges.', image: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=900&q=85', link: '/partner-with-colleges', icon: Handshake },
     { title: 'Job Openings', category: 'Careers', desc: 'Apply for current opportunities with our team.', image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=900&q=85', link: '/job-openings', icon: BriefcaseBusiness },
   ];
-  const listings: Listing[] = (data.cards?.length ? data.cards : defaults).map((item: any, index: number) => ({ ...item, icon: [Building2, DollarSign, Handshake, BriefcaseBusiness][index % 4], desc: item.description ?? item.desc, category: item.category ?? categories[(index + 1) % categories.length], link: /job|career/i.test(item.title) ? '/job-openings' : item.href ?? item.link ?? '#' }));
+  const listings: Listing[] = (Array.isArray(data.cards) ? data.cards : defaults).map((item: any, index: number) => ({ ...item, icon: [Building2, DollarSign, Handshake, BriefcaseBusiness][index % 4], desc: item.description ?? item.desc, category: item.category ?? categories[(index + 1) % categories.length], link: /job|career/i.test(item.title) ? '/job-openings' : item.href ?? item.link ?? '#' }));
   const visibleListings = useMemo(() => activeCategory === categories[0] ? listings : listings.filter(item => item.category === activeCategory), [activeCategory, categories, listings]);
   const openEnquiry = (listing: Listing) => { setEnquiryListing(listing); setEnquiryForm({ ...EMPTY_ENQUIRY, message: `I'm interested in "${listing.title}". Please share more details.` }); setSubmitted(false); setFormError(''); };
   const submitEnquiry = async (event: React.FormEvent) => { event.preventDefault(); if (!enquiryListing) return; setSubmitting(true); setFormError(''); try { await api.post('/contact', { ...enquiryForm, subject: `Classifieds enquiry: ${enquiryListing.title}` }); setSubmitted(true); } catch (err: any) { setFormError(err.response?.data?.error || 'Failed to send your enquiry. Please try again.'); } finally { setSubmitting(false); } };

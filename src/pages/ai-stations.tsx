@@ -34,7 +34,7 @@ const AIStations = () => {
   }, []);
 
   const section1Title = data.section1Title ?? AI_STATIONS_DEFAULTS.section1Title;
-  const cards: AIStationCard[] = (data.cards && data.cards.length > 0) ? data.cards : AI_STATIONS_DEFAULTS.cards;
+  const cards: AIStationCard[] = Array.isArray(data.cards) ? data.cards : AI_STATIONS_DEFAULTS.cards;
   const ctaTitle = data.ctaTitle ?? AI_STATIONS_DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? AI_STATIONS_DEFAULTS.ctaSubtitle;
 

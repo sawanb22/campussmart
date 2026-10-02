@@ -19,15 +19,16 @@ const COLLEGE_SALE_DATA = {
 
 async function ensureCollegeSalePage() {
     const existing = await prisma.page.findUnique({ where: { slug: COLLEGE_SALE_SLUG } });
-    let hasCards = false;
-    try {
-        hasCards = Boolean(existing?.pageData && Array.isArray(JSON.parse(existing.pageData).cards) && JSON.parse(existing.pageData).cards.length > 0);
-    } catch {
-        hasCards = false;
-    }
-    return existing
-        ? prisma.page.update({ where: { id: existing.id }, data: { template: COLLEGE_SALE_SLUG, published: true, ...(!hasCards ? { pageData: JSON.stringify(COLLEGE_SALE_DATA) } : {}) } })
-        : prisma.page.create({ data: { title: 'Colleges / Universities for Sale', slug: COLLEGE_SALE_SLUG, template: COLLEGE_SALE_SLUG, published: true, pageData: JSON.stringify(COLLEGE_SALE_DATA) } });
+    if (existing) return existing;
+    return prisma.page.create({
+        data: {
+            title: 'Colleges / Universities for Sale',
+            slug: COLLEGE_SALE_SLUG,
+            template: COLLEGE_SALE_SLUG,
+            published: true,
+            pageData: JSON.stringify(COLLEGE_SALE_DATA),
+        },
+    });
 }
 
 const PARTNER_SLUG = 'partner-with-colleges';
@@ -67,10 +68,15 @@ async function ensureJobOpeningsPage() {
 
 async function restorePartnershipIdentity() {
     const existing = await prisma.page.findUnique({ where: { slug: 'partnership' } });
-    if (!existing || !/job|career/i.test(existing.title)) return existing;
-    return prisma.page.update({
-        where: { id: existing.id },
-        data: { title: 'Partnership Enquiry', template: 'partnership' },
+    if (existing) return existing;
+    return prisma.page.create({
+        data: {
+            title: 'Partnership Enquiry',
+            slug: 'partnership',
+            template: 'partnership',
+            published: true,
+            pageData: JSON.stringify({}),
+        },
     });
 }
 
@@ -165,16 +171,27 @@ router.post('/', verifyToken, requireAdmin, async (req: AuthRequest, res: Respon
             return;
         }
 
-        const payload = { ...req.body };
-        if (payload.pageData !== undefined && payload.pageData !== null && typeof payload.pageData === 'object') {
-            payload.pageData = JSON.stringify(payload.pageData);
+        const validFields: Array<'title' | 'slug' | 'content' | 'template' | 'pageData' | 'published'> = [
+            'title', 'slug', 'content', 'template', 'pageData', 'published'
+        ];
+        const createData: Record<string, any> = {
+            published: true,
+        };
+
+        for (const field of validFields) {
+            if (req.body[field] !== undefined) {
+                if (field === 'pageData' && typeof req.body.pageData === 'object' && req.body.pageData !== null) {
+                    createData.pageData = JSON.stringify(req.body.pageData);
+                } else if (field === 'published' && typeof req.body.published !== 'boolean') {
+                    createData.published = req.body.published === 'true' || req.body.published === 1;
+                } else {
+                    createData[field] = req.body[field];
+                }
+            }
         }
 
         const page = await prisma.page.create({
-            data: {
-                ...payload,
-                published: payload.published !== undefined ? payload.published : true
-            }
+            data: createData as any
         });
         console.log(`Page created by admin ${req.user?.id}: ${page.slug}`);
         res.status(201).json(page);
@@ -202,18 +219,29 @@ router.put('/:id', verifyToken, requireAdmin, async (req: AuthRequest, res: Resp
             return;
         }
 
-        const payload = { ...req.body };
-        if (payload.pageData !== undefined && payload.pageData !== null && typeof payload.pageData === 'object') {
-            payload.pageData = JSON.stringify(payload.pageData);
+        const validFields: Array<'title' | 'slug' | 'content' | 'template' | 'pageData' | 'published'> = [
+            'title', 'slug', 'content', 'template', 'pageData', 'published'
+        ];
+        const updateData: Record<string, any> = {
+            updatedAt: new Date()
+        };
+
+        for (const field of validFields) {
+            if (req.body[field] !== undefined) {
+                if (field === 'pageData' && typeof req.body.pageData === 'object' && req.body.pageData !== null) {
+                    updateData.pageData = JSON.stringify(req.body.pageData);
+                } else if (field === 'published' && typeof req.body.published !== 'boolean') {
+                    updateData.published = req.body.published === 'true' || req.body.published === 1;
+                } else {
+                    updateData[field] = req.body[field];
+                }
+            }
         }
 
         // Update page
         const page = await prisma.page.update({
             where: { id },
-            data: {
-                ...payload,
-                updatedAt: new Date() // Ensure updatedAt is set
-            }
+            data: updateData
         });
         
         console.log(`Page ${id} updated by admin ${req.user?.id}`);

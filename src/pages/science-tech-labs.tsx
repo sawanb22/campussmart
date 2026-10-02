@@ -35,7 +35,7 @@ const ScienceTechLabs = () => {
     return () => ctx.revert();
   }, []);
 
-  const allCards: ScienceTechLabsCard[] = data.cards?.length ? data.cards : SCIENCE_TECH_LABS_DEFAULTS.cards;
+  const allCards: ScienceTechLabsCard[] = Array.isArray(data.cards) ? data.cards : SCIENCE_TECH_LABS_DEFAULTS.cards;
 
   const categoryOptions = useMemo(
     () => Array.from(new Set(allCards.flatMap((card) => card.categories ?? []).filter(Boolean))),

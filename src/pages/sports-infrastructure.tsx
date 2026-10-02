@@ -31,7 +31,7 @@ const SportsInfrastructure = () => {
   const ctaTitle = data.ctaTitle ?? SPORTS_INFRASTRUCTURE_DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? SPORTS_INFRASTRUCTURE_DEFAULTS.ctaSubtitle;
   const ctaButtonLabel = data.ctaButtonLabel ?? SPORTS_INFRASTRUCTURE_DEFAULTS.ctaButtonLabel;
-  const cards: SportsInfrastructureCard[] = data.cards?.length ? data.cards : SPORTS_INFRASTRUCTURE_DEFAULTS.cards;
+  const cards: SportsInfrastructureCard[] = Array.isArray(data.cards) ? data.cards : SPORTS_INFRASTRUCTURE_DEFAULTS.cards;
 
   const categoryOptions = useMemo(
     () => Array.from(new Set(cards.flatMap((card) => card.categories ?? []).filter(Boolean))),

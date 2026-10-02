@@ -229,7 +229,7 @@ const Corporate = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            {(data.team && data.team.length > 0 ? data.team : DEFAULTS.team).map((member: any) => (
+            {(Array.isArray(data.team) ? data.team : DEFAULTS.team).map((member: any) => (
               <div key={member.name} className="group flex flex-col items-center">
                 <div className="relative mb-6 w-full aspect-[4/3] overflow-hidden rounded-2xl shadow-xl border border-gray-100">
                   <img
@@ -267,7 +267,7 @@ const Corporate = () => {
             </p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-            {(data.partners && data.partners.length > 0 ? data.partners : DEFAULTS.partners).map((partner: string) => (
+            {(Array.isArray(data.partners) ? data.partners : DEFAULTS.partners).map((partner: string) => (
               <div key={partner} className="bg-white border border-cm-gray rounded-[2rem] p-6 flex flex-col items-center justify-center aspect-video shadow-sm hover:shadow-xl hover:border-cm-blue transition-all duration-500 group">
                 <div className="w-10 h-10 bg-cm-gray/30 rounded-full flex items-center justify-center mb-4 border border-gray-100 group-hover:bg-cm-blue group-hover:scale-110 transition-all">
                   <Handshake className="w-5 h-5 text-gray-400 group-hover:text-white" />

@@ -7,7 +7,7 @@ import { AR_VR_PAGE_SLUG, AR_VR_DEFAULTS, slugifyArVrTitle } from './ar-vr-exper
 const ArVrExperiencesDetail = () => {
   const { experienceSlug } = useParams();
   const { data, loading } = usePageData(AR_VR_PAGE_SLUG);
-  const cards = data.cards?.length ? data.cards : AR_VR_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : AR_VR_DEFAULTS.cards;
   const card = cards.find((item: any) => slugifyArVrTitle(item.title) === experienceSlug);
 
   if (loading) {

@@ -9,8 +9,8 @@ const slugify = (title: string) => title.toLowerCase().trim().replace(/[^a-z0-9]
 const UGCGuidelineArticle = () => {
   const { articleSlug } = useParams();
   const { data, loading } = usePageData<any>('ugc-guidelines');
-  const cards = data.cards?.length ? data.cards : DEFAULTS.cards;
-  const moreCards = data.moreCards?.length ? data.moreCards : DEFAULTS.moreCards;
+  const cards = Array.isArray(data.cards) ? data.cards : DEFAULTS.cards;
+  const moreCards = Array.isArray(data.moreCards) ? data.moreCards : DEFAULTS.moreCards;
   const allArticles = [...cards, ...moreCards];
   const article = allArticles.find(item => slugify(item.title) === articleSlug);
 

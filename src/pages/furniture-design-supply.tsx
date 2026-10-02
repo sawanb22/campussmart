@@ -101,7 +101,7 @@ const FurnitureDesignSupply = () => {
   const heroSubtitle = data.heroSubtitle ?? FURNITURE_SUPPLY_DEFAULTS.heroSubtitle;
   const heroImage = resolveMediaUrl(data.heroImage) || FURNITURE_SUPPLY_DEFAULTS.heroImage;
   const section1Title = data.section1Title ?? FURNITURE_SUPPLY_DEFAULTS.section1Title;
-  const cards: FurnitureSupplyCard[] = data.cards?.length ? data.cards : FURNITURE_SUPPLY_DEFAULTS.cards;
+  const cards: FurnitureSupplyCard[] = Array.isArray(data.cards) ? data.cards : FURNITURE_SUPPLY_DEFAULTS.cards;
   const ctaTitle = data.ctaTitle ?? FURNITURE_SUPPLY_DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? FURNITURE_SUPPLY_DEFAULTS.ctaSubtitle;
 

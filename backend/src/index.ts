@@ -81,6 +81,8 @@ app.use(cors({
     origin: (origin, callback) => {
         // Allow requests with no origin (mobile apps, curl, etc.)
         if (!origin) return callback(null, true);
+        // Allow all origins in local development and tunnels
+        if (process.env.NODE_ENV !== 'production') return callback(null, true);
         // Allow any vercel.app subdomain or Cloudflare/local tunnel
         if (origin.endsWith('.vercel.app') || origin.endsWith('.trycloudflare.com') || origin.endsWith('.loca.lt')) return callback(null, true);
         // Allow explicitly listed origins
@@ -114,6 +116,14 @@ if (fs.existsSync(rootUploadsFallback) && rootUploadsFallback !== UPLOADS_DIR) {
 // Health check
 app.get('/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Anti-cache middleware for API routes to guarantee fresh CMS delivery
+app.use('/api', (_req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    next();
 });
 
 // API Routes

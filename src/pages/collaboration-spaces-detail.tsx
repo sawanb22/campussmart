@@ -7,7 +7,7 @@ import { COLLABORATION_SPACES_PAGE_SLUG, COLLABORATION_SPACES_DEFAULTS, slugifyC
 const CollaborationSpacesDetail = () => {
   const { spaceSlug } = useParams();
   const { data, loading } = usePageData(COLLABORATION_SPACES_PAGE_SLUG);
-  const cards = data.cards?.length ? data.cards : COLLABORATION_SPACES_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : COLLABORATION_SPACES_DEFAULTS.cards;
   const card = cards.find((item: any) => slugifyCollaborationSpaceTitle(item.title) === spaceSlug);
 
   if (loading) {

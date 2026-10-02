@@ -39,7 +39,7 @@ const InnovationCentres = () => {
   }, []);
 
   const section1Title = data.section1Title ?? INNOVATION_CENTRES_DEFAULTS.section1Title;
-  const cards: InnovationCentresCard[] = (data.cards && data.cards.length > 0) ? data.cards : INNOVATION_CENTRES_DEFAULTS.cards;
+  const cards: InnovationCentresCard[] = Array.isArray(data.cards) ? data.cards : INNOVATION_CENTRES_DEFAULTS.cards;
 
   const cardLink = (card: InnovationCentresCard) => `/${INNOVATION_CENTRES_PAGE_SLUG}/${slugifyInnovationCentreTitle(card.title)}`;
 

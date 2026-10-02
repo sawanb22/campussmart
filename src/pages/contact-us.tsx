@@ -93,7 +93,7 @@ const ContactUs = () => {
       content: 'Monday - Friday: 9:00 AM - 6:00 PM\nSaturday: 10:00 AM - 4:00 PM',
     },
   ];
-  const contactInfo: ContactInfoItem[] = (data.cards?.length ? data.cards : defaultContactInfo).map((item: any, index: number) => ({
+  const contactInfo: ContactInfoItem[] = (Array.isArray(data.cards) ? data.cards : defaultContactInfo).map((item: any, index: number) => ({
     ...item,
     icon: [Phone, Mail, Clock][index % 3],
     content: item.description ?? item.content,

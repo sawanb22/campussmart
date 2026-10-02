@@ -31,8 +31,15 @@ export default function Login() {
             syncAdminSession(data.accessToken, data.user);
             navigate('/admin/dashboard');
         } catch (err: unknown) {
-            const msg = (err as { response?: { data?: { error?: string } } }).response?.data?.error;
-            setError(msg || 'Login failed. Check your credentials.');
+            const axiosErr = err as { response?: { data?: { error?: string } }; message?: string };
+            const msg = axiosErr.response?.data?.error;
+            if (msg) {
+                setError(msg);
+            } else if (!axiosErr.response) {
+                setError('Cannot reach server. Please check your connection or backend server.');
+            } else {
+                setError('Login failed. Check your credentials.');
+            }
         } finally {
             setLoading(false);
         }

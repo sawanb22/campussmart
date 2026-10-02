@@ -41,8 +41,8 @@ const AIGuide = () => {
   const [subscribed, setSubscribed] = useState(false);
   const value = (key: string) => data[key] ?? DEFAULTS[key as keyof typeof DEFAULTS];
   const featured = { ...DEFAULTS.featured, ...(data.featured ?? {}) };
-  const cards: Article[] = data.cards?.length ? data.cards : DEFAULTS.cards;
-  const filters: string[] = data.filters?.length ? data.filters : DEFAULTS.filters;
+  const cards: Article[] = Array.isArray(data.cards) ? data.cards : DEFAULTS.cards;
+  const filters: string[] = Array.isArray(data.filters) ? data.filters : DEFAULTS.filters;
   const visibleCards = useMemo(() => selectedFilter === 'All' ? cards : cards.filter(card => card.category?.toLowerCase() === selectedFilter.toLowerCase()), [cards, selectedFilter]);
 
   const handleSubscribe = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); setSubscribed(true); event.currentTarget.reset(); };

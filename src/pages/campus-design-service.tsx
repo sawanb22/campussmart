@@ -23,7 +23,7 @@ const CampusDesignService = () => {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
 
-  const cards: ServiceCard[] = data.cards?.length ? data.cards : fallbackCards;
+  const cards: ServiceCard[] = Array.isArray(data.cards) ? data.cards : fallbackCards;
   const service = cards.find((card) => toSlug(card.title) === serviceSlug) ?? cards[0];
 
   useEffect(() => {

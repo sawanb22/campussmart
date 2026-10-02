@@ -84,7 +84,7 @@ const CampusAutomation = () => {
   }, []);
 
   const section1Title = data.section1Title ?? CAMPUS_AUTOMATION_DEFAULTS.section1Title;
-  const allCards: CardItem[] = (data.cards && data.cards.length > 0) ? data.cards : CAMPUS_AUTOMATION_DEFAULTS.cards;
+  const allCards: CardItem[] = Array.isArray(data.cards) ? data.cards : CAMPUS_AUTOMATION_DEFAULTS.cards;
   const ctaTitle = data.ctaTitle ?? CAMPUS_AUTOMATION_DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? CAMPUS_AUTOMATION_DEFAULTS.ctaSubtitle;
 

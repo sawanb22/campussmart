@@ -38,7 +38,7 @@ const AIML = () => {
   const heroTitle = data.heroTitle ?? AI_ML_DEFAULTS.heroTitle;
   const heroSubtitle = data.heroSubtitle ?? AI_ML_DEFAULTS.heroSubtitle;
   const heroImage = resolveMediaUrl(data.heroImage) || AI_ML_DEFAULTS.heroImage;
-  const allCards: AiMlCard[] = data.cards?.length ? data.cards : AI_ML_DEFAULTS.cards;
+  const allCards: AiMlCard[] = Array.isArray(data.cards) ? data.cards : AI_ML_DEFAULTS.cards;
 
   const categoryOptions = useMemo(
     () => Array.from(new Set(allCards.flatMap((card) => card.categories ?? []).filter(Boolean))),

@@ -7,7 +7,7 @@ import { FURNITURE_DESIGN_PAGE_SLUG, FURNITURE_DESIGN_DEFAULTS, slugifyFurniture
 const CampusFurnitureDesignDetail = () => {
   const { rangeSlug } = useParams();
   const { data, loading } = usePageData(FURNITURE_DESIGN_PAGE_SLUG);
-  const cards = data.cards?.length ? data.cards : FURNITURE_DESIGN_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : FURNITURE_DESIGN_DEFAULTS.cards;
   const card = cards.find((item: any) => slugifyFurnitureDesignTitle(item.title) === rangeSlug);
 
   if (loading) {

@@ -102,7 +102,7 @@ const NewEnvironments = () => {
   const heroImage = data.heroImage ?? NEW_ENVIRONMENTS_DEFAULTS.heroImage;
   const section1Title = data.section1Title ?? NEW_ENVIRONMENTS_DEFAULTS.section1Title;
 
-  const cards: Card[] = (data.cards && data.cards.length > 0)
+  const cards: Card[] = Array.isArray(data.cards)
     ? data.cards.map((c: any, i: number) => ({
       ...c,
       image: c.image || NEW_ENVIRONMENTS_DEFAULTS.cards[i]?.image || NEW_ENVIRONMENTS_DEFAULTS.cards[0].image,

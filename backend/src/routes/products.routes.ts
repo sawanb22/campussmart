@@ -12,8 +12,10 @@ const CATEGORY_PAGES = new Set(['furniture', 'libraries', 'labs', 'sports', 'ai-
 router.get('/', optionalAuth, async (req: AuthRequest, res: Response) => {
     try {
         const { category, search, featured, sort = 'newest', page = '1', limit = '20', active, inStock, minPrice, maxPrice } = req.query;
+        const pageNum = Math.max(1, Number(page) || 1);
+        const limitNum = Math.max(1, Number(limit) || 20);
         const isAdmin = req.user?.role === 'admin';
-        const skip = (Number(page) - 1) * Number(limit);
+        const skip = (pageNum - 1) * limitNum;
         const where: Record<string, unknown> = {};
 
         // Active filter: Only admins can view inactive or all products. Public users always receive active: true.
@@ -69,11 +71,11 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response) => {
                         : { createdAt: 'desc' as const };
 
         const [products, total] = await Promise.all([
-            prisma.product.findMany({ where, include: { category: true }, skip, take: Number(limit), orderBy }),
+            prisma.product.findMany({ where, include: { category: true }, skip, take: limitNum, orderBy }),
             prisma.product.count({ where }),
         ]);
-        const totalPages = Math.ceil(total / Number(limit)) || 1;
-        res.json({ products, total, page: Number(page), limit: Number(limit), totalPages });
+        const totalPages = Math.ceil(total / limitNum) || 1;
+        res.json({ products, total, page: pageNum, limit: limitNum, totalPages });
     } catch {
         res.status(500).json({ error: 'Failed to fetch products' });
     }

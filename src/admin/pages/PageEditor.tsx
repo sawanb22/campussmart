@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Plus, Trash2 } from 'lucide-react';
 import api from '../api/client';
 import MediaImageField from '../components/MediaImageField';
-import { clearPageDataCache } from '@/hooks/usePageData';
+import { clearPageDataCache, broadcastCmsInvalidation } from '@/hooks/usePageData';
+import { pageDefaults } from '../pageDefaults';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface CardItem {
@@ -13,6 +14,7 @@ interface CardItem {
     count?: number;
     name?: string;
     href?: string;
+    categories?: string[];
 }
 
 interface PageData {
@@ -87,14 +89,25 @@ export default function PageEditor() {
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [saveError, setSaveError] = useState<string | null>(null);
 
     useEffect(() => {
         const load = async () => {
             try {
                 const { data: p } = await api.get(`/pages/${id}`);
                 setPage(p);
-                setData(parsePageData(p.pageData));
-            } catch { /* nothing */ }
+                const parsed = parsePageData(p.pageData);
+                const effectiveDefaults = pageDefaults[p.slug] || pageDefaults[p.template || ''] || {};
+                const initialData = { ...effectiveDefaults };
+                Object.entries(parsed).forEach(([k, v]) => {
+                    if (v !== undefined && v !== null) {
+                        (initialData as any)[k] = v;
+                    }
+                });
+                setData(initialData);
+            } catch (err) {
+                console.error(`Failed to load page ${id}:`, err);
+            }
             setLoading(false);
         };
         load();
@@ -103,7 +116,7 @@ export default function PageEditor() {
     const set = (key: keyof PageData, value: any) =>
         setData(prev => ({ ...prev, [key]: value }));
 
-    const setCard = (index: number, field: keyof CardItem, value: string) => {
+    const setCard = (index: number, field: keyof CardItem, value: any) => {
         const cards = [...(data.cards ?? [])];
         cards[index] = { ...cards[index], [field]: value };
         set('cards', cards);
@@ -126,8 +139,9 @@ export default function PageEditor() {
         set('features', (data.features ?? []).filter((_, idx) => idx !== i));
 
     const save = async () => {
-        if (!page) return;
+        if (!page || loading || saving) return;
         setSaving(true);
+        setSaveError(null);
         try {
             await api.put(`/pages/${page.id}`, {
                 title: page.title,
@@ -136,10 +150,18 @@ export default function PageEditor() {
             });
             clearPageDataCache(page.slug);
             clearPageDataCache();
+            broadcastCmsInvalidation({ type: 'INVALIDATE_PAGE', slug: page.slug });
+            broadcastCmsInvalidation({ type: 'INVALIDATE_ALL' });
             setSaved(true);
             setTimeout(() => setSaved(false), 2500);
-        } catch { /* nothing */ }
-        setSaving(false);
+        } catch (err: any) {
+            console.error(`Failed to save page ${page.slug}:`, err);
+            const msg = err?.response?.data?.error || 'Failed to save page changes. Please try again.';
+            setSaveError(msg);
+            alert(`Save failed: ${msg}`);
+        } finally {
+            setSaving(false);
+        }
     };
 
     if (loading) return <div className="p-8 text-gray-400">Loading page editor...</div>;
@@ -163,13 +185,22 @@ export default function PageEditor() {
                         className="px-4 py-2 text-sm border border-gray-200 bg-white rounded-lg hover:bg-gray-50 transition-colors text-gray-600 shadow-sm">
                         View Live ↗
                     </a>
-                    <button onClick={save} disabled={saving}
-                        className="flex items-center gap-2 px-5 py-2 bg-cm-blue text-white rounded-lg text-sm font-semibold hover:bg-cm-blue-dark transition-colors disabled:opacity-60 shadow-md">
+                    <button onClick={save} disabled={saving || loading}
+                        className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-colors shadow-md ${
+                            saving || loading ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-cm-blue text-white hover:bg-cm-blue-dark'
+                        }`}>
                         <Save className="w-4 h-4" />
                         {saving ? 'Saving...' : saved ? '✓ Saved!' : 'Save Changes'}
                     </button>
                 </div>
             </div>
+
+            {saveError && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-semibold flex items-center justify-between">
+                    <span>⚠️ {saveError}</span>
+                    <button onClick={() => setSaveError(null)} className="text-red-500 hover:text-red-700 font-bold ml-4">✕</button>
+                </div>
+            )}
 
             {/* Page Title */}
             <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-5 shadow-sm">
@@ -234,6 +265,12 @@ export default function PageEditor() {
                                 <Field label="Title" value={card.title ?? ''} onChange={v => setCard(i, 'title', v)} />
                                 <Field label="Description" value={card.description ?? ''} onChange={v => setCard(i, 'description', v)} />
                                 <Field label="Detail Page Link (optional)" value={card.href ?? ''} onChange={v => setCard(i, 'href', v)} placeholder="Auto-generated from title if blank" />
+                                <Field
+                                    label="Categories (comma-separated)"
+                                    value={(card.categories ?? []).join(', ')}
+                                    onChange={v => setCard(i, 'categories', v.split(',').map(s => s.trim()).filter(Boolean))}
+                                    placeholder="e.g. Science Labs, Safety & Wet Labs"
+                                />
                             </div>
                             <MediaImageField label="Image" value={card.image ?? ''} onChange={v => setCard(i, 'image', v)} previewClassName="h-24" />
                         </div>

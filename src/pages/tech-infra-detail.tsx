@@ -7,7 +7,7 @@ import { TECH_INFRA_PAGE_SLUG, TECH_INFRA_DEFAULTS, slugifyTechInfraTitle } from
 const TechInfraDetail = () => {
   const { solutionSlug } = useParams();
   const { data, loading } = usePageData(TECH_INFRA_PAGE_SLUG);
-  const cards = data.cards?.length ? data.cards : TECH_INFRA_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : TECH_INFRA_DEFAULTS.cards;
   const card = cards.find((item: any) => slugifyTechInfraTitle(item.title) === solutionSlug);
 
   if (loading) {

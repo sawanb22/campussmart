@@ -7,7 +7,7 @@ import { INNOVATION_CENTRES_PAGE_SLUG, INNOVATION_CENTRES_DEFAULTS, slugifyInnov
 const InnovationCentresDetail = () => {
   const { spaceSlug } = useParams();
   const { data, loading } = usePageData(INNOVATION_CENTRES_PAGE_SLUG);
-  const cards = data.cards?.length ? data.cards : INNOVATION_CENTRES_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : INNOVATION_CENTRES_DEFAULTS.cards;
   const card = cards.find((item: any) => slugifyInnovationCentreTitle(item.title) === spaceSlug);
 
   if (loading) {

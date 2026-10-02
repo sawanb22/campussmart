@@ -39,7 +39,7 @@ const CampusMasterPlanning = () => {
   }, []);
 
   const section2Title = data.section2Title ?? MASTER_PLANNING_DEFAULTS.section2Title;
-  const cards: any[] = data.cards?.length ? data.cards : MASTER_PLANNING_DEFAULTS.cards;
+  const cards: any[] = Array.isArray(data.cards) ? data.cards : MASTER_PLANNING_DEFAULTS.cards;
   const ctaTitle = data.ctaTitle ?? MASTER_PLANNING_DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? MASTER_PLANNING_DEFAULTS.ctaSubtitle;
 

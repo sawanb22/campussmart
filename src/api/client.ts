@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { clearUserSession } from '@/lib/auth-session';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'https://api.campusmart.in/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 const api = axios.create({
     baseURL: API_BASE,

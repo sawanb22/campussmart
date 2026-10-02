@@ -7,7 +7,7 @@ import { PARTNER_PAGE_SLUG, PARTNER_DEFAULTS, slugifyModelTitle } from './partne
 const PartnershipModelDetail = () => {
   const { modelSlug } = useParams();
   const { data, loading } = usePageData(PARTNER_PAGE_SLUG);
-  const cards: any[] = data.cards?.length ? data.cards : PARTNER_DEFAULTS.cards;
+  const cards: any[] = Array.isArray(data.cards) ? data.cards : PARTNER_DEFAULTS.cards;
   const card = cards.find((item) => slugifyModelTitle(item.title) === modelSlug);
 
   if (loading) {

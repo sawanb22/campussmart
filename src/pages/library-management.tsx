@@ -28,7 +28,7 @@ const LibraryManagement = () => {
     return () => ctx.revert();
   }, []);
 
-  const allCards: LibraryManagementCard[] = data.cards?.length ? data.cards : LIBRARY_MGMT_DEFAULTS.cards;
+  const allCards: LibraryManagementCard[] = Array.isArray(data.cards) ? data.cards : LIBRARY_MGMT_DEFAULTS.cards;
 
   const categoryOptions = useMemo(
     () => Array.from(new Set(allCards.flatMap((card) => card.categories ?? []).filter(Boolean))),

@@ -50,7 +50,7 @@ const Solutions = () => {
 
     const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
     const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
-    const cardList = (data.cards && data.cards.length > 0) ? data.cards : DEFAULTS.cards;
+    const cardList = Array.isArray(data.cards) ? data.cards : DEFAULTS.cards;
 
     const iconMap: Record<string, any> = {
         'Laboratories': Beaker,

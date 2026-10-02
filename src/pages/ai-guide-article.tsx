@@ -8,7 +8,7 @@ const slugify = (title: string) => title.toLowerCase().trim().replace(/[^a-z0-9]
 const AIGuideArticle = () => {
   const { articleSlug } = useParams();
   const { data, loading } = usePageData<any>('ai-guide');
-  const cards: Article[] = data.cards?.length ? data.cards : DEFAULTS.cards;
+  const cards: Article[] = Array.isArray(data.cards) ? data.cards : DEFAULTS.cards;
   const featured = { ...DEFAULTS.featured, ...(data.featured ?? {}) };
   const articles = [{ ...featured, readTime: '' }, ...cards];
   const article = articles.find(item => slugify(item.title) === articleSlug);

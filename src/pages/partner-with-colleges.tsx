@@ -52,7 +52,7 @@ const PartnerWithColleges = () => {
   const heroSubtitle = data.heroSubtitle ?? PARTNER_DEFAULTS.heroSubtitle;
   const heroImage = resolveMediaUrl(data.heroImage) || PARTNER_DEFAULTS.heroImage;
   const section2Title = data.section2Title ?? PARTNER_DEFAULTS.section2Title;
-  const cards: any[] = data.cards?.length ? data.cards : PARTNER_DEFAULTS.cards;
+  const cards: any[] = Array.isArray(data.cards) ? data.cards : PARTNER_DEFAULTS.cards;
   const ctaTitle = data.ctaTitle ?? PARTNER_DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? PARTNER_DEFAULTS.ctaSubtitle;
 

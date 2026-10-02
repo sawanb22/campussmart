@@ -45,16 +45,16 @@ const ServiceCards = () => {
 
       gsap.fromTo(
         cards,
-        { y: 20, opacity: 0 },
+        { y: 15, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          duration: 0.5,
-          stagger: 0.08,
+          duration: 0.4,
+          stagger: 0.06,
           ease: 'power3.out',
           scrollTrigger: {
             trigger: containerRef.current,
-            start: 'top 92%',
+            start: 'top 95%',
             toggleActions: 'play none none none',
           },
         }
@@ -88,19 +88,19 @@ const ServiceCards = () => {
             <Link
               key={`${service.title}-${index}`}
               to={link}
-              className="service-card group relative flex items-center justify-between p-6 sm:p-7 transition-all duration-300 hover:brightness-105"
+              className="service-card group relative flex items-center justify-between px-4 sm:px-5 py-2 sm:py-2.5 transition-all duration-200 hover:brightness-105 min-h-[44px] sm:min-h-[48px]"
               style={{ backgroundColor: bg, color: text }}
             >
-              <div className="space-y-1">
-                <span className="text-[10px] font-black uppercase tracking-widest opacity-80">
-                  Featured Solution 0{index + 1}
+              <div className="flex items-center gap-2 min-w-0 pr-2">
+                <span className="text-[10px] font-black uppercase tracking-wider opacity-75 shrink-0">
+                  0{index + 1}
                 </span>
-                <h3 className="font-black text-lg sm:text-xl tracking-tight leading-snug">
+                <h3 className="font-bold text-xs sm:text-sm tracking-tight truncate">
                   {service.title}
                 </h3>
               </div>
-              <div className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:bg-black/20 shrink-0 ml-3">
-                <ArrowUpRight className="w-5 h-5" />
+              <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center transition-transform duration-200 group-hover:scale-110 group-hover:bg-black/20 shrink-0">
+                <ArrowUpRight className="w-3.5 h-3.5" />
               </div>
             </Link>
           );

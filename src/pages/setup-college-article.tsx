@@ -9,7 +9,7 @@ const slugify = (title: string) => title.toLowerCase().trim().replace(/[^a-z0-9]
 const SetupCollegeArticle = () => {
   const { articleSlug } = useParams();
   const { data, loading } = usePageData<any>('setup-college');
-  const cards: SetupArticle[] = data.cards?.length ? data.cards : DEFAULTS.cards;
+  const cards: SetupArticle[] = Array.isArray(data.cards) ? data.cards : DEFAULTS.cards;
   const article = cards.find(card => slugify(card.title) === articleSlug);
 
   if (loading) {

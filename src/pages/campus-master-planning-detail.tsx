@@ -7,7 +7,7 @@ import { MASTER_PLANNING_PAGE_SLUG, MASTER_PLANNING_DEFAULTS, slugifyMasterPlann
 const CampusMasterPlanningDetail = () => {
   const { serviceSlug } = useParams();
   const { data, loading } = usePageData(MASTER_PLANNING_PAGE_SLUG);
-  const cards = data.cards?.length ? data.cards : MASTER_PLANNING_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : MASTER_PLANNING_DEFAULTS.cards;
   const card = cards.find((item: any) => slugifyMasterPlanningTitle(item.title) === serviceSlug);
 
   if (loading) {

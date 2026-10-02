@@ -77,7 +77,7 @@ const CollaborationSpaces = () => {
   const [activeCategory, setActiveCategory] = useState('All');
 
   const section1Title = data.section1Title ?? COLLABORATION_SPACES_DEFAULTS.section1Title;
-  const cards: CollaborationSpaceCard[] = data.cards?.length ? data.cards : COLLABORATION_SPACES_DEFAULTS.cards;
+  const cards: CollaborationSpaceCard[] = Array.isArray(data.cards) ? data.cards : COLLABORATION_SPACES_DEFAULTS.cards;
   const ctaTitle = data.ctaTitle ?? COLLABORATION_SPACES_DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? COLLABORATION_SPACES_DEFAULTS.ctaSubtitle;
 

@@ -7,7 +7,7 @@ import { SPORTS_INFRASTRUCTURE_PAGE_SLUG, SPORTS_INFRASTRUCTURE_DEFAULTS, slugif
 const SportsInfrastructureDetail = () => {
   const { facilitySlug } = useParams();
   const { data, loading } = usePageData(SPORTS_INFRASTRUCTURE_PAGE_SLUG);
-  const cards = data.cards?.length ? data.cards : SPORTS_INFRASTRUCTURE_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : SPORTS_INFRASTRUCTURE_DEFAULTS.cards;
   const card = cards.find((item: any) => slugifySportsInfrastructureTitle(item.title) === facilitySlug);
 
   if (loading) {

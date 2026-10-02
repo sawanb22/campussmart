@@ -65,7 +65,7 @@ const AIDigitalDesignSupply = () => {
   const [activeCategory, setActiveCategory] = useState('All');
 
   const section1Title = data.section1Title ?? AI_DIGITAL_SUPPLY_DEFAULTS.section1Title;
-  const cards: AiDigitalSupplyCard[] = data.cards?.length ? data.cards : AI_DIGITAL_SUPPLY_DEFAULTS.cards;
+  const cards: AiDigitalSupplyCard[] = Array.isArray(data.cards) ? data.cards : AI_DIGITAL_SUPPLY_DEFAULTS.cards;
   const ctaTitle = data.ctaTitle ?? AI_DIGITAL_SUPPLY_DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? AI_DIGITAL_SUPPLY_DEFAULTS.ctaSubtitle;
 

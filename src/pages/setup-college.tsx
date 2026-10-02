@@ -53,7 +53,7 @@ export const DEFAULTS = {
 const SetupCollege = () => {
   const { data } = usePageData<any>('setup-college');
   const get = (key: string) => data[key] ?? DEFAULTS[key as keyof typeof DEFAULTS];
-  const cards: SetupArticle[] = data.cards?.length ? data.cards : DEFAULTS.cards;
+  const cards: SetupArticle[] = Array.isArray(data.cards) ? data.cards : DEFAULTS.cards;
   const articleSlug = (title: string) => title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
   return (

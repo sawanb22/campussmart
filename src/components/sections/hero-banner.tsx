@@ -1,10 +1,12 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useSiteContent } from '@/contexts/SiteContentContext';
 import { resolveMediaUrl } from '@/lib/media-url';
 
 gsap.registerPlugin(ScrollTrigger);
+
+const DEFAULT_HERO_IMAGE = 'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80';
 
 const HeroBanner = () => {
   const { content } = useSiteContent();
@@ -15,8 +17,20 @@ const HeroBanner = () => {
     subtitle: rawHero.subtitle || content.hero_subtitle || 'Physical + Digital',
     ctaLabel: rawHero.ctaLabel || 'Schedule Campus Audit →',
     ctaHref: rawHero.ctaHref || '/contact-us',
-    image: rawHero.image || 'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'
+    image: rawHero.image || DEFAULT_HERO_IMAGE
   };
+
+  const [bgImageUrl, setBgImageUrl] = useState<string>(() => {
+    return resolveMediaUrl(heroData.image) || DEFAULT_HERO_IMAGE;
+  });
+
+  useEffect(() => {
+    const candidate = resolveMediaUrl(heroData.image) || DEFAULT_HERO_IMAGE;
+    const testImg = new Image();
+    testImg.src = candidate;
+    testImg.onload = () => setBgImageUrl(candidate);
+    testImg.onerror = () => setBgImageUrl(DEFAULT_HERO_IMAGE);
+  }, [heroData.image]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -58,7 +72,7 @@ const HeroBanner = () => {
       className="relative overflow-hidden w-full"
       style={{
         minHeight: '280px',
-        backgroundImage: `linear-gradient(90deg, rgba(5,20,50,0.50) 0%, rgba(5,20,50,0.30) 45%, rgba(5,20,50,0.05) 85%), url('${resolveMediaUrl(heroData.image)}')`,
+        backgroundImage: `linear-gradient(90deg, rgba(5,20,50,0.50) 0%, rgba(5,20,50,0.30) 45%, rgba(5,20,50,0.05) 85%), url('${bgImageUrl}')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}

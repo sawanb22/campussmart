@@ -138,7 +138,7 @@ const SportsInfra = ({ slug = 'sports-infra' }: { slug?: string }) => {
   const ctaTitle = data.ctaTitle ?? SPORTS_INFRA_DEFAULTS.ctaTitle;
   const ctaButtonLabel = data.ctaButtonLabel ?? SPORTS_INFRA_DEFAULTS.ctaButtonLabel;
   const ctaHref = data.ctaHref ?? SPORTS_INFRA_DEFAULTS.ctaHref;
-  const allCards = data.cards?.length > 0 ? data.cards : SPORTS_INFRA_DEFAULTS.cards;
+  const allCards = Array.isArray(data.cards) ? data.cards : SPORTS_INFRA_DEFAULTS.cards;
   const cards = allCards.map((card: any) => ({
     ...card,
     categories: card.categories?.length ? card.categories : [],
@@ -148,7 +148,7 @@ const SportsInfra = ({ slug = 'sports-infra' }: { slug?: string }) => {
   const filteredCards = activeCategory
     ? cards.filter((card: any) => card.categories.includes(activeCategory))
     : cards;
-  const features = (data.features && data.features.length > 0) ? data.features : SPORTS_INFRA_DEFAULTS.features;
+  const features = Array.isArray(data.features) ? data.features : SPORTS_INFRA_DEFAULTS.features;
 
   return (
     <main className="min-h-screen bg-white text-opensans">

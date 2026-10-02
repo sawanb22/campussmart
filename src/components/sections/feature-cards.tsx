@@ -113,11 +113,11 @@ const FeatureCards = () => {
       } else {
         // Full animation for desktop
         gsap.fromTo(cards,
-          { opacity: 0, y: 50, scale: 0.96 },
+          { opacity: 0, y: 30, scale: 0.98 },
           {
             opacity: 1, y: 0, scale: 1,
-            duration: 0.7, stagger: 0.06, ease: 'power3.out',
-            scrollTrigger: { trigger: sectionRef.current, start: 'top 78%', toggleActions: 'play none none none' },
+            duration: 0.5, stagger: 0.05, ease: 'power3.out',
+            scrollTrigger: { trigger: sectionRef.current, start: 'top 92%', toggleActions: 'play none none none' },
           }
         );
       }

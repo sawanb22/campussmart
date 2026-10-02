@@ -7,7 +7,7 @@ import { CAMPUS_AUTOMATION_PAGE_SLUG, CAMPUS_AUTOMATION_DEFAULTS, slugifyCampusA
 const CampusAutomationDetail = () => {
   const { moduleSlug } = useParams();
   const { data, loading } = usePageData(CAMPUS_AUTOMATION_PAGE_SLUG);
-  const cards = data.cards?.length ? data.cards : CAMPUS_AUTOMATION_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : CAMPUS_AUTOMATION_DEFAULTS.cards;
   const card = cards.find((item: any) => slugifyCampusAutomationTitle(item.title) === moduleSlug);
 
   if (loading) {

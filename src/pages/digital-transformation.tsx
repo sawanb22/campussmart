@@ -79,10 +79,10 @@ const DigitalTransformation = () => {
   const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
   const heroImage = data.heroImage ?? DEFAULTS.heroImage;
   const section1Title = data.section1Title ?? DEFAULTS.section1Title;
-  const cards: CardItem[] = (data.cards && data.cards.length > 0) ? data.cards : DEFAULTS.cards;
-  const steps: Step[] = (data.sections && data.sections.length > 0) ? data.sections : DEFAULTS.sections;
+  const cards: CardItem[] = Array.isArray(data.cards) ? data.cards : DEFAULTS.cards;
+  const steps: Step[] = Array.isArray(data.sections) ? data.sections : DEFAULTS.sections;
   const section2Title = data.section2Title ?? DEFAULTS.section2Title;
-  const section2Cards: CardItem[] = (data.section2Cards && data.section2Cards.length > 0) ? data.section2Cards : DEFAULTS.section2Cards;
+  const section2Cards: CardItem[] = Array.isArray(data.section2Cards) ? data.section2Cards : DEFAULTS.section2Cards;
   const section2Description = data.section2Description ?? DEFAULTS.section2Description;
   const ctaTitle = data.ctaTitle ?? DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? DEFAULTS.ctaSubtitle;

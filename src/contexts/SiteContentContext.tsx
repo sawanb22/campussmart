@@ -22,18 +22,24 @@ export const SiteContentProvider: React.FC<{ children: React.ReactNode }> = ({ c
             setLoading(true);
             const { data } = await api.get('/content');
 
-            // Parse JSON values if possible
+            // Parse JSON values only for structured objects and arrays, preserving strings like phone numbers
             const parsedContent: Record<string, any> = {};
             for (const key in data) {
-                try {
-                    parsedContent[key] = JSON.parse(data[key]);
-                } catch {
-                    parsedContent[key] = data[key];
+                const val = data[key];
+                if (typeof val === 'string' && (val.trim().startsWith('{') || val.trim().startsWith('['))) {
+                    try {
+                        parsedContent[key] = JSON.parse(val);
+                    } catch {
+                        parsedContent[key] = val;
+                    }
+                } else {
+                    parsedContent[key] = val;
                 }
             }
             setContent(parsedContent);
         } catch (error) {
-            console.error('Failed to load site content:', error);
+            console.warn('[SiteContentContext] Failed to load site content. Preserving previous state:', error);
+            // State is intentionally retained
         } finally {
             setLoading(false);
         }
@@ -41,6 +47,22 @@ export const SiteContentProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     useEffect(() => {
         refresh();
+
+        if (typeof window !== 'undefined' && typeof BroadcastChannel !== 'undefined') {
+            try {
+                const channel = new BroadcastChannel('cm_cms_channel');
+                channel.onmessage = (e) => {
+                    if (e.data?.type === 'INVALIDATE_ALL') {
+                        refresh();
+                    }
+                };
+                return () => {
+                    channel.close();
+                };
+            } catch {
+                // Ignore BroadcastChannel errors
+            }
+        }
     }, []);
 
     return (

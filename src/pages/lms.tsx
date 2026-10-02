@@ -27,7 +27,7 @@ const LMS = () => {
 
   const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
   const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
-  const cards: CardItem[] = (data.cards && data.cards.length > 0) ? data.cards : DEFAULTS.cards;
+  const cards: CardItem[] = Array.isArray(data.cards) ? data.cards : DEFAULTS.cards;
 
   return (
     <main className="min-h-screen">

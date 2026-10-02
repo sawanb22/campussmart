@@ -37,8 +37,12 @@ const Login = () => {
       if (err.response?.data?.code === 'EMAIL_NOT_VERIFIED') {
         setUnverifiedEmail(err.response?.data?.email || formData.email);
         setError(err.response?.data?.error || 'Please verify your email address before signing in.');
+      } else if (err.response?.data?.error) {
+        setError(err.response.data.error);
+      } else if (!err.response) {
+        setError('Cannot reach server. Please check your connection or backend server.');
       } else {
-        setError(err.response?.data?.error || 'Invalid email or password');
+        setError('Invalid email or password');
       }
     } finally {
       setLoading(false);

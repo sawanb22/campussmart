@@ -12,7 +12,7 @@ const CampusDesignExecution = () => {
   const { data } = usePageData(CDE_PAGE_SLUG);
   const [activeCategory, setActiveCategory] = useState('All');
 
-  const cards: CampusDesignExecutionCard[] = data.cards?.length ? data.cards : CDE_DEFAULTS.cards;
+  const cards: CampusDesignExecutionCard[] = Array.isArray(data.cards) ? data.cards : CDE_DEFAULTS.cards;
 
   const categoryOptions = useMemo(
     () => Array.from(new Set(cards.flatMap((card) => card.categories ?? []).filter(Boolean))),

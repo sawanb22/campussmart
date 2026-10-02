@@ -176,7 +176,7 @@ const Catalogues = () => {
   const catalogues =
     catalogueRows.length > 0
       ? catalogueRows
-      : data.cards && data.cards.length > 0
+      : Array.isArray(data.cards)
         ? data.cards.map((catalogue: any) => ({
             ...catalogue,
             image: resolveMediaUrl(catalogue.image) || catalogue.image,

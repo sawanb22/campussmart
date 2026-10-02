@@ -33,8 +33,8 @@ const SmartClassrooms = () => {
 
   const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
   const heroImage = resolveMediaUrl(data.heroImage) || DEFAULTS.heroImage;
-  const features: string[] = data.features?.length ? data.features : DEFAULTS.features;
-  const cards: CardItem[] = data.cards?.length ? data.cards : DEFAULTS.cards;
+  const features: string[] = Array.isArray(data.features) ? data.features : DEFAULTS.features;
+  const cards: CardItem[] = Array.isArray(data.cards) ? data.cards : DEFAULTS.cards;
   const ctaTitle = data.ctaTitle ?? DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? DEFAULTS.ctaSubtitle;
 

@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Save, RotateCcw, Facebook, Twitter, Youtube, Instagram, Linkedin, Link2 } from 'lucide-react';
 import api from '../api/client';
+import { broadcastCmsInvalidation } from '@/hooks/usePageData';
 
 interface ContentMap { [key: string]: string; }
 
 const CONTENT_LABELS: Record<string, string> = {
-    hero_title: 'Hero Title',
-    hero_subtitle: 'Hero Subtitle',
     about_text: 'About Text',
     contact_phone: 'Contact Phone',
     contact_email: 'Contact Email',
@@ -38,6 +37,7 @@ export default function SiteContent() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
+    const [saveError, setSaveError] = useState<string | null>(null);
 
     const fetch = async () => {
         const { data } = await api.get('/content');
@@ -50,12 +50,31 @@ export default function SiteContent() {
 
     const save = async () => {
         setSaving(true);
+        setSaveError(null);
         try {
-            await api.put('/content', content);
+            // Filter out keys managed exclusively by HomepageEditor
+            const payload: ContentMap = {};
+            for (const [key, value] of Object.entries(content)) {
+                if (!HOMEPAGE_MANAGED_KEYS.has(key)) {
+                    payload[key] = value;
+                }
+            }
+            await api.put('/content', payload);
             setOriginal(content);
             setSaved(true);
+
+            // Broadcast cache invalidation across all tabs
+            broadcastCmsInvalidation({ type: 'INVALIDATE_ALL' });
+
             setTimeout(() => setSaved(false), 2000);
-        } finally { setSaving(false); }
+        } catch (err: any) {
+            console.error('Failed to save site content:', err);
+            const msg = err?.response?.data?.error || 'Failed to save changes. Please try again.';
+            setSaveError(msg);
+            alert(`Save failed: ${msg}`);
+        } finally {
+            setSaving(false);
+        }
     };
 
     const hasChanges = JSON.stringify(content) !== JSON.stringify(original);
@@ -82,6 +101,13 @@ export default function SiteContent() {
                     </button>
                 </div>
             </div>
+
+            {saveError && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-semibold flex items-center justify-between">
+                    <span>⚠️ {saveError}</span>
+                    <button onClick={() => setSaveError(null)} className="text-red-500 hover:text-red-700 font-bold ml-4">✕</button>
+                </div>
+            )}
 
             <div className="space-y-8">
                 {/* Website Settings Section */}

@@ -7,7 +7,7 @@ import { LIBRARIES_PAGE_SLUG, LIBRARIES_DEFAULTS, slugifyLibraryTitle } from './
 const LibrariesDetail = () => {
   const { featureSlug } = useParams();
   const { data, loading } = usePageData(LIBRARIES_PAGE_SLUG);
-  const cards = data.cards?.length ? data.cards : LIBRARIES_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : LIBRARIES_DEFAULTS.cards;
   const card = cards.find((item: any) => slugifyLibraryTitle(item.title) === featureSlug);
 
   if (loading) {

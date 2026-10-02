@@ -4,7 +4,7 @@ import { Eye, EyeOff, Pencil, X, Save, Plus, Trash2, Link as LinkIcon, ExternalL
 import api from '../api/client';
 import { pageDefaults } from '../pageDefaults';
 import MediaImageField from '../components/MediaImageField';
-import { clearPageDataCache } from '@/hooks/usePageData';
+import { clearPageDataCache, broadcastCmsInvalidation } from '@/hooks/usePageData';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface CardItem { title: string; description: string; image?: string; href?: string; category?: string; readTime?: string; categories?: string[]; }
@@ -199,11 +199,8 @@ function InlinePageEditor({ page, onClose, onSaved }: {
     
     const initialData = { ...effectiveDefaults };
     Object.entries(parsedData).forEach(([k, v]) => {
-        // If the DB has saved a non-falsy value (and not an empty array), overwrite the default
-        // Older sports records did not contain card categories, so keep the complete
-        // editable defaults until that page is saved in the current content shape.
-        if (['sports-infra', 'labs', 'libraries'].includes(page.slug) && k === 'cards' && Array.isArray(v) && !v.some((card: any) => card.categories?.length)) return;
-        if (v !== undefined && v !== null && (!Array.isArray(v) || v.length > 0 || k === 'cards')) {
+        // Respect explicit admin values saved in the database, including empty arrays []
+        if (v !== undefined && v !== null) {
             (initialData as any)[k] = v;
         }
     });
@@ -212,6 +209,7 @@ function InlinePageEditor({ page, onClose, onSaved }: {
     
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
+    const [saveError, setSaveError] = useState<string | null>(null);
 
     const set = (key: string, value: any) => setData((p: any) => ({ ...p, [key]: value }));
 
@@ -295,17 +293,29 @@ function InlinePageEditor({ page, onClose, onSaved }: {
 
     const save = async () => {
         setSaving(true);
+        setSaveError(null);
         try {
             const { data: updated } = await api.put(`/pages/${page.id}`, {
                 title, published, pageData: JSON.stringify(data)
             });
             clearPageDataCache(page.slug);
             clearPageDataCache();
+
+            // Broadcast cache invalidation across all tabs
+            broadcastCmsInvalidation({ type: 'INVALIDATE_PAGE', slug: page.slug });
+            broadcastCmsInvalidation({ type: 'INVALIDATE_ALL' });
+
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
             onSaved(updated);
-        } catch { /* noop */ }
-        setSaving(false);
+        } catch (err: any) {
+            console.error(`Failed to save page ${page.slug}:`, err);
+            const msg = err?.response?.data?.error || 'Failed to save page changes. Please try again.';
+            setSaveError(msg);
+            alert(`Save failed: ${msg}`);
+        } finally {
+            setSaving(false);
+        }
     };
 
     return (
@@ -334,6 +344,13 @@ function InlinePageEditor({ page, onClose, onSaved }: {
                     </button>
                 </div>
             </div>
+
+            {saveError && (
+                <div className="mx-8 mt-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-semibold flex items-center justify-between">
+                    <span>⚠️ {saveError}</span>
+                    <button onClick={() => setSaveError(null)} className="text-red-500 hover:text-red-700 font-bold ml-4">✕</button>
+                </div>
+            )}
 
             <div className="p-8 space-y-12">
                 {/* Basic Info */}

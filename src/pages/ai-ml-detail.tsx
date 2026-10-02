@@ -7,7 +7,7 @@ import { AI_ML_PAGE_SLUG, AI_ML_DEFAULTS, slugifyAiMlTitle } from './ai-ml.data'
 const AiMlDetail = () => {
   const { moduleSlug } = useParams();
   const { data, loading } = usePageData(AI_ML_PAGE_SLUG);
-  const cards = data.cards?.length ? data.cards : AI_ML_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : AI_ML_DEFAULTS.cards;
   const card = cards.find((item: any) => slugifyAiMlTitle(item.title) === moduleSlug);
 
   if (loading) {

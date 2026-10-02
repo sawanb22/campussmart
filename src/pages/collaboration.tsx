@@ -27,7 +27,7 @@ const Collaboration = () => {
     return () => ctx.revert();
   }, []);
 
-  const cards = data.cards?.length ? data.cards : COLLAB_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : COLLAB_DEFAULTS.cards;
 
   return (
     <main className="min-h-screen bg-white">
