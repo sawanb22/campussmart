@@ -22,7 +22,7 @@ export const DEFAULTS = {
     readMoreLabel: 'Read the guidance',
   },
   cards: [
-    { category: 'Digital Campus', readTime: '5 min read', title: 'What a connected campus needs before launch', description: 'A clear checklist for infrastructure, systems and teams preparing for a more connected institution.', image: 'https://images.unsplash.com/photo-1516321318423-f06a051b3e14?auto=format&fit=crop&w=900&q=85', author: 'CampusMart Team', authorImage: 'https://i.pravatar.cc/80?img=12', href: '/tech-infra' },
+    { category: 'Digital Campus', readTime: '5 min read', title: 'What a connected campus needs before launch', description: 'A clear checklist for infrastructure, systems and teams preparing for a more connected institution.', image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80', author: 'CampusMart Team', authorImage: 'https://i.pravatar.cc/80?img=12', href: '/tech-infra' },
     { category: 'Governance', readTime: '6 min read', title: 'Make student data privacy part of the design', description: 'Build trust into campus technology with practical privacy and access decisions from day one.', image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=900&q=85', author: 'CampusMart Team', authorImage: 'https://i.pravatar.cc/80?img=32', href: '/services' },
     { category: 'Student Experience', readTime: '4 min read', title: 'Digital services that keep students moving', description: 'Thoughtful digital touchpoints can make everyday campus journeys simpler and more inclusive.', image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=900&q=85', author: 'CampusMart Team', authorImage: 'https://i.pravatar.cc/80?img=47', href: '/campus-automation' },
   ] as Article[],
@@ -30,7 +30,7 @@ export const DEFAULTS = {
   moreCards: [
     { category: 'Campus planning', title: 'Plan spaces around the way students learn', description: 'Shape learning environments around real student journeys.', image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=900&q=85', href: '/campus-master-planning' },
     { category: 'Operations', title: 'Spend less time on manual campus work', description: 'Connect everyday workflows so staff can focus on students.', image: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=900&q=85', href: '/campus-automation' },
-    { category: 'Technology', title: 'Choose tools that help teams do more', description: 'Build a practical digital foundation for your institution.', image: 'https://images.unsplash.com/photo-1516321318423-f06a051b3e14?auto=format&fit=crop&w=900&q=85', href: '/digital-transformation' },
+    { category: 'Technology', title: 'Choose tools that help teams do more', description: 'Build a practical digital foundation for your institution.', image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80', href: '/digital-transformation' },
   ] as MoreCard[],
   footerDescription: 'Practical guidance for education leaders building safer, smarter and more human campuses.',
   footerColumns: [

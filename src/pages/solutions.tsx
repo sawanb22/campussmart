@@ -21,13 +21,13 @@ const DEFAULTS = {
             title: 'Libraries',
             description: 'Next-generation libraries combining traditional resources with digital learning environments.',
             href: '/libraries',
-            color: 'bg-cm-yellow'
+            color: 'bg-amber-500'
         },
         {
             title: 'Innovation Centres',
             description: 'Dedicated spaces for creative thinking, prototyping, and interdisciplinary collaboration.',
             href: '/innovation-centres',
-            color: 'bg-cm-green'
+            color: 'bg-emerald-600'
         },
         {
             title: 'Learning Environments',
@@ -62,53 +62,61 @@ const Solutions = () => {
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            gsap.from('.solution-card', {
-                scale: 0.9,
-                opacity: 0,
-                duration: 0.5,
-                stagger: 0.1,
-                ease: 'back.out(1.7)',
-                scrollTrigger: {
-                    trigger: containerRef.current,
-                    start: 'top 80%'
-                }
-            });
-        });
+            const cards = containerRef.current?.querySelectorAll('.solution-card');
+            if (cards && cards.length > 0) {
+                gsap.fromTo(
+                    cards,
+                    { opacity: 0, y: 24, scale: 0.97 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        scale: 1,
+                        duration: 0.45,
+                        stagger: 0.08,
+                        ease: 'power2.out',
+                        clearProps: 'all'
+                    }
+                );
+            }
+        }, containerRef);
         return () => ctx.revert();
-    }, []);
+    }, [cardList]);
 
     return (
-        <main className="min-h-screen pt-12 pb-20 bg-gray-50/50">
+        <main className="min-h-screen pt-8 sm:pt-12 pb-10 sm:pb-12 bg-slate-50/60">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="mb-12">
-                    <h1 className="text-4xl font-bold text-gray-900 mb-4">{heroTitle}</h1>
-                    <p className="text-xl text-gray-600 max-w-3xl">
+                <div className="mb-10">
+                    <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3 tracking-tight">{heroTitle}</h1>
+                    <p className="text-base sm:text-lg text-slate-600 max-w-3xl leading-relaxed">
                         {heroSubtitle}
                     </p>
                 </div>
 
-                <div ref={containerRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div ref={containerRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
                     {cardList.map((sol: any, i: number) => {
                         const Icon = iconMap[sol.title] || Beaker;
+                        const isYellow = sol.color === 'bg-cm-yellow';
                         return (
                             <Link 
                                 key={i} 
                                 to={sol.href} 
-                                className="solution-card group bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden"
+                                className="solution-card group bg-white border border-slate-200/90 rounded-2xl shadow-xs hover:shadow-lg hover:border-cm-blue/40 transition-all duration-200 overflow-hidden flex flex-col justify-between"
                             >
-                                <div className={`h-2 ${sol.color}`} />
-                                <div className="p-8">
-                                    <div className={`w-12 h-12 rounded-lg ${sol.color} flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform`}>
-                                        <Icon className="w-6 h-6" />
+                                <div className={`h-2 ${sol.color || 'bg-cm-blue'}`} />
+                                <div className="p-6 sm:p-8 flex-1 flex flex-col justify-between">
+                                    <div>
+                                        <div className={`w-12 h-12 rounded-xl ${sol.color || 'bg-cm-blue'} flex items-center justify-center ${isYellow ? 'text-slate-900' : 'text-white'} mb-6 group-hover:scale-105 transition-transform duration-200 shadow-xs`}>
+                                            <Icon className="w-6 h-6" />
+                                        </div>
+                                        <h3 className="text-xl font-bold text-slate-900 mb-2.5 group-hover:text-cm-blue transition-colors">
+                                            {sol.title}
+                                        </h3>
+                                        <p className="text-slate-600 text-sm leading-relaxed mb-6">
+                                            {sol.description}
+                                        </p>
                                     </div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-cm-blue transition-colors">
-                                        {sol.title}
-                                    </h3>
-                                    <p className="text-gray-500 text-sm leading-relaxed mb-6">
-                                        {sol.description}
-                                    </p>
-                                    <span className="text-cm-blue font-bold text-xs uppercase tracking-wider flex items-center gap-1">
-                                        View Details <span className="text-lg">→</span>
+                                    <span className="text-cm-blue font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 group-hover:translate-x-1 transition-transform duration-200">
+                                        View Details <span className="text-base">→</span>
                                     </span>
                                 </div>
                             </Link>

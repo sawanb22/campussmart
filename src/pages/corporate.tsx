@@ -16,7 +16,7 @@ const DEFAULTS = {
   missionTitle: 'Our Mission',
   missionBody1: 'To transform educational infrastructure across India by providing comprehensive campus solutions that blend physical spaces with cutting-edge digital technology. We aim to create learning environments that inspire, engage, and empower students and educators alike.',
   missionBody2: 'As the first company in Asia to bring curriculum-mapped innovations to the campus industry, we continue to lead the way in educational transformation.',
-  missionImage: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+  missionImage: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=80',
   whyBullets: [
     "India's leading Consortium for Campus Infrastructure",
     "Bespoke Design to Delivery across 100+ categories",
@@ -162,8 +162,11 @@ const Corporate = () => {
               <div className="absolute -inset-6 bg-cm-blue/10 rounded-[3rem] group-hover:rotate-1 transition-transform duration-1000" />
               <img
                 src={resolveMediaUrl(data.missionImage) || DEFAULTS.missionImage}
-                alt="Mission"
-                className="relative rounded-[2.5rem] shadow-xl w-full translate-x-2 grayscale group-hover:grayscale-0 transition-all duration-1000"
+                alt="Campus Mart Mission"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1200&q=80';
+                }}
+                className="relative rounded-[2.5rem] shadow-xl w-full h-[360px] sm:h-[440px] object-cover translate-x-2 grayscale group-hover:grayscale-0 transition-all duration-1000 bg-slate-100"
               />
               <div className="absolute -bottom-6 -right-6 bg-cm-yellow p-6 rounded-2xl shadow-xl">
                 <Building2 className="w-6 h-6 text-cm-blue-dark" />
@@ -192,9 +195,9 @@ const Corporate = () => {
       </section>
 
       {/* Core Values - Large Typography */}
-      <section className="py-16 md:py-24 bg-cm-gray/30 border-y border-cm-gray rounded-[3rem] mx-4 my-10">
+      <section className="py-12 md:py-16 bg-cm-gray/30 border-y border-cm-gray rounded-[3rem] mx-4 my-6">
         <div className="w-full mx-auto px-4 sm:px-8 max-w-6xl">
-          <div className="mb-16 text-center">
+          <div className="mb-8 text-center">
             <h2 className="text-2xl md:text-4xl font-bold text-cm-blue-dark tracking-tighter leading-none">
               {data.section2Title ?? DEFAULTS.section2Title}
             </h2>
@@ -216,9 +219,9 @@ const Corporate = () => {
 
 
       {/* Executive Profiles */}
-      <section id="team" className="py-20 md:py-24">
+      <section id="team" className="py-12 md:py-16">
         <div className="w-full mx-auto px-4 sm:px-8 max-w-6xl">
-          <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-6">
+          <div className="flex flex-col md:flex-row items-end justify-between mb-8 gap-6">
             <h2 className="text-3xl md:text-5xl font-bold text-cm-blue-dark tracking-tighter leading-none">
               Governance & Leadership
             </h2>
@@ -230,8 +233,14 @@ const Corporate = () => {
               <div key={member.name} className="group flex flex-col items-center">
                 <div className="relative mb-6 w-full aspect-[4/3] overflow-hidden rounded-2xl shadow-xl border border-gray-100">
                   <img
-                    src={resolveMediaUrl(member.image) || 'https://via.placeholder.com/150'}
+                    src={resolveMediaUrl(member.image) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}
                     alt={member.name}
+                    onError={(e) => {
+                      const fallback = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+                      if (e.currentTarget.src !== fallback) {
+                        e.currentTarget.src = fallback;
+                      }
+                    }}
                     className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-cm-blue-dark/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -249,10 +258,10 @@ const Corporate = () => {
       </section>
 
       {/* Partner Network */}
-      <section id="partners" className="py-32 bg-cm-gray/20 border-t border-cm-gray">
+      <section id="partners" className="py-12 md:py-16 bg-cm-gray/20 border-t border-cm-gray">
         <div className="w-full mx-auto px-4 sm:px-8">
-          <div className="text-center mb-20">
-            <h2 className="text-3xl font-bold text-cm-blue-dark tracking-tighter mb-6">Global Ecosystem</h2>
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-cm-blue-dark tracking-tighter mb-4">Global Ecosystem</h2>
             <p className="text-gray-500 max-w-2xl mx-auto">
               Our strength lies in our network of global partners who bring the best of edtech and infrastructure to Indian soil.
             </p>

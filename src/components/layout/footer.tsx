@@ -64,6 +64,7 @@ const Footer = () => {
 
   const businessLinks = [
     { label: 'About Us', href: '/about-us' },
+    { label: 'Careers & Job Openings', href: '/job-openings' },
     { label: 'Contact Us', href: '/contact-us' },
     { label: 'Report Issue', href: '/contact-us' },
     { label: 'Blog', href: '/blog' },

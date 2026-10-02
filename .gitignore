@@ -48,6 +48,8 @@ puppeteer-error.png
 *.zip
 *.tar.gz
 *.rar
+*.exe
+cloudflared.exe
 backend/campusmart-backend.zip
 
 # OS and Editor files

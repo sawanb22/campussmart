@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Plus, Trash2 } from 'lucide-react';
 import api from '../api/client';
 import MediaImageField from '../components/MediaImageField';
+import { clearPageDataCache } from '@/hooks/usePageData';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface CardItem {
@@ -133,6 +134,8 @@ export default function PageEditor() {
                 published: page.published,
                 pageData: JSON.stringify(data),
             });
+            clearPageDataCache(page.slug);
+            clearPageDataCache();
             setSaved(true);
             setTimeout(() => setSaved(false), 2500);
         } catch { /* nothing */ }

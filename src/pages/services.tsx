@@ -27,7 +27,7 @@ const DEFAULTS = {
             title: 'Sports Design & Execution',
             description: 'Premier sports infrastructure including synthetic tracks, indoor courts, and outdoor recreational areas.',
             href: '/sports-design-execution',
-            color: 'bg-cm-yellow'
+            color: 'bg-amber-500'
         },
         {
             title: 'AI/Digital Solutions',
@@ -55,27 +55,32 @@ const Services = () => {
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            gsap.from('.service-card', {
-                y: 50,
-                opacity: 0,
-                duration: 0.6,
-                stagger: 0.1,
-                ease: 'power3.out',
-                scrollTrigger: {
-                    trigger: containerRef.current,
-                    start: 'top 80%'
-                }
-            });
-        });
+            const cards = containerRef.current?.querySelectorAll('.service-card');
+            if (cards && cards.length > 0) {
+                gsap.fromTo(
+                    cards,
+                    { opacity: 0, y: 24, scale: 0.97 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        scale: 1,
+                        duration: 0.45,
+                        stagger: 0.08,
+                        ease: 'power2.out',
+                        clearProps: 'all'
+                    }
+                );
+            }
+        }, containerRef);
         return () => ctx.revert();
-    }, []);
+    }, [cardList]);
 
     return (
-        <main className="min-h-screen pt-12 pb-20">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10">
-                <div className="mb-12">
-                    <h1 className="text-4xl font-bold text-gray-900 mb-4">{heroTitle}</h1>
-                    <p className="text-xl text-gray-600 max-w-3xl">
+        <main className="min-h-screen pt-8 sm:pt-12 pb-10 sm:pb-12 bg-slate-50/60">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="mb-10">
+                    <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3 tracking-tight">{heroTitle}</h1>
+                    <p className="text-base sm:text-lg text-slate-600 max-w-3xl leading-relaxed">
                         {heroSubtitle}
                     </p>
                 </div>
@@ -83,27 +88,28 @@ const Services = () => {
                 <div ref={containerRef} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 lg:gap-6 items-stretch">
                     {cardList.map((service: any, i: number) => {
                         const Icon = iconMap[service.title] || Ruler;
+                        const isYellow = service.color === 'bg-cm-yellow';
                         return (
                             <Link 
                                 key={i} 
                                 to={service.href} 
-                                className="service-card group bg-white border border-gray-100 rounded-[1.75rem] shadow-sm hover:shadow-md transition-all p-5 sm:p-6 xl:p-7 flex h-full min-h-[240px] w-full gap-4"
+                                className="service-card group bg-white border border-slate-200/90 rounded-[1.75rem] shadow-xs hover:shadow-lg hover:border-cm-blue/40 transition-all duration-200 p-5 sm:p-6 flex flex-col justify-between h-full min-h-[240px] w-full"
                             >
-                                <div className="flex h-full w-full items-start gap-4 sm:gap-5">
-                                    <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-xl ${service.color} flex items-center justify-center text-white shrink-0 group-hover:scale-110 transition-transform`}>
-                                        <Icon className="w-7 h-7 sm:w-8 sm:h-8" />
+                                <div className="flex h-full w-full items-start gap-4">
+                                    <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl ${service.color} flex items-center justify-center ${isYellow ? 'text-slate-900' : 'text-white'} shrink-0 group-hover:scale-105 transition-transform duration-200 shadow-xs`}>
+                                        <Icon className="w-6 h-6 sm:w-7 sm:h-7" />
                                     </div>
                                     <div className="flex flex-1 flex-col justify-between min-w-0">
                                         <div>
-                                            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 group-hover:text-cm-blue transition-colors leading-tight">
+                                            <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2 group-hover:text-cm-blue transition-colors leading-tight">
                                                 {service.title}
                                             </h3>
-                                            <p className="text-gray-600 leading-relaxed mb-4 text-sm sm:text-base">
+                                            <p className="text-slate-600 leading-relaxed mb-4 text-xs sm:text-sm">
                                                 {service.description}
                                             </p>
                                         </div>
-                                        <span className="text-cm-blue font-bold text-sm uppercase tracking-wider flex items-center gap-2">
-                                            Learn More <span className="text-xl">→</span>
+                                        <span className="text-cm-blue font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 group-hover:translate-x-1 transition-transform duration-200">
+                                            Learn More <span className="text-base">→</span>
                                         </span>
                                     </div>
                                 </div>

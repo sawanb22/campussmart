@@ -4,6 +4,7 @@ import { Eye, EyeOff, Pencil, X, Save, Plus, Trash2, Link as LinkIcon, ExternalL
 import api from '../api/client';
 import { pageDefaults } from '../pageDefaults';
 import MediaImageField from '../components/MediaImageField';
+import { clearPageDataCache } from '@/hooks/usePageData';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface CardItem { title: string; description: string; image?: string; href?: string; category?: string; readTime?: string; categories?: string[]; }
@@ -167,7 +168,7 @@ function InlinePageEditor({ page, onClose, onSaved }: {
         missionTitle: 'Our Mission',
         missionBody1: 'To transform educational infrastructure across India by providing comprehensive campus solutions that blend physical spaces with cutting-edge digital technology. We aim to create learning environments that inspire, engage, and empower students and educators alike.',
         missionBody2: 'As the first company in Asia to bring curriculum-mapped innovations to the campus industry, we continue to lead the way in educational transformation.',
-        missionImage: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+        missionImage: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=80',
         whyBullets: [
             "India's leading Consortium for Campus Infrastructure",
             "Bespoke Design to Delivery across 100+ categories",
@@ -298,6 +299,8 @@ function InlinePageEditor({ page, onClose, onSaved }: {
             const { data: updated } = await api.put(`/pages/${page.id}`, {
                 title, published, pageData: JSON.stringify(data)
             });
+            clearPageDataCache(page.slug);
+            clearPageDataCache();
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
             onSaved(updated);

@@ -10,6 +10,7 @@ import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
 import ScrollToTop from '@/components/layout/scroll-to-top';
 import CategoryBar from '@/components/sections/category-bar';
+import BreadcrumbBar from '@/components/layout/breadcrumb-bar';
 
 // Core Pages (Always present)
 const Home = lazy(() => import('@/pages/home'));
@@ -114,6 +115,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       <TopBar />
       <Header />
       <CategoryBar />
+      <BreadcrumbBar />
       <main className="flex-1">{children}</main>
       <Footer />
     </div>

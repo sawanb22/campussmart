@@ -21,14 +21,15 @@ router.get('/', async (_req: Request, res: Response) => {
 // PUT /api/content - update site content (admin)
 router.put('/', verifyToken, requireAdmin, async (req: AuthRequest, res: Response) => {
     try {
-        const updates: Record<string, string> = req.body;
-        const promises = Object.entries(updates).map(([key, value]) =>
-            prisma.siteContent.upsert({
+        const updates: Record<string, any> = req.body;
+        const promises = Object.entries(updates).map(([key, value]) => {
+            const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
+            return prisma.siteContent.upsert({
                 where: { key },
-                update: { value },
-                create: { key, value },
-            })
-        );
+                update: { value: stringValue },
+                create: { key, value: stringValue },
+            });
+        });
         await Promise.all(promises);
         res.json({ message: 'Content updated successfully' });
     } catch {
@@ -39,10 +40,12 @@ router.put('/', verifyToken, requireAdmin, async (req: AuthRequest, res: Respons
 // PUT /api/content/:key - update single key (admin)
 router.put('/:key', verifyToken, requireAdmin, async (req: AuthRequest, res: Response) => {
     try {
+        const rawValue = req.body.value !== undefined ? req.body.value : req.body;
+        const stringValue = typeof rawValue === 'string' ? rawValue : JSON.stringify(rawValue);
         const content = await prisma.siteContent.upsert({
             where: { key: String(req.params.key) },
-            update: { value: req.body.value },
-            create: { key: String(req.params.key), value: req.body.value },
+            update: { value: stringValue },
+            create: { key: String(req.params.key), value: stringValue },
         });
         res.json(content);
     } catch {

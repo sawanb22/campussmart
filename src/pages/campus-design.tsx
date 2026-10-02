@@ -152,11 +152,11 @@ const CampusDesign = () => {
       </section>
 
       {/* Branding Call to Action */}
-      <section className="py-10 text-center bg-cm-blue-dark text-white rounded-t-[5rem] border-t-8 border-cm-yellow/50">
+      <section className="py-10 text-center bg-cm-blue text-white rounded-[2rem] mx-3 sm:mx-6 lg:mx-8 mb-10 shadow-xl border border-cm-blue/20">
         <div className="max-w-4xl mx-auto px-6">
            <Building2 className="w-12 h-12 text-cm-yellow mx-auto mb-5 opacity-50" />
            <h2 className="text-2xl md:text-4xl font-bold mb-4 tracking-tighter">{ctaTitle}</h2>
-           <p className="text-base md:text-lg text-white/70 mb-7 font-bold leading-relaxed font-opensans text-pretty">{ctaSubtitle}</p>
+           <p className="text-base md:text-lg text-white/90 mb-7 font-bold leading-relaxed font-opensans text-pretty">{ctaSubtitle}</p>
            <Link to="/request-quote" className="btn-secondary px-10 py-3.5 text-base">
              Elevate Your Space
            </Link>

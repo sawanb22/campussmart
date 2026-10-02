@@ -151,6 +151,13 @@ export default function GenericPageRenderer({ page, pageData = {} }: GenericPage
                   <img
                     src={heroImage}
                     alt={title}
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      const fallback = 'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80';
+                      if (target.src !== fallback) {
+                        target.src = fallback;
+                      }
+                    }}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
@@ -201,6 +208,13 @@ export default function GenericPageRenderer({ page, pageData = {} }: GenericPage
                       <img
                         src={cardImage}
                         alt={card.title}
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          const fallback = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=600&q=80';
+                          if (target.src !== fallback) {
+                            target.src = fallback;
+                          }
+                        }}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       {card.category && (

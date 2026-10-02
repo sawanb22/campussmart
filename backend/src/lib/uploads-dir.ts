@@ -14,8 +14,8 @@ import path from 'path';
 // can be checked against the hosting panel's file manager.
 export const UPLOADS_DIR = process.env.UPLOADS_DIR
     ? path.resolve(process.env.UPLOADS_DIR)
-    : path.resolve(process.cwd(), 'uploads');
+    : path.resolve(__dirname, '../../uploads');
 
 export const RESUMES_DIR = process.env.RESUMES_DIR
     ? path.resolve(process.env.RESUMES_DIR)
-    : path.resolve(process.cwd(), 'private-resumes');
+    : path.resolve(__dirname, '../../private-resumes');

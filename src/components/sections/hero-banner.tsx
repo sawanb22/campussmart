@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useSiteContent } from '@/contexts/SiteContentContext';
+import { resolveMediaUrl } from '@/lib/media-url';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -57,16 +58,16 @@ const HeroBanner = () => {
       className="relative overflow-hidden w-full"
       style={{
         minHeight: '280px',
-        backgroundImage: `linear-gradient(90deg,rgba(2,22,50,.96) 0%,rgba(2,22,50,.83) 42%,rgba(2,22,50,.24) 78%), url('${heroData.image}')`,
+        backgroundImage: `linear-gradient(90deg, rgba(5,20,50,0.50) 0%, rgba(5,20,50,0.30) 45%, rgba(5,20,50,0.05) 85%), url('${resolveMediaUrl(heroData.image)}')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
     >
       {/* Content */}
-      <div className="relative z-10 h-full flex items-center">
+      <div className="relative z-10 h-full flex items-center py-6 sm:py-8">
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="max-w-6xl mx-auto">
-            <div className="max-w-2xl text-white">
+            <div className="max-w-2xl text-white bg-slate-950/20 backdrop-blur-[2px] p-4 sm:p-6 rounded-2xl border border-white/10">
               <div 
                 ref={subtitleRef}
                 className="text-[10px] sm:text-xs md:text-sm font-black uppercase tracking-widest text-blue-300 mb-2"

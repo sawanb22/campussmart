@@ -10,7 +10,6 @@ import FeatureCards from '@/components/sections/feature-cards';
 import Resources from '@/components/sections/resources';
 import PartnershipForm from '@/components/sections/partnership-form';
 import CollaborationsTicker from '@/components/sections/collaborations-ticker';
-import Ecosystem from '@/components/sections/ecosystem';
 
 export default function Home() {
   return (
@@ -26,7 +25,6 @@ export default function Home() {
       <Resources />
       <PartnershipForm />
       <CollaborationsTicker />
-      <Ecosystem />
       <Footer />
     </div>
   );

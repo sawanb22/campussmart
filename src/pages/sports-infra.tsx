@@ -31,14 +31,14 @@ export const SPORTS_INFRA_DEFAULTS = {
   ctaButtonLabel: 'Get Project Audit',
   ctaHref: '/contact-us',
   cards: [
-    { title: 'Basketball Court', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Indoor', 'Adults'], image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Football Ground', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Outdoor', 'Adults'], image: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Tennis Court', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Outdoor', 'Adults'], image: 'https://images.unsplash.com/photo-1622163642998-1ea36b1ade5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Swimming Pool', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Indoor', 'Kids', 'Adults'], image: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Athletics Track', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Outdoor', 'Adults', 'Training'], image: 'https://images.unsplash.com/photo-1461896836934-voices?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Indoor Badminton Arena', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Indoor', 'Kids', 'Adults'], image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Kids Play Zone', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Kids'], image: 'https://images.unsplash.com/photo-1472162072942-cd5147eb3902?auto=format&fit=crop&w=400&q=80' },
-    { title: 'Multi-Sport Training Area', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Training', 'Adults'], image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=400&q=80' },
+    { title: 'Basketball Court', description: 'FIBA-compliant wooden and acrylic cushioned surfaces engineered for shock absorption, bounce consistency, and heavy collegiate competition.', categories: ['Indoor', 'Adults'], image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Football Ground', description: 'FIFA-standard artificial turf and natural grass pitches with laser-leveled sub-base drainage and floodlighting systems.', categories: ['Outdoor', 'Adults'], image: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Tennis Court', description: 'ITF-approved multi-layer synthetic acrylic surfaces offering true ball response, high-traction grip, and all-weather durability.', categories: ['Outdoor', 'Adults'], image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&q=80' },
+    { title: 'Swimming Pool', description: 'Semi-Olympic and recreational aquatic facilities with commercial sand filtration, anti-slip surrounds, and competitive lane markers.', categories: ['Indoor', 'Kids', 'Adults'], image: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Athletics Track', description: 'IAAF-certified seamless polyurethane running tracks designed for maximum energy return, spike resistance, and athlete joint safety.', categories: ['Outdoor', 'Adults', 'Training'], image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=80' },
+    { title: 'Indoor Badminton Arena', description: 'BWF-standard shock-absorbing vinyl mats paired with anti-glare high-bay sports LED illumination and acoustic dampening.', categories: ['Indoor', 'Kids', 'Adults'], image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Kids Play Zone', description: 'Child-safe EPDM impact-attenuating rubber safety surfacing equipped with certified non-toxic climbing and balancing structures.', categories: ['Kids'], image: 'https://images.unsplash.com/photo-1472162072942-cd5147eb3902?auto=format&fit=crop&w=400&q=80' },
+    { title: 'Multi-Sport Training Area', description: 'Versatile multi-sport halls adapted for volleyball, handball, yoga, martial arts, and institutional fitness programming.', categories: ['Training', 'Adults'], image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=400&q=80' },
   ],
   features: [
     'Surface Installation',
@@ -53,7 +53,7 @@ const SportsInfra = ({ slug = 'sports-infra' }: { slug?: string }) => {
   const quoteRef = useRef<HTMLDivElement>(null);
   const { data } = usePageData(slug);
   const { isSaved, isPending, add, remove, showLoginPrompt, setShowLoginPrompt } = useDesignWishlist('sports-infra');
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -141,12 +141,13 @@ const SportsInfra = ({ slug = 'sports-infra' }: { slug?: string }) => {
   const allCards = data.cards?.length > 0 ? data.cards : SPORTS_INFRA_DEFAULTS.cards;
   const cards = allCards.map((card: any) => ({
     ...card,
-    categories: card.categories?.length ? card.categories : ['All'],
+    categories: card.categories?.length ? card.categories : [],
   }));
-  const categoryOptions: string[] = ['All', ...Array.from(new Set<string>(cards.flatMap((card: { categories?: string[] }) => card.categories ?? []))).filter((option) => option !== 'All')];
-  const filteredCards = selectedCategory === 'All'
-    ? cards
-    : cards.filter((card: any) => card.categories.includes(selectedCategory));
+  const categoryOptions: string[] = Array.from(new Set<string>(cards.flatMap((card: { categories?: string[] }) => card.categories ?? []))).filter((option) => Boolean(option) && option !== 'All');
+  const activeCategory = selectedCategory && categoryOptions.includes(selectedCategory) ? selectedCategory : (categoryOptions[0] || '');
+  const filteredCards = activeCategory
+    ? cards.filter((card: any) => card.categories.includes(activeCategory))
+    : cards;
   const features = (data.features && data.features.length > 0) ? data.features : SPORTS_INFRA_DEFAULTS.features;
 
   return (
@@ -191,7 +192,7 @@ const SportsInfra = ({ slug = 'sports-infra' }: { slug?: string }) => {
                     key={option}
                     type="button"
                     onClick={() => setSelectedCategory(option)}
-                    className={`w-full text-left rounded-2xl px-4 py-3 transition-all duration-200 ${selectedCategory === option ? 'bg-cm-blue text-white shadow-lg' : 'bg-slate-50 text-slate-700 hover:bg-slate-100'}`}
+                    className={`w-full text-left rounded-2xl px-4 py-3 transition-all duration-200 ${activeCategory === option ? 'bg-cm-blue text-white shadow-lg' : 'bg-slate-50 text-slate-700 hover:bg-slate-100'}`}
                   >
                     {option}
                   </button>
@@ -201,19 +202,33 @@ const SportsInfra = ({ slug = 'sports-infra' }: { slug?: string }) => {
               <div className="mt-8 rounded-3xl bg-cm-blue-dark/5 p-4">
                 <p className="text-sm font-semibold text-cm-blue-dark mb-3">Showing</p>
                 <p className="text-4xl font-black text-cm-blue-dark">{filteredCards.length}</p>
-                <p className="text-sm text-slate-500 mt-2">{selectedCategory === 'All' ? 'All facility types' : `${selectedCategory} activities`}</p>
+                <p className="text-sm text-slate-500 mt-2">{activeCategory ? `${activeCategory} activities` : 'Facility types'}</p>
               </div>
             </aside>
 
             <div ref={cardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredCards.map((s: any, i: number) => {
-                const image = s.image || SPORTS_INFRA_DEFAULTS.cards[i % SPORTS_INFRA_DEFAULTS.cards.length].image;
+                const defaultCard = SPORTS_INFRA_DEFAULTS.cards.find((c) => c.title === s.title) || SPORTS_INFRA_DEFAULTS.cards[i % SPORTS_INFRA_DEFAULTS.cards.length];
+                const image = s.image || defaultCard.image;
+                const description = s.description && s.description !== 'Premium sports facility designed for training, events, and wellness.'
+                  ? s.description
+                  : (defaultCard.description || s.description);
                 const wishlistCard = { title: s.title, image };
                 return (
                   <div key={s.title} className="group flex flex-col overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)]">
                     <Link to={`/${SPORTS_INFRA_PAGE_SLUG}/${slugifySportsInfraTitle(s.title)}`} className="flex flex-1 flex-col">
                       <div className="relative overflow-hidden h-[220px] sm:h-[230px]">
-                        <img src={resolveMediaUrl(image)} alt={s.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                        <img
+                          src={resolveMediaUrl(image) || defaultCard.image}
+                          alt={s.title}
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            if (target.src !== defaultCard.image) {
+                              target.src = defaultCard.image;
+                            }
+                          }}
+                          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent" />
                         <span className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-800 shadow-sm backdrop-blur-sm">
                           <Star className="h-3.5 w-3.5 text-cm-yellow" />
@@ -222,7 +237,7 @@ const SportsInfra = ({ slug = 'sports-infra' }: { slug?: string }) => {
                       </div>
                       <div className="flex flex-1 flex-col px-5 pb-2 pt-4">
                         <h3 className="text-lg font-semibold text-slate-900 tracking-tight mb-2">{s.title}</h3>
-                        {s.description && <p className="text-sm text-slate-600 leading-relaxed mb-3">{s.description}</p>}
+                        {description && <p className="text-sm text-slate-600 leading-relaxed mb-3">{description}</p>}
                         <div className="mt-auto flex flex-wrap gap-2">
                           {s.categories?.map((category: string) => (
                             <span key={category} className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-slate-600">{category}</span>
@@ -381,10 +396,10 @@ const SportsInfra = ({ slug = 'sports-infra' }: { slug?: string }) => {
       </section>
 
       {/* Action Footer */}
-      <section className="py-16 text-center rounded-t-[4rem] bg-cm-blue-dark text-white border-t-4 border-cm-yellow/50">
+      <section className="py-10 text-center rounded-[2rem] bg-cm-blue mx-3 sm:mx-6 lg:mx-8 mb-10 text-white shadow-xl">
         <div className="max-w-4xl mx-auto px-6">
-          <h2 className="text-2xl md:text-4xl font-bold text-white mb-8 tracking-tighter">{ctaTitle}</h2>
-          <Link to={ctaHref} className="btn-secondary px-10 py-3 text-lg font-bold transition-all inline-block shadow-lg">
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 tracking-tighter">{ctaTitle}</h2>
+          <Link to={ctaHref} className="btn-secondary px-8 py-3 text-base font-bold transition-all inline-block shadow-lg">
             {ctaButtonLabel}
           </Link>
         </div>

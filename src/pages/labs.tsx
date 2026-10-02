@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ArrowLeft, Microscope, FlaskConical, Atom, Monitor, CheckCircle, Star, Heart, Check, Trash2 } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Atom, Microscope, CheckCircle, Star, Heart, Check, Trash2 } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { usePageCategories } from '@/hooks/usePageCategories';
 import { useDesignWishlist } from '@/hooks/useDesignWishlist';
@@ -27,10 +27,10 @@ export const LABS_DEFAULTS = {
   heroTitle: 'Laboratory Solutions',
   heroSubtitle: 'State-of-the-art laboratory setups for schools and colleges. From STEM labs to specialized research facilities, we deliver excellence.',
   heroImage: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
-  section1Title: 'Lab Types',
+  section1Title: 'Specialized Laboratory Environments',
   cards: [
     { title: 'Chemistry Lab', description: 'Purpose-built environments for practical chemistry education and safe experimentation.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Physics Lab', description: 'Hands-on spaces for experiments, measurement, and applied physics learning.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Physics Lab', description: 'Hands-on spaces for experiments, measurement, and applied physics learning.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80' },
     { title: 'Math Lab', description: 'Interactive learning environments that make mathematical concepts practical and visual.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=400&q=80' },
     { title: 'Biology Lab', description: 'Well-equipped spaces for life science observation, analysis, and discovery.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
     { title: 'Composite Skill Lab', description: 'Flexible multidisciplinary labs that support practical and vocational skill development.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=400&q=80' },
@@ -40,8 +40,6 @@ export const LABS_DEFAULTS = {
     { title: 'STEM Labs', description: 'Integrated innovation spaces that bring science, technology, engineering, and math together.', categories: ['Innovation Labs'], image: 'https://images.unsplash.com/photo-1535378917042-10a22c95931a?auto=format&fit=crop&w=400&q=80' },
   ] as Card[],
 };
-
-const ICONS = [FlaskConical, Atom, Microscope, Monitor];
 
 const Labs = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -124,13 +122,6 @@ const Labs = () => {
             <aside className="hidden lg:block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-cm-blue-dark mb-5">Categories</h3>
               <div className="space-y-3">
-                <button
-                  type="button"
-                  onClick={() => setActiveProductCategory('all')}
-                  className={`block w-full text-left rounded-2xl px-4 py-3 transition-all duration-200 ${activeProductCategory === 'all' ? 'bg-cm-blue text-white shadow-lg' : 'bg-slate-50 text-slate-700 hover:bg-slate-100'}`}
-                >
-                  All Products
-                </button>
                 {shopCategories.map((category) => (
                   <button
                     key={category.id}
@@ -166,7 +157,7 @@ const Labs = () => {
             {activeProductCategory ? (
               <Shop
                 key={activeProductCategory}
-                categorySlug={activeProductCategory === 'all' ? undefined : activeProductCategory}
+                categorySlug={activeProductCategory}
                 categoryPage="labs"
                 hideCategorySidebar
                 embedded
@@ -174,20 +165,27 @@ const Labs = () => {
             ) : (
             <div ref={cardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {cards.map((lab, i) => {
-                const Icon = ICONS[i % ICONS.length];
+                const fallback = LABS_DEFAULTS.cards[i % LABS_DEFAULTS.cards.length]?.image || '';
                 return (
                   <div key={lab.title} className="group flex flex-col overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)]">
                     <Link to={`/${LABS_PAGE_SLUG}/${slugifyLabTitle(lab.title)}`} className="flex flex-1 flex-col">
                       <div className="relative overflow-hidden h-[220px] sm:h-[230px]">
-                        <img src={resolveMediaUrl(lab.image)} alt={lab.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                        <img
+                          src={resolveMediaUrl(lab.image) || fallback}
+                          alt={lab.title}
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            if (fallback && target.src !== fallback) {
+                              target.src = fallback;
+                            }
+                          }}
+                          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent" />
                         <span className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-800 shadow-sm backdrop-blur-sm">
                           <Star className="h-3.5 w-3.5 text-cm-yellow" />
                           {lab.categories?.[0] ?? 'Lab'}
                         </span>
-                        <div className="absolute top-4 right-4 w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20 group-hover:bg-cm-blue group-hover:scale-110 transition-all duration-500">
-                          <Icon className="w-5 h-5 text-white" />
-                        </div>
                       </div>
                       <div className="flex flex-1 flex-col px-5 pb-2 pt-4">
                         <h3 className="text-lg font-semibold text-slate-900 tracking-tight mb-2">{lab.title}</h3>
@@ -224,7 +222,7 @@ const Labs = () => {
       </section>
 
       {/* Comparison: Static to Dynamic Lab Evolution */}
-      <section className="py-12 bg-cm-gray/30 rounded-[2rem] mx-4 mb-16 overflow-hidden shadow-sm border border-cm-gray">
+      <section className="py-12 bg-cm-gray/30 rounded-[2rem] mx-4 mb-8 overflow-hidden shadow-sm border border-cm-gray">
         <div className="max-w-6xl mx-auto px-6 md:px-12">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="p-8 md:p-12 bg-cm-blue-dark rounded-[2.5rem] text-white shadow-xl relative">
@@ -276,7 +274,7 @@ const Labs = () => {
       </section>
 
       {/* Safety Callout */}
-      <section className="py-12 text-center">
+      <section className="py-8 pb-12 text-center">
         <div className="max-w-4xl mx-auto px-4">
           <Microscope className="w-12 h-12 text-cm-yellow mx-auto mb-6 opacity-50" />
           <h2 className="text-2xl md:text-5xl font-bold text-cm-blue-dark leading-tight mb-6 tracking-tighter">Certified Excellence.</h2>

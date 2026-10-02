@@ -16,7 +16,7 @@ export interface ServiceItem {
   icon?: any;
 }
 
-const defaultServices: ServiceItem[] = [
+export const defaultServices: ServiceItem[] = [
   { title: 'Furniture Design+ Supply', bgColor: '#ef4444', textColor: '#ffffff', href: '/furniture-design-supply' },
   { title: 'Campus Design+ Execution', bgColor: '#a3e635', textColor: '#000000', href: '/campus-design-execution' },
   { title: 'Sports Design+ Execution', bgColor: '#06b6d4', textColor: '#ffffff', href: '/sports-design-execution' },
@@ -26,14 +26,19 @@ const defaultServices: ServiceItem[] = [
 const ServiceCards = () => {
   const { content } = useSiteContent();
   const rawServices = content.home_services;
-  const services: ServiceItem[] = (Array.isArray(rawServices) && rawServices.length > 0)
+  
+  // If home_services is explicitly configured as an array (even if empty []), respect it.
+  // Only fall back to defaultServices if never configured in DB (undefined / null).
+  const services: ServiceItem[] = Array.isArray(rawServices)
     ? rawServices
-    : defaultServices;
+    : (rawServices === undefined || rawServices === null ? defaultServices : []);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!services || services.length === 0) return;
+
     const ctx = gsap.context(() => {
       const cards = cardsRef.current?.children;
       if (!cards) return;
@@ -58,9 +63,22 @@ const ServiceCards = () => {
     return () => ctx.revert();
   }, [services]);
 
+  // If the admin deliberately removed all service cards, do not render an empty container
+  if (!services || services.length === 0) {
+    return null;
+  }
+
+  const colClass = services.length === 1
+    ? 'grid-cols-1'
+    : services.length === 2
+      ? 'grid-cols-1 sm:grid-cols-2'
+      : services.length === 3
+        ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+        : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4';
+
   return (
     <div ref={containerRef} className="w-full bg-white border-b border-gray-100">
-      <div ref={cardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div ref={cardsRef} className={`grid ${colClass}`}>
         {services.map((service, index) => {
           const bg = service.bgColor || ['#ef4444', '#a3e635', '#06b6d4', '#a855f7'][index % 4];
           const text = service.textColor || '#ffffff';

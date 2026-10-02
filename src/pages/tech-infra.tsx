@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { Link } from 'react-router-dom';
-import { Monitor, Wifi, Server, Shield, Star, Heart, Check, Trash2, ArrowLeft } from 'lucide-react';
+import { Shield, Star, Heart, Check, Trash2, ArrowLeft } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { usePageCategories } from '@/hooks/usePageCategories';
 import { useDesignWishlist } from '@/hooks/useDesignWishlist';
@@ -27,16 +27,14 @@ export const TECH_INFRA_DEFAULTS = {
   heroTitle: 'Technology Infrastructure',
   heroSubtitle: 'Complete technology infrastructure solutions for modern campuses. From networking to security, we build the foundation for digital learning.',
   heroImage: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
-  section1Title: 'Our Services',
+  section1Title: 'Campus Technology Solutions',
   cards: [
-    { title: 'Interactive Displays', description: 'Smart boards and digital displays for connected classrooms.', categories: ['Classroom Tech'], image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Network Solutions', description: 'Campus-wide WiFi and structured networking.', categories: ['Networking'], image: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Server Infrastructure', description: 'On-premise and cloud server solutions.', categories: ['Networking'], image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Cybersecurity', description: 'Complete security solutions for campus networks.', categories: ['Security'], image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Interactive Displays', description: '4K interactive flat panels with zero-lag optical bonding, multi-touch stylus support, and unified digital whiteboard suites.', categories: ['Classroom Tech'], image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Network Solutions', description: 'High-density 802.11ax Wi-Fi 6 APs and structured optical fiber backbones engineered for seamless campus connectivity.', categories: ['Networking'], image: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Server Infrastructure', description: 'Hybrid on-premise blade servers and scalable academic cloud setups delivering low latency and enterprise uptime.', categories: ['Networking'], image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Cybersecurity', description: 'Next-generation firewalls, encrypted endpoint threat protection, and automated student data access control.', categories: ['Security'], image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
   ] as CardItem[],
 };
-
-const ICONS = [Monitor, Wifi, Server, Shield];
 
 const TechInfra = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -119,13 +117,6 @@ const TechInfra = () => {
             <aside className="hidden lg:block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-cm-blue-dark mb-5">Categories</h3>
               <div className="space-y-3">
-                <button
-                  type="button"
-                  onClick={() => setActiveProductCategory('all')}
-                  className={`block w-full text-left rounded-2xl px-4 py-3 transition-all duration-200 ${activeProductCategory === 'all' ? 'bg-cm-blue text-white shadow-lg' : 'bg-slate-50 text-slate-700 hover:bg-slate-100'}`}
-                >
-                  All Products
-                </button>
                 {shopCategories.map((category) => (
                   <button
                     key={category.id}
@@ -161,7 +152,7 @@ const TechInfra = () => {
               {activeProductCategory ? (
                 <Shop
                   key={activeProductCategory}
-                  categorySlug={activeProductCategory === 'all' ? undefined : activeProductCategory}
+                  categorySlug={activeProductCategory}
                   categoryPage="tech-infra"
                   hideCategorySidebar
                   embedded
@@ -169,20 +160,27 @@ const TechInfra = () => {
               ) : (
               <div ref={cardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {cards.map((card, i) => {
-                const Icon = ICONS[i % ICONS.length];
+                const fallback = TECH_INFRA_DEFAULTS.cards[i % TECH_INFRA_DEFAULTS.cards.length]?.image || '';
                 return (
                   <div key={card.title} className="group flex flex-col overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)]">
                     <Link to={`/${TECH_INFRA_PAGE_SLUG}/${slugifyTechInfraTitle(card.title)}`} className="flex flex-1 flex-col">
                       <div className="relative overflow-hidden h-[220px] sm:h-[230px]">
-                        <img src={resolveMediaUrl(card.image)} alt={card.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                        <img
+                          src={resolveMediaUrl(card.image) || fallback}
+                          alt={card.title}
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            if (fallback && target.src !== fallback) {
+                              target.src = fallback;
+                            }
+                          }}
+                          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent" />
                         <span className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-800 shadow-sm backdrop-blur-sm">
                           <Star className="h-3.5 w-3.5 text-cm-yellow" />
                           {card.categories?.[0] ?? 'Tech'}
                         </span>
-                        <div className="absolute top-4 right-4 w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20 group-hover:bg-cm-blue group-hover:scale-110 transition-all duration-500">
-                          <Icon className="w-5 h-5 text-white" />
-                        </div>
                       </div>
                       <div className="flex flex-1 flex-col px-5 pb-2 pt-4">
                         <h3 className="text-lg font-semibold text-slate-900 tracking-tight mb-2">{card.title}</h3>

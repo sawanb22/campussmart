@@ -15,20 +15,39 @@ export default function Products() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+    const [categoryFilter, setCategoryFilter] = useState<string>('all');
     const [showModal, setShowModal] = useState(false);
     const [editing, setEditing] = useState<Partial<Product>>(EMPTY);
     const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
 
     const fetchProducts = async () => {
-        const { data } = await api.get('/products?limit=250&active=all');
-        setProducts(data.products);
-        setLoading(false);
+        setLoading(true);
+        setLoadError(null);
+        try {
+            const { data } = await api.get('/products?limit=250&active=all');
+            const list = Array.isArray(data?.products)
+                ? data.products
+                : Array.isArray(data)
+                    ? data
+                    : [];
+            setProducts(list);
+        } catch (err: any) {
+            console.error('Failed to load products in admin:', err);
+            setLoadError(err.response?.data?.error || 'Failed to load products. Please check server or retry.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
         fetchProducts();
-        api.get('/products/categories').then(({ data }) => setCategories(data));
+        api.get('/products/categories')
+            .then(({ data }) => {
+                if (Array.isArray(data)) setCategories(data);
+            })
+            .catch((err) => console.error('Failed to load categories:', err));
     }, []);
 
     const openAdd = () => { setEditing({ ...EMPTY, categoryId: categories[0]?.id }); setShowModal(true); };
@@ -115,7 +134,10 @@ export default function Products() {
             : statusFilter === 'active'
                 ? p.active
                 : !p.active;
-        return matchesSearch && matchesStatus;
+        const matchesCategory = categoryFilter === 'all'
+            ? true
+            : String(p.categoryId) === categoryFilter || p.category?.slug === categoryFilter;
+        return matchesSearch && matchesStatus && matchesCategory;
     });
 
     // Bulk Upload State
@@ -257,17 +279,35 @@ export default function Products() {
 
             {/* ... existing search and table code ... */}
             {/* Search & Status Filters */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="relative w-full sm:max-w-sm">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search by name, SKU, category..."
-                        className="w-full border border-gray-200 rounded-xl pl-11 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                    />
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+                <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:max-w-2xl">
+                    <div className="relative w-full">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Search by name, SKU, category..."
+                            className="w-full border border-gray-200 rounded-xl pl-11 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                        />
+                    </div>
+                    <select
+                        value={categoryFilter}
+                        onChange={(e) => setCategoryFilter(e.target.value)}
+                        aria-label="Filter products by category"
+                        className="w-full sm:w-auto shrink-0 border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-white text-slate-700 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer shadow-sm"
+                    >
+                        <option value="all">All Categories ({products.length})</option>
+                        {categories.map((c) => {
+                            const count = products.filter((p) => p.categoryId === c.id || p.category?.slug === c.slug).length;
+                            return (
+                                <option key={c.id} value={String(c.id)}>
+                                    {c.name} ({count})
+                                </option>
+                            );
+                        })}
+                    </select>
                 </div>
-                <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl self-stretch sm:self-auto">
+                <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl self-stretch sm:self-auto shrink-0">
                     {(['all', 'active', 'inactive'] as const).map((tab) => {
                         const count = tab === 'all'
                             ? products.length
@@ -310,8 +350,21 @@ export default function Products() {
                         <tbody className="divide-y divide-gray-50 bg-white">
                             {loading ? (
                                 <tr><td colSpan={8} className="px-6 py-12 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">Synchronizing Inventory...</td></tr>
+                            ) : loadError ? (
+                                <tr>
+                                    <td colSpan={8} className="px-6 py-12 text-center">
+                                        <div className="text-red-500 font-bold text-sm mb-3">{loadError}</div>
+                                        <button
+                                            type="button"
+                                            onClick={fetchProducts}
+                                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-sm"
+                                        >
+                                            <RotateCcw className="w-3.5 h-3.5" /> Retry Loading
+                                        </button>
+                                    </td>
+                                </tr>
                             ) : filtered.length === 0 ? (
-                                <tr><td colSpan={8} className="px-6 py-12 text-center text-slate-400">No products match your search.</td></tr>
+                                <tr><td colSpan={8} className="px-6 py-12 text-center text-slate-400 font-medium">No products match your filters.</td></tr>
                             ) : filtered.map((p) => (
                                 <tr key={p.id} className="hover:bg-blue-50/30 transition-colors group">
                                     <td className="px-6 py-4">

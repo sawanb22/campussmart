@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Plus, Pencil, Trash2, Search, X, Tag } from 'lucide-react';
 import api from '../api/client';
+import { clearPageCategoriesCache } from '@/hooks/usePageCategories';
 
 interface Category {
     id: number;
@@ -69,6 +70,7 @@ export default function Categories() {
                 await api.post('/products/categories', payload);
             }
             await fetchCategories();
+            clearPageCategoriesCache();
             setShowModal(false);
         } catch (err: any) {
             alert(err.response?.data?.error || 'Failed to save category');
@@ -82,6 +84,7 @@ export default function Categories() {
         try {
             await api.delete(`/products/categories/${id}`);
             await fetchCategories();
+            clearPageCategoriesCache();
         } catch (err: any) {
             alert(err.response?.data?.error || 'Failed to delete category. Ensure no products are linked.');
         }

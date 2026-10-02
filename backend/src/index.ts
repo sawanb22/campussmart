@@ -49,8 +49,11 @@ const PORT = process.env.PORT || 3001;
 if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 console.log(`Serving uploads from: ${UPLOADS_DIR}`);
 
-// Security middleware
-app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+// Security middleware - allow external images (Unsplash, CDNs, etc.)
+app.use(helmet({ 
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: false 
+}));
 // Env vars may hold a single URL or a comma-separated list, sometimes with a
 // stray path or trailing slash; normalize everything down to bare origins
 // (scheme+host+port) so a formatting typo can't silently lock out real traffic.
@@ -78,8 +81,8 @@ app.use(cors({
     origin: (origin, callback) => {
         // Allow requests with no origin (mobile apps, curl, etc.)
         if (!origin) return callback(null, true);
-        // Allow any vercel.app subdomain
-        if (origin.endsWith('.vercel.app')) return callback(null, true);
+        // Allow any vercel.app subdomain or Cloudflare/local tunnel
+        if (origin.endsWith('.vercel.app') || origin.endsWith('.trycloudflare.com') || origin.endsWith('.loca.lt')) return callback(null, true);
         // Allow explicitly listed origins
         if (allowedOrigins.includes(origin)) return callback(null, true);
         callback(new Error(`CORS: origin ${origin} not allowed`));
@@ -95,10 +98,18 @@ app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Static files (uploaded images/PDFs). Catalogue PDFs are restricted to logged-in
+// Static files (uploaded images/PDFs/videos). Catalogue PDFs are restricted to logged-in
 // users, so that mount is gated and registered before the general public one.
+const staticOptions = {
+    maxAge: '7d',
+    immutable: true,
+};
 app.use('/uploads/catalogues', verifyTokenFromQueryOrHeader, express.static(path.join(UPLOADS_DIR, 'catalogues')));
-app.use('/uploads', express.static(UPLOADS_DIR));
+app.use('/uploads', express.static(UPLOADS_DIR, staticOptions));
+const rootUploadsFallback = path.resolve(UPLOADS_DIR, '../../uploads');
+if (fs.existsSync(rootUploadsFallback) && rootUploadsFallback !== UPLOADS_DIR) {
+    app.use('/uploads', express.static(rootUploadsFallback, staticOptions));
+}
 
 // Health check
 app.get('/health', (_req, res) => {
@@ -120,6 +131,19 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/pages', pagesRoutes);
 app.use('/api/media', mediaRoutes);
+
+// Serve compiled frontend static assets for single-origin deployments/tunnels
+const DIST_DIR = path.resolve(__dirname, '../../dist');
+if (fs.existsSync(DIST_DIR)) {
+    app.use(express.static(DIST_DIR));
+    app.use((req, res, next) => {
+        if (req.method !== 'GET') return next();
+        if (req.path.startsWith('/api') || req.path.startsWith('/uploads') || req.path === '/health') {
+            return next();
+        }
+        res.sendFile(path.join(DIST_DIR, 'index.html'));
+    });
+}
 
 // Error handler must be last
 app.use(errorHandler);

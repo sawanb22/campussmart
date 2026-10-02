@@ -433,8 +433,15 @@ const Shop = ({
                       <Link to={`/product/${product.slug}`} className="cursor-pointer">
                         <div className="aspect-[4/3] overflow-hidden bg-white flex items-center justify-center p-3 group-hover/card:bg-slate-50/50 transition-colors">
                           <img
-                            src={resolveMediaUrl(product.imageUrl) || 'https://via.placeholder.com/400x300'}
+                            src={resolveMediaUrl(product.imageUrl) || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=400&q=80'}
                             alt={product.name}
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              const fallback = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=400&q=80';
+                              if (target.src !== fallback) {
+                                target.src = fallback;
+                              }
+                            }}
                             className="max-h-full max-w-full object-contain group-hover/card:scale-105 transition-all duration-500"
                           />
                         </div>

@@ -59,13 +59,13 @@ const Furniture = () => {
 
 
       {/* Trust Quote */}
-      <section className="py-16 bg-cm-blue-dark text-white text-center rounded-t-[4rem] border-t-4 border-cm-yellow/50">
+      <section className="py-10 bg-slate-50 text-slate-800 text-center rounded-[2rem] mx-3 sm:mx-6 lg:mx-8 mb-10 border border-slate-200 shadow-sm">
         <div className="max-w-4xl mx-auto px-6">
-          <h3 className="text-xl md:text-3xl font-bold mb-8 leading-relaxed max-w-2xl mx-auto">
+          <h3 className="text-xl md:text-2xl font-bold mb-5 leading-relaxed max-w-2xl mx-auto text-slate-800">
             "Infrastructure isn't just about buildings; it's about the tools we give our students to shape their own environments."
           </h3>
-          <div className="w-12 h-1 bg-cm-yellow mx-auto mb-4 rounded-full" />
-          <div className="font-bold uppercase tracking-widest text-xs text-white/50">Campus Mart Design Philosophy</div>
+          <div className="w-12 h-1 bg-cm-yellow mx-auto mb-3 rounded-full" />
+          <div className="font-bold uppercase tracking-widest text-xs text-cm-blue">Campus Mart Design Philosophy</div>
         </div>
       </section>
     </main>

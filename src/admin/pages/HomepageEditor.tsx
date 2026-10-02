@@ -3,6 +3,8 @@ import { Save, RotateCcw, Plus, Trash2 } from 'lucide-react';
 import api from '../api/client';
 import MediaImageField from '../components/MediaImageField';
 import { CATEGORY_ICONS, DEFAULT_CATEGORIES, type CategoryItem } from '@/components/sections/category-bar';
+import { useSiteContent } from '@/contexts/SiteContentContext';
+import { defaultServices } from '@/components/sections/service-cards';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
     return (
@@ -37,6 +39,7 @@ function Field({ label, value, onChange, multiline = false, hint = '', placehold
 }
 
 export default function HomepageEditor() {
+    const { refresh } = useSiteContent();
     const [heroData, setHeroData] = useState<any>({
         eyebrow: 'Future-ready campus infrastructure',
         title: 'Design. Build.\nDigitize. Operate.\nFuture-Ready Campuses.',
@@ -71,7 +74,13 @@ export default function HomepageEditor() {
                         ? { ...feature, href: '/ar-vr-learning' }
                         : feature));
             } catch { /**/ }
-            try { setServices(data.home_services ? JSON.parse(data.home_services) : []); } catch { /**/ }
+            try {
+                setServices(data.home_services !== undefined && data.home_services !== null
+                    ? JSON.parse(data.home_services)
+                    : defaultServices);
+            } catch {
+                setServices(defaultServices);
+            }
             try { setSidebar(data.home_sidebar ? JSON.parse(data.home_sidebar) : { classifieds: [], resources: [], completedProjects: [], contacts: [] }); } catch { /**/ }
             try { setTickerAnnouncements(data.ticker_announcements ? JSON.parse(data.ticker_announcements) : [
                 "Digital Transformation Summit: 15 May 2026",
@@ -109,6 +118,7 @@ export default function HomepageEditor() {
                 ticker_announcements: JSON.stringify(tickerAnnouncements),
                 collaborations: JSON.stringify(collaborations),
             });
+            await refresh();
             setSaved(true);
             setTimeout(() => setSaved(false), 2500);
         } catch (e) { console.error(e); }

@@ -172,7 +172,18 @@ const ProductDetail = () => {
           {/* Gallery Column */}
           <div className="space-y-4">
             <div className="aspect-[4/3] rounded-2xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center">
-              <img src={mainImage} alt={product.name} className="w-full h-full object-cover" />
+              <img
+                src={mainImage}
+                alt={product.name}
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  const fallback = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=600&q=80';
+                  if (target.src !== fallback) {
+                    target.src = fallback;
+                  }
+                }}
+                className="w-full h-full object-cover"
+              />
             </div>
             {gallery.length > 0 && (
               <div className="flex gap-2 overflow-x-auto pb-2">
@@ -182,7 +193,18 @@ const ProductDetail = () => {
                      onClick={() => setMainImage(img || '')}
                      className={`w-20 h-20 rounded-xl overflow-hidden border-2 flex-shrink-0 transition-all ${mainImage === img ? 'border-cm-blue' : 'border-slate-100'}`}
                   >
-                     <img src={img || ''} alt={`View ${i}`} className="w-full h-full object-cover" />
+                     <img
+                       src={img || ''}
+                       alt={`View ${i}`}
+                       onError={(e) => {
+                         const target = e.currentTarget;
+                         const fallback = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=200&q=80';
+                         if (target.src !== fallback) {
+                           target.src = fallback;
+                         }
+                       }}
+                       className="w-full h-full object-cover"
+                     />
                   </button>
                 ))}
               </div>

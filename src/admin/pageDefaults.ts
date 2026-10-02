@@ -63,7 +63,7 @@ export const pageDefaults: Record<string, any> = {
   section1Title: 'AI Learning Features',
   cards: [
     { title: 'Interactive AI Tutors', description: 'Personalized learning experiences powered by AI', image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' },
-    { title: 'Personalized Learning Paths', description: 'Adaptive curriculum tailored to each student', image: 'https://images.unsplash.com/photo-1516321318423-f06a051b3e14?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' },
+    { title: 'Personalized Learning Paths', description: 'Adaptive curriculum tailored to each student', image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80' },
     { title: 'Real-time Analytics', description: 'Track progress with comprehensive data insights', image: 'https://images.unsplash.com/photo-1551427260-7cddeaf76ae8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' },
     { title: 'Multi-language Support', description: 'Learning in preferred languages with AI assistance', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' },
   ],
@@ -392,7 +392,7 @@ export const pageDefaults: Record<string, any> = {
   missionTitle: 'Our Mission',
   missionBody1: 'To transform educational infrastructure across India by providing comprehensive campus solutions that blend physical spaces with cutting-edge digital technology. We aim to create learning environments that inspire, engage, and empower students and educators alike.',
   missionBody2: 'As the first company in Asia to bring curriculum-mapped innovations to the campus industry, we continue to lead the way in educational transformation.',
-  missionImage: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+  missionImage: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=80',
   whyBullets: [
     "India's leading Consortium for Campus Infrastructure",
     "Bespoke Design to Delivery across 100+ categories",
@@ -424,7 +424,7 @@ export const pageDefaults: Record<string, any> = {
   'digital-transformation': {
   heroTitle: 'Digital Transformation',
   heroSubtitle: 'Transform your campus with connected classrooms, campus automation and data-driven decision making — built around how your institution actually works.',
-  heroImage: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80',
+  heroImage: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80',
   section1Title: 'Digital Services',
   cards: [
     { title: 'Smart Classrooms', description: 'Interactive displays, connected devices and digital content that keep every lesson engaging.' },
@@ -554,10 +554,10 @@ export const pageDefaults: Record<string, any> = {
   heroTitle: 'Laboratory Solutions',
   heroSubtitle: 'State-of-the-art laboratory setups for schools and colleges. From STEM labs to specialized research facilities, we deliver excellence.',
   heroImage: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
-  section1Title: 'Lab Types',
+  section1Title: 'Specialized Laboratory Environments',
   cards: [
     { title: 'Chemistry Lab', description: 'Purpose-built environments for practical chemistry education and safe experimentation.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Physics Lab', description: 'Hands-on spaces for experiments, measurement, and applied physics learning.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Physics Lab', description: 'Hands-on spaces for experiments, measurement, and applied physics learning.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80' },
     { title: 'Math Lab', description: 'Interactive learning environments that make mathematical concepts practical and visual.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=400&q=80' },
     { title: 'Biology Lab', description: 'Well-equipped spaces for life science observation, analysis, and discovery.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
     { title: 'Composite Skill Lab', description: 'Flexible multidisciplinary labs that support practical and vocational skill development.', categories: ['Lab Products'], image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=400&q=80' },
@@ -571,16 +571,16 @@ export const pageDefaults: Record<string, any> = {
   heroTitle: 'Library Solutions',
   heroSubtitle: 'Modern library solutions that blend traditional resources with digital innovation. Create spaces that inspire learning and research.',
   heroImage: 'https://images.unsplash.com/photo-1568667256549-094345857637?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
-  section1Title: 'Library Features',
+  section1Title: 'Curated Library Environments',
   cards: [
     { title: 'Library Furniture', description: 'Complete furniture solutions for functional and welcoming library environments.', categories: ['Library Furniture'], image: 'https://images.unsplash.com/photo-1568667256549-094345857637?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
     { title: 'Reading Tables and Chairs', description: 'Comfortable, durable seating for focused individual and group reading.', categories: ['Library Furniture'], image: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=400&q=80' },
     { title: 'Bookshelves and Racks', description: 'Organized storage systems that make every collection easy to access.', categories: ['Library Furniture'], image: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=400&q=80' },
     { title: 'Open Book Shelves', description: 'Accessible open shelving designed for discovery and smooth circulation.', categories: ['Library Furniture'], image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=400&q=80' },
-    { title: 'Traditional', description: 'Timeless library spaces that support focused reading and classic resource access.', categories: ['Libraries'], image: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&w=400&q=80' },
-    { title: 'Digital Library', description: 'Technology-enabled environments for digital collections, research, and connected learning.', categories: ['Libraries'], image: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=400&q=80' },
-    { title: 'Junior Library', description: 'Bright, welcoming reading spaces designed to build curiosity and a love of books.', categories: ['Libraries'], image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=400&q=80' },
-    { title: 'Minimalist', description: 'Clean, adaptable library interiors that keep learning and usability at the centre.', categories: ['Libraries'], image: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=400&q=80' }
+    { title: 'Heritage & Academic Stacks', description: 'Heavy-gauge steel and timber shelving designed for extensive reference collections, archives, and high-capacity storage.', categories: ['Libraries'], image: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&w=400&q=80' },
+    { title: 'Digital Research Commons', description: 'Tech-enabled computer pods, OPAC terminals, and individual study carrels with integrated acoustic and power hubs.', categories: ['Libraries'], image: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=400&q=80' },
+    { title: 'Early Learning Reading Zones', description: 'Low-height accessible display bays, playful soft seating, and collaborative story circles to cultivate early reading habits.', categories: ['Libraries'], image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=400&q=80' },
+    { title: 'Modular Collaborative Commons', description: 'Reconfigurable breakout lounge tables, acoustic mobile screens, and flexible group discussion zones.', categories: ['Libraries'], image: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=400&q=80' }
   ]
 },
   'library-management': {
@@ -776,7 +776,7 @@ export const pageDefaults: Record<string, any> = {
     { category: 'Academics', readTime: '04 MIN READ', title: 'HOW TO BUILD AN ACADEMIC MODEL THAT LASTS', image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1000&q=85', href: '/ai-ml' },
     { category: 'Compliance', readTime: '07 MIN READ', title: 'A PRACTICAL GUIDE TO APPROVALS AND ACCREDITATION', image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1000&q=85', href: '/services' },
     { category: 'Faculty', readTime: '05 MIN READ', title: 'ATTRACTING THE RIGHT FACULTY TO YOUR CAMPUS', image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1000&q=85', href: '/partner-with-colleges' },
-    { category: 'Technology', readTime: '06 MIN READ', title: 'THE DIGITAL SYSTEMS TO PLAN BEFORE OPENING DAY', image: 'https://images.unsplash.com/photo-1516321318423-f06a051b3e14?auto=format&fit=crop&w=1000&q=85', href: '/digital-transformation' }
+    { category: 'Technology', readTime: '06 MIN READ', title: 'THE DIGITAL SYSTEMS TO PLAN BEFORE OPENING DAY', image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80', href: '/digital-transformation' }
   ],
   ctaTitle: 'BUILD A CAMPUS\nTHAT MOVES\nEDUCATION FORWARD.',
   ctaButtonLabel: 'START PLANNING',
@@ -849,14 +849,14 @@ export const pageDefaults: Record<string, any> = {
   ctaButtonLabel: 'Get Project Audit',
   ctaHref: '/contact-us',
   cards: [
-    { title: 'Basketball Court', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Indoor', 'Adults'], image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Football Ground', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Outdoor', 'Adults'], image: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Tennis Court', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Outdoor', 'Adults'], image: 'https://images.unsplash.com/photo-1622163642998-1ea36b1ade5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Swimming Pool', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Indoor', 'Kids', 'Adults'], image: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Athletics Track', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Outdoor', 'Adults', 'Training'], image: 'https://images.unsplash.com/photo-1461896836934-voices?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Indoor Badminton Arena', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Indoor', 'Kids', 'Adults'], image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Kids Play Zone', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Kids'], image: 'https://images.unsplash.com/photo-1472162072942-cd5147eb3902?auto=format&fit=crop&w=400&q=80' },
-    { title: 'Multi-Sport Training Area', description: 'Premium sports facility designed for training, events, and wellness.', categories: ['Training', 'Adults'], image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=400&q=80' },
+    { title: 'Basketball Court', description: 'FIBA-compliant wooden and acrylic cushioned surfaces engineered for shock absorption, bounce consistency, and heavy collegiate competition.', categories: ['Indoor', 'Adults'], image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Football Ground', description: 'FIFA-standard artificial turf and natural grass pitches with laser-leveled sub-base drainage and floodlighting systems.', categories: ['Outdoor', 'Adults'], image: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Tennis Court', description: 'ITF-approved multi-layer synthetic acrylic surfaces offering true ball response, high-traction grip, and all-weather durability.', categories: ['Outdoor', 'Adults'], image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&q=80' },
+    { title: 'Swimming Pool', description: 'Semi-Olympic and recreational aquatic facilities with commercial sand filtration, anti-slip surrounds, and competitive lane markers.', categories: ['Indoor', 'Kids', 'Adults'], image: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Athletics Track', description: 'IAAF-certified seamless polyurethane running tracks designed for maximum energy return, spike resistance, and athlete joint safety.', categories: ['Outdoor', 'Adults', 'Training'], image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=80' },
+    { title: 'Indoor Badminton Arena', description: 'BWF-standard shock-absorbing vinyl mats paired with anti-glare high-bay sports LED illumination and acoustic dampening.', categories: ['Indoor', 'Kids', 'Adults'], image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Kids Play Zone', description: 'Child-safe EPDM impact-attenuating rubber safety surfacing equipped with certified non-toxic climbing and balancing structures.', categories: ['Kids'], image: 'https://images.unsplash.com/photo-1472162072942-cd5147eb3902?auto=format&fit=crop&w=400&q=80' },
+    { title: 'Multi-Sport Training Area', description: 'Versatile multi-sport halls adapted for volleyball, handball, yoga, martial arts, and institutional fitness programming.', categories: ['Training', 'Adults'], image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=400&q=80' },
   ],
   features: [
     'Surface Installation',
@@ -883,6 +883,7 @@ export const pageDefaults: Record<string, any> = {
   'sports-products': {
   heroTitle: 'Sports Products',
   heroSubtitle: 'Explore sports equipment and solutions for schools, colleges, and training facilities.',
+  heroImage: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
 },
   'science-tech-labs': {
   heroTitle: 'Labs Built for Real Discovery',
@@ -899,13 +900,13 @@ export const pageDefaults: Record<string, any> = {
   'tech-infra': {
   heroTitle: 'Technology Infrastructure',
   heroSubtitle: 'Complete technology infrastructure solutions for modern campuses. From networking to security, we build the foundation for digital learning.',
-  heroImage: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
-  section1Title: 'Our Services',
+  heroImage: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80',
+  section1Title: 'Campus Technology Solutions',
   cards: [
-    { title: 'Interactive Displays', description: 'Smart boards and digital displays for connected classrooms.', categories: ['Classroom Tech'], image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Network Solutions', description: 'Campus-wide WiFi and structured networking.', categories: ['Networking'], image: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Server Infrastructure', description: 'On-premise and cloud server solutions.', categories: ['Networking'], image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
-    { title: 'Cybersecurity', description: 'Complete security solutions for campus networks.', categories: ['Security'], image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Interactive Displays', description: '4K interactive flat panels with zero-lag optical bonding, multi-touch stylus support, and unified digital whiteboard suites.', categories: ['Classroom Tech'], image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80' },
+    { title: 'Network Solutions', description: 'High-density 802.11ax Wi-Fi 6 APs and structured optical fiber backbones engineered for seamless campus connectivity.', categories: ['Networking'], image: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Server Infrastructure', description: 'Hybrid on-premise blade servers and scalable academic cloud setups delivering low latency and enterprise uptime.', categories: ['Networking'], image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
+    { title: 'Cybersecurity', description: 'Next-generation firewalls, encrypted endpoint threat protection, and automated student data access control.', categories: ['Security'], image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
   ]
 },
   'ugc-guidelines': {
@@ -924,7 +925,7 @@ export const pageDefaults: Record<string, any> = {
     readMoreLabel: 'Read the guidance'
   },
   cards: [
-    { category: 'Digital Campus', readTime: '5 min read', title: 'What a connected campus needs before launch', description: 'A clear checklist for infrastructure, systems and teams preparing for a more connected institution.', image: 'https://images.unsplash.com/photo-1516321318423-f06a051b3e14?auto=format&fit=crop&w=900&q=85', author: 'CampusMart Team', authorImage: 'https://i.pravatar.cc/80?img=12', href: '/tech-infra' },
+    { category: 'Digital Campus', readTime: '5 min read', title: 'What a connected campus needs before launch', description: 'A clear checklist for infrastructure, systems and teams preparing for a more connected institution.', image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80', author: 'CampusMart Team', authorImage: 'https://i.pravatar.cc/80?img=12', href: '/tech-infra' },
     { category: 'Governance', readTime: '6 min read', title: 'Make student data privacy part of the design', description: 'Build trust into campus technology with practical privacy and access decisions from day one.', image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=900&q=85', author: 'CampusMart Team', authorImage: 'https://i.pravatar.cc/80?img=32', href: '/services' },
     { category: 'Student Experience', readTime: '4 min read', title: 'Digital services that keep students moving', description: 'Thoughtful digital touchpoints can make everyday campus journeys simpler and more inclusive.', image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=900&q=85', author: 'CampusMart Team', authorImage: 'https://i.pravatar.cc/80?img=47', href: '/campus-automation' }
   ],
@@ -932,7 +933,7 @@ export const pageDefaults: Record<string, any> = {
   moreCards: [
     { category: 'Campus planning', title: 'Plan spaces around the way students learn', description: 'Shape learning environments around real student journeys.', image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=900&q=85', href: '/campus-master-planning' },
     { category: 'Operations', title: 'Spend less time on manual campus work', description: 'Connect everyday workflows so staff can focus on students.', image: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=900&q=85', href: '/campus-automation' },
-    { category: 'Technology', title: 'Choose tools that help teams do more', description: 'Build a practical digital foundation for your institution.', image: 'https://images.unsplash.com/photo-1516321318423-f06a051b3e14?auto=format&fit=crop&w=900&q=85', href: '/digital-transformation' },
+    { category: 'Technology', title: 'Choose tools that help teams do more', description: 'Build a practical digital foundation for your institution.', image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80', href: '/digital-transformation' },
   ],
   footerDescription: 'Practical guidance for education leaders building safer, smarter and more human campuses.',
   footerColumns: [

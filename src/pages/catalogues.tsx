@@ -1,14 +1,18 @@
 import { useEffect, useState, type MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { Download, FileText, BookOpen, ArrowRight, Lock } from 'lucide-react';
+import { Download, FileText, Lock } from 'lucide-react';
 import api from '@/api/client';
 import { usePageData } from '@/hooks/usePageData';
 import LoginPromptModal from '@/components/login-prompt-modal';
 import { resolveMediaUrl } from '@/lib/media-url';
 import { getCardCover } from '@/lib/card-covers';
 
+const MASTER_CATALOGUE_FALLBACK = '/uploads/catalogues/1790872959601-232430012.pdf';
+
 const normalizeCatalogDownload = (value?: string) => {
-  if (!value || value === '#') return '';
+  if (!value || value === '#' || value.trim() === '') {
+    return resolveMediaUrl(MASTER_CATALOGUE_FALLBACK);
+  }
   return resolveMediaUrl(value);
 };
 
@@ -33,8 +37,8 @@ const DEFAULTS = {
         'Furniture solutions specifically designed to align with New Education Policy guidelines for modern classrooms.',
       image:
         'https://images.unsplash.com/photo-1524758631624-e2822e304c36?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      downloadLink: '',
-      size: '12 MB',
+      downloadLink: '/uploads/catalogues/1788258517755-838164996.pdf',
+      size: '411 KB',
     },
     {
       title: 'CAMPUSMART BRIEF PROFILE [PDF]',
@@ -42,8 +46,8 @@ const DEFAULTS = {
         "An overview of CampusMart's mission, services, and extensive experience in educational infrastructure.",
       image:
         'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      downloadLink: '',
-      size: '5 MB',
+      downloadLink: '/uploads/catalogues/1788784785158-777852239.pdf',
+      size: '96 MB',
     },
     {
       title: 'SCHOOL DESIGN [PDF]',
@@ -51,8 +55,8 @@ const DEFAULTS = {
         'Comprehensive guide on architectural and ergonomic principles for modern school environments.',
       image:
         'https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      downloadLink: '',
-      size: '18 MB',
+      downloadLink: '/uploads/catalogues/1788259430344-947630598.pdf',
+      size: '411 KB',
     },
     {
       title: 'CLASSROOM CONFIGURATION IDEAS [PDF]',
@@ -60,8 +64,8 @@ const DEFAULTS = {
         'Creative and functional layout samples for various classroom sizes and learning objectives.',
       image:
         'https://images.unsplash.com/photo-1588072432836-e10032774350?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      downloadLink: '',
-      size: '8 MB',
+      downloadLink: '/uploads/catalogues/1788258554866-942654994.pdf',
+      size: '170 KB',
     },
     {
       title: 'MASTER CATALOGUE',
@@ -69,8 +73,8 @@ const DEFAULTS = {
         'Our full range of products including Labs, Libraries, Sports, and AI Stations.',
       image:
         'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      downloadLink: '',
-      size: '25 MB',
+      downloadLink: '/uploads/catalogues/1790872959601-232430012.pdf',
+      size: '23 MB',
     },
   ],
   caseStudies: [
@@ -101,7 +105,6 @@ const DEFAULTS = {
 const Catalogues = () => {
   const { data } = usePageData('catalogues');
   const [catalogueRows, setCatalogueRows] = useState<any[]>([]);
-  const [caseStudyRows, setCaseStudyRows] = useState<any[]>([]);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const isLoggedIn = Boolean(localStorage.getItem('cm_token'));
@@ -113,6 +116,7 @@ const Catalogues = () => {
       return;
     }
 
+    const targetUrl = resolveMediaUrl(catalogue.downloadLink || MASTER_CATALOGUE_FALLBACK);
     const filename = `${(catalogue.title || 'catalogue').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'catalogue'}.pdf`;
     const token = localStorage.getItem('cm_token');
 
@@ -120,7 +124,7 @@ const Catalogues = () => {
       // Catalogue PDFs require a logged-in user server-side, so the token has
       // to travel as a header on this fetch — a plain <a>/window.open navigation
       // never carries one.
-      const response = await fetch(catalogue.downloadLink, token ? { headers: { Authorization: `Bearer ${token}` } } : undefined);
+      const response = await fetch(targetUrl, token ? { headers: { Authorization: `Bearer ${token}` } } : undefined);
       if (!response.ok) throw new Error('Download failed');
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
@@ -136,7 +140,7 @@ const Catalogues = () => {
       // (e.g. a cross-origin host that doesn't allow fetch reads). A direct
       // navigation can't carry the auth header, so pass the token as a query
       // param instead — the backend accepts either.
-      const fallbackUrl = token ? `${catalogue.downloadLink}${catalogue.downloadLink.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}` : catalogue.downloadLink;
+      const fallbackUrl = token ? `${targetUrl}${targetUrl.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}` : targetUrl;
       window.open(fallbackUrl, '_blank', 'noopener,noreferrer');
     }
   };
@@ -169,34 +173,6 @@ const Catalogues = () => {
     };
   }, []);
 
-  useEffect(() => {
-    let active = true;
-
-    api
-      .get('/case-studies')
-      .then((res) => {
-        if (!active) return;
-
-        const mapped = (Array.isArray(res.data) ? res.data : []).map((study: any) => ({
-          title: study.title,
-          description: study.description || '',
-          image:
-            resolveMediaUrl(study.imageUrl) ||
-            'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-          slug: study.slug,
-        }));
-
-        setCaseStudyRows(mapped);
-      })
-      .catch(() => {
-        if (active) setCaseStudyRows([]);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
   const catalogues =
     catalogueRows.length > 0
       ? catalogueRows
@@ -207,9 +183,6 @@ const Catalogues = () => {
             downloadLink: normalizeCatalogDownload(catalogue.downloadLink ?? catalogue.fileUrl),
           }))
         : DEFAULTS.cards;
-
-  const caseStudies =
-    caseStudyRows.length > 0 ? caseStudyRows : data.caseStudies && data.caseStudies.length > 0 ? data.caseStudies : DEFAULTS.caseStudies;
 
   const visibleCatalogues = catalogues.slice(0, visibleCount);
   const hasMore = visibleCount < catalogues.length;
@@ -303,45 +276,6 @@ const Catalogues = () => {
         </div>
       </section>
 
-      {/* Case Studies */}
-      <section className="bg-gradient-to-b from-gray-50 to-white px-4 py-4 sm:px-6 md:py-5 lg:px-8">
-        <div className="mx-auto max-w-6xl">
-          <h2 className="mb-4 text-center text-3xl font-bold text-cm-blue-dark md:text-4xl">Case Studies &amp; Projects</h2>
-
-          <p className="mx-auto mb-6 max-w-3xl text-center text-base text-gray-600 md:mb-8 md:text-lg">
-            Explore our completed projects and see how we've transformed educational institutions.
-          </p>
-
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-8">
-            {caseStudies.map((study: any) => (
-              <div key={study.title} className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-md transition-all duration-300 hover:border-cm-blue/20 hover:shadow-xl">
-                <div className="h-56 overflow-hidden bg-gray-100">
-                  <img src={study.image} alt={study.title} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                </div>
-
-                <div className="p-6 md:p-8">
-                  <div className="mb-4 flex items-center gap-2">
-                    <BookOpen className="h-5 w-5 text-cm-blue" />
-                    <span className="text-xs font-semibold uppercase tracking-wider text-cm-blue">Case Study</span>
-                  </div>
-
-                  <h3 className="mb-3 text-lg font-bold text-cm-blue-dark">{study.title}</h3>
-
-                  <p className="mb-6 text-sm text-gray-600">{study.description}</p>
-
-                  <Link
-                    to={study.slug ? `/case-studies/${study.slug}` : '/contact-us'}
-                    className="inline-flex items-center gap-2 text-sm font-semibold text-cm-blue transition-colors duration-200 hover:text-cm-blue-dark"
-                  >
-                    Read More
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* CTA Section */}
       <section className="bg-cm-yellow px-4 py-4 sm:px-6 md:py-5 lg:px-8">
