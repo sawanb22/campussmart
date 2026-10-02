@@ -5,6 +5,12 @@ import rateLimit from 'express-rate-limit';
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
+import dns from 'dns';
+
+// Enforce IPv4-first resolution across all Node sockets to eliminate ENETUNREACH on Render/Docker
+if (typeof dns.setDefaultResultOrder === 'function') {
+    dns.setDefaultResultOrder('ipv4first');
+}
 
 dotenv.config();
 

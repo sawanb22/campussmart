@@ -1,24 +1,40 @@
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
+import dns from 'dns';
+
+// Enforce IPv4-first resolution to prevent ENETUNREACH in containers
+if (typeof dns.setDefaultResultOrder === 'function') {
+    dns.setDefaultResultOrder('ipv4first');
+}
+
+const isSecure = process.env.EMAIL_SECURE === 'true';
+const port = parseInt(process.env.EMAIL_PORT || '587', 10);
+const host = process.env.EMAIL_HOST || 'smtp.gmail.com';
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host,
+    port,
+    secure: isSecure, // false for port 587 (uses STARTTLS)
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
     },
-    // Gmail's SMTP occasionally stalls instead of erroring outright; without these
-    // caps a single slow handshake hangs the request until the client gives up.
+    family: 4, // Enforce IPv4 socket connection on Render/Docker
     connectionTimeout: 10_000,
     greetingTimeout: 10_000,
     socketTimeout: 10_000,
-});
+} as any);
 
 // Fails fast at boot if the Gmail app password has been revoked/rotated, instead
 // of only surfacing as opaque "Failed to send OTP" errors once a user hits it.
 transporter.verify((err) => {
-    if (err) console.error('⚠️ Email transporter verification failed — OTP emails will not send:', err.message);
-    else console.log('✅ Email transporter ready');
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        console.warn('⚠️ EMAIL_USER or EMAIL_PASS not configured — OTP emails will not send. Codes will be logged to server logs.');
+    } else if (err) {
+        console.error('⚠️ Email transporter verification failed — OTP emails will not send:', err.message);
+    } else {
+        console.log(`✅ Email transporter ready (IPv4 via ${host}:${port})`);
+    }
 });
 
 export async function sendOtpEmail(to: string, otp: string, purpose: 'verify' | 'login' | 'reset') {
@@ -81,7 +97,7 @@ export async function sendOtpEmail(to: string, otp: string, purpose: 'verify' | 
         console.log(`   Purpose: ${purpose}`);
         console.log(`==========================================\n`);
     } else {
-        console.log(`🔑 [CAMPUSMART OTP DISPATCHED] To: ${to} | Purpose: ${purpose}`);
+        console.log(`🔑 [CAMPUSMART OTP DISPATCHED] To: ${to} | Purpose: ${purpose} | Code: ${otp}`);
     }
 
     const text = `${heading}\n\n${message}\n\nYour OTP code is: ${otp}\n\n⏱ Expires in 10 minutes.\nIf you did not request this, you can safely ignore this email.\nNever share your OTP with anyone.`;

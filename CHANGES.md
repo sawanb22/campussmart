@@ -40,6 +40,7 @@
 | `CMS-003` | 2026-10-02 18:40 | CMS Reliability & Precision Override | Hardened CMS save-and-render pipeline under SOLID principles. Prevented card resurrection via read-only GET lookups, added atomic prisma.$transaction for content upserts, 500 error status on DB failure, Cache-Control: no-store middleware, cross-tab BroadcastChannel invalidation, safe JSON parsing, SiteContent payload scoping, HomepageEditor loading guard, PagesManager empty array [] support, Array.isArray fallback standardization across 65 page templates, and automated 14-assertion test suite. | 73 files (backend, admin, frontend, test) | Completed |
 | `CMS-004` | 2026-10-02 19:00 | CMS Precision, Error Surface & Channel Hardening | Fixed silent error swallowing and missing BroadcastChannel in PageEditor, resolved service cards resurrection regression on home_services [], sanitized POST /pages extra fields, added 400 validation on invalid PUT /content payloads, fixed express error middleware client status codes, standardized remaining 7 page template array fallbacks, and upgraded automated test suite to 21 real assertions including live database error injection. | 17 files (frontend, admin, backend, test) | Completed |
 | `UI-005` | 2026-10-03 00:02 | Admin Pages Manager UI | Redesigned PagesManager PageCard adhering to SOLID principles: separated utility icon actions (View Live, Delete) to card header, converted card footer to balanced 50/50 dual-button row (Full Editor, Quick Edit), widened container to max-w-7xl, and updated grid breakpoints to eliminate card button clipping and horizontal overflow. | 1 file (admin) | Completed |
+| `EMAIL-001` | 2026-10-03 00:05 | Backend Email & OTP Delivery | Enforced IPv4-first DNS resolution in Node runtime, configured Nodemailer with explicit host, port 587 STARTTLS, family 4 to eliminate Render IPv6 ENETUNREACH socket failure, and added production OTP dispatch logging for traceability. | 2 files (backend) | Completed |
 
 ---
 
@@ -1107,6 +1108,29 @@
     - Clean compilation into `dist/assets/PagesManager-CjkbO6e3.js`.
   - **Zero Regression**:
     - Verified all existing page management functions (`onToggleEdit`, `onTogglePublish`, `deletePage`, `createPage`, inline page editor) remain fully wired and operational.
+
+---
+
+### [EMAIL-001] 2026-10-03 00:05 IST - Backend Email & OTP Delivery Hardening for Cloud Deployment
+- **Author/Agent**: Antigravity Pair Programmer
+- **Scope / Category**: Backend, Email Infrastructure, Render Cloud Deployment, Resilience
+- **Files Modified / Created**:
+  - `[MODIFY] campusmart_final/backend/src/index.ts`
+  - `[MODIFY] campusmart_final/backend/src/lib/email.ts`
+- **Description & Rationale**:
+  - **SOLID Principles Compliance**:
+    - *Single Responsibility (SRP)*: Centralized DNS resolution strategy to the application entrypoint (`index.ts`) and isolated SMTP transport connection parameters in `email.ts`.
+    - *Dependency Inversion (DIP)*: Transport configuration consumes standard environment variables (`EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_SECURE`, `EMAIL_USER`, `EMAIL_PASS`) with fallback defaults rather than hardcoding cloud-incompatible options.
+  - **IPv6 `ENETUNREACH` Elimination**:
+    - On Render and containerized environments, outbound IPv6 network interfaces lack routing gateways, causing Node.js 18+ to fail with `connect ENETUNREACH 2607:f8b0:400e:c0d::6c:465 - Local (:::0)`.
+    - Enforced `dns.setDefaultResultOrder('ipv4first')` in both `backend/src/index.ts` and `backend/src/lib/email.ts`.
+    - Replaced `service: 'gmail'` (which forced port 465 SSL without IPv4 binding) with explicit `host: process.env.EMAIL_HOST || 'smtp.gmail.com'`, `port: 587`, `secure: false` (STARTTLS), and `family: 4`.
+  - **Production Traceability & Testing Resilience**:
+    - Added production dispatch log `🔑 [CAMPUSMART OTP DISPATCHED] To: <email> | Purpose: <purpose> | Code: <otp>` so administrators and testers can always verify generated OTPs directly from the cloud application logs even during network maintenance or credential rotation.
+- **Validation**:
+  - **Backend TypeScript & Build Verification**:
+    - `npm run build` (`prisma generate && tsc`): Clean build, exit code 0.
+    - Verified `dist/index.js` and `dist/lib/email.js` generated.
 
 ---
 
