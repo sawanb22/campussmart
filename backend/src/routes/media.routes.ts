@@ -1,4 +1,4 @@
-import { Router, Response } from 'express';
+import { Router, Response, NextFunction } from 'express';
 import rateLimit from 'express-rate-limit';
 import { uploadMedia, validateMediaFileSize } from '../middleware/upload.middleware';
 import { verifyToken, requireAdmin, AuthRequest } from '../middleware/auth.middleware';
@@ -19,13 +19,13 @@ router.post(
     mediaUploadLimiter,
     verifyToken,
     requireAdmin,
-    (req: AuthRequest, res: Response, next) => {
+    (req: AuthRequest, res: Response, next: NextFunction) => {
         // Accept either 'media' or 'image' field for seamless frontend flexibility
         const upload = uploadMedia.fields([
             { name: 'media', maxCount: 1 },
             { name: 'image', maxCount: 1 },
         ]);
-        upload(req, res, (err) => {
+        upload(req, res, (err: any) => {
             if (err) return next(err);
             const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
             const file = files?.media?.[0] || files?.image?.[0];
