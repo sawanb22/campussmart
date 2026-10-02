@@ -60,16 +60,16 @@ async function main() {
     // Demo user
     const userHash = await bcrypt.hash('User@1234', 10);
     await withRetry(() => prisma.user.upsert({
-        where: { email: 'demo@campusmart.in' },
-        update: { emailVerified: true },
+        where: { email: 'user@campussmart.in' },
+        update: { emailVerified: true, role: 'user' },
         create: {
-            name: 'Demo User',
-            email: 'demo@campusmart.in',
+            name: 'Demo Campus User',
+            email: 'user@campussmart.in',
             passwordHash: userHash,
             role: 'user',
             emailVerified: true,
-            phone: '+91 98765 43210',
-            institution: 'ABC International School',
+            phone: '+91 98765 11111',
+            institution: 'Sample University',
         },
     }));
 

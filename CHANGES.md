@@ -41,6 +41,7 @@
 | `CMS-004` | 2026-10-02 19:00 | CMS Precision, Error Surface & Channel Hardening | Fixed silent error swallowing and missing BroadcastChannel in PageEditor, resolved service cards resurrection regression on home_services [], sanitized POST /pages extra fields, added 400 validation on invalid PUT /content payloads, fixed express error middleware client status codes, standardized remaining 7 page template array fallbacks, and upgraded automated test suite to 21 real assertions including live database error injection. | 17 files (frontend, admin, backend, test) | Completed |
 | `UI-005` | 2026-10-03 00:02 | Admin Pages Manager UI | Redesigned PagesManager PageCard adhering to SOLID principles: separated utility icon actions (View Live, Delete) to card header, converted card footer to balanced 50/50 dual-button row (Full Editor, Quick Edit), widened container to max-w-7xl, and updated grid breakpoints to eliminate card button clipping and horizontal overflow. | 1 file (admin) | Completed |
 | `EMAIL-001` | 2026-10-03 00:05 | Backend Email & OTP Delivery | Enforced IPv4-first DNS resolution in Node runtime, configured Nodemailer with explicit host, port 587 STARTTLS, family 4 to eliminate Render IPv6 ENETUNREACH socket failure, and added production OTP dispatch logging for traceability. | 2 files (backend) | Completed |
+| `AUTH-002` | 2026-10-03 00:35 | Pre-Verified Test User Seeding | Seeded pre-verified standard customer account (user@campussmart.in / User@1234) in runSeed.ts and seed.ts with emailVerified: true, enabling frictionless customer login and testing without OTP dependency. | 2 files (backend) | Completed |
 
 ---
 
@@ -1131,6 +1132,24 @@
   - **Backend TypeScript & Build Verification**:
     - `npm run build` (`prisma generate && tsc`): Clean build, exit code 0.
     - Verified `dist/index.js` and `dist/lib/email.js` generated.
+
+---
+
+### [AUTH-002] 2026-10-03 00:35 IST - Pre-Verified Test User Account Seeding
+- **Author/Agent**: Antigravity Pair Programmer
+- **Scope / Category**: Authentication, Database Seeding, Customer Flow Testing
+- **Files Modified / Created**:
+  - `[MODIFY] campusmart_final/backend/src/runSeed.ts`
+  - `[MODIFY] campusmart_final/backend/prisma/seed.ts`
+- **Description & Rationale**:
+  - **Pre-Verified Customer Account**:
+    - Created an idempotent seed block in `backend/src/runSeed.ts` and `backend/prisma/seed.ts` creating/verifying user `user@campussmart.in` with bcrypt-hashed password `User@1234`.
+    - Explicitly sets `role: 'user'` and `emailVerified: true`.
+    - Allows immediate, direct customer login at `/login` without OTP dependency, providing complete, unblocked access to test user features (cart, orders, wishlist, profile, and addresses).
+- **Validation**:
+  - **Backend TypeScript & Build Verification**:
+    - `npm run build` (`prisma generate && tsc`): Exit code 0.
+    - Verified `dist/runSeed.js` compiled with the new test user block.
 
 ---
 

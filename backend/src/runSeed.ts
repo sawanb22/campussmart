@@ -554,6 +554,39 @@ async function seed() {
         console.log(`✓ Initial admin user created: ${adminEmail}`);
     }
 
+    // ── Test User ─────────────────────────────────────────────────────────
+    const testUserEmail = 'user@campussmart.in';
+    const existingTestUser = await prisma.user.findFirst({
+        where: { email: { equals: testUserEmail, mode: 'insensitive' } },
+    });
+
+    if (existingTestUser) {
+        await prisma.user.update({
+            where: { id: existingTestUser.id },
+            data: {
+                role: 'user',
+                emailVerified: true,
+                name: existingTestUser.name || 'Demo Campus User',
+            },
+        });
+        console.log(`✓ Test user verified: ${testUserEmail}`);
+    } else {
+        const userPassword = 'User@1234';
+        const userHash = await bcrypt.hash(userPassword, 10);
+        await prisma.user.create({
+            data: {
+                name: 'Demo Campus User',
+                email: testUserEmail,
+                passwordHash: userHash,
+                role: 'user',
+                emailVerified: true,
+                phone: '+91 98765 11111',
+                institution: 'Sample University',
+            },
+        });
+        console.log(`✓ Test user created: ${testUserEmail}`);
+    }
+
     // ── Hero banner ───────────────────────────────────────────────────────
     await prisma.siteContent.upsert({
         where: { key: 'home_hero' },
