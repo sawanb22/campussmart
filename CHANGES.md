@@ -50,6 +50,8 @@
 | `FIX-006` | 2026-10-03 19:55 | Admin CMS UX & Ergonomics | Smooth auto-scroll and auto-focus to newly added cards, secondary cards, process steps, team members, and case studies in UnifiedPageEditor across both Quick Edit modal and Full Editor page contexts under SOLID principles (Problem 1). | 1 file (admin) | Completed |
 | `FIX-007` | 2026-10-03 20:25 | Smart Classrooms Images & Product Card Spacing | Enriched Smart Classrooms cards with verified educational photography, added resilient fallbackNode to MediaImage, hardened MediaImageField preview, and resolved price vs. wishlist button horizontal collision in Shop product cards with gap-3, shrink-0, and compact vertical rhythm (Problems 2 & A). | 4 files (frontend, admin) | Completed |
 | `FIX-008` | 2026-10-03 20:40 | Campus Digital Journal Subtitles & Images | Increased subtitle, body, and metadata font sizes across Campus Digital Journal and AI Guide; restored missing featured article image container; wrapped card images in MediaImage with fallback support; eliminated fragile pravatar dependency; and strictly enforced compact vertical rhythm (Testing Team Issues 1 & 2). | 4 files (frontend, admin) | Completed |
+| `FIX-009` | 2026-10-03 21:05 | Media Resilience & Asset Alignment | Indoor Sports & AI Learning Stations Image 404 & Alignment Repair: replaced dead Unsplash URLs and misassigned sports courts with verified active assets. | 3 files (frontend & admin) | Completed |
+| `CLEAN-001` | 2026-10-03 22:38 | Maintenance & Build Hygiene | Inactive database purge, stale artifacts cleanup (cloudflared, logs, legacy zip), and frontend TypeScript build stabilization (`tsc -b`) under SOLID principles. | 9 files (frontend, backend, root) | Completed |
 
 ---
 
@@ -1463,19 +1465,33 @@
     - Replaced with a real tournament-spec indoor basketball court photo (`photo-1546519638-68e109498ffc`).
     - Updated Indoor Badminton Arena to high-resolution clean court photography (`photo-1626224583764-f87db24ac4ea`).
 - **Validation**:
-  - TypeScript Compilation: `npx tsc --noEmit` exited cleanly with code 0 (0 errors).
+  ---
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+### [CLEAN-001] 2026-10-03 22:38 IST - Inactive Database Purge, Stale Artifact Cleanup & Frontend Build Fix
+- **Author/Agent**: Antigravity Pair Programmer
+- **Scope / Category**: Workspace Hygiene, Maintenance & Production Readiness
+- **Files Modified & Deleted**:
+  - `[DELETE] backend/dev.db` (100 KB legacy SQLite database)
+  - `[DELETE] backend/prisma/dev.db` (268 KB legacy SQLite database)
+  - `[DELETE] cloudflared.exe` (55 MB local tunnel binary)
+  - `[DELETE] backend/campusmart-backend.zip` (237 KB legacy backup archive)
+  - `[DELETE] backend/prisma_out.txt` (stale migration dump)
+  - `[DELETE] backend/testout.txt` (stale test dump)
+  - `[DELETE] backend/seed-job.log` (stale seed terminal log)
+  - `[DELETE] puppeteer-error.png` (stale browser screenshot)
+  - `[MODIFY] src/pages/ugc-guidelines.tsx` (removed unused `resolveMediaUrl` import)
+- **Description & Rationale**:
+  - **Database Hygiene**:
+    - Eradicated orphaned SQLite database files (`dev.db` and `prisma/dev.db`) left over from initial project setup.
+    - Verified that Render PostgreSQL (`dpg-davupbfavr4c73dge7ng-a.oregon-postgres.render.com/campusmart_db_e2bx`) is the single, canonical cloud database used across the entire application stack.
+    - Preserved git-tracked Prisma migrations, seed files, and schema intact.
+  - **Artifact Cleanup**:
+    - Deleted redundant 55 MB `cloudflared.exe`, legacy `campusmart-backend.zip`, and old terminal dumps to eliminate workspace bloat.
+  - **Build Stabilization under SOLID Principles (Single Responsibility)**:
+    - Fixed active compilation error in `src/pages/ugc-guidelines.tsx` (`TS6133: 'resolveMediaUrl' is declared but its value is never read`).
+    - Standardized clean import scope, unblocking strict production compilation (`tsc -b && vite build`) for Vercel deployment.
+- **Validation**:
+  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 10.26s`).
+  - Backend Build: `npm run build` (`prisma generate && tsc`) passed with exit code 0.
+  - Database Reachability: Verified live connection and query execution to Render PostgreSQL via Prisma Client.
 

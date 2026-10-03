@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { usePageData } from '@/hooks/usePageData';
-import { resolveMediaUrl } from '@/lib/media-url';
 import MediaImage from '@/components/ui/media-image';
 
 type Article = { title: string; description?: string; category: string; readTime: string; image: string; href?: string; author?: string; authorImage?: string };
