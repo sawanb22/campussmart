@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { Link } from 'react-router-dom';
 import { usePageData } from '@/hooks/usePageData';
+import MediaImage from '@/components/ui/media-image';
 import Shop from '@/pages/shop';
 
 const DEFAULTS = {
@@ -47,7 +48,7 @@ const Furniture = () => {
             </div>
           </div>
           <div className="lg:w-1/2 relative">
-            <img src={heroImage} alt={heroTitle} className="rounded-2xl shadow-xl w-full h-[260px] object-cover border-2 border-cm-blue-dark relative z-10" />
+            <MediaImage src={heroImage} alt={heroTitle} className="rounded-2xl shadow-xl w-full h-[260px] object-cover border-2 border-cm-blue-dark relative z-10" />
           </div>
         </div>
       </section>

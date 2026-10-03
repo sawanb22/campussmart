@@ -42,7 +42,7 @@ const PageTemplates: Record<string, any> = {
   'blog': lazy(() => import('@/pages/blog')),
   'ar-vr-experiences': lazy(() => import('@/pages/ar-vr-experiences')),
   'campus-automation': lazy(() => import('@/pages/campus-automation')),
-  'campus-design-execution': lazy(() => import('@/pages/campus-design')),
+  'campus-design-execution': lazy(() => import('@/pages/campus-design-execution')),
   'campus-master-planning': lazy(() => import('@/pages/campus-master-planning')),
   'campus-furniture-design': lazy(() => import('@/pages/campus-furniture-design')),
   'campus-design': lazy(() => import('@/pages/campus-design')),
@@ -53,9 +53,8 @@ const PageTemplates: Record<string, any> = {
   'collaboration-spaces': lazy(() => import('@/pages/collaboration-spaces')),
   'contact-us': lazy(() => import('@/pages/contact-us')),
   'about-us': lazy(() => import('@/pages/corporate')),
-  'corporate': lazy(() => import('@/pages/corporate')),
   'digital-transformation': lazy(() => import('@/pages/digital-transformation')),
-  'furniture-design-supply': lazy(() => import('@/pages/campus-furniture-design')),
+  'furniture-design-supply': lazy(() => import('@/pages/furniture-design-supply')),
   'furniture': lazy(() => import('@/pages/furniture')),
   'innovation-centres': lazy(() => import('@/pages/innovation-centres')),
   'innovation-centers': lazy(() => import('@/pages/innovation-centers')),
@@ -95,6 +94,7 @@ const PageTemplates: Record<string, any> = {
   'ugc-guidelines': lazy(() => import('@/pages/ugc-guidelines')),
   'services': lazy(() => import('@/pages/services')),
   'solutions': lazy(() => import('@/pages/solutions')),
+  'smart-classrooms': SmartClassrooms,
   'home': Home,
 };
 
@@ -187,6 +187,8 @@ const ScienceTechLabsDetail = lazy(() => import('@/pages/science-tech-labs-detai
 const CampusMasterPlanningDetail = lazy(() => import('@/pages/campus-master-planning-detail'));
 const ArVrExperiencesDetail = lazy(() => import('@/pages/ar-vr-experiences-detail'));
 const CampusFurnitureDesignDetail = lazy(() => import('@/pages/campus-furniture-design-detail'));
+const FurnitureDesignSupplyDetail = lazy(() => import('@/pages/furniture-design-supply-detail'));
+const CampusDesignExecutionDetail = lazy(() => import('@/pages/campus-design-execution-detail'));
 const AiDigitalDesignSupplyDetail = lazy(() => import('@/pages/ai-digital-design-supply-detail'));
 const CollaborationSpacesDetail = lazy(() => import('@/pages/collaboration-spaces-detail'));
 const SportsInfrastructureDetail = lazy(() => import('@/pages/sports-infrastructure-detail'));
@@ -216,7 +218,7 @@ function App() {
               <Route path="/blog/:slug" element={<Layout><BlogPost /></Layout>} />
               <Route path="/case-studies/:slug" element={<Layout><CaseStudyDetail /></Layout>} />
               <Route path="/partner-with-colleges/:modelSlug" element={<Layout><PartnershipModelDetail /></Layout>} />
-              <Route path="/campus-design-execution/:stepSlug" element={<Layout><CampusDesignService /></Layout>} />
+              <Route path="/campus-design-execution/:stepSlug" element={<Layout><CampusDesignExecutionDetail /></Layout>} />
               <Route path="/collaboration/:itemSlug" element={<Layout><CollaborationDetail /></Layout>} />
               <Route path="/innovation/:trackSlug" element={<Layout><InnovationDetail /></Layout>} />
               <Route path="/ai-ml/:moduleSlug" element={<Layout><AiMlDetail /></Layout>} />
@@ -227,7 +229,7 @@ function App() {
               <Route path="/campus-master-planning/:serviceSlug" element={<Layout><CampusMasterPlanningDetail /></Layout>} />
               <Route path="/ar-vr-experiences/:experienceSlug" element={<Layout><ArVrExperiencesDetail /></Layout>} />
               <Route path="/campus-furniture-design/:rangeSlug" element={<Layout><CampusFurnitureDesignDetail /></Layout>} />
-              <Route path="/furniture-design-supply/:solutionSlug" element={<Layout><CampusFurnitureDesignDetail /></Layout>} />
+              <Route path="/furniture-design-supply/:solutionSlug" element={<Layout><FurnitureDesignSupplyDetail /></Layout>} />
               <Route path="/ai-digital-design-supply/:solutionSlug" element={<Layout><AiDigitalDesignSupplyDetail /></Layout>} />
               <Route path="/collaboration-spaces/:spaceSlug" element={<Layout><CollaborationSpacesDetail /></Layout>} />
               <Route path="/sports-infrastructure/:facilitySlug" element={<Layout><SportsInfrastructureDetail /></Layout>} />
@@ -248,6 +250,7 @@ function App() {
               <Route path="/admin/*" element={<AdminRoutes />} />
               <Route path="/wishlist" element={<Navigate to="/my-account?tab=wishlist" replace />} />
               <Route path="/cart" element={<Navigate to="/my-account?tab=wishlist" replace />} />
+              <Route path="/corporate" element={<Navigate to="/about-us" replace />} />
 
               {/* Static pages explicitly mapped so they always work */}
               {Object.keys(PageTemplates).map((path) => {

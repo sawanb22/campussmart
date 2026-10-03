@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { LayoutGrid, Ruler, Trophy, Cpu } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePageData } from '@/hooks/usePageData';
+import { MediaImage } from '@/components/ui/media-image';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -92,13 +93,19 @@ const Services = () => {
                         return (
                             <Link 
                                 key={i} 
-                                to={service.href} 
+                                to={service.href?.trim() || '/contact-us'} 
                                 className="service-card group bg-white border border-slate-200/90 rounded-[1.75rem] shadow-xs hover:shadow-lg hover:border-cm-blue/40 transition-all duration-200 p-5 sm:p-6 flex flex-col justify-between h-full min-h-[240px] w-full"
                             >
                                 <div className="flex h-full w-full items-start gap-4">
-                                    <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl ${service.color} flex items-center justify-center ${isYellow ? 'text-slate-900' : 'text-white'} shrink-0 group-hover:scale-105 transition-transform duration-200 shadow-xs`}>
-                                        <Icon className="w-6 h-6 sm:w-7 sm:h-7" />
-                                    </div>
+                                    {service.image ? (
+                                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden shrink-0 group-hover:scale-105 transition-transform duration-200 shadow-xs">
+                                            <MediaImage src={service.image} alt={service.title} className="w-full h-full object-cover" />
+                                        </div>
+                                    ) : (
+                                        <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl ${service.color || 'bg-cm-blue'} flex items-center justify-center ${isYellow ? 'text-slate-900' : 'text-white'} shrink-0 group-hover:scale-105 transition-transform duration-200 shadow-xs`}>
+                                            <Icon className="w-6 h-6 sm:w-7 sm:h-7" />
+                                        </div>
+                                    )}
                                     <div className="flex flex-1 flex-col justify-between min-w-0">
                                         <div>
                                             <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2 group-hover:text-cm-blue transition-colors leading-tight">

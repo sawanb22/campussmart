@@ -3,9 +3,9 @@ import gsap from 'gsap';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
-import { resolveMediaUrl } from '@/lib/media-url';
+import MediaImage from '@/components/ui/media-image';
 
-export interface CardItem { title: string; description: string; image?: string; }
+export interface CardItem { title: string; description: string; image?: string; href?: string; }
 interface Step { heading: string; body: string; }
 
 export const DIGITAL_TRANSFORMATION_PAGE_SLUG = 'digital-transformation';
@@ -87,6 +87,8 @@ const DigitalTransformation = () => {
   const ctaTitle = data.ctaTitle ?? DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? DEFAULTS.ctaSubtitle;
 
+  const cardLink = (card: CardItem) => card.href?.trim() || `/${DIGITAL_TRANSFORMATION_PAGE_SLUG}/${slugifyDigitalTransformationCard(card.title)}`;
+
   return (
     <main className="min-h-screen bg-white">
       {/* Standard Hero Section */}
@@ -111,8 +113,8 @@ const DigitalTransformation = () => {
             </div>
           </div>
           <div className="lg:w-1/2 relative w-full">
-            <img
-              src={resolveMediaUrl(heroImage)}
+            <MediaImage
+              src={heroImage}
               alt={heroTitle}
               className="rounded-2xl shadow-xl w-full h-[240px] sm:h-[260px] object-cover border-2 border-cm-blue-dark relative z-10"
             />
@@ -129,16 +131,15 @@ const DigitalTransformation = () => {
           </div>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {section2Cards.map((card) => {
-              const image = resolveMediaUrl(card.image);
               return (
                 <Link
                   key={card.title}
-                  to={`/${DIGITAL_TRANSFORMATION_PAGE_SLUG}/${slugifyDigitalTransformationCard(card.title)}`}
+                  to={cardLink(card)}
                   className="group block overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
                 >
-                  {image && (
+                  {card.image && (
                     <div className="h-36 w-full overflow-hidden">
-                      <img src={image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                      <MediaImage src={card.image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     </div>
                   )}
                   <div className="p-6">

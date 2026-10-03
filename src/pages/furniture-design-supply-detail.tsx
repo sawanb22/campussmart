@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Armchair } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
-import { resolveMediaUrl } from '@/lib/media-url';
+import { MediaImage } from '@/components/ui/media-image';
 import { FURNITURE_SUPPLY_PAGE_SLUG, FURNITURE_SUPPLY_DEFAULTS, slugifyFurnitureSupplyTitle } from './furniture-design-supply';
 
 const FurnitureDesignSupplyDetail = () => {
@@ -27,8 +27,6 @@ const FurnitureDesignSupplyDetail = () => {
     );
   }
 
-  const image = resolveMediaUrl(card.image);
-
   return (
     <main className="min-h-screen bg-gray-50/50 py-8 sm:py-12">
       <article className="mx-auto max-w-3xl px-4 sm:px-6">
@@ -36,7 +34,13 @@ const FurnitureDesignSupplyDetail = () => {
           <ArrowLeft className="h-4 w-4" /> Back to Furniture Design & Supply
         </Link>
         <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-          {image && <img src={image} alt={card.title} className="h-56 w-full object-cover sm:h-72" />}
+          {card.image && (
+            <MediaImage
+              src={card.image}
+              alt={card.title}
+              className="h-56 w-full object-cover sm:h-72"
+            />
+          )}
           <div className="p-6 sm:p-10">
             <div className="mb-5 inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cm-red">
               <Armchair className="h-3 w-3" /> {card.categories?.[0] ?? 'Furniture'}

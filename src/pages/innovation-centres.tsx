@@ -3,7 +3,7 @@ import gsap from 'gsap';
 import { Link } from 'react-router-dom';
 import { Lightbulb, Zap, Users, Target } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
-import { resolveMediaUrl } from '@/lib/media-url';
+import { MediaImage } from '@/components/ui/media-image';
 import {
   INNOVATION_CENTRES_PAGE_SLUG,
   INNOVATION_CENTRES_DEFAULTS,
@@ -41,7 +41,8 @@ const InnovationCentres = () => {
   const section1Title = data.section1Title ?? INNOVATION_CENTRES_DEFAULTS.section1Title;
   const cards: InnovationCentresCard[] = Array.isArray(data.cards) ? data.cards : INNOVATION_CENTRES_DEFAULTS.cards;
 
-  const cardLink = (card: InnovationCentresCard) => `/${INNOVATION_CENTRES_PAGE_SLUG}/${slugifyInnovationCentreTitle(card.title)}`;
+  const cardLink = (card: InnovationCentresCard) =>
+    card.href?.trim() || `/${INNOVATION_CENTRES_PAGE_SLUG}/${card.slug?.trim() || slugifyInnovationCentreTitle(card.title)}`;
 
   return (
     <main className="min-h-screen bg-white">
@@ -65,7 +66,11 @@ const InnovationCentres = () => {
                   className="group bg-white border border-slate-200/70 rounded-[2rem] hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)] transition duration-300 hover:-translate-y-1 flex flex-col shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] min-h-[360px] overflow-hidden"
                 >
                   <div className="relative overflow-hidden aspect-[4/5]">
-                    <img src={resolveMediaUrl(item.image)} alt={item.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <MediaImage
+                      src={item.image}
+                      alt={item.title}
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent" />
                     <div className="absolute top-4 right-4 w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20 group-hover:bg-cm-blue group-hover:scale-110 transition-all duration-500">
                       <Icon className="w-5 h-5 text-white" />

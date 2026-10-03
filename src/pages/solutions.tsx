@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Beaker, BookOpen, Lightbulb, Users, Monitor } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePageData } from '@/hooks/usePageData';
+import { MediaImage } from '@/components/ui/media-image';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -99,15 +100,21 @@ const Solutions = () => {
                         return (
                             <Link 
                                 key={i} 
-                                to={sol.href} 
+                                to={sol.href?.trim() || '/contact-us'} 
                                 className="solution-card group bg-white border border-slate-200/90 rounded-2xl shadow-xs hover:shadow-lg hover:border-cm-blue/40 transition-all duration-200 overflow-hidden flex flex-col justify-between"
                             >
                                 <div className={`h-2 ${sol.color || 'bg-cm-blue'}`} />
                                 <div className="p-6 sm:p-8 flex-1 flex flex-col justify-between">
                                     <div>
-                                        <div className={`w-12 h-12 rounded-xl ${sol.color || 'bg-cm-blue'} flex items-center justify-center ${isYellow ? 'text-slate-900' : 'text-white'} mb-6 group-hover:scale-105 transition-transform duration-200 shadow-xs`}>
-                                            <Icon className="w-6 h-6" />
-                                        </div>
+                                        {sol.image ? (
+                                            <div className="w-12 h-12 rounded-xl overflow-hidden mb-6 group-hover:scale-105 transition-transform duration-200 shadow-xs">
+                                                <MediaImage src={sol.image} alt={sol.title} className="w-full h-full object-cover" />
+                                            </div>
+                                        ) : (
+                                            <div className={`w-12 h-12 rounded-xl ${sol.color || 'bg-cm-blue'} flex items-center justify-center ${isYellow ? 'text-slate-900' : 'text-white'} mb-6 group-hover:scale-105 transition-transform duration-200 shadow-xs`}>
+                                                <Icon className="w-6 h-6" />
+                                            </div>
+                                        )}
                                         <h3 className="text-xl font-bold text-slate-900 mb-2.5 group-hover:text-cm-blue transition-colors">
                                             {sol.title}
                                         </h3>

@@ -7,7 +7,7 @@ import { usePageData } from '@/hooks/usePageData';
 import { usePageCategories } from '@/hooks/usePageCategories';
 import { useDesignWishlist } from '@/hooks/useDesignWishlist';
 import LoginPromptModal from '@/components/login-prompt-modal';
-import { resolveMediaUrl } from '@/lib/media-url';
+import { MediaImage } from '@/components/ui/media-image';
 import { AI_ML_PAGE_SLUG, AI_ML_DEFAULTS, slugifyAiMlTitle, type AiMlCard } from './ai-ml.data';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -37,7 +37,11 @@ const AIML = () => {
 
   const heroTitle = data.heroTitle ?? AI_ML_DEFAULTS.heroTitle;
   const heroSubtitle = data.heroSubtitle ?? AI_ML_DEFAULTS.heroSubtitle;
-  const heroImage = resolveMediaUrl(data.heroImage) || AI_ML_DEFAULTS.heroImage;
+  const heroImage = data.heroImage || AI_ML_DEFAULTS.heroImage;
+  const ctaTitle = data.ctaTitle ?? AI_ML_DEFAULTS.ctaTitle;
+  const ctaSubtitle = data.ctaSubtitle ?? AI_ML_DEFAULTS.ctaSubtitle;
+  const ctaButtonLabel = data.ctaButtonLabel ?? AI_ML_DEFAULTS.ctaButtonLabel;
+  const ctaHref = data.ctaHref ?? AI_ML_DEFAULTS.ctaHref;
   const allCards: AiMlCard[] = Array.isArray(data.cards) ? data.cards : AI_ML_DEFAULTS.cards;
 
   const categoryOptions = useMemo(
@@ -50,7 +54,8 @@ const AIML = () => {
   );
 
   const [featured, ...rest] = filteredCards;
-  const cardLink = (card: AiMlCard) => `/${AI_ML_PAGE_SLUG}/${slugifyAiMlTitle(card.title)}`;
+  const cardLink = (card: AiMlCard) =>
+    card.href?.trim() || `/${AI_ML_PAGE_SLUG}/${card.slug?.trim() || slugifyAiMlTitle(card.title)}`;
 
   return (
     <main className="min-h-screen bg-white">
@@ -80,7 +85,7 @@ const AIML = () => {
           <div className="relative mx-auto hidden aspect-square w-full max-w-sm lg:block">
             <div className="absolute right-0 top-4 h-64 w-64 rounded-full bg-orange-400/90" />
             <div className="absolute left-2 top-10 h-56 w-72 overflow-hidden rounded-2xl shadow-xl">
-              <img src={heroImage} alt={heroTitle} className="h-full w-full object-cover" />
+              <MediaImage src={heroImage} alt={heroTitle} className="h-full w-full object-cover" />
             </div>
           </div>
         </div>
@@ -111,13 +116,11 @@ const AIML = () => {
               {/* Featured */}
               <Link to={cardLink(featured)} className="group grid grid-cols-1 overflow-hidden rounded-2xl bg-amber-50 sm:grid-cols-[1.2fr_0.8fr]">
                 <div className="min-h-[220px] overflow-hidden sm:min-h-full">
-                  {resolveMediaUrl(featured.image) && (
-                    <img
-                      src={resolveMediaUrl(featured.image)}
-                      alt={featured.title}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  )}
+                  <MediaImage
+                    src={featured.image}
+                    alt={featured.title}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
                 </div>
                 <div className="flex flex-col justify-center p-6 sm:p-8">
                   <span className="mb-2.5 text-xs font-bold uppercase tracking-[0.13em] text-orange-600">
@@ -135,14 +138,11 @@ const AIML = () => {
               {rest.length > 0 && (
                 <div ref={gridRef} className="mt-4 grid grid-cols-1 gap-x-5 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
                   {rest.map((card) => {
-                    const image = resolveMediaUrl(card.image);
                     return (
                       <article key={card.title} className="group min-w-0">
                         <Link to={cardLink(card)} className="block">
                           <div className="aspect-[4/3] w-full overflow-hidden rounded-xl bg-stone-100">
-                            {image && (
-                              <img src={image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                            )}
+                            <MediaImage src={card.image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                           </div>
                           <span className="mt-3 block text-xs font-bold uppercase tracking-wide text-orange-600">{card.categories?.[0] ?? 'AI/ML'}</span>
                           <h3 className="font-playfair mt-1 text-lg font-semibold leading-snug text-stone-900">{card.title}</h3>
@@ -206,11 +206,11 @@ const AIML = () => {
           <div className="pointer-events-none absolute -right-14 -top-20 h-52 w-52 rounded-full border border-white/10" />
           <div className="relative flex flex-col items-center justify-between gap-6 sm:flex-row">
             <div>
-              <h2 className="font-playfair text-2xl font-semibold sm:text-3xl">Ready to deploy AI/ML on your campus?</h2>
-              <p className="mt-2 max-w-md text-sm text-white/60">Talk to our engineering team about the right mix of stations, labs and compute for your students.</p>
+              <h2 className="font-playfair text-2xl font-semibold sm:text-3xl">{ctaTitle}</h2>
+              <p className="mt-2 max-w-md text-sm text-white/60">{ctaSubtitle}</p>
             </div>
-            <Link to="/contact-us" className="shrink-0 rounded-full bg-orange-500 px-7 py-3 text-sm font-bold text-white transition-colors hover:bg-orange-600">
-              Contact Us
+            <Link to={ctaHref} className="shrink-0 rounded-full bg-orange-500 px-7 py-3 text-sm font-bold text-white transition-colors hover:bg-orange-600">
+              {ctaButtonLabel}
             </Link>
           </div>
         </div>

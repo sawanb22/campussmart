@@ -6,12 +6,14 @@ import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { resolveMediaUrl } from '@/lib/media-url';
 import { getWarmCardCover } from '@/lib/card-covers';
+import MediaImage from '@/components/ui/media-image';
 
 export interface FurnitureSupplyCard {
   title: string;
   description?: string;
   image?: string;
   categories?: string[];
+  href?: string;
 }
 
 export const FURNITURE_SUPPLY_PAGE_SLUG = 'furniture-design-supply';
@@ -114,6 +116,8 @@ const FurnitureDesignSupply = () => {
     [cards, activeCategory],
   );
 
+  const cardLink = (card: FurnitureSupplyCard) => card.href?.trim() || `/${FURNITURE_SUPPLY_PAGE_SLUG}/${slugifyFurnitureSupplyTitle(card.title)}`;
+
   return (
     <main className="min-h-screen bg-white">
       <section ref={heroRef} className="px-4 pb-3 pt-4 sm:px-6 sm:pb-4 sm:pt-5 lg:px-8">
@@ -123,7 +127,7 @@ const FurnitureDesignSupply = () => {
             {/* Large image tile */}
             <div className="group relative overflow-hidden rounded-2xl lg:col-span-2">
               <div className="h-64 w-full overflow-hidden sm:h-72">
-                <img
+                <MediaImage
                   src={heroImage}
                   alt={heroTitle}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -196,16 +200,15 @@ const FurnitureDesignSupply = () => {
             <div ref={gridRef} className="grid grid-cols-1 gap-x-5 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
               {filteredCards.map((card, index) => {
                 const cover = getWarmCardCover(index);
-                const image = resolveMediaUrl(card.image);
                 return (
                   <Link
                     key={card.title}
-                    to={`/${FURNITURE_SUPPLY_PAGE_SLUG}/${slugifyFurnitureSupplyTitle(card.title)}`}
+                    to={cardLink(card)}
                     className="group block min-w-0"
                   >
                     <div className="aspect-[4/3] w-full overflow-hidden rounded-xl" style={{ background: cover.background }}>
-                      {image && (
-                        <img src={image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                      {card.image && (
+                        <MediaImage src={card.image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                       )}
                     </div>
                     <span className="mt-3 block text-xs font-bold uppercase tracking-wide text-cm-red">{card.categories?.[0] ?? 'Furniture'}</span>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, BookOpen } from 'lucide-react';
 import api from '@/api/client';
-import { resolveMediaUrl } from '@/lib/media-url';
+import { MediaImage } from '@/components/ui/media-image';
 
 interface CaseStudy {
   title: string;
@@ -35,7 +35,7 @@ const CaseStudyDetail = () => {
       <article className="max-w-4xl mx-auto px-4 sm:px-6">
         <Link to="/catalogues" className="inline-flex items-center gap-2 text-cm-blue font-semibold mb-8"><ArrowLeft className="w-4 h-4" /> Back to Catalogues</Link>
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
-          {study.imageUrl && <img src={resolveMediaUrl(study.imageUrl)} alt={study.title} className="w-full max-h-[420px] object-cover" />}
+          {study.imageUrl && <MediaImage src={study.imageUrl} alt={study.title} className="w-full max-h-[420px] object-cover" />}
           <div className="p-6 sm:p-10">
             <div className="inline-flex items-center gap-1.5 bg-blue-50 text-cm-blue px-3 py-1 rounded-full font-semibold text-xs uppercase tracking-wide mb-5">
               <BookOpen className="w-3 h-3" /> Case Study

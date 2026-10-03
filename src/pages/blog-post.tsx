@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, Tags } from 'lucide-react';
 import api from '@/api/client';
+import MediaImage from '@/components/ui/media-image';
 
 interface Category { id: number; name: string; slug: string; }
 interface Post { title: string; body: string; excerpt: string; imageUrl?: string; category?: Category; blogcategory?: Category; }
@@ -30,7 +31,7 @@ const BlogPost = () => {
       <article className="max-w-4xl mx-auto px-4 sm:px-6">
         <Link to="/blog" className="inline-flex items-center gap-2 text-cm-blue font-semibold mb-8"><ArrowLeft className="w-4 h-4" /> Back to Blog</Link>
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
-          {post.imageUrl && <img src={post.imageUrl} alt={post.title} className="w-full max-h-[420px] object-cover" />}
+          {post.imageUrl && <MediaImage src={post.imageUrl} alt={post.title} className="w-full max-h-[420px] object-cover" />}
           <div className="p-6 sm:p-10">
             <div className="inline-flex items-center gap-1.5 bg-blue-50 text-cm-blue px-3 py-1 rounded-full font-semibold text-xs uppercase tracking-wide mb-5">
               <Tags className="w-3 h-3" /> {post.category?.name || 'General'}

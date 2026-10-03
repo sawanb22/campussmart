@@ -4,7 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
-import { resolveMediaUrl } from '@/lib/media-url';
+import { MediaImage } from '@/components/ui/media-image';
 import { getCardCover } from '@/lib/card-covers';
 import {
   SCIENCE_TECH_LABS_PAGE_SLUG,
@@ -51,7 +51,8 @@ const ScienceTechLabs = () => {
     });
   }, [allCards, activeCategory, searchQuery]);
 
-  const cardLink = (card: ScienceTechLabsCard) => `/${SCIENCE_TECH_LABS_PAGE_SLUG}/${slugifyScienceLabTitle(card.title)}`;
+  const cardLink = (card: ScienceTechLabsCard) =>
+    card.href?.trim() || `/${SCIENCE_TECH_LABS_PAGE_SLUG}/${card.slug?.trim() || slugifyScienceLabTitle(card.title)}`;
 
   return (
     <main className="min-h-screen bg-white">
@@ -103,11 +104,10 @@ const ScienceTechLabs = () => {
             <div ref={gridRef} className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
               {filteredCards.map((card, index) => {
                 const cover = getCardCover(index);
-                const image = resolveMediaUrl(card.image);
                 return (
                   <Link key={card.title} to={cardLink(card)} className="group block min-w-0">
                     <div className="relative h-48 overflow-hidden rounded-xl" style={{ background: cover.background }}>
-                      {image && <img src={image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />}
+                      <MediaImage src={card.image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                       <span className="absolute bottom-0 left-0 h-7 w-7 rounded-tr-xl rounded-bl-xl" style={{ background: cover.accent }} />
                     </div>
                     <div className="mt-3 flex items-center gap-2 text-[11px] text-gray-400">

@@ -2,14 +2,15 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
-import { resolveMediaUrl } from '@/lib/media-url';
 import { getCardCover } from '@/lib/card-covers';
+import MediaImage from '@/components/ui/media-image';
 
 export interface CollaborationSpaceCard {
   title: string;
   description?: string;
   image?: string;
   categories?: string[];
+  href?: string;
 }
 
 export const COLLABORATION_SPACES_PAGE_SLUG = 'collaboration-spaces';
@@ -90,6 +91,8 @@ const CollaborationSpaces = () => {
     [cards, activeCategory],
   );
 
+  const cardLink = (card: CollaborationSpaceCard) => card.href?.trim() || `/${COLLABORATION_SPACES_PAGE_SLUG}/${slugifyCollaborationSpaceTitle(card.title)}`;
+
   return (
     <main className="min-h-screen bg-white">
       {/* Toolbar + grid */}
@@ -128,16 +131,15 @@ const CollaborationSpaces = () => {
             <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
               {filteredCards.map((card, index) => {
                 const cover = getCardCover(index);
-                const image = resolveMediaUrl(card.image);
                 return (
                   <Link
                     key={card.title}
-                    to={`/${COLLABORATION_SPACES_PAGE_SLUG}/${slugifyCollaborationSpaceTitle(card.title)}`}
+                    to={cardLink(card)}
                     className="group block min-w-0"
                   >
                     <div className="aspect-[4/3] w-full overflow-hidden rounded-xl" style={{ background: cover.background }}>
-                      {image && (
-                        <img src={image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                      {card.image && (
+                        <MediaImage src={card.image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                       )}
                     </div>
                     <span className="mt-3 block text-xs font-bold uppercase tracking-wide text-orange-600">{card.categories?.[0] ?? 'Space'}</span>

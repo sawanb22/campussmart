@@ -3,9 +3,9 @@ import gsap from 'gsap';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
-import { resolveMediaUrl } from '@/lib/media-url';
+import MediaImage from '@/components/ui/media-image';
 
-interface CardItem { title: string; description: string; image?: string; categories?: string[]; }
+interface CardItem { title: string; description: string; image?: string; categories?: string[]; href?: string; }
 
 export const CAMPUS_AUTOMATION_PAGE_SLUG = 'campus-automation';
 
@@ -95,6 +95,8 @@ const CampusAutomation = () => {
   );
   const filteredCards = activeFilter === 'All' ? rest : rest.filter((card) => card.categories?.includes(activeFilter));
 
+  const cardLink = (card: CardItem) => card.href?.trim() || `/${CAMPUS_AUTOMATION_PAGE_SLUG}/${slugifyCampusAutomationTitle(card.title)}`;
+
   return (
     <main className="min-h-screen bg-white">
       <section id="modules" className="mx-auto max-w-6xl px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
@@ -118,7 +120,7 @@ const CampusAutomation = () => {
         {featured && (
           <article className="mb-4 grid grid-cols-1 overflow-hidden rounded-xl bg-cm-gray lg:grid-cols-[1.2fr_1fr]">
             <div className="h-56 overflow-hidden lg:h-auto">
-              <img src={resolveMediaUrl(featured.image) || featured.image} alt={featured.title} className="h-full w-full object-cover" />
+              <MediaImage src={featured.image} alt={featured.title} className="h-full w-full object-cover" />
             </div>
             <div className="flex flex-col justify-center p-6 sm:p-8">
               <span className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-cm-blue">
@@ -144,11 +146,11 @@ const CampusAutomation = () => {
             {filteredCards.map((card) => (
               <Link
                 key={card.title}
-                to={`/${CAMPUS_AUTOMATION_PAGE_SLUG}/${slugifyCampusAutomationTitle(card.title)}`}
+                to={cardLink(card)}
                 className="block overflow-hidden rounded-lg bg-cm-gray transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
               >
                 <div className="h-44 overflow-hidden">
-                  <img src={resolveMediaUrl(card.image) || card.image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 hover:scale-105" />
+                  <MediaImage src={card.image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 hover:scale-105" />
                 </div>
                 <div className="p-4">
                   <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-cm-blue">{card.categories?.[0] ?? 'Module'}</span>

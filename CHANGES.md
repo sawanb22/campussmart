@@ -44,6 +44,7 @@
 | `AUTH-002` | 2026-10-03 00:35 | Pre-Verified Test User Seeding | Seeded pre-verified standard customer account (user@campussmart.in / User@1234) in runSeed.ts and seed.ts with emailVerified: true, enabling frictionless customer login and testing without OTP dependency. | 2 files (backend) | Completed |
 | `FIX-001` | 2026-10-03 15:30 | Quote Submission Resilience & Canonical Routes Alignment | Made quote spreadsheet sync non-blocking and added database error logging; refined input trimming and server error display on /campus-design quote form; unified duplicate routes (/campus-design-execution -> /campus-design, /furniture-design-supply -> /campus-furniture-design); synced DB cards and homepage links under SOLID principles. | 5 files (backend, frontend) + DB | Completed |
 | `FIX-002` | 2026-10-03 15:55 | Media URL Resolution & Static Proxying | Resolved live card image display failure on Vercel: added Vercel rewrite proxying /uploads/(.*) to Render backend, wrapped service card images in resolveMediaUrl with typed onError fallbacks in campus-design.tsx and campus-design-service.tsx. | 3 files (frontend & config) | Completed |
+| `FIX-003` | 2026-10-03 17:50 | Global CMS & 95-Page Architecture Standardization | Standardized universal media resilience (<MediaImage />) across 28+ pages; resolved /catalogues skeleton race conditions; aligned case-study slugs & detail routing; eliminated Admin data loss vectors via UnifiedPageEditor SSOT; aligned App.tsx routes (/campus-design-execution, /furniture-design-supply, /corporate redirect); deleted 6 mock seed rows in Neon Postgres Catalogue table. | 28+ files (frontend, admin, routes) + DB | Completed |
 
 ---
 
@@ -1205,7 +1206,64 @@
 
 ---
 
-<!-- FUTURE CHANGES APPENDED BELOW -->
+### [FIX-003] 2026-10-03 17:50 IST - Global CMS and 95-Page Architecture Standardization
+- **Author/Agent**: Antigravity Pair Programmer
+- **Scope / Category**: Universal Media Resilience Layer, Single Source of Truth CMS, Admin Data Loss Remediation, Routing & Navigation Standardization, Neon Postgres Database Hygiene
+- **Files Modified / Created**:
+  - `[NEW] src/components/ui/media-image.tsx`
+  - `[NEW] src/admin/components/UnifiedPageEditor.tsx`
+  - `[MODIFY] src/admin/pages/PageEditor.tsx`
+  - `[MODIFY] src/admin/pages/PagesManager.tsx`
+  - `[MODIFY] src/pages/catalogues.tsx`
+  - `[MODIFY] src/pages/case-study-detail.tsx`
+  - `[MODIFY] src/pages/smart-classrooms.tsx`
+  - `[MODIFY] src/pages/services.tsx`
+  - `[MODIFY] src/pages/solutions.tsx`
+  - `[MODIFY] src/pages/ai-stations.tsx`
+  - `[MODIFY] src/pages/ai-ml.tsx` & `src/pages/ai-ml.data.ts`
+  - `[MODIFY] src/pages/ai-guide.tsx` & `src/pages/ai-guide-article.tsx`
+  - `[MODIFY] src/pages/blog-post.tsx`
+  - `[MODIFY] src/pages/colleges-universities-for-sale.tsx`
+  - `[MODIFY] src/pages/furniture.tsx`
+  - `[MODIFY] src/pages/home-feature-detail.tsx`
+  - `[MODIFY] src/pages/new-environments.tsx`
+  - `[MODIFY] src/pages/product-catalog.tsx`
+  - `[MODIFY] src/pages/ai-digital-design-supply.tsx`
+  - `[MODIFY] src/pages/campus-automation.tsx`
+  - `[MODIFY] src/pages/collaboration-spaces.tsx`
+  - `[MODIFY] src/pages/collaboration.tsx`
+  - `[MODIFY] src/pages/digital-transformation.tsx`
+  - `[MODIFY] src/pages/furniture-design-supply.tsx` & `src/pages/furniture-design-supply-detail.tsx`
+  - `[MODIFY] src/pages/innovation-centers.tsx` & `src/pages/innovation-centres.tsx`
+  - `[MODIFY] src/pages/labs.tsx`
+  - `[MODIFY] src/pages/libraries.tsx`
+  - `[MODIFY] src/pages/science-tech-labs.tsx` & `src/pages/science-tech-labs.data.ts`
+  - `[MODIFY] src/pages/sports-infra.tsx` & `src/pages/sports-infrastructure.tsx`
+  - `[MODIFY] src/pages/tech-infra.tsx`
+  - `[MODIFY] src/pages/campus-design-execution-detail.tsx`
+  - `[MODIFY] src/App.tsx`
+  - `[DATABASE] Neon Postgres`: Cleaned mock catalogue seeds (`id IN (1, 2, 3, 4, 5, 6)`), retaining 4 live uploaded catalogues.
+- **Description & Rationale**:
+  - **Issue Addressed**:
+    1. *Media 404 Disconnects*: Various category and inner pages lacked defensive media URL resolution (`resolveMediaUrl`), rendering raw unproxied paths or breaking entirely upon asset fetch failures.
+    2. *Catalogues Dual-Fetch Race Condition & Flashing*: On `/catalogues`, CMS cards and API catalogues both loaded asynchronously, flashing fallback cards before switching to API catalogues. Case studies section lacked proper CMS/API bindings and `/case-studies/:slug` integration.
+    3. *Admin Schema Mismatch & Data Loss Vector*: `PageEditor.tsx` (the standalone full editor at `/admin/pages/:id/edit`) only supported a minimal subset of fields (Hero + basic Cards + Features), wiping out complex page structures (AboutUs mission/team/partners, Document uploads, Interactive cards, Sections, UGC guidelines, Newsletters) whenever saved from the full editor.
+    4. *Route & Template Mismatches*: In `App.tsx`, `furniture-design-supply` and `campus-design-execution` mapped to inconsistent templates/detail views instead of dedicated components, and `/corporate` lacked an automatic redirect to `/about-us`.
+    5. *Database Seed Pollution*: Mock seed rows (`id IN (1, 2, 3, 4, 5, 6)`) in the Neon Postgres `catalogue` table pointed to non-existent `/uploads/catalogues/*.pdf` files, cluttering the public downloads interface.
+  - **Architectural Solution & SOLID Principles Compliance**:
+    - *Universal Media Resilience Component (`<MediaImage />`)*: Created `src/components/ui/media-image.tsx` encapsulating `resolveMediaUrl`, image error recovery with SVG placeholder fallback, optional `fallbackSrc`, and smooth layout stabilization. Integrated across all category and detail templates.
+    - *Single Source of Truth Catalogues Hub*: Overhauled `src/pages/catalogues.tsx` to display an animated 6-card skeleton while loading, eliminating dual-fetch flashing. Integrated dynamic Case Studies fetching `/api/case-studies` with fallback to CMS `data.caseStudies`, routing directly to `/case-studies/:slug`.
+    - *Unified Page Editor Architecture (`UnifiedPageEditor.tsx`)*: Extracted the complete schema-driven inline editor from `PagesManager.tsx` into a reusable, full-featured `UnifiedPageEditor.tsx` component. Configured both `PageEditor.tsx` (standalone) and `PagesManager.tsx` (modal quick-edit) to use this component, eradicating the data-loss vector, adding dedicated quick-links for `/admin/homepage-editor` and `/admin/catalogues`, and broadcasting CMS invalidations.
+    - *Route & Slug Alignment*: Standardized `App.tsx` PageTemplates for `furniture-design-supply` and `campus-design-execution`, wired `CampusDesignExecutionDetail` and `FurnitureDesignSupplyDetail`, added canonical redirect from `/corporate` to `/about-us`, and added `smart-classrooms` to template maps.
+    - *Database Hygiene*: Safely purged mock records 1-6 from the Neon Postgres `catalogue` table, preserving the 4 verified user uploads.
+- **Validation**:
+  - Frontend TypeScript Build (`npx tsc -b`): Clean exit with code 0 (0 errors).
+  - Backend TypeScript Check (`npx --prefix backend tsc --noEmit`): Clean exit with code 0 (0 errors).
+  - Production Bundle (`npm run build`): Vite built 100% of client assets in 7.76s with 0 errors.
+  - Database verification: Confirmed mock IDs 1-6 removed and remaining 4 user catalogues active.
+
+---
+
 
 
 

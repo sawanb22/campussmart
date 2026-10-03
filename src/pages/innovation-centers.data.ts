@@ -3,6 +3,7 @@ export interface InnovationCentersCard {
   description?: string;
   image?: string;
   categories?: string[];
+  href?: string;
 }
 
 export const INNOVATION_CENTERS_PAGE_SLUG = 'innovation-centers';

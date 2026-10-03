@@ -2,6 +2,7 @@ export interface AIStationCard {
   title: string;
   description?: string;
   image?: string;
+  href?: string;
 }
 
 export const AI_STATIONS_PAGE_SLUG = 'ai-stations';

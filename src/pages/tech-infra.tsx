@@ -5,9 +5,9 @@ import { Shield, Star, Heart, Check, Trash2 } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { useDesignWishlist } from '@/hooks/useDesignWishlist';
 import LoginPromptModal from '@/components/login-prompt-modal';
-import { resolveMediaUrl } from '@/lib/media-url';
+import { MediaImage } from '@/components/ui/media-image';
 
-interface CardItem { title: string; description: string; image?: string; categories?: string[]; }
+interface CardItem { title: string; description: string; image?: string; categories?: string[]; href?: string; slug?: string; }
 
 export const TECH_INFRA_PAGE_SLUG = 'tech-infra';
 
@@ -92,6 +92,9 @@ const TechInfra = () => {
     ? cards.filter((card) => card.categories?.includes(activeCategory))
     : cards;
 
+  const cardLink = (card: CardItem) =>
+    card.href?.trim() || `/${TECH_INFRA_PAGE_SLUG}/${card.slug?.trim() || slugifyTechInfraTitle(card.title)}`;
+
   return (
     <main className="min-h-screen bg-white">
       <LoginPromptModal open={showLoginPrompt} onClose={() => setShowLoginPrompt(false)} />
@@ -112,7 +115,7 @@ const TechInfra = () => {
             </div>
           </div>
           <div className="lg:w-1/2 relative">
-            <img src={resolveMediaUrl(heroImage)} alt={heroTitle} className="rounded-2xl shadow-xl w-full h-[260px] object-cover border-2 border-cm-blue-dark relative z-10" />
+            <MediaImage src={heroImage} alt={heroTitle} className="rounded-2xl shadow-xl w-full h-[260px] object-cover border-2 border-cm-blue-dark relative z-10" />
           </div>
         </div>
       </section>
@@ -159,17 +162,12 @@ const TechInfra = () => {
                 const fallback = defaultCard.image;
                 return (
                   <div key={card.title} className="group flex flex-col overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)]">
-                    <Link to={`/${TECH_INFRA_PAGE_SLUG}/${slugifyTechInfraTitle(card.title)}`} className="flex flex-1 flex-col">
+                    <Link to={cardLink(card)} className="flex flex-1 flex-col">
                       <div className="relative overflow-hidden h-[220px] sm:h-[230px]">
-                        <img
-                          src={resolveMediaUrl(card.image) || fallback}
+                        <MediaImage
+                          src={card.image}
                           alt={card.title}
-                          onError={(e) => {
-                            const target = e.currentTarget;
-                            if (fallback && target.src !== fallback) {
-                              target.src = fallback;
-                            }
-                          }}
+                          fallbackSrc={fallback}
                           className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent" />

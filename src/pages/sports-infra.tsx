@@ -5,7 +5,7 @@ import { CheckCircle, Send, Star, Heart, Check, Trash2 } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { useDesignWishlist } from '@/hooks/useDesignWishlist';
 import LoginPromptModal from '@/components/login-prompt-modal';
-import { resolveMediaUrl } from '@/lib/media-url';
+import { MediaImage } from '@/components/ui/media-image';
 import api from '@/api/client';
 
 export const SPORTS_INFRA_PAGE_SLUG = 'sports-infra';
@@ -150,6 +150,9 @@ const SportsInfra = ({ slug = 'sports-infra' }: { slug?: string }) => {
     : cards;
   const features = Array.isArray(data.features) ? data.features : SPORTS_INFRA_DEFAULTS.features;
 
+  const cardLink = (card: { title: string; href?: string; slug?: string }) =>
+    card.href?.trim() || `/${SPORTS_INFRA_PAGE_SLUG}/${card.slug?.trim() || slugifySportsInfraTitle(card.title)}`;
+
   return (
     <main className="min-h-screen bg-white text-opensans">
       <LoginPromptModal open={showLoginPrompt} onClose={() => setShowLoginPrompt(false)} />
@@ -170,7 +173,7 @@ const SportsInfra = ({ slug = 'sports-infra' }: { slug?: string }) => {
             </div>
           </div>
           <div className="lg:w-1/2 relative">
-             <img src={resolveMediaUrl(heroImage)} alt={heroTitle} className="rounded-2xl shadow-xl w-full h-[260px] object-cover border-2 border-cm-blue-dark relative z-10" />
+             <MediaImage src={heroImage} alt={heroTitle} className="rounded-2xl shadow-xl w-full h-[260px] object-cover border-2 border-cm-blue-dark relative z-10" />
           </div>
         </div>
       </section>
@@ -216,17 +219,12 @@ const SportsInfra = ({ slug = 'sports-infra' }: { slug?: string }) => {
                 const wishlistCard = { title: s.title, image };
                 return (
                   <div key={s.title} className="group flex flex-col overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)]">
-                    <Link to={`/${SPORTS_INFRA_PAGE_SLUG}/${slugifySportsInfraTitle(s.title)}`} className="flex flex-1 flex-col">
+                    <Link to={cardLink(s)} className="flex flex-1 flex-col">
                       <div className="relative overflow-hidden h-[220px] sm:h-[230px]">
-                        <img
-                          src={resolveMediaUrl(image) || defaultCard.image}
+                        <MediaImage
+                          src={image}
                           alt={s.title}
-                          onError={(e) => {
-                            const target = e.currentTarget;
-                            if (target.src !== defaultCard.image) {
-                              target.src = defaultCard.image;
-                            }
-                          }}
+                          fallbackSrc={defaultCard.image}
                           className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent" />

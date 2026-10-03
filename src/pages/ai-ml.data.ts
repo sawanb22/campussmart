@@ -3,6 +3,8 @@ export interface AiMlCard {
   description?: string;
   image?: string;
   categories?: string[];
+  href?: string;
+  slug?: string;
 }
 
 export const AI_ML_PAGE_SLUG = 'ai-ml';
@@ -22,6 +24,10 @@ export const AI_ML_DEFAULTS = {
   heroSubtitle:
     'Learning stations, ML labs and computing infrastructure that give students hands-on experience with real AI tools, not just slides about them.',
   heroImage: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=700&q=85',
+  ctaTitle: 'Ready to deploy AI/ML on your campus?',
+  ctaSubtitle: 'Talk to our engineering team about the right mix of stations, labs and compute for your students.',
+  ctaButtonLabel: 'Contact Us',
+  ctaHref: '/contact-us',
   cards: [
     {
       title: 'AI Learning Stations',

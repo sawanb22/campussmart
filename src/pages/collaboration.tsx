@@ -4,7 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
-import { resolveMediaUrl } from '@/lib/media-url';
+import MediaImage from '@/components/ui/media-image';
 import { COLLAB_PAGE_SLUG, COLLAB_DEFAULTS, slugifyCollabTitle } from './collaboration.data';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -28,6 +28,7 @@ const Collaboration = () => {
   }, []);
 
   const cards = Array.isArray(data.cards) ? data.cards : COLLAB_DEFAULTS.cards;
+  const cardLink = (card: any) => card.href?.trim() || `/${COLLAB_PAGE_SLUG}/${slugifyCollabTitle(card.title)}`;
 
   return (
     <main className="min-h-screen bg-white">
@@ -35,13 +36,12 @@ const Collaboration = () => {
       <section className="px-4 pt-8 pb-16 sm:px-6 lg:px-8">
         <div ref={cardsRef} className="mx-auto grid max-w-6xl grid-cols-1 gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
           {cards.map((card: any) => {
-            const image = resolveMediaUrl(card.image);
             return (
-              <Link key={card.title} to={`/${COLLAB_PAGE_SLUG}/${slugifyCollabTitle(card.title)}`} className="group block min-w-0">
+              <Link key={card.title} to={cardLink(card)} className="group block min-w-0">
                 <div className="aspect-[1.42/1] w-full overflow-hidden rounded-xl bg-gray-100">
-                  {image && (
-                    <img
-                      src={image}
+                  {card.image && (
+                    <MediaImage
+                      src={card.image}
                       alt={card.title}
                       className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
                     />

@@ -3,6 +3,8 @@ export interface SportsInfrastructureCard {
   description?: string;
   image?: string;
   categories?: string[];
+  href?: string;
+  slug?: string;
 }
 
 export const SPORTS_INFRASTRUCTURE_PAGE_SLUG = 'sports-infrastructure';

@@ -2,6 +2,8 @@ export interface InnovationCentresCard {
   title: string;
   description: string;
   image?: string;
+  href?: string;
+  slug?: string;
 }
 
 export const INNOVATION_CENTRES_PAGE_SLUG = 'innovation-centres';

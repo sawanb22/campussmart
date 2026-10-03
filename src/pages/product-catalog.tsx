@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePageData } from '@/hooks/usePageData';
+import MediaImage from '@/components/ui/media-image';
 
 const DEFAULTS = {
   heroTitle: 'Product Catalog 2025',
@@ -43,7 +44,7 @@ const ProductCatalog = () => {
       <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto text-center">
           <div className="bg-white rounded-xl p-8 shadow-sm">
-            <img
+            <MediaImage
               src={heroImage}
               alt={heroTitle}
               className="w-full h-64 object-cover rounded-lg mb-6"

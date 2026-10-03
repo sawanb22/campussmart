@@ -3,6 +3,8 @@ export interface ScienceTechLabsCard {
   description?: string;
   image?: string;
   categories?: string[];
+  href?: string;
+  slug?: string;
 }
 
 export const SCIENCE_TECH_LABS_PAGE_SLUG = 'science-tech-labs';

@@ -4,7 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, Trophy } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
-import { resolveMediaUrl } from '@/lib/media-url';
+import { MediaImage } from '@/components/ui/media-image';
 import { SPORTS_INFRASTRUCTURE_PAGE_SLUG, SPORTS_INFRASTRUCTURE_DEFAULTS, slugifySportsInfrastructureTitle, type SportsInfrastructureCard } from './sports-infrastructure.data';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -41,7 +41,8 @@ const SportsInfrastructure = () => {
     () => (activeCategory === 'All' ? cards : cards.filter((card) => (card.categories ?? []).includes(activeCategory))),
     [cards, activeCategory],
   );
-  const cardLink = (card: SportsInfrastructureCard) => `/${SPORTS_INFRASTRUCTURE_PAGE_SLUG}/${slugifySportsInfrastructureTitle(card.title)}`;
+  const cardLink = (card: SportsInfrastructureCard) =>
+    card.href?.trim() || `/${SPORTS_INFRASTRUCTURE_PAGE_SLUG}/${card.slug?.trim() || slugifySportsInfrastructureTitle(card.title)}`;
 
   return (
     <main className="min-h-screen bg-[#f5f8e8]">
@@ -81,11 +82,10 @@ const SportsInfrastructure = () => {
 
           <div ref={gridRef} className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {filteredCards.map((card) => {
-              const image = resolveMediaUrl(card.image);
               return (
                 <Link key={card.title} to={cardLink(card)} className="group overflow-hidden rounded-[1.375rem] bg-white transition-transform duration-300 hover:-translate-y-1">
                   <div className="h-[220px] overflow-hidden">
-                    {image && <img src={image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />}
+                    <MediaImage src={card.image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   </div>
                   <div className="p-5">
                     <p className="mb-2.5 text-[9px] font-semibold uppercase tracking-widest text-black/50">{card.categories?.[0] ?? 'Facility'}</p>

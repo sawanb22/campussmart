@@ -3,6 +3,7 @@ import { ArrowLeft, CheckCircle, Send } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSiteContent } from '@/contexts/SiteContentContext';
 import api from '@/api/client';
+import MediaImage from '@/components/ui/media-image';
 import { useState } from 'react';
 
 interface DetailCard { title: string; description: string; }
@@ -52,7 +53,7 @@ const HomeFeatureDetail = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <Link to="/" className="inline-flex items-center gap-2 text-cm-blue font-semibold mb-6"><ArrowLeft className="w-4 h-4" /> Back to Home</Link>
         <section className="bg-white rounded-2xl overflow-hidden shadow-sm">
-          <img src={image} alt={detail.title} className="w-full h-64 sm:h-80 object-cover" />
+          <MediaImage src={image} alt={detail.title} className="w-full h-64 sm:h-80 object-cover" />
           <div className="p-6 sm:p-10">
             <h1 className="text-3xl sm:text-5xl font-bold text-cm-blue-dark mb-4">{detail.title}</h1>
             <p className="text-lg text-gray-600 max-w-3xl leading-relaxed">{detail.description}</p>

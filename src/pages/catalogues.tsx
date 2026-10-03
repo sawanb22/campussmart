@@ -5,6 +5,7 @@ import api from '@/api/client';
 import { usePageData } from '@/hooks/usePageData';
 import LoginPromptModal from '@/components/login-prompt-modal';
 import { resolveMediaUrl } from '@/lib/media-url';
+import { MediaImage } from '@/components/ui/media-image';
 import { getCardCover } from '@/lib/card-covers';
 
 const MASTER_CATALOGUE_FALLBACK = '/uploads/catalogues/1790872959601-232430012.pdf';
@@ -15,6 +16,12 @@ const normalizeCatalogDownload = (value?: string) => {
   }
   return resolveMediaUrl(value);
 };
+
+const slugify = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'case-study';
 
 const PAGE_SIZE = 6;
 
@@ -84,6 +91,7 @@ const DEFAULTS = {
         'Complete campus transformation for a leading university in Bangalore.',
       image:
         'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+      slug: 'campus-master-planning',
     },
     {
       title: '20 Stunning College Buildings',
@@ -91,6 +99,7 @@ const DEFAULTS = {
         'Showcase of our most innovative campus architecture projects.',
       image:
         'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+      slug: '20-stunning-college-buildings',
     },
     {
       title: 'STEM Lab Implementation',
@@ -98,6 +107,7 @@ const DEFAULTS = {
         'State-of-the-art STEM lab setup for a prestigious school chain.',
       image:
         'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+      slug: 'stem-lab-implementation',
     },
   ],
 };
@@ -105,6 +115,9 @@ const DEFAULTS = {
 const Catalogues = () => {
   const { data } = usePageData('catalogues');
   const [catalogueRows, setCatalogueRows] = useState<any[]>([]);
+  const [loadingCatalogues, setLoadingCatalogues] = useState(true);
+  const [caseStudyRows, setCaseStudyRows] = useState<any[]>([]);
+  const [loadingCaseStudies, setLoadingCaseStudies] = useState(true);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const isLoggedIn = Boolean(localStorage.getItem('cm_token'));
@@ -121,9 +134,6 @@ const Catalogues = () => {
     const token = localStorage.getItem('cm_token');
 
     try {
-      // Catalogue PDFs require a logged-in user server-side, so the token has
-      // to travel as a header on this fetch — a plain <a>/window.open navigation
-      // never carries one.
       const response = await fetch(targetUrl, token ? { headers: { Authorization: `Bearer ${token}` } } : undefined);
       if (!response.ok) throw new Error('Download failed');
       const blob = await response.blob();
@@ -136,10 +146,6 @@ const Catalogues = () => {
       link.remove();
       URL.revokeObjectURL(blobUrl);
     } catch {
-      // Fall back to opening the file directly if it can't be fetched as a blob
-      // (e.g. a cross-origin host that doesn't allow fetch reads). A direct
-      // navigation can't carry the auth header, so pass the token as a query
-      // param instead — the backend accepts either.
       const fallbackUrl = token ? `${targetUrl}${targetUrl.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}` : targetUrl;
       window.open(fallbackUrl, '_blank', 'noopener,noreferrer');
     }
@@ -152,20 +158,34 @@ const Catalogues = () => {
       .get('/catalogues')
       .then((res) => {
         if (!active) return;
-
         const mapped = (Array.isArray(res.data) ? res.data : []).map((catalogue: any) => ({
           title: catalogue.title,
           description: catalogue.description || 'Download the catalogue PDF.',
-          image: resolveMediaUrl(catalogue.thumbnailUrl) || '',
+          image: catalogue.thumbnailUrl || '',
           downloadLink: normalizeCatalogDownload(catalogue.fileUrl),
           size: 'PDF',
           date: catalogue.createdAt,
         }));
-
         setCatalogueRows(mapped);
       })
       .catch(() => {
         if (active) setCatalogueRows([]);
+      })
+      .finally(() => {
+        if (active) setLoadingCatalogues(false);
+      });
+
+    api
+      .get('/case-studies')
+      .then((res) => {
+        if (!active) return;
+        setCaseStudyRows(Array.isArray(res.data) ? res.data : []);
+      })
+      .catch(() => {
+        if (active) setCaseStudyRows([]);
+      })
+      .finally(() => {
+        if (active) setLoadingCaseStudies(false);
       });
 
     return () => {
@@ -173,16 +193,33 @@ const Catalogues = () => {
     };
   }, []);
 
-  const catalogues =
-    catalogueRows.length > 0
+  const catalogues = loadingCatalogues
+    ? []
+    : catalogueRows.length > 0
       ? catalogueRows
-      : Array.isArray(data.cards)
+      : Array.isArray(data.cards) && data.cards.length > 0
         ? data.cards.map((catalogue: any) => ({
             ...catalogue,
-            image: resolveMediaUrl(catalogue.image) || catalogue.image,
+            image: catalogue.image || '',
             downloadLink: normalizeCatalogDownload(catalogue.downloadLink ?? catalogue.fileUrl),
           }))
         : DEFAULTS.cards;
+
+  const caseStudies = loadingCaseStudies
+    ? []
+    : caseStudyRows.length > 0
+      ? caseStudyRows.map((cs: any) => ({
+          title: cs.title,
+          description: cs.description || '',
+          image: cs.imageUrl || '',
+          slug: cs.slug || slugify(cs.title),
+        }))
+      : Array.isArray(data.caseStudies) && data.caseStudies.length > 0
+        ? data.caseStudies.map((cs: any) => ({
+            ...cs,
+            slug: cs.slug || slugify(cs.title),
+          }))
+        : DEFAULTS.caseStudies;
 
   const visibleCatalogues = catalogues.slice(0, visibleCount);
   const hasMore = visibleCount < catalogues.length;
@@ -199,10 +236,10 @@ const Catalogues = () => {
       />
 
       {/* Toolbar */}
-      <section className="px-4 pt-1 sm:px-6 lg:px-8">
-        <div className="mx-auto flex max-w-6xl flex-col gap-2 border-b border-gray-100 pb-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs font-semibold text-gray-400">
-            Showing {catalogues.length} catalogues
+      <section className="px-4 pt-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-6xl flex-col gap-2 border-b border-gray-100 pb-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs font-semibold text-gray-500">
+            {loadingCatalogues ? 'Loading catalogue library...' : `Showing ${catalogues.length} catalogues`}
           </p>
         </div>
       </section>
@@ -210,8 +247,22 @@ const Catalogues = () => {
       {/* Catalogues Grid */}
       <section className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          {visibleCatalogues.length === 0 ? (
-            <div className="rounded-2xl border border-gray-100 bg-gray-50 py-20 text-center text-gray-500">No catalogues found.</div>
+          {loadingCatalogues ? (
+            <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+              {[...Array(6)].map((_, idx) => (
+                <div key={idx} className="animate-pulse rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                  <div className="h-48 rounded-xl bg-gray-200" />
+                  <div className="mt-4 h-4 w-1/3 rounded bg-gray-200" />
+                  <div className="mt-2 h-5 w-3/4 rounded bg-gray-200" />
+                  <div className="mt-2 h-4 w-full rounded bg-gray-100" />
+                  <div className="mt-4 h-10 w-36 rounded-lg bg-gray-200" />
+                </div>
+              ))}
+            </div>
+          ) : visibleCatalogues.length === 0 ? (
+            <div className="rounded-2xl border border-gray-100 bg-gray-50 py-20 text-center text-gray-500">
+              No catalogues found.
+            </div>
           ) : (
             <>
               <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -219,42 +270,48 @@ const Catalogues = () => {
                   const cover = getCardCover(index);
                   const hasDownload = Boolean(catalogue.downloadLink);
                   return (
-                    <div key={catalogue.title} className="group min-w-0">
-                      <div className="relative h-48 overflow-hidden rounded-xl" style={{ background: cover.background }}>
-                        {catalogue.image && (
-                          <img src={catalogue.image} alt={catalogue.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                        )}
-                        <span className="absolute bottom-0 left-0 h-7 w-7 rounded-tr-xl rounded-bl-xl" style={{ background: cover.accent }} />
+                    <div key={catalogue.title} className="group min-w-0 flex flex-col justify-between rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition hover:shadow-md">
+                      <div>
+                        <div className="relative h-48 overflow-hidden rounded-xl" style={{ background: cover.background }}>
+                          <MediaImage
+                            src={catalogue.image}
+                            alt={catalogue.title}
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                          <span className="absolute bottom-0 left-0 h-7 w-7 rounded-tr-xl rounded-bl-xl" style={{ background: cover.accent }} />
+                        </div>
+                        <div className="mt-3 flex items-center gap-2 text-[11px] text-gray-400">
+                          <FileText className="h-3 w-3 text-cm-blue" />
+                          <span className="font-bold text-cm-blue">{catalogue.size || 'PDF'}</span>
+                          {catalogue.date && <span>{formatDate(catalogue.date)}</span>}
+                        </div>
+                        <h3 className="mt-1.5 text-base font-extrabold leading-snug tracking-tight text-cm-blue-dark line-clamp-2 sm:text-lg">
+                          {catalogue.title}
+                        </h3>
+                        <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-gray-500">{catalogue.description}</p>
                       </div>
-                      <div className="mt-3 flex items-center gap-2 text-[11px] text-gray-400">
-                        <FileText className="h-3 w-3 text-cm-blue" />
-                        <span className="font-bold text-cm-blue">{catalogue.size || 'PDF'}</span>
-                        {catalogue.date && <span>{formatDate(catalogue.date)}</span>}
-                      </div>
-                      <h3 className="mt-1.5 text-base font-extrabold leading-snug tracking-tight text-cm-blue-dark line-clamp-2 sm:text-lg">
-                        {catalogue.title}
-                      </h3>
-                      <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-gray-500">{catalogue.description}</p>
 
-                      {hasDownload ? (
-                        <a
-                          href={catalogue.downloadLink}
-                          onClick={(e) => handleDownloadClick(e, catalogue)}
-                          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-cm-blue px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-cm-blue-dark"
-                        >
-                          {isLoggedIn ? <Download className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-                          Download PDF
-                        </a>
-                      ) : (
-                        <button
-                          type="button"
-                          disabled
-                          className="mt-4 inline-flex cursor-not-allowed items-center gap-2 rounded-lg bg-gray-100 px-4 py-2.5 text-sm font-semibold text-gray-400"
-                        >
-                          <Download className="h-4 w-4" />
-                          PDF Unavailable
-                        </button>
-                      )}
+                      <div className="pt-4">
+                        {hasDownload ? (
+                          <a
+                            href={catalogue.downloadLink}
+                            onClick={(e) => handleDownloadClick(e, catalogue)}
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-cm-blue px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-cm-blue-dark"
+                          >
+                            {isLoggedIn ? <Download className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+                            Download PDF
+                          </a>
+                        ) : (
+                          <button
+                            type="button"
+                            disabled
+                            className="inline-flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-gray-100 px-4 py-2.5 text-sm font-semibold text-gray-400"
+                          >
+                            <Download className="h-4 w-4" />
+                            PDF Unavailable
+                          </button>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -276,13 +333,72 @@ const Catalogues = () => {
         </div>
       </section>
 
+      {/* Case Studies Showcase */}
+      <section className="border-t border-gray-100 bg-slate-50/70 px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-8 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-cm-blue">Proven Transformations</span>
+              <h2 className="text-2xl font-bold tracking-tight text-cm-blue-dark sm:text-3xl">Campus Case Studies</h2>
+              <p className="mt-1 text-sm text-gray-500">Explore real-world implementations delivered across leading institutions.</p>
+            </div>
+            <Link to="/contact-us" className="text-xs font-semibold text-cm-blue hover:underline">
+              Partner on a Case Study &rarr;
+            </Link>
+          </div>
+
+          {loadingCaseStudies ? (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="animate-pulse rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                  <div className="h-44 rounded-xl bg-gray-200" />
+                  <div className="mt-4 h-5 w-2/3 rounded bg-gray-200" />
+                  <div className="mt-2 h-4 w-full rounded bg-gray-100" />
+                </div>
+              ))}
+            </div>
+          ) : caseStudies.length === 0 ? null : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {caseStudies.map((study: any, index: number) => {
+                const cover = getCardCover(index);
+                return (
+                  <Link
+                    key={study.title || index}
+                    to={`/case-studies/${study.slug || slugify(study.title)}`}
+                    className="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                  >
+                    <div className="relative h-48 overflow-hidden" style={{ background: cover.background }}>
+                      <MediaImage
+                        src={study.image}
+                        alt={study.title}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <span className="absolute bottom-0 left-0 h-6 w-6 rounded-tr-lg rounded-bl-lg" style={{ background: cover.accent }} />
+                    </div>
+                    <div className="flex flex-1 flex-col p-5">
+                      <div className="mb-2 text-[10px] font-bold uppercase tracking-wider text-cm-blue">Case Study</div>
+                      <h3 className="text-base font-bold text-gray-900 group-hover:text-cm-blue line-clamp-1">{study.title}</h3>
+                      {study.description && (
+                        <p className="mt-2 text-xs leading-relaxed text-gray-500 line-clamp-2">{study.description}</p>
+                      )}
+                      <span className="mt-auto pt-4 text-xs font-semibold text-cm-blue group-hover:underline">
+                        Read Case Study &rarr;
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* CTA Section */}
-      <section className="bg-cm-yellow px-4 py-4 sm:px-6 md:py-5 lg:px-8">
+      <section className="bg-cm-yellow px-4 py-8 sm:px-6 md:py-10 lg:px-8">
         <div className="mx-auto max-w-4xl text-center">
-          <h2 className="mb-6 text-3xl font-bold text-cm-blue-dark md:text-4xl">Need a Custom Solution?</h2>
+          <h2 className="mb-4 text-2xl font-bold text-cm-blue-dark md:text-3xl">Need a Custom Solution?</h2>
 
-          <p className="mx-auto mb-8 max-w-2xl text-lg text-gray-700 md:text-xl">
+          <p className="mx-auto mb-6 max-w-2xl text-base text-gray-700 md:text-lg">
             Our team can create customized catalogues based on your specific requirements.
           </p>
 

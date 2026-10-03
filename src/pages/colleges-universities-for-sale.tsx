@@ -3,6 +3,8 @@ import { Grid2X2, List, Mail, MapPin, Phone, Search, Star, Send, X, FileText, Do
 import { usePageData } from '@/hooks/usePageData';
 import api from '@/api/client';
 import LoginPromptModal from '@/components/login-prompt-modal';
+import MediaImage from '@/components/ui/media-image';
+import { resolveMediaUrl } from '@/lib/media-url';
 
 type Region = 'North' | 'South' | 'East' | 'West';
 
@@ -17,17 +19,13 @@ type Listing = {
   margin?: string;
   askingPrice?: string;
   premium?: boolean;
+  ndaUrl?: string;
+  mandateUrl?: string;
 };
 
 const REGIONS: Region[] = ['North', 'South', 'East', 'West'];
 
-const API_ORIGIN = (import.meta.env.VITE_API_URL || '').replace(/\/api\/?$/, '');
-
-const resolveImage = (value?: string) => {
-  if (!value) return '';
-  if (/^(https?:)?\/\//i.test(value)) return value;
-  return `${API_ORIGIN}${value}`;
-};
+const resolveImage = (value?: string) => resolveMediaUrl(value);
 
 const DEFAULTS = {
   heroTitle: 'Businesses for Sale and Investment',
@@ -291,13 +289,39 @@ export default function CollegesUniversitiesForSale() {
               {filteredListings.map((listing, index) => (
                 <article key={listing.title} className={`relative border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md ${view === 'list' ? 'flex gap-5 p-4' : 'p-6'}`}>
                   {(listing.premium || index < 2) && <span className="absolute right-0 top-0 bg-emerald-600 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">Premium</span>}
-                  {listing.image && <img src={resolveImage(listing.image)} alt="" className={`${view === 'list' ? 'h-32 w-44' : 'mb-5 h-40 w-full'} object-cover`} />}
+                  {listing.image && <MediaImage src={listing.image} alt={listing.title} className={`${view === 'list' ? 'h-32 w-44' : 'mb-5 h-40 w-full'} object-cover`} />}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 text-[#087ea4]"><span className="h-3 w-3 rounded-full bg-emerald-500" /><span className="truncate text-sm font-medium">{listing.title}</span></div>
                     <h2 className="mt-3 line-clamp-3 text-xl font-semibold leading-8 text-slate-950">{listing.description || listing.title}</h2>
                     <div className="mt-4 flex flex-wrap gap-3 text-xs text-slate-500"><span><Mail className="mr-1 inline h-3.5 w-3.5 text-[#087ea4]" />Email</span><span><Phone className="mr-1 inline h-3.5 w-3.5 text-emerald-600" />Phone</span><span>Google</span><span>LinkedIn</span></div>
                     <p className="mt-5 line-clamp-3 text-sm leading-7 text-slate-600">{listing.description}</p>
                     <div className="mt-4 flex items-center gap-5 text-sm font-semibold"><span className="text-amber-500"><Star className="mr-1 inline h-4 w-4 fill-current" />{listing.rating ?? '6.8'}</span><span><MapPin className="mr-1 inline h-4 w-4 text-red-500" />{listing.location ?? 'India'}</span></div>
+                    {(listing.ndaUrl || listing.mandateUrl) && (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {listing.ndaUrl && (
+                          <a
+                            href={resolveImage(listing.ndaUrl)}
+                            onClick={handleDownloadClick}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 rounded bg-[#087ea4]/10 px-2 py-1 text-[10px] font-semibold text-[#087ea4] hover:bg-[#087ea4]/20"
+                          >
+                            <FileText className="h-3 w-3" /> NDA
+                          </a>
+                        )}
+                        {listing.mandateUrl && (
+                          <a
+                            href={resolveImage(listing.mandateUrl)}
+                            onClick={handleDownloadClick}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 rounded bg-[#087ea4]/10 px-2 py-1 text-[10px] font-semibold text-[#087ea4] hover:bg-[#087ea4]/20"
+                          >
+                            <FileText className="h-3 w-3" /> Mandate
+                          </a>
+                        )}
+                      </div>
+                    )}
                     <div className="mt-5 border-t border-slate-100 pt-4 text-sm"><div className="flex justify-between"><span className="text-slate-500">Run Rate Sales</span><strong>{listing.sales ?? 'Price on request'}</strong></div><div className="mt-3 flex justify-between"><span className="text-slate-500">EBITDA Margin</span><strong>{listing.margin ?? '25 %'}</strong></div></div>
                     <div className="mt-3 flex justify-between text-sm"><span className="text-slate-500">Business for Sale</span><strong className="text-[#087ea4]">{listing.askingPrice ?? 'Contact us'}</strong></div>
                     <button type="button" onClick={() => openContactForm(listing)} className="mt-5 w-full rounded bg-[#e6bb00] px-4 py-3 font-semibold text-slate-950 hover:bg-[#d5ab00]">Contact Business</button>

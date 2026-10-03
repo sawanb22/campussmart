@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle, Send, Sparkles } from 'lucide-react';
 import api from '@/api/client';
 import { usePageData } from '@/hooks/usePageData';
-import { resolveMediaUrl } from '@/lib/media-url';
+import { MediaImage } from '@/components/ui/media-image';
 
-interface CardItem { title: string; description: string; }
+interface CardItem { title: string; description: string; image?: string; href?: string; }
 
 const DEFAULTS = {
   heroTitle: 'Smart Classrooms',
@@ -32,7 +32,8 @@ const SmartClassrooms = () => {
   const { data } = usePageData('smart-classrooms');
 
   const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
-  const heroImage = resolveMediaUrl(data.heroImage) || DEFAULTS.heroImage;
+  const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
+  const heroImage = data.heroImage || DEFAULTS.heroImage;
   const features: string[] = Array.isArray(data.features) ? data.features : DEFAULTS.features;
   const cards: CardItem[] = Array.isArray(data.cards) ? data.cards : DEFAULTS.cards;
   const ctaTitle = data.ctaTitle ?? DEFAULTS.ctaTitle;
@@ -59,8 +60,34 @@ const SmartClassrooms = () => {
 
   return (
     <main className="min-h-screen bg-white">
+      {/* Hero Section */}
+      <section className="bg-cm-blue mx-3 sm:mx-6 lg:mx-8 rounded-[2rem] py-6 md:py-8 overflow-hidden relative shadow-inner mt-4 mb-2">
+        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 relative z-10 px-4">
+          <div className="lg:w-1/2 text-left text-white">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-3 tracking-tight text-white leading-tight">
+              {heroTitle}
+            </h1>
+            <p className="text-sm md:text-base text-white/85 leading-relaxed max-w-xl">
+              {heroSubtitle}
+            </p>
+            <div className="mt-5 flex flex-wrap gap-4">
+              <Link to="/request-quote" className="btn-secondary px-6 py-2.5 text-sm font-bold shadow-md">
+                Get Quote
+              </Link>
+            </div>
+          </div>
+          <div className="lg:w-1/2 relative w-full">
+            <MediaImage
+              src={heroImage}
+              alt={heroTitle}
+              className="rounded-2xl shadow-xl w-full h-[240px] sm:h-[260px] object-cover border-2 border-cm-blue-dark relative z-10"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Capability pills */}
-      <section className="px-4 pt-6 sm:px-6 lg:px-8">
+      <section className="px-4 pt-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <div className="flex items-center gap-2 overflow-x-auto rounded-full bg-cm-blue-dark p-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {features.map((feature) => (
@@ -83,13 +110,26 @@ const SmartClassrooms = () => {
             {cards.map((card) => (
               <div
                 key={card.title}
-                className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                className="flex flex-col justify-between rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
               >
-                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-blue-50">
-                  <CheckCircle className="h-5 w-5 text-cm-blue" />
+                <div>
+                  {card.image ? (
+                    <div className="mb-4 h-36 w-full overflow-hidden rounded-xl">
+                      <MediaImage src={card.image} alt={card.title} className="h-full w-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-blue-50">
+                      <CheckCircle className="h-5 w-5 text-cm-blue" />
+                    </div>
+                  )}
+                  <h3 className="mb-2 font-bold text-cm-blue-dark">{card.title}</h3>
+                  <p className="text-sm leading-relaxed text-gray-500">{card.description}</p>
                 </div>
-                <h3 className="mb-2 font-bold text-cm-blue-dark">{card.title}</h3>
-                <p className="text-sm leading-relaxed text-gray-500">{card.description}</p>
+                {card.href && (
+                  <Link to={card.href} className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-cm-blue hover:underline">
+                    Learn more &rarr;
+                  </Link>
+                )}
               </div>
             ))}
           </div>
@@ -118,7 +158,7 @@ const SmartClassrooms = () => {
               </ul>
             </div>
             <div className="relative min-h-[220px]">
-              <img src={heroImage} alt="" className="absolute inset-0 h-full w-full object-cover opacity-90" />
+              <MediaImage src={heroImage} alt="" className="absolute inset-0 h-full w-full object-cover opacity-90" />
               <div className="absolute inset-0 bg-gradient-to-l from-transparent to-cm-blue-dark lg:bg-gradient-to-r" />
             </div>
           </div>

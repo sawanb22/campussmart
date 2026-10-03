@@ -6,6 +6,7 @@ import { Search, Sparkles } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { resolveMediaUrl } from '@/lib/media-url';
 import { getCardCover } from '@/lib/card-covers';
+import MediaImage from '@/components/ui/media-image';
 import {
   INNOVATION_CENTERS_PAGE_SLUG,
   INNOVATION_CENTERS_DEFAULTS,
@@ -55,7 +56,7 @@ const InnovationCenters = () => {
     });
   }, [allCards, activeCategory, searchQuery]);
 
-  const cardLink = (card: InnovationCentersCard) => `/${INNOVATION_CENTERS_PAGE_SLUG}/${slugifyInnovationCenterTitle(card.title)}`;
+  const cardLink = (card: InnovationCentersCard) => card.href?.trim() || `/${INNOVATION_CENTERS_PAGE_SLUG}/${slugifyInnovationCenterTitle(card.title)}`;
 
   return (
     <main className="min-h-screen bg-white">
@@ -68,7 +69,7 @@ const InnovationCenters = () => {
             <p className="mt-5 max-w-lg text-sm leading-relaxed text-gray-500 sm:text-base">{heroSubtitle}</p>
           </div>
           <div className="relative mx-auto hidden aspect-[4/3] w-full max-w-sm overflow-hidden rounded-2xl shadow-xl lg:block">
-            <img
+            <MediaImage
               src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&w=800&q=85"
               alt={heroTitle}
               className="h-full w-full object-cover"

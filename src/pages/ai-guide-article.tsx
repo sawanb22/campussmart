@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
+import MediaImage from '@/components/ui/media-image';
 import { DEFAULTS, type Article } from './ai-guide';
 
 const slugify = (title: string) => title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -26,7 +27,7 @@ const AIGuideArticle = () => {
       <article className="mx-auto max-w-4xl px-5 sm:px-8">
         <Link to="/ai-guide" className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-[#3d718f] hover:text-[#3c2f26]"><ArrowLeft size={16} /> Back to AI Guide</Link>
         <div className="overflow-hidden rounded-lg bg-[#fffdf8] shadow-sm">
-          <img src={article.image} alt={article.title} className="h-64 w-full object-cover sm:h-[440px]" />
+          <MediaImage src={article.image} alt={article.title} className="h-64 w-full object-cover sm:h-[440px]" />
           <div className="px-6 py-8 sm:px-12 sm:py-12">
             <div className="mb-4 text-[10px] font-bold uppercase tracking-[0.14em] text-[#ed9816]">{article.category}</div>
             <h1 className="mb-6 font-serif text-4xl font-medium leading-tight tracking-tight text-[#3c2f26] sm:text-6xl">{article.title}</h1>

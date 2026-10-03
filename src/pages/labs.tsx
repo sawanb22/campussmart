@@ -5,9 +5,9 @@ import { ArrowRight, Atom, Microscope, CheckCircle, Star, Heart, Check, Trash2 }
 import { usePageData } from '@/hooks/usePageData';
 import { useDesignWishlist } from '@/hooks/useDesignWishlist';
 import LoginPromptModal from '@/components/login-prompt-modal';
-import { resolveMediaUrl } from '@/lib/media-url';
+import { MediaImage } from '@/components/ui/media-image';
 
-interface Card { title: string; description: string; image?: string; name?: string; categories?: string[]; }
+interface Card { title: string; description: string; image?: string; name?: string; categories?: string[]; href?: string; slug?: string; }
 
 export const LABS_PAGE_SLUG = 'labs';
 
@@ -99,6 +99,9 @@ const Labs = () => {
     ? cards.filter((card) => card.categories?.includes(activeCategory))
     : cards;
 
+  const cardLink = (card: Card) =>
+    card.href?.trim() || `/${LABS_PAGE_SLUG}/${card.slug?.trim() || slugifyLabTitle(card.title)}`;
+
   return (
     <main className="min-h-screen bg-white">
       <LoginPromptModal open={showLoginPrompt} onClose={() => setShowLoginPrompt(false)} />
@@ -119,7 +122,7 @@ const Labs = () => {
             </div>
           </div>
           <div className="lg:w-1/2">
-            <img src={resolveMediaUrl(heroImage)} alt={heroTitle} className="rounded-2xl shadow-xl w-full h-[260px] object-cover border-2 border-cm-blue-dark" />
+            <MediaImage src={heroImage} alt={heroTitle} className="rounded-2xl shadow-xl w-full h-[260px] object-cover border-2 border-cm-blue-dark" />
           </div>
         </div>
       </section>
@@ -166,17 +169,12 @@ const Labs = () => {
                   const fallback = defaultCard.image;
                   return (
                     <div key={lab.title} className="group flex flex-col overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)]">
-                      <Link to={`/${LABS_PAGE_SLUG}/${slugifyLabTitle(lab.title)}`} className="flex flex-1 flex-col">
+                      <Link to={cardLink(lab)} className="flex flex-1 flex-col">
                         <div className="relative overflow-hidden h-[220px] sm:h-[230px]">
-                          <img
-                            src={resolveMediaUrl(lab.image) || fallback}
+                          <MediaImage
+                            src={lab.image}
                             alt={lab.title}
-                            onError={(e) => {
-                              const target = e.currentTarget;
-                              if (fallback && target.src !== fallback) {
-                                target.src = fallback;
-                              }
-                            }}
+                            fallbackSrc={fallback}
                             className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent" />
