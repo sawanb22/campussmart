@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { Link } from 'react-router-dom';
 import { Building2, Ruler, PenTool, CheckCircle } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
+import { resolveMediaUrl } from '@/lib/media-url';
 
 interface Card { title: string; description: string; image?: string; href?: string; }
 
@@ -60,7 +61,7 @@ const CampusDesign = () => {
 
   const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
   const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
-  const heroImage = data.heroImage ?? DEFAULTS.heroImage;
+  const heroImage = resolveMediaUrl(data.heroImage) || DEFAULTS.heroImage;
   const section1Title = data.section1Title ?? DEFAULTS.section1Title;
   const ctaTitle = data.ctaTitle ?? DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? DEFAULTS.ctaSubtitle;
@@ -112,7 +113,18 @@ const CampusDesign = () => {
                 className="group bg-white rounded-2xl overflow-hidden shadow-[0_20px_60px_-30px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.28)] border border-slate-200/70 flex flex-col"
               >
                 <div className="relative overflow-hidden aspect-[16/10]">
-                  <img src={service.image} alt={service.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                  <img
+                    src={resolveMediaUrl(service.image) || DEFAULTS.cards[0].image || ''}
+                    alt={service.title}
+                    onError={(e) => {
+                      const fallback = DEFAULTS.cards[0].image || '';
+                      const target = e.currentTarget;
+                      if (target.src !== fallback) {
+                        target.src = fallback;
+                      }
+                    }}
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent" />
                 </div>
                 <div className="px-5 pb-5 pt-4 flex flex-col flex-grow">

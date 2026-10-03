@@ -43,6 +43,7 @@
 | `EMAIL-001` | 2026-10-03 00:05 | Backend Email & OTP Delivery | Enforced IPv4-first DNS resolution in Node runtime, configured Nodemailer with explicit host, port 587 STARTTLS, family 4 to eliminate Render IPv6 ENETUNREACH socket failure, and added production OTP dispatch logging for traceability. | 2 files (backend) | Completed |
 | `AUTH-002` | 2026-10-03 00:35 | Pre-Verified Test User Seeding | Seeded pre-verified standard customer account (user@campussmart.in / User@1234) in runSeed.ts and seed.ts with emailVerified: true, enabling frictionless customer login and testing without OTP dependency. | 2 files (backend) | Completed |
 | `FIX-001` | 2026-10-03 15:30 | Quote Submission Resilience & Canonical Routes Alignment | Made quote spreadsheet sync non-blocking and added database error logging; refined input trimming and server error display on /campus-design quote form; unified duplicate routes (/campus-design-execution -> /campus-design, /furniture-design-supply -> /campus-furniture-design); synced DB cards and homepage links under SOLID principles. | 5 files (backend, frontend) + DB | Completed |
+| `FIX-002` | 2026-10-03 15:55 | Media URL Resolution & Static Proxying | Resolved live card image display failure on Vercel: added Vercel rewrite proxying /uploads/(.*) to Render backend, wrapped service card images in resolveMediaUrl with typed onError fallbacks in campus-design.tsx and campus-design-service.tsx. | 3 files (frontend & config) | Completed |
 
 ---
 
@@ -1178,6 +1179,29 @@
     - `POST /api/contact/quote` with valid payload: Returns HTTP 201 `{ message: 'Quote request submitted successfully', id: 17 }`.
     - `POST /api/contact/quote` with invalid phone: Returns HTTP 400 `{ error: 'Please enter a valid 10-digit Indian phone number' }`.
     - Live Tunnel: Verified HTTP 200 on `https://thorough-manor-donated-ruled.trycloudflare.com/campus-design`, `/campus-furniture-design`, `/campus-design-execution`, and `/furniture-design-supply`.
+
+### [FIX-002] 2026-10-03 15:55 IST - Media URL Resolution & Uploads Proxying on Hosted Environment
+- **Author/Agent**: Antigravity Pair Programmer
+- **Scope / Category**: Hosted Image Serving, Vercel SPA Routing, URL Resolution (SOLID Principles), Error Resilience
+- **Files Modified**:
+  - `[MODIFY] vercel.json`
+  - `[MODIFY] src/pages/campus-design.tsx`
+  - `[MODIFY] src/pages/campus-design-service.tsx`
+- **Description & Rationale**:
+  - **Issue Addressed**:
+    - Uploaded card images (e.g. `Architectural Design- test` on `/campus-design`) were visible in the Admin quick-edit preview and on localhost, but showed up broken/missing on the live hosted version (`campussmart.vercel.app/campus-design`).
+  - **Root Cause**:
+    1. *Relative Path Storage*: When an image was uploaded in Admin, its stored path in PostgreSQL was a relative path (e.g., `/uploads/media/1791022240620-592886472.jpg`).
+    2. *Vercel SPA Catch-all*: In `vercel.json`, all routes matched `/(.*) -> /index.html`. Requests to `campussmart.vercel.app/uploads/media/...` were served with Vercel's `index.html` (text/html) instead of being proxied to Render (`campussmart.onrender.com/uploads/...`), causing the browser image decoder to fail.
+    3. *Missing Resolution Wrapper*: While `MediaImageField.tsx` in Admin correctly wrapped paths in `resolveMediaUrl(value)` (which prepends `VITE_API_URL` host `https://campussmart.onrender.com`), `campus-design.tsx` and `campus-design-service.tsx` were directly rendering raw `<img src={service.image} />`.
+  - **Architectural Solution & SOLID Principles Compliance**:
+    - *Vercel Reverse Proxy Rule (Single Responsibility)*: In `vercel.json`, added rewrite `{"source": "/uploads/(.*)", "destination": "https://campussmart.onrender.com/uploads/$1"}` ahead of the catch-all SPA rewrite, ensuring any direct requests to `/uploads/...` on the frontend domain seamlessly fetch the asset from the Render media storage.
+    - *Canonical Media URL Resolution (SRP)*: In `campus-design.tsx` and `campus-design-service.tsx`, wrapped `heroImage` and `service.image` with `resolveMediaUrl(...)` so relative backend uploads resolve directly to Render backend URLs.
+    - *Defensive Fallback Handlers (LSP & Robustness)*: Added typed `onError` fallback handlers on images to prevent broken-image UI states if a remote resource fails to load or undergoes network timeouts.
+- **Validation**:
+  - TypeScript Typecheck (`npx tsc -b`): Clean exit with code 0 (0 errors).
+  - Backend Typecheck (`npx tsc --noEmit`): Clean exit with code 0 (0 errors).
+  - Vercel rewrite configuration verified valid JSON.
 
 ---
 

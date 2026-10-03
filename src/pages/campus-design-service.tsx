@@ -3,6 +3,7 @@ import { ArrowLeft, CheckCircle, Send } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import api from '@/api/client';
 import { usePageData } from '@/hooks/usePageData';
+import { resolveMediaUrl } from '@/lib/media-url';
 
 interface ServiceCard { title: string; description?: string; image?: string; href?: string; }
 
@@ -72,7 +73,18 @@ const CampusDesignService = () => {
         <Link to="/campus-design" className="inline-flex items-center gap-2 text-cm-blue font-semibold mb-6"><ArrowLeft className="w-4 h-4" /> Back to Campus Design</Link>
         <div className="bg-white rounded-2xl overflow-hidden shadow-sm grid grid-cols-1 lg:grid-cols-2">
           <div className="min-h-[280px] lg:min-h-full">
-            <img src={service.image || fallbackCards[0].image} alt={service.title} className="w-full h-full min-h-[280px] object-cover" />
+            <img
+              src={resolveMediaUrl(service.image) || fallbackCards[0].image || ''}
+              alt={service.title}
+              onError={(e) => {
+                const fallback = fallbackCards[0].image || '';
+                const target = e.currentTarget;
+                if (target.src !== fallback) {
+                  target.src = fallback;
+                }
+              }}
+              className="w-full h-full min-h-[280px] object-cover"
+            />
           </div>
           <div className="p-6 sm:p-10">
             <h1 className="text-3xl sm:text-4xl font-bold text-cm-blue-dark mb-3">{service.title}</h1>
