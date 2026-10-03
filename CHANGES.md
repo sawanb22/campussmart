@@ -46,7 +46,7 @@
 | `FIX-002` | 2026-10-03 15:55 | Media URL Resolution & Static Proxying | Resolved live card image display failure on Vercel: added Vercel rewrite proxying /uploads/(.*) to Render backend, wrapped service card images in resolveMediaUrl with typed onError fallbacks in campus-design.tsx and campus-design-service.tsx. | 3 files (frontend & config) | Completed |
 | `FIX-003` | 2026-10-03 17:50 | Global CMS & 95-Page Architecture Standardization | Standardized universal media resilience (<MediaImage />) across 28+ pages; resolved /catalogues skeleton race conditions; aligned case-study slugs & detail routing; eliminated Admin data loss vectors via UnifiedPageEditor SSOT; aligned App.tsx routes (/campus-design-execution, /furniture-design-supply, /corporate redirect); deleted 6 mock seed rows in Neon Postgres Catalogue table. | 28+ files (frontend, admin, routes) + DB | Completed |
 | `FIX-004` | 2026-10-03 18:15 | Global CMS Review & Critical Edge-Case Hardening | Fixed fatal fallbackSrc state machine bug in MediaImage; rendered missing Hero banner and dynamic CTA on /catalogues; replaced ghost cards editor with PDF Manager shortcut banner in UnifiedPageEditor; added card.href priority across category pages; enabled prefix slug resolution and static resilience on case studies. | 18 files (frontend, backend, admin) | Completed |
-| `FIX-005` | 2026-10-03 19:15 | Database Sync, Seed Idempotency & Catalogues Refactor | Connected backend to Render production PostgreSQL, added idempotent seed guard with system_bootstrapped flag, purged 3 broken mock records from catalogue table, bound /catalogues 100% to usePageData('catalogues') with Request Catalogue enquiry modal for missing physical PDFs, and added smart non-destructive "Load Starter Template" to UnifiedPageEditor while removing duplicate CTA block under SOLID principles. | 5 files (backend, admin, frontend) + DB | Completed |
+| `FIX-005` | 2026-10-03 19:15 | Database Sync, Seed Idempotency, Catalogues Refactor & Enquiry Pipeline | Connected backend to Render production PostgreSQL, added idempotent seed guard with system_bootstrapped flag, purged 3 broken mock records from catalogue table, bound /catalogues 100% to usePageData('catalogues') with Request Catalogue enquiry modal for missing physical PDFs, made contact enquiry spreadsheet sync non-blocking, and added smart non-destructive "Load Starter Template" to UnifiedPageEditor while removing duplicate CTA and banner blocks under SOLID principles. | 8 files (backend, admin, frontend) + DB | Completed |
 
 ---
 
@@ -1300,15 +1300,17 @@
 
 ---
 
-### [FIX-005] 2026-10-03 19:15 IST - Database Synchronization, Seed Idempotency, and Pure Database-Driven Catalogues Architecture
+### [FIX-005] 2026-10-03 19:15 IST - Database Synchronization, Seed Idempotency, Pure Database-Driven Catalogues Architecture, and Resilient Enquiry Pipeline
 - **Author/Agent**: Antigravity Pair Programmer
-- **Scope / Category**: Production Database Sync, Seed Guard, Catalogues Rendering, CMS Page Editor, SOLID Principles
+- **Scope / Category**: Production Database Sync, Seed Guard, Catalogues Rendering, CMS Page Editor, Enquiry Pipeline, SOLID Principles
 - **Files Modified / Created**:
   - `[MODIFY] backend/.env`
   - `[MODIFY] backend/src/runSeed.ts`
   - `[MODIFY] backend/prisma/seed.ts`
+  - `[MODIFY] backend/src/routes/contact.routes.ts`
   - `[MODIFY] src/pages/catalogues.tsx`
   - `[MODIFY] src/admin/components/UnifiedPageEditor.tsx`
+  - `[MODIFY] src/admin/pageDefaults.ts`
   - `[NEW] backend/scripts/verify-fix-005.ts`
 - **Description & Rationale**:
   - **Step 1: Production Database Synchronization**:
@@ -1325,17 +1327,27 @@
     - Removed fallback resurrection of `DEFAULTS.cards` and `DEFAULTS.caseStudies` when the database returns empty arrays (`[]`).
     - If `caseStudies.length === 0`, the Case Studies showcase section is omitted entirely from the DOM.
     - For catalogue items without a valid physical PDF file (or where file download fails with 404), displays a prominent "Request Catalogue" button that opens an enquiry modal submitting to `api.post('/contact')`, eliminating `Cannot GET ...` browser errors.
+    - Hardened `hasValidPdf` against string-serialized literals (`'null'`, `'undefined'`, `'none'`, `'n/a'`, `javascript:`).
+    - Fixed hero image disappearing when DB contains empty string `""` by falling back to `DEFAULTS.heroImage`.
+    - Normalized brand text from legacy "SchoolMart" to "CampusMart".
+    - Appended auth token query param to `<a href>` so right-click "Open in new tab" and direct download access are authenticated.
+    - Auto-prefilled "Request Catalogue" form fields using `getUserSession()` when user is logged in.
   - **Step 4: Smart Non-Destructive "Load Starter Template" in `UnifiedPageEditor.tsx`**:
     - Added `[Load Starter Template]` action button to the editor toolbar.
     - Built modal prompt offering two clear modes:
       1. *"Append Samples (Keep my current cards)"* (default): Preserves all user-created cards at the top (indices 0..N) and only appends non-duplicate sample cards based on title matching, safely backfilling empty fields.
       2. *"Replace All"*: Replaces current page content and cards with the original template defaults.
     - Unblocked card editing for `/catalogues` in `UnifiedPageEditor` and wired `DocumentUploadField` for `downloadLink` to allow direct PDF uploads.
-    - Consolidated Call-to-Action Footer fields (`ctaTitle`, `ctaSubtitle`, `ctaButtonLabel`, `ctaHref`) and removed the duplicate "CONVERSION / CTA FOOTER" block.
+    - Removed duplicate "CONVERSION / CTA FOOTER" block.
+    - Removed obsolete and contradictory shortcut banner on lines 618-643 that stated "Real downloadable catalogue PDFs are managed in Catalogues", leaving single accurate instructions banner.
+    - Updated `pageDefaults.ts` for `'catalogues'` with verified `/uploads/catalogues/...` physical file links and CampusMart branding.
+  - **Enquiry Pipeline Resilience (`backend/src/routes/contact.routes.ts`)**:
+    - Made Google Sheets spreadsheet sync non-blocking using `.catch(...)` in the main `POST /api/contact` route so external webhook errors or latency never block customer enquiry or catalogue request persistence.
 - **Validation**:
   - Frontend TypeScript Check (`npx tsc -b`): Clean exit with code 0 (0 errors).
   - Backend TypeScript Check (`npx --prefix backend tsc --noEmit`): Clean exit with code 0 (0 errors).
-  - Automated Verification Suite (`backend/scripts/verify-fix-005.ts`): 18/18 assertions passed (DB connection, seed guard, mock purge, API removal, pure CMS binding, array preservation, section omission, PDF validation, starter template append deduplication, and CTA deduplication).
+  - Production Bundle (`npm run build`): Vite packaged 100% of client assets in 6.42s with 0 errors.
+  - Automated Verification Suite (`backend/scripts/verify-fix-005.ts`): 34/34 assertions passed (DB connection, seed guard, mock purge, API removal, pure CMS binding, array preservation, section omission, PDF validation matrix, starter template append deduplication, banner cleanup, and non-blocking enquiry persistence).
 
 
 

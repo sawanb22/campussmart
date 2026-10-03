@@ -7,11 +7,23 @@ import LoginPromptModal from '@/components/login-prompt-modal';
 import { resolveMediaUrl } from '@/lib/media-url';
 import { MediaImage } from '@/components/ui/media-image';
 import { getCardCover } from '@/lib/card-covers';
+import { getUserSession, getUserToken } from '@/lib/auth-session';
 
 const hasValidPdf = (url?: string): boolean => {
   if (!url) return false;
   const trimmed = url.trim();
-  if (!trimmed || trimmed === '#' || trimmed === '/') return false;
+  if (
+    !trimmed ||
+    trimmed === '#' ||
+    trimmed === '/' ||
+    trimmed.toLowerCase() === 'null' ||
+    trimmed.toLowerCase() === 'undefined' ||
+    trimmed.toLowerCase() === 'n/a' ||
+    trimmed.toLowerCase() === 'none' ||
+    trimmed.toLowerCase().startsWith('javascript:')
+  ) {
+    return false;
+  }
   if (
     trimmed.includes('furniture-2025.pdf') ||
     trimmed.includes('lab-equipment.pdf') ||
@@ -126,8 +138,9 @@ const Catalogues = () => {
   const { data, loading } = usePageData('catalogues');
 
   const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
-  const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
-  const heroImage = data.heroImage !== undefined ? data.heroImage : DEFAULTS.heroImage;
+  const rawSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
+  const heroSubtitle = rawSubtitle.replace(/SchoolMart/g, 'CampusMart');
+  const heroImage = data.heroImage?.trim() ? data.heroImage : DEFAULTS.heroImage;
   const ctaTitle = data.ctaTitle ?? DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? DEFAULTS.ctaSubtitle;
   const ctaButtonLabel = data.ctaButtonLabel ?? DEFAULTS.ctaButtonLabel;
@@ -135,7 +148,8 @@ const Catalogues = () => {
 
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const isLoggedIn = Boolean(localStorage.getItem('cm_token'));
+  const token = getUserToken();
+  const isLoggedIn = Boolean(token);
 
   // Request Catalogue Modal state
   const [requestTarget, setRequestTarget] = useState<any | null>(null);
@@ -151,12 +165,13 @@ const Catalogues = () => {
   const [formError, setFormError] = useState('');
 
   const openRequestModal = (catalogue: any) => {
+    const user = getUserSession();
     setRequestTarget(catalogue);
     setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      institution: '',
+      name: user?.name || '',
+      email: user?.email || '',
+      phone: user?.phone || '',
+      institution: user?.institution || '',
       message: `Please share the catalogue for "${catalogue.title}".`,
     });
     setSubmitted(false);
@@ -204,9 +219,11 @@ const Catalogues = () => {
       return;
     }
 
-    const targetUrl = resolveMediaUrl(downloadUrl);
+    const resolvedUrl = resolveMediaUrl(downloadUrl);
+    const targetUrl = token
+      ? `${resolvedUrl}${resolvedUrl.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}`
+      : resolvedUrl;
     const filename = `${(catalogue.title || 'catalogue').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'catalogue'}.pdf`;
-    const token = localStorage.getItem('cm_token');
 
     try {
       const response = await fetch(targetUrl, token ? { headers: { Authorization: `Bearer ${token}` } } : undefined);
@@ -237,6 +254,8 @@ const Catalogues = () => {
     : Array.isArray(data.cards)
       ? data.cards.map((c: any) => ({
           ...c,
+          title: (c.title || '').replace(/SCHOOLMART/g, 'CAMPUSMART'),
+          description: (c.description || '').replace(/SchoolMart/g, 'CampusMart'),
           image: c.image || '',
           downloadLink: c.downloadLink ?? c.fileUrl ?? '',
         }))
@@ -353,7 +372,11 @@ const Catalogues = () => {
                       <div className="pt-4">
                         {hasPdf ? (
                           <a
-                            href={resolveMediaUrl(catalogue.downloadLink)}
+                            href={
+                              token
+                                ? `${resolveMediaUrl(catalogue.downloadLink)}${catalogue.downloadLink.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}`
+                                : resolveMediaUrl(catalogue.downloadLink)
+                            }
                             onClick={(e) => handleDownloadClick(e, catalogue)}
                             className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-cm-blue px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-cm-blue-dark"
                           >

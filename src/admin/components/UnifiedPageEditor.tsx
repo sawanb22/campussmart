@@ -615,32 +615,6 @@ export default function UnifiedPageEditor({
             </div>
 
             {/* Specialized Shortcut Banners */}
-            {page.slug === 'catalogues' && (
-                <div className="mx-6 sm:mx-8 mt-6 rounded-xl border border-blue-200 bg-blue-50/70 p-4 text-sm text-blue-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
-                    <div>
-                        <div className="font-bold flex items-center gap-2 text-blue-950">
-                            <span>📚 Dedicated Management Hubs Available</span>
-                        </div>
-                        <p className="text-xs text-blue-800 mt-0.5">
-                            Real downloadable catalogue PDFs are managed in <strong>Catalogues</strong>, and customer portfolios in <strong>Case Studies</strong>.
-                        </p>
-                    </div>
-                    <div className="flex gap-2 shrink-0">
-                        <Link
-                            to="/admin/catalogues"
-                            className="px-3 py-1.5 text-xs font-bold rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition shadow-xs"
-                        >
-                            Manage Catalogues →
-                        </Link>
-                        <Link
-                            to="/admin/case-studies"
-                            className="px-3 py-1.5 text-xs font-bold rounded-lg bg-white border border-blue-300 text-blue-700 hover:bg-blue-50 transition shadow-xs"
-                        >
-                            Manage Case Studies →
-                        </Link>
-                    </div>
-                </div>
-            )}
 
             {page.slug === 'home' && (
                 <div className="mx-6 sm:mx-8 mt-6 rounded-xl border border-amber-200 bg-amber-50/70 p-4 text-sm text-amber-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">

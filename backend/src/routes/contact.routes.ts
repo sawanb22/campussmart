@@ -40,7 +40,9 @@ router.post('/', uploadResume.single('resume'), async (req: Request, res: Respon
                 resumeSize: req.file?.size,
             },
         });
-        await syncToSpreadsheet({ type: 'Contact Enquiry', id: enquiry.id, name, email, phone, institution, subject, role, message, resumeOriginalName: req.file?.originalname, createdAt: enquiry.createdAt });
+        // Non-blocking sync: external spreadsheet errors should never fail customer enquiry persistence
+        syncToSpreadsheet({ type: 'Contact Enquiry', id: enquiry.id, name, email, phone, institution, subject, role, message, resumeOriginalName: req.file?.originalname, createdAt: enquiry.createdAt })
+            .catch((sheetErr) => console.error('Spreadsheet sync error (non-fatal):', sheetErr));
         res.status(201).json({ message: 'Enquiry submitted successfully', id: enquiry.id });
     } catch {
         res.status(500).json({ error: 'Failed to submit enquiry' });
