@@ -1443,6 +1443,29 @@
 - **Validation**:
   - TypeScript Compilation: `npx tsc --noEmit` exited cleanly with code 0 (0 errors).
 
+---
+
+### [FIX-009] 2026-10-03 21:05 IST - Indoor Sports & AI Learning Stations Image 404 & Alignment Repair
+- **Author/Agent**: Antigravity Pair Programmer
+- **Scope / Category**: Media Resilience & Asset Alignment (Testing Sheet Issues #6 & #7)
+- **Files Modified**:
+  - `[MODIFY] src/pages/ai-stations.data.ts`
+  - `[MODIFY] src/pages/sports-infra.tsx`
+  - `[MODIFY] src/admin/pageDefaults.ts`
+- **Description & Rationale**:
+  - **Issue 1 (AI Learning Stations Dead Image Links)**:
+    - Dead 404 Unsplash URLs in `ai-stations.data.ts` and `src/admin/pageDefaults.ts` (`photo-1516321318423-f06a051b3e14` and `photo-1551427260-7cddeaf76ae8`) caused broken or missing image displays.
+    - Replaced with verified 200 OK modern learning station imagery:
+      - `Personalized Learning Paths`: `photo-1531482615713-2afd69097998`
+      - `Real-time Analytics`: `photo-1551288049-bebda4e38f71`
+  - **Issue 2 (Indoor Sports Image Misassignment & Modernization)**:
+    - Basketball Court in `sports-infra.tsx` and `pageDefaults.ts` was erroneously assigned a running track photo (`photo-1574629810360-7efbbe195018`).
+    - Replaced with a real tournament-spec indoor basketball court photo (`photo-1546519638-68e109498ffc`).
+    - Updated Indoor Badminton Arena to high-resolution clean court photography (`photo-1626224583764-f87db24ac4ea`).
+- **Validation**:
+  - TypeScript Compilation: `npx tsc --noEmit` exited cleanly with code 0 (0 errors).
+
+
 
 
 
