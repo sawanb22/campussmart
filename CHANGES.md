@@ -48,6 +48,7 @@
 | `FIX-004` | 2026-10-03 18:15 | Global CMS Review & Critical Edge-Case Hardening | Fixed fatal fallbackSrc state machine bug in MediaImage; rendered missing Hero banner and dynamic CTA on /catalogues; replaced ghost cards editor with PDF Manager shortcut banner in UnifiedPageEditor; added card.href priority across category pages; enabled prefix slug resolution and static resilience on case studies. | 18 files (frontend, backend, admin) | Completed |
 | `FIX-005` | 2026-10-03 19:15 | Database Sync, Seed Idempotency, Catalogues Refactor & Enquiry Pipeline | Connected backend to Render production PostgreSQL, added idempotent seed guard with system_bootstrapped flag, purged 3 broken mock records from catalogue table, bound /catalogues 100% to usePageData('catalogues') with Request Catalogue enquiry modal for missing physical PDFs, made contact enquiry spreadsheet sync non-blocking, and added smart non-destructive "Load Starter Template" to UnifiedPageEditor while removing duplicate CTA and banner blocks under SOLID principles. | 8 files (backend, admin, frontend) + DB | Completed |
 | `FIX-006` | 2026-10-03 19:55 | Admin CMS UX & Ergonomics | Smooth auto-scroll and auto-focus to newly added cards, secondary cards, process steps, team members, and case studies in UnifiedPageEditor across both Quick Edit modal and Full Editor page contexts under SOLID principles (Problem 1). | 1 file (admin) | Completed |
+| `FIX-007` | 2026-10-03 20:25 | Smart Classrooms Images & Product Card Spacing | Enriched Smart Classrooms cards with verified educational photography, added resilient fallbackNode to MediaImage, hardened MediaImageField preview, and resolved price vs. wishlist button horizontal collision in Shop product cards with gap-3, shrink-0, and compact vertical rhythm (Problems 2 & A). | 4 files (frontend, admin) | Completed |
 
 ---
 
@@ -1375,6 +1376,33 @@
   - Frontend TypeScript Check (`npx tsc -b`): Clean exit with code 0 (0 errors).
   - Backend TypeScript Check (`npx --prefix backend tsc --noEmit`): Clean exit with code 0 (0 errors).
   - Production Bundle (`npm run build`): Clean build in 7.52s, `dist/assets/UnifiedPageEditor-CZZs_EIK.js` bundled with 0 errors.
+
+---
+
+### [FIX-007] 2026-10-03 20:25 IST - Smart Classrooms Images & Product Card Spacing (Problems 2 & A)
+- **Author/Agent**: Antigravity Pair Programmer
+- **Scope / Category**: Frontend UI, Ergonomics & Single Source of Truth
+- **Files Modified**:
+  - `campusmart_final/src/pages/shop.tsx`
+  - `campusmart_final/src/pages/smart-classrooms.tsx`
+  - `campusmart_final/src/admin/pageDefaults.ts`
+  - `campusmart_final/src/admin/components/MediaImageField.tsx`
+- **Description & Rationale**:
+  - **Problem A (Product Card Price vs. Wishlist Spacing)**:
+    - *The Issue*: Across all product cards in Furniture (`/furniture`), Technology (`/tech-infra/products`), Sports (`/sports-infra/products`), and the main Shop (`/shop`), multi-digit prices (e.g., `₹1,25,000` or `₹14,990`) and the "Add to Wishlist" button were touching with 0px spacing on narrow card columns.
+    - *The Fix adhering to SOLID*: Fixed at the Single Source of Truth (`src/pages/shop.tsx`). Added `flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap`, `shrink-0` and `whitespace-nowrap` on the price and action buttons. Enforced strictly compact vertical rhythm (`mt-2 pt-2 border-t border-slate-100/70`) without adding vertical bloat.
+  - **Problem 2 (Smart Classrooms Image Display & Template Parity)**:
+    - *The Issue*: Testing team reported added cards on `/smart-classrooms` were not showing images. The default template cards lacked image definitions entirely, and any 404 image path displayed an unbranded blank SVG box.
+    - *The Fix*:
+      1. Updated `smart-classrooms.tsx` and `pageDefaults.ts` with curated, verified high-resolution educational technology photography for all 4 core capability cards.
+      2. Upgraded capability cards with responsive `h-36 w-full` containers, smooth hover zoom, and resilient `fallbackNode` in `<MediaImage />` rendering `<CheckCircle className="h-8 w-8 text-cm-blue/70" />` on error.
+      3. Maintained strictly compact card padding (`p-5`) to honor vertical spacing constraints.
+      4. Hardened `MediaImageField.tsx` in Admin CMS with `previewError` state so missing or offline media files render a clean branded placeholder rather than a broken browser icon.
+- **Validation**:
+  - Frontend TypeScript Check (`npx tsc -b`): Clean exit with code 0 (0 errors).
+  - Backend TypeScript Check (`npx --prefix backend tsc --noEmit`): Clean exit with code 0 (0 errors).
+  - Production Bundle (`npm run build`): Clean build in 8.02s, all assets compiled with 0 errors.
+
 
 
 

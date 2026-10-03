@@ -19,10 +19,26 @@ const DEFAULTS = {
     'Teacher Enablement',
   ],
   cards: [
-    { title: 'Interactive Learning', description: 'Interactive displays, digital content, and collaborative tools make lessons more engaging.' },
-    { title: 'Connected Classrooms', description: 'Reliable audio, video, networking, and device integration keep the classroom connected.' },
-    { title: 'Flexible Furniture', description: 'Ergonomic, movable furniture supports group work, presentations, and different teaching styles.' },
-    { title: 'Teacher Enablement', description: 'Simple controls and training help teachers use the technology confidently every day.' },
+    {
+      title: 'Interactive Learning',
+      description: 'Interactive displays, digital content, and collaborative tools make lessons more engaging.',
+      image: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=600&q=80',
+    },
+    {
+      title: 'Connected Classrooms',
+      description: 'Reliable audio, video, networking, and device integration keep the classroom connected.',
+      image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=600&q=80',
+    },
+    {
+      title: 'Flexible Furniture',
+      description: 'Ergonomic, movable furniture supports group work, presentations, and different teaching styles.',
+      image: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=600&q=80',
+    },
+    {
+      title: 'Teacher Enablement',
+      description: 'Simple controls and training help teachers use the technology confidently every day.',
+      image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=600&q=80',
+    },
   ] as CardItem[],
   ctaTitle: 'Ready to upgrade your classrooms?',
   ctaSubtitle: 'Talk to our team about a smart classroom rollout tailored to your campus and budget.',
@@ -107,26 +123,35 @@ const SmartClassrooms = () => {
         <div className="mx-auto max-w-6xl">
           <h2 className="mb-5 text-2xl font-bold tracking-tight text-cm-blue-dark sm:text-3xl">What's included</h2>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {cards.map((card) => (
+            {cards.map((card, i) => (
               <div
-                key={card.title}
-                className="flex flex-col justify-between rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                key={`${card.title}-${i}`}
+                className="flex flex-col justify-between rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
               >
                 <div>
                   {card.image ? (
-                    <div className="mb-4 h-36 w-full overflow-hidden rounded-xl">
-                      <MediaImage src={card.image} alt={card.title} className="h-full w-full object-cover" />
+                    <div className="mb-3 h-36 w-full overflow-hidden rounded-xl bg-slate-100 relative group">
+                      <MediaImage
+                        src={card.image}
+                        alt={card.title}
+                        className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        fallbackNode={
+                          <div className="flex h-full w-full items-center justify-center bg-blue-50/60 text-cm-blue">
+                            <CheckCircle className="h-8 w-8 text-cm-blue/70" />
+                          </div>
+                        }
+                      />
                     </div>
                   ) : (
-                    <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-blue-50">
+                    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-cm-blue">
                       <CheckCircle className="h-5 w-5 text-cm-blue" />
                     </div>
                   )}
-                  <h3 className="mb-2 font-bold text-cm-blue-dark">{card.title}</h3>
-                  <p className="text-sm leading-relaxed text-gray-500">{card.description}</p>
+                  <h3 className="mb-1.5 font-bold text-cm-blue-dark text-base">{card.title}</h3>
+                  <p className="text-xs sm:text-sm leading-relaxed text-gray-500">{card.description}</p>
                 </div>
                 {card.href && (
-                  <Link to={card.href} className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-cm-blue hover:underline">
+                  <Link to={card.href} className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-cm-blue hover:underline">
                     Learn more &rarr;
                   </Link>
                 )}

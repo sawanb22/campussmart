@@ -834,10 +834,26 @@ export const pageDefaults: Record<string, any> = {
     'Teacher Enablement'
   ],
   cards: [
-    { title: 'Interactive Learning', description: 'Interactive displays, digital content, and collaborative tools make lessons more engaging.' },
-    { title: 'Connected Classrooms', description: 'Reliable audio, video, networking, and device integration keep the classroom connected.' },
-    { title: 'Flexible Furniture', description: 'Ergonomic, movable furniture supports group work, presentations, and different teaching styles.' },
-    { title: 'Teacher Enablement', description: 'Simple controls and training help teachers use the technology confidently every day.' }
+    {
+      title: 'Interactive Learning',
+      description: 'Interactive displays, digital content, and collaborative tools make lessons more engaging.',
+      image: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=600&q=80',
+    },
+    {
+      title: 'Connected Classrooms',
+      description: 'Reliable audio, video, networking, and device integration keep the classroom connected.',
+      image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=600&q=80',
+    },
+    {
+      title: 'Flexible Furniture',
+      description: 'Ergonomic, movable furniture supports group work, presentations, and different teaching styles.',
+      image: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=600&q=80',
+    },
+    {
+      title: 'Teacher Enablement',
+      description: 'Simple controls and training help teachers use the technology confidently every day.',
+      image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=600&q=80',
+    },
   ],
   ctaTitle: 'Ready to upgrade your classrooms?',
   ctaSubtitle: 'Talk to our team about a smart classroom rollout tailored to your campus and budget.'

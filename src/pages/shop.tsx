@@ -493,14 +493,14 @@ const Shop = ({
                           </Link>
                         </div>
 
-                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100/60">
-                          <span className="text-sm sm:text-base font-bold text-cm-blue tracking-tight">
+                        <div className="flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap mt-2 pt-2 border-t border-slate-100/70">
+                          <span className="text-sm sm:text-base font-black text-cm-blue tracking-tight shrink-0">
                             {formatPrice(product.price)}
                           </span>
 
                           {inWishlist ? (
-                            <div className="flex items-center gap-1.5">
-                              <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1.5 text-xs font-bold">
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1.5 text-xs font-bold whitespace-nowrap">
                                 <Check className="h-3.5 w-3.5" />
                                 <span>Wishlist</span>
                               </span>
@@ -516,7 +516,7 @@ const Shop = ({
                           ) : (
                             <button
                               onClick={() => handleToggleWishlist(product)}
-                              className="flex items-center justify-center gap-1.5 rounded-lg bg-cm-blue px-3 py-1.5 text-xs font-bold text-white shadow-sm transition-all duration-200 hover:bg-cm-blue-dark focus:ring-2 focus:ring-cm-blue/20"
+                              className="shrink-0 flex items-center justify-center gap-1.5 rounded-lg bg-cm-blue px-2.5 sm:px-3 py-1.5 text-xs font-bold text-white shadow-sm transition-all duration-200 hover:bg-cm-blue-dark focus:ring-2 focus:ring-cm-blue/20 whitespace-nowrap active:scale-95"
                             >
                               <Heart className="h-3.5 w-3.5" />
                               <span>Add to Wishlist</span>

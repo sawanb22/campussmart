@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Film, ImagePlus, Loader2, Upload, X } from 'lucide-react';
 import api from '../api/client';
 import { resolveMediaUrl } from '../../lib/media-url';
@@ -14,6 +14,11 @@ export default function MediaImageField({ label, value, onChange, previewClassNa
     const inputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState('');
+    const [previewError, setPreviewError] = useState(false);
+
+    useEffect(() => {
+        setPreviewError(false);
+    }, [value]);
 
     const isVideo = /\.(mp4|webm|mov|mkv)(\?.*)?$/i.test(value || '');
 
@@ -97,11 +102,18 @@ export default function MediaImageField({ label, value, onChange, previewClassNa
                             controls 
                             className="h-full w-full object-contain bg-slate-900" 
                         />
+                    ) : previewError ? (
+                        <div className="flex flex-col items-center justify-center h-full w-full bg-slate-100 text-slate-400 p-2 text-center select-none">
+                            <ImagePlus className="h-6 w-6 text-slate-400 mb-1 opacity-60" />
+                            <span className="text-xs font-bold text-slate-500">Preview Unavailable</span>
+                            <span className="text-[10px] text-slate-400">Media file not found or path offline</span>
+                        </div>
                     ) : (
                         <img 
                             src={resolveMediaUrl(value)} 
                             alt={`${label} preview`} 
                             className="h-full w-full object-cover" 
+                            onError={() => setPreviewError(true)}
                         />
                     )}
                     <button
