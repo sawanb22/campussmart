@@ -47,6 +47,7 @@
 | `FIX-003` | 2026-10-03 17:50 | Global CMS & 95-Page Architecture Standardization | Standardized universal media resilience (<MediaImage />) across 28+ pages; resolved /catalogues skeleton race conditions; aligned case-study slugs & detail routing; eliminated Admin data loss vectors via UnifiedPageEditor SSOT; aligned App.tsx routes (/campus-design-execution, /furniture-design-supply, /corporate redirect); deleted 6 mock seed rows in Neon Postgres Catalogue table. | 28+ files (frontend, admin, routes) + DB | Completed |
 | `FIX-004` | 2026-10-03 18:15 | Global CMS Review & Critical Edge-Case Hardening | Fixed fatal fallbackSrc state machine bug in MediaImage; rendered missing Hero banner and dynamic CTA on /catalogues; replaced ghost cards editor with PDF Manager shortcut banner in UnifiedPageEditor; added card.href priority across category pages; enabled prefix slug resolution and static resilience on case studies. | 18 files (frontend, backend, admin) | Completed |
 | `FIX-005` | 2026-10-03 19:15 | Database Sync, Seed Idempotency, Catalogues Refactor & Enquiry Pipeline | Connected backend to Render production PostgreSQL, added idempotent seed guard with system_bootstrapped flag, purged 3 broken mock records from catalogue table, bound /catalogues 100% to usePageData('catalogues') with Request Catalogue enquiry modal for missing physical PDFs, made contact enquiry spreadsheet sync non-blocking, and added smart non-destructive "Load Starter Template" to UnifiedPageEditor while removing duplicate CTA and banner blocks under SOLID principles. | 8 files (backend, admin, frontend) + DB | Completed |
+| `FIX-006` | 2026-10-03 19:55 | Admin CMS UX & Ergonomics | Smooth auto-scroll and auto-focus to newly added cards, secondary cards, process steps, team members, and case studies in UnifiedPageEditor across both Quick Edit modal and Full Editor page contexts under SOLID principles (Problem 1). | 1 file (admin) | Completed |
 
 ---
 
@@ -1348,6 +1349,33 @@
   - Backend TypeScript Check (`npx --prefix backend tsc --noEmit`): Clean exit with code 0 (0 errors).
   - Production Bundle (`npm run build`): Vite packaged 100% of client assets in 6.42s with 0 errors.
   - Automated Verification Suite (`backend/scripts/verify-fix-005.ts`): 34/34 assertions passed (DB connection, seed guard, mock purge, API removal, pure CMS binding, array preservation, section omission, PDF validation matrix, starter template append deduplication, banner cleanup, and non-blocking enquiry persistence).
+
+---
+
+### [FIX-006] 2026-10-03 19:55 IST - Admin CMS UX: Auto-Scroll & Focus to Newly Added Cards (Problem 1)
+- **Author/Agent**: Antigravity Pair Programmer
+- **Scope / Category**: Admin CMS UX, Ergonomics & Single Responsibility
+- **Files Modified**:
+  - `campusmart_final/src/admin/components/UnifiedPageEditor.tsx`
+- **Description & Rationale**:
+  - **The Problem**: In CMS pages with 6 to 15 cards (Campus Design, Labs, Sports Infra, Furniture, etc.), clicking `+ New Card` appended the card at the bottom while leaving the administrator's viewport static at the top of the page/section. Administrators were forced to manually scroll down long pages to find the empty card and click its title input.
+  - **Architecture & SOLID Adherence**:
+    - **Single Responsibility Principle (SRP)**: Extracted DOM scroll and input-focus logic into an isolated, reusable utility `scrollToAndFocusNewItem(elementId: string)` using `requestAnimationFrame` + `setTimeout(..., 80)` to ensure React 18 batch-rendering commits the DOM node before invoking `scrollIntoView({ behavior: 'smooth', block: 'center' })`.
+    - Automatically locates the first editable input (`'input[type="text"], textarea'`), triggers `.focus()`, and invokes `.select()` so administrators can immediately begin typing the card title without touching the mouse.
+    - **Zero Database Schema Impact**: Pure UI/UX ergonomic layer with 100% backward and forward compatibility.
+    - **Dual-Context Resilience**: Works identically inside the Quick Edit modal (`overflow-y-auto` container in `PagesManager.tsx`) and the standalone Full Editor route (`/admin/pages/:id/edit`).
+  - **Enclosing Elements Instrumented**:
+    - Primary Cards (`addCard`): `card-item-${i}`
+    - Secondary Cards (`addSection2Card`): `section2-card-item-${i}`
+    - Content/Process Sections (`addSection`): `section-item-${i}`
+    - Leadership Team (`addTeamMember`): `team-item-${i}`
+    - Case Studies / Projects (`addCaseStudy`): `casestudy-item-${i}`
+    - More Cards / Resources (`addMoreCard`): `more-card-item-${i}`
+- **Validation**:
+  - Frontend TypeScript Check (`npx tsc -b`): Clean exit with code 0 (0 errors).
+  - Backend TypeScript Check (`npx --prefix backend tsc --noEmit`): Clean exit with code 0 (0 errors).
+  - Production Bundle (`npm run build`): Clean build in 7.52s, `dist/assets/UnifiedPageEditor-CZZs_EIK.js` bundled with 0 errors.
+
 
 
 

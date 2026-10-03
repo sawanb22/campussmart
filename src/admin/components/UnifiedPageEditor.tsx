@@ -411,13 +411,40 @@ export default function UnifiedPageEditor({
 
     const set = (key: string, value: any) => setData((p: any) => ({ ...p, [key]: value }));
 
+    /**
+     * Resilient DOM scroll & focus utility adhering to SRP.
+     * Smoothly navigates the viewport (window or modal container) to newly added cards
+     * and focuses the primary text field for zero-friction editing.
+     */
+    const scrollToAndFocusNewItem = (elementId: string) => {
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                const el = document.getElementById(elementId);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    const firstInput = el.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+                        'input[type="text"], textarea'
+                    );
+                    if (firstInput) {
+                        firstInput.focus();
+                        firstInput.select();
+                    }
+                }
+            }, 80);
+        });
+    };
+
     // Generic Handlers
     const setCard = (i: number, field: string, val: any) => {
         const cards = [...(data.cards ?? [])];
         cards[i] = { ...cards[i], [field]: val };
         set('cards', cards);
     };
-    const addCard = () => set('cards', [...(data.cards ?? []), { title: 'New Card', description: '' }]);
+    const addCard = () => {
+        const nextIndex = (data.cards ?? []).length;
+        set('cards', [...(data.cards ?? []), { title: 'New Card', description: '' }]);
+        scrollToAndFocusNewItem(`card-item-${nextIndex}`);
+    };
     const removeCard = (i: number) => set('cards', (data.cards ?? []).filter((_: any, idx: number) => idx !== i));
 
     const setFeatured = (field: string, value: string) => set('featured', { ...(data.featured ?? {}), [field]: value });
@@ -445,7 +472,11 @@ export default function UnifiedPageEditor({
         cards[i] = { ...cards[i], [field]: value };
         set('moreCards', cards);
     };
-    const addMoreCard = () => set('moreCards', [...(data.moreCards ?? []), { title: 'New resource', category: 'Topic', href: '' }]);
+    const addMoreCard = () => {
+        const nextIndex = (data.moreCards ?? []).length;
+        set('moreCards', [...(data.moreCards ?? []), { title: 'New resource', category: 'Topic', href: '' }]);
+        scrollToAndFocusNewItem(`more-card-item-${nextIndex}`);
+    };
     const removeMoreCard = (i: number) => set('moreCards', (data.moreCards ?? []).filter((_: MoreCardItem, idx: number) => idx !== i));
 
     const setFooterColumn = (i: number, field: string, value: any) => {
@@ -477,7 +508,11 @@ export default function UnifiedPageEditor({
         cards[i] = { ...cards[i], [field]: val };
         set('section2Cards', cards);
     };
-    const addSection2Card = () => set('section2Cards', [...(data.section2Cards ?? []), { title: 'New Card', description: '' }]);
+    const addSection2Card = () => {
+        const nextIndex = (data.section2Cards ?? []).length;
+        set('section2Cards', [...(data.section2Cards ?? []), { title: 'New Card', description: '' }]);
+        scrollToAndFocusNewItem(`section2-card-item-${nextIndex}`);
+    };
     const removeSection2Card = (i: number) => set('section2Cards', (data.section2Cards ?? []).filter((_: any, idx: number) => idx !== i));
 
     const setSection = (i: number, field: string, value: any) => {
@@ -485,7 +520,11 @@ export default function UnifiedPageEditor({
         sections[i] = { ...sections[i], [field]: value };
         set('sections', sections);
     };
-    const addSection = () => set('sections', [...(data.sections ?? []), { heading: 'New Section', body: '', bullets: [] }]);
+    const addSection = () => {
+        const nextIndex = (data.sections ?? []).length;
+        set('sections', [...(data.sections ?? []), { heading: 'New Section', body: '', bullets: [] }]);
+        scrollToAndFocusNewItem(`section-item-${nextIndex}`);
+    };
     const removeSection = (i: number) => set('sections', (data.sections ?? []).filter((_: any, idx: number) => idx !== i));
 
     const setFeature = (i: number, v: string) => {
@@ -510,8 +549,18 @@ export default function UnifiedPageEditor({
         t[i] = { ...t[i], [field]: val };
         set('team', t);
     };
-    const addTeamMember = () => set('team', [...(data.team ?? []), { name: 'Name', role: 'Role', image: '' }]);
+    const addTeamMember = () => {
+        const nextIndex = (data.team ?? []).length;
+        set('team', [...(data.team ?? []), { name: 'Name', role: 'Role', image: '' }]);
+        scrollToAndFocusNewItem(`team-item-${nextIndex}`);
+    };
     const removeTeamMember = (i: number) => set('team', (data.team ?? []).filter((_: any, idx: number) => idx !== i));
+
+    const addCaseStudy = () => {
+        const nextIndex = (data.caseStudies ?? []).length;
+        set('caseStudies', [...(data.caseStudies ?? []), { title: '', description: '', image: '' }]);
+        scrollToAndFocusNewItem(`casestudy-item-${nextIndex}`);
+    };
 
     const setPartner = (i: number, v: string) => {
         const p = [...(data.partners ?? [])];
@@ -774,7 +823,7 @@ export default function UnifiedPageEditor({
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 {(data.team ?? []).map((t: any, i: number) => (
-                                    <div key={i} className="border border-gray-200 rounded-2xl p-4 space-y-4 shadow-sm bg-white relative group">
+                                    <div key={i} id={`team-item-${i}`} className="border border-gray-200 rounded-2xl p-4 space-y-4 shadow-sm bg-white relative group">
                                         <button
                                             type="button"
                                             onClick={() => removeTeamMember(i)}
@@ -1100,7 +1149,7 @@ export default function UnifiedPageEditor({
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         {(data.moreCards ?? []).map((card: MoreCardItem, i: number) => (
-                                            <div key={i} className="relative space-y-3 rounded-2xl border border-gray-200 bg-gray-50/30 p-4">
+                                            <div key={i} id={`more-card-item-${i}`} className="relative space-y-3 rounded-2xl border border-gray-200 bg-gray-50/30 p-4">
                                                 <button type="button" onClick={() => removeMoreCard(i)} className="absolute right-3 top-3 text-red-400 hover:text-red-600">
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
@@ -1264,7 +1313,7 @@ export default function UnifiedPageEditor({
                                     </div>
                                     <div className="grid grid-cols-1 gap-6">
                                         {(data.cards ?? []).map((card: any, i: number) => (
-                                            <div key={i} className="border border-gray-200 rounded-2xl p-6 bg-gray-50/30 hover:bg-white hover:shadow-lg hover:border-blue-200 transition-all group relative">
+                                            <div key={i} id={`card-item-${i}`} className="border border-gray-200 rounded-2xl p-6 bg-gray-50/30 hover:bg-white hover:shadow-lg hover:border-blue-200 transition-all group relative">
                                                 <div className="flex items-center justify-between mb-6">
                                                     <div className="flex items-center gap-3">
                                                         <span className="w-8 h-8 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">{i + 1}</span>
@@ -1353,7 +1402,7 @@ export default function UnifiedPageEditor({
                                 </div>
                                 <div className="grid grid-cols-1 gap-6">
                                     {(data.section2Cards ?? []).map((card: any, i: number) => (
-                                        <div key={i} className="border border-gray-200 rounded-2xl p-6 bg-gray-50/30 hover:bg-white hover:shadow-lg hover:border-blue-200 transition-all group relative">
+                                        <div key={i} id={`section2-card-item-${i}`} className="border border-gray-200 rounded-2xl p-6 bg-gray-50/30 hover:bg-white hover:shadow-lg hover:border-blue-200 transition-all group relative">
                                             <div className="flex items-center justify-between mb-6">
                                                 <div className="flex items-center gap-3">
                                                     <span className="w-8 h-8 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">{i + 1}</span>
@@ -1391,7 +1440,7 @@ export default function UnifiedPageEditor({
                                 </div>
                                 <div className="space-y-6">
                                     {(data.sections ?? []).map((section: SectionItem, i: number) => (
-                                        <div key={i} className="border border-gray-200 rounded-2xl p-6 bg-gray-50/30 relative">
+                                        <div key={i} id={`section-item-${i}`} className="border border-gray-200 rounded-2xl p-6 bg-gray-50/30 relative">
                                             <button type="button" onClick={() => removeSection(i)} className="absolute top-5 right-5 flex items-center gap-1.5 text-red-400 hover:text-red-600 text-[10px] font-black uppercase tracking-wider">
                                                 <Trash2 className="w-3.5 h-3.5" /> Delete
                                             </button>
@@ -1495,10 +1544,7 @@ export default function UnifiedPageEditor({
                                     </h4>
                                     <button
                                         type="button"
-                                        onClick={() => {
-                                            const newList = [...(data.caseStudies ?? []), { title: '', description: '', image: '' }];
-                                            set('caseStudies', newList);
-                                        }}
+                                        onClick={addCaseStudy}
                                         className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-purple-700 transition-all shadow-md"
                                     >
                                         <Plus className="w-4 h-4" /> Add Project
@@ -1506,7 +1552,7 @@ export default function UnifiedPageEditor({
                                 </div>
                                 <div className="grid grid-cols-1 gap-6">
                                     {(data.caseStudies ?? []).map((study: any, i: number) => (
-                                        <div key={i} className="border border-gray-200 rounded-2xl p-6 bg-gray-50/30 group relative">
+                                        <div key={i} id={`casestudy-item-${i}`} className="border border-gray-200 rounded-2xl p-6 bg-gray-50/30 group relative">
                                             <button
                                                 type="button"
                                                 onClick={() => {
