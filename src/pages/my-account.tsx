@@ -384,8 +384,12 @@ const MyAccount = () => {
                       <div key={item.id} className="border border-slate-200 rounded-lg p-4 flex gap-4 hover:border-slate-300 transition-colors">
                         <Link to={`/product/${item.product.slug}`} className="shrink-0">
                           <img
-                            src={resolveMediaUrl(item.product.imageUrl) || 'https://via.placeholder.com/160'}
+                            src={resolveMediaUrl(item.product.imageUrl) || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=400&q=80'}
                             alt={item.product.name}
+                            onError={(e) => {
+                              const fallback = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=400&q=80';
+                              if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback;
+                            }}
                             className="w-20 h-20 object-cover rounded-lg bg-slate-50 border border-slate-100"
                           />
                         </Link>
@@ -413,30 +417,57 @@ const MyAccount = () => {
                       </div>
                     ) : (
                       <div key={item.id} className="border border-slate-200 rounded-lg p-4 flex gap-4 hover:border-slate-300 transition-colors">
-                        <img
-                          src={resolveMediaUrl(item.designImage || undefined) || 'https://via.placeholder.com/160'}
-                          alt={item.designTitle || 'Design'}
-                          className="w-20 h-20 object-cover rounded-lg bg-slate-50 border border-slate-100 shrink-0"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-cm-blue-dark line-clamp-1">{item.designTitle || 'Custom Design'}</h3>
-                          <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mt-1">Saved Design</p>
-                          <div className="flex flex-wrap items-center gap-3 mt-3">
-                            <Link
-                              to="/request-quote?fromWishlist=true"
-                              className="text-xs font-semibold text-cm-blue hover:underline"
-                            >
-                              Quote Design
-                            </Link>
-                            <span className="text-gray-300">|</span>
-                            <button
-                              onClick={() => removeDesign(item.designKey!)}
-                              className="text-xs font-semibold text-red-600 hover:underline"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        </div>
+                        {(() => {
+                          const [pageSlug, cardSlug] = (item.designKey || '').split(':');
+                          const targetUrl = pageSlug && cardSlug ? `/${pageSlug}/${cardSlug}` : (item.pageSlug ? `/${item.pageSlug}` : null);
+                          const thumbImg = (
+                            <img
+                              src={resolveMediaUrl(item.designImage || undefined) || 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=400&q=80'}
+                              alt={item.designTitle || 'Design'}
+                              onError={(e) => {
+                                const fallback = 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=400&q=80';
+                                if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback;
+                              }}
+                              className="w-20 h-20 object-cover rounded-lg bg-slate-50 border border-slate-100 shrink-0"
+                            />
+                          );
+                          return (
+                            <>
+                              {targetUrl ? (
+                                <Link to={targetUrl} className="shrink-0 hover:opacity-90 transition-opacity">
+                                  {thumbImg}
+                                </Link>
+                              ) : (
+                                thumbImg
+                              )}
+                              <div className="flex-1 min-w-0">
+                                {targetUrl ? (
+                                  <Link to={targetUrl} className="font-semibold text-cm-blue-dark hover:text-cm-blue line-clamp-1">
+                                    {item.designTitle || 'Custom Design'}
+                                  </Link>
+                                ) : (
+                                  <h3 className="font-semibold text-cm-blue-dark line-clamp-1">{item.designTitle || 'Custom Design'}</h3>
+                                )}
+                                <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mt-1">Saved Design</p>
+                                <div className="flex flex-wrap items-center gap-3 mt-3">
+                                  <Link
+                                    to="/request-quote?fromWishlist=true"
+                                    className="text-xs font-semibold text-cm-blue hover:underline"
+                                  >
+                                    Quote Design
+                                  </Link>
+                                  <span className="text-gray-300">|</span>
+                                  <button
+                                    onClick={() => removeDesign(item.designKey!)}
+                                    className="text-xs font-semibold text-red-600 hover:underline"
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
+                              </div>
+                            </>
+                          );
+                        })()}
                       </div>
                     ))}
                   </div>

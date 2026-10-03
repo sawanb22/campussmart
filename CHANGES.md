@@ -52,6 +52,7 @@
 | `FIX-008` | 2026-10-03 20:40 | Campus Digital Journal Subtitles & Images | Increased subtitle, body, and metadata font sizes across Campus Digital Journal and AI Guide; restored missing featured article image container; wrapped card images in MediaImage with fallback support; eliminated fragile pravatar dependency; and strictly enforced compact vertical rhythm (Testing Team Issues 1 & 2). | 4 files (frontend, admin) | Completed |
 | `FIX-009` | 2026-10-03 21:05 | Media Resilience & Asset Alignment | Indoor Sports & AI Learning Stations Image 404 & Alignment Repair: replaced dead Unsplash URLs and misassigned sports courts with verified active assets. | 3 files (frontend & admin) | Completed |
 | `CLEAN-001` | 2026-10-03 22:38 | Maintenance & Build Hygiene | Inactive database purge, stale artifacts cleanup (cloudflared, logs, legacy zip), and frontend TypeScript build stabilization (`tsc -b`) under SOLID principles. | 9 files (frontend, backend, root) | Completed |
+| `NAV-004` | 2026-10-04 01:10 | Product & Wishlist Navigation Standardization | Fixed React error #310 hook placement in product-detail.tsx, made Wishlist products and designs universally clickable with image fallbacks, enabled optimistic instant rendering across Labs, Sports, and AI/ML detail pages, and aligned DB assets under SOLID principles. | 5 files (frontend) + DB | Completed |
 
 ---
 
@@ -1490,8 +1491,34 @@
   - **Build Stabilization under SOLID Principles (Single Responsibility)**:
     - Fixed active compilation error in `src/pages/ugc-guidelines.tsx` (`TS6133: 'resolveMediaUrl' is declared but its value is never read`).
     - Standardized clean import scope, unblocking strict production compilation (`tsc -b && vite build`) for Vercel deployment.
-- **Validation**:
-  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 10.26s`).
-  - Backend Build: `npm run build` (`prisma generate && tsc`) passed with exit code 0.
-  - Database Reachability: Verified live connection and query execution to Render PostgreSQL via Prisma Client.
+---
 
+### [NAV-004] 2026-10-04 01:10 IST - Product & Wishlist Navigation Standardization & Hook Order Resolution
+- **Author/Agent**: Antigravity Pair Programmer
+- **Scope / Category**: Core Product Flow, React Stability & UX Alignment
+- **Files Modified**:
+  - `[MODIFY] src/pages/product-detail.tsx`
+  - `[MODIFY] src/pages/my-account.tsx`
+  - `[MODIFY] src/pages/labs-detail.tsx`
+  - `[MODIFY] src/pages/sports-infra-detail.tsx`
+  - `[MODIFY] src/pages/ai-ml-detail.tsx`
+  - `[DATABASE UPDATE] PostgreSQL Page (sports-infra, ai-ml) & WishlistItem records`
+- **Description & Rationale**:
+  - **Product Detail React Hook Fix (`Minified React error #310`)**:
+    - Relocated `const [copied, setCopied] = useState(false);` from line 86 (after conditional loading & error returns) to the top of `ProductDetail` component.
+    - Restored compliance with React's Rules of Hooks, enabling dynamic loading for 100% of catalog products (including new products like `chairrss`).
+  - **Wishlist Standardized Navigation & Image Resilience**:
+    - Added `onError` fallback on product thumbnail images in `my-account.tsx` (`WishlistTab`) to prevent broken browser image icons when remote or custom uploads fail.
+    - Made Saved Designs (like `ML Labs` and `Indoor Sports`) universally clickable by parsing `item.designKey` / `item.pageSlug` to derive `targetUrl`, wrapping both image and title in `<Link to={targetUrl}>` while preserving the "Quote Design" action.
+    - Added high-resolution fallback image on Saved Design thumbnails.
+  - **Optimistic Rendering on Solution Detail Pages**:
+    - In `labs-detail.tsx`, `sports-infra-detail.tsx`, and `ai-ml-detail.tsx`, changed blocking loader from `if (loading)` to `if (loading && !card)`.
+    - Pages with default definitions (like `Physics Lab` or `Indoor Sports`) now render immediately without hanging behind an infinite spinner during network delays or server cold starts.
+  - **Database Alignment**:
+    - Corrected broken Unsplash ID in `sports-infra` ("Indoor Sports") from 404 URL `photo-1546519638405-a9a10ea4b1b7` to verified tournament court `photo-1546519638-68e109498ffc`.
+    - Synced user wishlist record for "Indoor Sports" to point to the active photo.
+    - Fixed trailing comma in `ai-ml` hero subtitle in PostgreSQL database.
+- **Validation**:
+  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 7.32s`).
+  - Backend Build: `npm run build` (`prisma generate && tsc`) passed with exit code 0.
+  - Database queries: Verified table updates for `page` and `wishlistitem` in Render PostgreSQL.

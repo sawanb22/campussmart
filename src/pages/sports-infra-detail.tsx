@@ -10,7 +10,7 @@ const SportsInfraDetail = () => {
   const cards = Array.isArray(data.cards) ? data.cards : SPORTS_INFRA_DEFAULTS.cards;
   const card = cards.find((item: any) => slugifySportsInfraTitle(item.title) === facilitySlug);
 
-  if (loading) {
+  if (loading && !card) {
     return (
       <main className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-cm-blue border-t-transparent" />
@@ -27,7 +27,9 @@ const SportsInfraDetail = () => {
     );
   }
 
-  const image = resolveMediaUrl(card.image);
+  const defaultCard = SPORTS_INFRA_DEFAULTS.cards.find((c) => slugifySportsInfraTitle(c.title) === facilitySlug);
+  const fallbackImage = defaultCard?.image || 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&q=80';
+  const image = resolveMediaUrl(card.image) || fallbackImage;
 
   return (
     <main className="min-h-screen bg-gray-50/50 py-8 sm:py-12">
@@ -36,7 +38,16 @@ const SportsInfraDetail = () => {
           <ArrowLeft className="h-4 w-4" /> Back to Sports Infrastructure
         </Link>
         <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-          {image && <img src={image} alt={card.title} className="h-56 w-full object-cover sm:h-72" />}
+          {image && (
+            <img
+              src={image}
+              alt={card.title}
+              onError={(e) => {
+                if (e.currentTarget.src !== fallbackImage) e.currentTarget.src = fallbackImage;
+              }}
+              className="h-56 w-full object-cover sm:h-72"
+            />
+          )}
           <div className="p-6 sm:p-10">
             <div className="mb-5 inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cm-blue">
               <Star className="h-3 w-3" /> {card.categories?.[0] ?? 'Facility'}

@@ -31,6 +31,7 @@ const ProductDetail = () => {
   const [gallery, setGallery] = useState<string[]>([]);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState('');
+  const [copied, setCopied] = useState(false);
   const { isInWishlist, addProduct, removeProduct } = useWishlist();
 
   useEffect(() => {
@@ -82,8 +83,6 @@ const ProductDetail = () => {
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(price);
-
-  const [copied, setCopied] = useState(false);
 
   const handleShare = async () => {
     const shareUrl = window.location.href;
