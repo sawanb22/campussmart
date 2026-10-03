@@ -3,6 +3,8 @@ export interface LibraryManagementCard {
   description?: string;
   image?: string;
   categories?: string[];
+  href?: string;
+  slug?: string;
 }
 
 export const LIBRARY_MGMT_PAGE_SLUG = 'library-management';

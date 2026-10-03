@@ -45,6 +45,7 @@
 | `FIX-001` | 2026-10-03 15:30 | Quote Submission Resilience & Canonical Routes Alignment | Made quote spreadsheet sync non-blocking and added database error logging; refined input trimming and server error display on /campus-design quote form; unified duplicate routes (/campus-design-execution -> /campus-design, /furniture-design-supply -> /campus-furniture-design); synced DB cards and homepage links under SOLID principles. | 5 files (backend, frontend) + DB | Completed |
 | `FIX-002` | 2026-10-03 15:55 | Media URL Resolution & Static Proxying | Resolved live card image display failure on Vercel: added Vercel rewrite proxying /uploads/(.*) to Render backend, wrapped service card images in resolveMediaUrl with typed onError fallbacks in campus-design.tsx and campus-design-service.tsx. | 3 files (frontend & config) | Completed |
 | `FIX-003` | 2026-10-03 17:50 | Global CMS & 95-Page Architecture Standardization | Standardized universal media resilience (<MediaImage />) across 28+ pages; resolved /catalogues skeleton race conditions; aligned case-study slugs & detail routing; eliminated Admin data loss vectors via UnifiedPageEditor SSOT; aligned App.tsx routes (/campus-design-execution, /furniture-design-supply, /corporate redirect); deleted 6 mock seed rows in Neon Postgres Catalogue table. | 28+ files (frontend, admin, routes) + DB | Completed |
+| `FIX-004` | 2026-10-03 18:15 | Global CMS Review & Critical Edge-Case Hardening | Fixed fatal fallbackSrc state machine bug in MediaImage; rendered missing Hero banner and dynamic CTA on /catalogues; replaced ghost cards editor with PDF Manager shortcut banner in UnifiedPageEditor; added card.href priority across category pages; enabled prefix slug resolution and static resilience on case studies. | 18 files (frontend, backend, admin) | Completed |
 
 ---
 
@@ -1263,6 +1264,41 @@
   - Database verification: Confirmed mock IDs 1-6 removed and remaining 4 user catalogues active.
 
 ---
+
+### [FIX-004] 2026-10-03 18:15 IST - Global CMS Review & Critical Edge-Case Hardening
+- **Author/Agent**: Antigravity Pair Programmer (Reviewer & Hardening Agent)
+- **Scope / Category**: Global Architecture Review, Media Resilience & Edge-Case Protection
+- **Files Modified / Created**:
+  - `[MODIFY] src/components/ui/media-image.tsx`
+  - `[MODIFY] src/pages/catalogues.tsx`
+  - `[MODIFY] src/admin/components/UnifiedPageEditor.tsx`
+  - `[MODIFY] src/admin/pageDefaults.ts`
+  - `[MODIFY] backend/src/routes/case-studies.routes.ts`
+  - `[MODIFY] src/pages/case-study-detail.tsx`
+  - `[MODIFY] src/pages/campus-design-execution.tsx` & `src/pages/campus-design-execution.data.ts`
+  - `[MODIFY] src/pages/campus-design-execution-detail.tsx`
+  - `[MODIFY] src/pages/campus-furniture-design.tsx` & `src/pages/campus-furniture-design.data.ts`
+  - `[MODIFY] src/pages/furniture-design-supply-detail.tsx`
+  - `[MODIFY] src/pages/innovation.tsx` & `src/pages/innovation.data.ts`
+  - `[MODIFY] src/pages/library-management.tsx` & `src/pages/library-management.data.ts`
+  - `[MODIFY] src/pages/corporate.tsx`
+  - `[NEW] backend/scripts/verify-fixes.ts`
+- **Description & Rationale**:
+  - **Identified Failure Vectors & Fixes**:
+    1. *Fatal State-Machine Bug in `MediaImage`*: In `<MediaImage />`, when primary `src` failed, `onError` called `setAttemptedFallbackSrc(true)` without changing `hasError`. The component re-rendered trying the same failing primary `src`. Upon second failure, `attemptedFallbackSrc` was already true, skipping `fallbackSrc` entirely and showing the SVG placeholder. Rewrote the component with a clean reactive state machine where `useFallback` directly switches `effectiveUrl` to `fallbackUrl`.
+    2. *Omitted Hero Section & Static CTA on `/catalogues`*: Although `DEFAULTS` had `heroTitle`, `heroSubtitle`, and `heroImage`, the JSX completely omitted the Hero section and hardcoded static text in the CTA banner. Restored the corporate Hero banner with MediaImage and bound the CTA section to `data.ctaTitle`, `data.ctaSubtitle`, `data.ctaButtonLabel`, and `data.ctaHref`.
+    3. *Ghost Card Editor in `UnifiedPageEditor` for Catalogues*: When editing `catalogues`, the editor displayed generic interactive cards that have zero effect because the live page reads exclusively from the relational `Catalogue` table. Replaced the cards block for `catalogues` with an informative shortcut banner pointing directly to `/admin/catalogues`, adhering to the approved plan.
+    4. *Missing `card.href` Priority on Category Pages*: Category pages (`campus-design-execution`, `campus-furniture-design`, `innovation`, `library-management`) hardcoded title-slug links and ignored custom `card.href`. Standardized `cardLink` across all pages and updated data interfaces.
+    5. *Case Studies Slug Prefix Lookup & Detail Resilience*: In `backend/src/routes/case-studies.routes.ts`, case studies created in admin receive timestamped slugs (e.g. `campus-master-planning-178826...`). Enabled prefix (`startsWith`) matching on `GET /:slug` and added `STATIC_CASE_STUDIES` fallback in `CaseStudyDetail.tsx` to guarantee zero 404 dead ends.
+    6. *MediaImage Integration on Corporate Page*: Wired `<MediaImage />` into `corporate.tsx` for mission statements and leadership team profile photos.
+- **Validation**:
+  - Frontend TypeScript Check (`npx tsc -b`): Clean exit with code 0 (0 errors).
+  - Backend TypeScript Check (`npx --prefix backend tsc --noEmit`): Clean exit with code 0 (0 errors).
+  - Production Bundle (`npm run build`): Vite packaged 100% of client assets in 10.10s with 0 errors.
+  - Automated Database & Slug Script (`npx ts-node scripts/verify-fixes.ts`): 100% PASS across DB catalogues, case studies, page slugs, and prefix query resolutions.
+
+---
+
 
 
 

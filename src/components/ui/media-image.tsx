@@ -17,36 +17,22 @@ export const MediaImage: React.FC<MediaImageProps> = ({
   loading = 'lazy',
   ...rest
 }) => {
+  const [useFallback, setUseFallback] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [attemptedFallbackSrc, setAttemptedFallbackSrc] = useState(false);
 
-  // Reset error state when the source prop changes
+  // Reset state when source props change
   useEffect(() => {
+    setUseFallback(false);
     setHasError(false);
-    setAttemptedFallbackSrc(false);
   }, [src, fallbackSrc]);
 
-  const resolvedUrl = src ? resolveMediaUrl(src) : '';
+  const initialUrl = src ? resolveMediaUrl(src) : '';
+  const fallbackUrl = fallbackSrc ? resolveMediaUrl(fallbackSrc) : '';
 
-  if (!resolvedUrl || hasError) {
-    if (fallbackSrc && !attemptedFallbackSrc) {
-      const resolvedFallback = resolveMediaUrl(fallbackSrc);
-      return (
-        <img
-          src={resolvedFallback}
-          alt={alt}
-          loading={loading}
-          className={className}
-          onError={(e) => {
-            setAttemptedFallbackSrc(true);
-            setHasError(true);
-            onError?.(e);
-          }}
-          {...rest}
-        />
-      );
-    }
+  // Determine which URL should be actively attempted
+  const effectiveUrl = !initialUrl || useFallback ? fallbackUrl : initialUrl;
 
+  if (!effectiveUrl || hasError) {
     if (fallbackNode) {
       return <>{fallbackNode}</>;
     }
@@ -80,13 +66,13 @@ export const MediaImage: React.FC<MediaImageProps> = ({
 
   return (
     <img
-      src={resolvedUrl}
+      src={effectiveUrl}
       alt={alt}
       loading={loading}
       className={className}
       onError={(e) => {
-        if (fallbackSrc && !attemptedFallbackSrc) {
-          setAttemptedFallbackSrc(true);
+        if (!useFallback && fallbackUrl && fallbackUrl !== effectiveUrl) {
+          setUseFallback(true);
         } else {
           setHasError(true);
         }

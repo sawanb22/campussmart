@@ -3,6 +3,8 @@ export interface CampusDesignExecutionCard {
   description?: string;
   image?: string;
   categories?: string[];
+  href?: string;
+  slug?: string;
 }
 
 export const CDE_PAGE_SLUG = 'campus-design-execution';

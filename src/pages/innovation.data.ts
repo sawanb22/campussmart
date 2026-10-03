@@ -3,6 +3,8 @@ export interface InnovationCard {
   description?: string;
   image?: string;
   categories?: string[];
+  href?: string;
+  slug?: string;
 }
 
 export const INNOVATION_PAGE_SLUG = 'innovation';

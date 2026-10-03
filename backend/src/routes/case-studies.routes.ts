@@ -19,8 +19,16 @@ router.get('/', async (_req: Request, res: Response) => {
 
 router.get('/:slug', async (req: Request, res: Response) => {
     try {
+        const param = String(req.params.slug);
         const caseStudy = await prisma.caseStudy.findFirst({
-            where: { OR: [{ slug: String(req.params.slug) }, { id: Number(req.params.slug) || 0 }] },
+            where: {
+                active: true,
+                OR: [
+                    { slug: param },
+                    { slug: { startsWith: param } },
+                    { id: Number(param) || 0 },
+                ],
+            },
         });
         if (!caseStudy) { res.status(404).json({ error: 'Case study not found' }); return; }
         res.json(caseStudy);

@@ -3,6 +3,8 @@ export interface FurnitureDesignCard {
   description?: string;
   image?: string;
   categories?: string[];
+  href?: string;
+  slug?: string;
 }
 
 export const FURNITURE_DESIGN_PAGE_SLUG = 'campus-furniture-design';

@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
-import { resolveMediaUrl } from '@/lib/media-url';
 import { getWarmCardCover } from '@/lib/card-covers';
+import MediaImage from '@/components/ui/media-image';
 import { CDE_PAGE_SLUG, CDE_DEFAULTS, slugifyStepTitle, type CampusDesignExecutionCard } from './campus-design-execution.data';
 
 const DOT_COLORS = ['bg-orange-500', 'bg-emerald-600', 'bg-sky-600', 'bg-rose-500', 'bg-amber-500', 'bg-violet-500'];
@@ -32,6 +32,9 @@ const CampusDesignExecution = () => {
 
   const featured = filteredCards.slice(0, 2);
   const rest = filteredCards.slice(2);
+
+  const cardLink = (card: CampusDesignExecutionCard) =>
+    card.href?.trim() || `/${CDE_PAGE_SLUG}/${slugifyStepTitle(card.title)}`;
 
   return (
     <main className="min-h-screen bg-white">
@@ -65,15 +68,20 @@ const CampusDesignExecution = () => {
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 {featured.map((card, index) => {
                   const cover = getWarmCardCover(index);
-                  const image = resolveMediaUrl(card.image);
                   return (
                     <Link
                       key={card.title}
-                      to={`/${CDE_PAGE_SLUG}/${slugifyStepTitle(card.title)}`}
+                      to={cardLink(card)}
                       className="group block overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-lg"
                     >
                       <div className="relative m-2 h-40 overflow-hidden rounded-lg sm:h-48" style={{ background: cover.background }}>
-                        {image && <img src={image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />}
+                        {card.image && (
+                          <MediaImage
+                            src={card.image}
+                            alt={card.title}
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        )}
                       </div>
                       <div className="p-4 pb-5">
                         <div className="mb-1.5 flex items-center gap-2 text-xs text-gray-400">
@@ -97,15 +105,20 @@ const CampusDesignExecution = () => {
               <div className="mt-3 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {rest.map((card, index) => {
                   const cover = getWarmCardCover(index + 2);
-                  const image = resolveMediaUrl(card.image);
                   return (
                     <Link
                       key={card.title}
-                      to={`/${CDE_PAGE_SLUG}/${slugifyStepTitle(card.title)}`}
+                      to={cardLink(card)}
                       className="group block overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-lg"
                     >
                       <div className="relative m-2 h-36 overflow-hidden rounded-lg" style={{ background: cover.background }}>
-                        {image && <img src={image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />}
+                        {card.image && (
+                          <MediaImage
+                            src={card.image}
+                            alt={card.title}
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        )}
                       </div>
                       <div className="p-4 pb-5">
                         <div className="mb-1.5 flex items-center gap-2 text-xs text-gray-400">

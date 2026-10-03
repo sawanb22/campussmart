@@ -287,7 +287,11 @@ export const pageDefaults: Record<string, any> = {
       description: 'State-of-the-art STEM lab setup for a prestigious school chain.',
       image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
     },
-  ]
+  ],
+  ctaTitle: 'Need a Custom Solution?',
+  ctaSubtitle: 'Our team can create customized catalogues based on your specific requirements.',
+  ctaButtonLabel: 'Request Custom Catalogue',
+  ctaHref: '/request-quote',
 },
   'classifieds': {
   heroTitle: 'Education opportunities, thoughtfully matched.',

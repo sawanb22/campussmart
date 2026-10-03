@@ -50,7 +50,8 @@ const Innovation = () => {
   const richGrid = remaining.slice(0, 3);
   const simpleGrid = remaining.slice(3);
 
-  const cardLink = (card: InnovationCard) => `/${INNOVATION_PAGE_SLUG}/${slugifyInnovationTitle(card.title)}`;
+  const cardLink = (card: InnovationCard) =>
+    card.href?.trim() || `/${INNOVATION_PAGE_SLUG}/${slugifyInnovationTitle(card.title)}`;
 
   return (
     <main className="min-h-screen bg-white">

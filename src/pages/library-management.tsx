@@ -40,7 +40,8 @@ const LibraryManagement = () => {
   );
 
   const [featured, ...rest] = filteredCards;
-  const cardLink = (card: LibraryManagementCard) => `/${LIBRARY_MGMT_PAGE_SLUG}/${slugifyLibraryModuleTitle(card.title)}`;
+  const cardLink = (card: LibraryManagementCard) =>
+    card.href?.trim() || `/${LIBRARY_MGMT_PAGE_SLUG}/${slugifyLibraryModuleTitle(card.title)}`;
 
   return (
     <main className="min-h-screen bg-white">

@@ -110,10 +110,23 @@ const DEFAULTS = {
       slug: 'stem-lab-implementation',
     },
   ],
+  ctaTitle: 'Need a Custom Solution?',
+  ctaSubtitle:
+    'Our team can create customized catalogues based on your specific requirements.',
+  ctaButtonLabel: 'Request Custom Catalogue',
+  ctaHref: '/request-quote',
 };
 
 const Catalogues = () => {
   const { data } = usePageData('catalogues');
+  const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
+  const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
+  const heroImage = data.heroImage || DEFAULTS.heroImage;
+  const ctaTitle = data.ctaTitle ?? DEFAULTS.ctaTitle;
+  const ctaSubtitle = data.ctaSubtitle ?? DEFAULTS.ctaSubtitle;
+  const ctaButtonLabel = data.ctaButtonLabel ?? DEFAULTS.ctaButtonLabel;
+  const ctaHref = data.ctaHref ?? DEFAULTS.ctaHref;
+
   const [catalogueRows, setCatalogueRows] = useState<any[]>([]);
   const [loadingCatalogues, setLoadingCatalogues] = useState(true);
   const [caseStudyRows, setCaseStudyRows] = useState<any[]>([]);
@@ -234,6 +247,34 @@ const Catalogues = () => {
         title="Register to download catalogues"
         description="Create a free account to download our product catalogues and case study PDFs."
       />
+
+      {/* Hero Section */}
+      <section className="bg-cm-blue mx-3 sm:mx-6 lg:mx-8 rounded-[2rem] py-6 md:py-8 overflow-hidden relative shadow-inner mt-4 mb-2">
+        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 relative z-10 px-4">
+          <div className="lg:w-1/2 text-left text-white">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-3 tracking-tight text-white leading-tight">
+              {heroTitle}
+            </h1>
+            <p className="text-sm md:text-base text-white/85 leading-relaxed max-w-xl">
+              {heroSubtitle}
+            </p>
+            <div className="mt-5 flex flex-wrap gap-4">
+              <Link to="/request-quote" className="btn-secondary px-6 py-2.5 text-sm font-bold shadow-md">
+                Request Custom Catalogue
+              </Link>
+            </div>
+          </div>
+          {heroImage && (
+            <div className="lg:w-1/2 relative w-full">
+              <MediaImage
+                src={heroImage}
+                alt={heroTitle}
+                className="rounded-2xl shadow-xl w-full h-[240px] sm:h-[260px] object-cover border-2 border-cm-blue-dark relative z-10"
+              />
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* Toolbar */}
       <section className="px-4 pt-4 sm:px-6 lg:px-8">
@@ -396,15 +437,15 @@ const Catalogues = () => {
       {/* CTA Section */}
       <section className="bg-cm-yellow px-4 py-8 sm:px-6 md:py-10 lg:px-8">
         <div className="mx-auto max-w-4xl text-center">
-          <h2 className="mb-4 text-2xl font-bold text-cm-blue-dark md:text-3xl">Need a Custom Solution?</h2>
+          <h2 className="mb-4 text-2xl font-bold text-cm-blue-dark md:text-3xl">{ctaTitle}</h2>
 
           <p className="mx-auto mb-6 max-w-2xl text-base text-gray-700 md:text-lg">
-            Our team can create customized catalogues based on your specific requirements.
+            {ctaSubtitle}
           </p>
 
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
-            <Link to="/request-quote" className="btn-primary">
-              Request Custom Catalogue
+            <Link to={ctaHref?.trim() || '/request-quote'} className="btn-primary">
+              {ctaButtonLabel || 'Request Custom Catalogue'}
             </Link>
 
             <Link to="/contact-us" className="rounded-full bg-white px-6 py-3 font-semibold text-cm-blue-dark transition-colors hover:bg-gray-100">

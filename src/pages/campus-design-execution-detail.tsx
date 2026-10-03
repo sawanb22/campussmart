@@ -8,7 +8,7 @@ const CampusDesignExecutionDetail = () => {
   const { stepSlug } = useParams();
   const { data, loading } = usePageData(CDE_PAGE_SLUG);
   const cards = Array.isArray(data.cards) ? data.cards : CDE_DEFAULTS.cards;
-  const card = cards.find((item: any) => slugifyStepTitle(item.title) === stepSlug);
+  const card = cards.find((item: any) => slugifyStepTitle(item.title) === stepSlug || item.slug === stepSlug);
 
   if (loading) {
     return (

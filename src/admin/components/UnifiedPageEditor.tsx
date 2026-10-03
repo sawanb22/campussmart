@@ -1154,8 +1154,25 @@ export default function UnifiedPageEditor({
                             </section>
                         )}
 
-                        {/* Optional Cards block */}
-                        {('cards' in effectiveDefaults || page.slug === 'colleges-universities-for-sale') && (() => {
+                        {/* Catalogues shortcut banner */}
+                        {page.slug === 'catalogues' ? (
+                            <section className="space-y-4 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-6">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                    <div>
+                                        <h4 className="text-sm font-bold text-emerald-900">Manage Downloadable Catalogues &amp; PDF Uploads</h4>
+                                        <p className="text-xs text-emerald-700 mt-1 max-w-xl">
+                                            Downloadable PDF files and cover images are managed centrally in the Catalogues module backed by the database. Hero and CTA banner copy can be customized directly on this page.
+                                        </p>
+                                    </div>
+                                    <Link
+                                        to="/admin/catalogues"
+                                        className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition-colors"
+                                    >
+                                        Open PDF Manager &rarr;
+                                    </Link>
+                                </div>
+                            </section>
+                        ) : ('cards' in effectiveDefaults || page.slug === 'colleges-universities-for-sale') && (() => {
                             const cardsUseCategories = (effectiveDefaults.cards ?? []).some((c: any) => Array.isArray(c?.categories));
                             const cardsUseHref = (effectiveDefaults.cards ?? []).some((c: any) => 'href' in (c || {}));
                             const cardsUseDownloadLink = (effectiveDefaults.cards ?? []).some((c: any) => 'downloadLink' in (c || {}));

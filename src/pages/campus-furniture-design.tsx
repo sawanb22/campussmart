@@ -40,7 +40,8 @@ const CampusFurnitureDesign = () => {
   );
 
   const [featured, ...rest] = filteredCards;
-  const cardLink = (card: FurnitureDesignCard) => `/${FURNITURE_DESIGN_PAGE_SLUG}/${slugifyFurnitureDesignTitle(card.title)}`;
+  const cardLink = (card: FurnitureDesignCard) =>
+    card.href?.trim() || `/${FURNITURE_DESIGN_PAGE_SLUG}/${slugifyFurnitureDesignTitle(card.title)}`;
 
   return (
     <main className="min-h-screen bg-white">

@@ -8,7 +8,7 @@ const FurnitureDesignSupplyDetail = () => {
   const { solutionSlug } = useParams();
   const { data, loading } = usePageData(FURNITURE_SUPPLY_PAGE_SLUG);
   const cards = Array.isArray(data.cards) ? data.cards : FURNITURE_SUPPLY_DEFAULTS.cards;
-  const card = cards.find((item: any) => slugifyFurnitureSupplyTitle(item.title) === solutionSlug);
+  const card = cards.find((item: any) => slugifyFurnitureSupplyTitle(item.title) === solutionSlug || item.slug === solutionSlug);
 
   if (loading) {
     return (

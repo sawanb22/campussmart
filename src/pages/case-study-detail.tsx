@@ -11,6 +11,27 @@ interface CaseStudy {
   imageUrl?: string;
 }
 
+const STATIC_CASE_STUDIES: Record<string, CaseStudy> = {
+  'campus-master-planning': {
+    title: 'Campus Master Planning',
+    description: 'Complete campus transformation for a leading university in Bangalore.',
+    body: 'CampusMart delivered a comprehensive campus master planning and infrastructure overhaul, optimizing learning spaces, faculty areas, and technology-enabled learning centers across 45 acres.',
+    imageUrl: 'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+  },
+  '20-stunning-college-buildings': {
+    title: '20 Stunning College Buildings',
+    description: 'Showcase of our most innovative campus architecture projects.',
+    body: 'A portfolio of 20 architectural landmarks engineered to harmonize aesthetic excellence, sustainable materials, and contemporary pedagogical requirements.',
+    imageUrl: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+  },
+  'stem-lab-implementation': {
+    title: 'STEM Lab Implementation',
+    description: 'State-of-the-art STEM lab setup for a prestigious school chain.',
+    body: 'Complete turnkey rollout of advanced robotics, sensor stations, and modular maker tables for 12 campus locations across India.',
+    imageUrl: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+  },
+};
+
 const CaseStudyDetail = () => {
   const { slug } = useParams();
   const [study, setStudy] = useState<CaseStudy | null>(null);
@@ -21,7 +42,16 @@ const CaseStudyDetail = () => {
     if (!slug) return;
     api.get(`/case-studies/${slug}`)
       .then(({ data }) => setStudy(data))
-      .catch((requestError) => setError(requestError.response?.data?.error || 'Case study not found.'))
+      .catch((requestError) => {
+        const cleanSlug = slug.toLowerCase().replace(/-\d+$/, '');
+        const fallback = STATIC_CASE_STUDIES[slug] || STATIC_CASE_STUDIES[cleanSlug];
+        if (fallback) {
+          setStudy(fallback);
+          setError('');
+        } else {
+          setError(requestError.response?.data?.error || 'Case study not found.');
+        }
+      })
       .finally(() => setLoading(false));
   }, [slug]);
 

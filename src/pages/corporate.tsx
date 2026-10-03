@@ -4,7 +4,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Building2, Users, Target, Award, Handshake, TrendingUp } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
-import { resolveMediaUrl } from '@/lib/media-url';
+import MediaImage from '@/components/ui/media-image';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -160,12 +160,10 @@ const Corporate = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="relative group">
               <div className="absolute -inset-6 bg-cm-blue/10 rounded-[3rem] group-hover:rotate-1 transition-transform duration-1000" />
-              <img
-                src={resolveMediaUrl(data.missionImage) || DEFAULTS.missionImage}
+              <MediaImage
+                src={data.missionImage}
+                fallbackSrc={DEFAULTS.missionImage}
                 alt="Campus Mart Mission"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1200&q=80';
-                }}
                 className="relative rounded-[2.5rem] shadow-xl w-full h-[360px] sm:h-[440px] object-cover translate-x-2 grayscale group-hover:grayscale-0 transition-all duration-1000 bg-slate-100"
               />
               <div className="absolute -bottom-6 -right-6 bg-cm-yellow p-6 rounded-2xl shadow-xl">
@@ -232,15 +230,10 @@ const Corporate = () => {
             {(Array.isArray(data.team) ? data.team : DEFAULTS.team).map((member: any) => (
               <div key={member.name} className="group flex flex-col items-center">
                 <div className="relative mb-6 w-full aspect-[4/3] overflow-hidden rounded-2xl shadow-xl border border-gray-100">
-                  <img
-                    src={resolveMediaUrl(member.image) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}
+                  <MediaImage
+                    src={member.image}
+                    fallbackSrc="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"
                     alt={member.name}
-                    onError={(e) => {
-                      const fallback = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
-                      if (e.currentTarget.src !== fallback) {
-                        e.currentTarget.src = fallback;
-                      }
-                    }}
                     className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-cm-blue-dark/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
