@@ -42,6 +42,7 @@
 | `UI-005` | 2026-10-03 00:02 | Admin Pages Manager UI | Redesigned PagesManager PageCard adhering to SOLID principles: separated utility icon actions (View Live, Delete) to card header, converted card footer to balanced 50/50 dual-button row (Full Editor, Quick Edit), widened container to max-w-7xl, and updated grid breakpoints to eliminate card button clipping and horizontal overflow. | 1 file (admin) | Completed |
 | `EMAIL-001` | 2026-10-03 00:05 | Backend Email & OTP Delivery | Enforced IPv4-first DNS resolution in Node runtime, configured Nodemailer with explicit host, port 587 STARTTLS, family 4 to eliminate Render IPv6 ENETUNREACH socket failure, and added production OTP dispatch logging for traceability. | 2 files (backend) | Completed |
 | `AUTH-002` | 2026-10-03 00:35 | Pre-Verified Test User Seeding | Seeded pre-verified standard customer account (user@campussmart.in / User@1234) in runSeed.ts and seed.ts with emailVerified: true, enabling frictionless customer login and testing without OTP dependency. | 2 files (backend) | Completed |
+| `FIX-001` | 2026-10-03 15:30 | Quote Submission Resilience & Canonical Routes Alignment | Made quote spreadsheet sync non-blocking and added database error logging; refined input trimming and server error display on /campus-design quote form; unified duplicate routes (/campus-design-execution -> /campus-design, /furniture-design-supply -> /campus-furniture-design); synced DB cards and homepage links under SOLID principles. | 5 files (backend, frontend) + DB | Completed |
 
 ---
 
@@ -1151,9 +1152,37 @@
     - `npm run build` (`prisma generate && tsc`): Exit code 0.
     - Verified `dist/runSeed.js` compiled with the new test user block.
 
+### [FIX-001] 2026-10-03 15:30 IST - Quote Submission Resilience & Canonical CMS Routes Alignment
+- **Author/Agent**: Antigravity Pair Programmer
+- **Scope / Category**: Form Submission Reliability, Error Handling, Routing & Slug Unification (SOLID Principles), Database Sync
+- **Files Modified**:
+  - `[MODIFY] backend/src/routes/contact.routes.ts`
+  - `[MODIFY] src/pages/campus-design-service.tsx`
+  - `[MODIFY] src/App.tsx`
+  - `[MODIFY] src/components/sections/service-cards.tsx`
+  - `[UPDATE] PostgreSQL DB` (`sitecontent` key `home_services` and `page` row `campus-furniture-design`)
+- **Description & Rationale**:
+  - **Issue Addressed**:
+    - *Problem 1 (Quote Submission Error)*: On the Homepage $\rightarrow$ Campus Design card $\rightarrow$ "View" $\rightarrow$ Request Quote form (`/campus-design/:serviceSlug`), submissions failed with a generic red error message `"Failed to submit your quotation request. Please try again."` if phone or pincode validation failed or if external webhook synchronization threw an exception.
+    - *Problem 2 (CMS Cards Route Disconnect)*: In the Admin CMS, adding cards to "Campus Design" or "Campus Furniture Design" updated the database rows for `campus-design` and `campus-furniture-design`, but public website links pointed to duplicate routes (`/campus-design-execution` and `/furniture-design-supply`). To testers and admins, cards added in the CMS appeared missing from the public site.
+  - **Architectural Solution & SOLID Principles Compliance**:
+    - *Decoupled Non-Blocking Sync (Single Responsibility Principle)*: In `backend/src/routes/contact.routes.ts`, decoupled `syncToSpreadsheet()` from the primary HTTP response pipeline using `.catch()`. Quotes are persisted immediately to the database, ensuring customer requests succeed even if Google Sheets is slow or unavailable. Added `console.error` in the catch block for transparent database error observability.
+    - *Actionable Client Error Messaging (SRP)*: In `campus-design-service.tsx`, trimmed all form inputs and surfaced the exact backend validation error (`requestError.response?.data?.error`) directly to the user (e.g. indicating valid 10-digit Indian mobile number requirements) rather than masking failures with a generic error.
+    - *Canonical Route Unification (DRY & SRP)*: In `src/App.tsx`, mapped `campus-design-execution` to `CampusDesign` and `furniture-design-supply` to `CampusFurnitureDesign`. In `service-cards.tsx` and the `sitecontent` database table, updated homepage service links to point directly to `/campus-design` and `/campus-furniture-design`.
+    - *Database Data Parity*: Synced the missing card catalog into `campus-furniture-design` in PostgreSQL so the page does not render an empty array.
+- **Validation**:
+  - Dual TypeScript Compilation:
+    - Frontend (`npx tsc -b`): Clean exit with code 0 (0 errors).
+    - Backend (`npx tsc --noEmit`): Clean exit with code 0 (0 errors).
+  - API & Route Testing:
+    - `POST /api/contact/quote` with valid payload: Returns HTTP 201 `{ message: 'Quote request submitted successfully', id: 17 }`.
+    - `POST /api/contact/quote` with invalid phone: Returns HTTP 400 `{ error: 'Please enter a valid 10-digit Indian phone number' }`.
+    - Live Tunnel: Verified HTTP 200 on `https://thorough-manor-donated-ruled.trycloudflare.com/campus-design`, `/campus-furniture-design`, `/campus-design-execution`, and `/furniture-design-supply`.
+
 ---
 
 <!-- FUTURE CHANGES APPENDED BELOW -->
+
 
 
 

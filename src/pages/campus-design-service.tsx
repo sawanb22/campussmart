@@ -36,17 +36,18 @@ const CampusDesignService = () => {
     setError('');
     try {
       await api.post('/contact/quote', {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        institution: formData.institution,
-        pincode: formData.pincode,
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        institution: formData.institution.trim(),
+        pincode: formData.pincode.trim(),
         items: service.title,
-        message: `Service: ${service.title}\n${formData.message}`,
+        message: `Service: ${service.title}\n${formData.message.trim()}`,
       });
       setSubmitted(true);
     } catch (requestError: any) {
-      setError(requestError.response?.data?.error || 'Failed to submit your quotation request. Please try again.');
+      const serverMsg = requestError.response?.data?.error;
+      setError(serverMsg || 'Failed to submit your quotation request. Please check your phone number and details.');
     } finally {
       setSubmitting(false);
     }

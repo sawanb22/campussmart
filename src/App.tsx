@@ -42,7 +42,7 @@ const PageTemplates: Record<string, any> = {
   'blog': lazy(() => import('@/pages/blog')),
   'ar-vr-experiences': lazy(() => import('@/pages/ar-vr-experiences')),
   'campus-automation': lazy(() => import('@/pages/campus-automation')),
-  'campus-design-execution': lazy(() => import('@/pages/campus-design-execution')),
+  'campus-design-execution': lazy(() => import('@/pages/campus-design')),
   'campus-master-planning': lazy(() => import('@/pages/campus-master-planning')),
   'campus-furniture-design': lazy(() => import('@/pages/campus-furniture-design')),
   'campus-design': lazy(() => import('@/pages/campus-design')),
@@ -55,7 +55,7 @@ const PageTemplates: Record<string, any> = {
   'about-us': lazy(() => import('@/pages/corporate')),
   'corporate': lazy(() => import('@/pages/corporate')),
   'digital-transformation': lazy(() => import('@/pages/digital-transformation')),
-  'furniture-design-supply': lazy(() => import('@/pages/furniture-design-supply')),
+  'furniture-design-supply': lazy(() => import('@/pages/campus-furniture-design')),
   'furniture': lazy(() => import('@/pages/furniture')),
   'innovation-centres': lazy(() => import('@/pages/innovation-centres')),
   'innovation-centers': lazy(() => import('@/pages/innovation-centers')),
@@ -177,7 +177,6 @@ const DynamicPageRoute = () => {
 
 const ProductDetail = lazy(() => import('@/pages/product-detail'));
 const PartnershipModelDetail = lazy(() => import('@/pages/partnership-model-detail'));
-const CampusDesignExecutionDetail = lazy(() => import('@/pages/campus-design-execution-detail'));
 const CollaborationDetail = lazy(() => import('@/pages/collaboration-detail'));
 const InnovationDetail = lazy(() => import('@/pages/innovation-detail'));
 const AiMlDetail = lazy(() => import('@/pages/ai-ml-detail'));
@@ -188,7 +187,6 @@ const ScienceTechLabsDetail = lazy(() => import('@/pages/science-tech-labs-detai
 const CampusMasterPlanningDetail = lazy(() => import('@/pages/campus-master-planning-detail'));
 const ArVrExperiencesDetail = lazy(() => import('@/pages/ar-vr-experiences-detail'));
 const CampusFurnitureDesignDetail = lazy(() => import('@/pages/campus-furniture-design-detail'));
-const FurnitureDesignSupplyDetail = lazy(() => import('@/pages/furniture-design-supply-detail'));
 const AiDigitalDesignSupplyDetail = lazy(() => import('@/pages/ai-digital-design-supply-detail'));
 const CollaborationSpacesDetail = lazy(() => import('@/pages/collaboration-spaces-detail'));
 const SportsInfrastructureDetail = lazy(() => import('@/pages/sports-infrastructure-detail'));
@@ -218,7 +216,7 @@ function App() {
               <Route path="/blog/:slug" element={<Layout><BlogPost /></Layout>} />
               <Route path="/case-studies/:slug" element={<Layout><CaseStudyDetail /></Layout>} />
               <Route path="/partner-with-colleges/:modelSlug" element={<Layout><PartnershipModelDetail /></Layout>} />
-              <Route path="/campus-design-execution/:stepSlug" element={<Layout><CampusDesignExecutionDetail /></Layout>} />
+              <Route path="/campus-design-execution/:stepSlug" element={<Layout><CampusDesignService /></Layout>} />
               <Route path="/collaboration/:itemSlug" element={<Layout><CollaborationDetail /></Layout>} />
               <Route path="/innovation/:trackSlug" element={<Layout><InnovationDetail /></Layout>} />
               <Route path="/ai-ml/:moduleSlug" element={<Layout><AiMlDetail /></Layout>} />
@@ -229,7 +227,7 @@ function App() {
               <Route path="/campus-master-planning/:serviceSlug" element={<Layout><CampusMasterPlanningDetail /></Layout>} />
               <Route path="/ar-vr-experiences/:experienceSlug" element={<Layout><ArVrExperiencesDetail /></Layout>} />
               <Route path="/campus-furniture-design/:rangeSlug" element={<Layout><CampusFurnitureDesignDetail /></Layout>} />
-              <Route path="/furniture-design-supply/:solutionSlug" element={<Layout><FurnitureDesignSupplyDetail /></Layout>} />
+              <Route path="/furniture-design-supply/:solutionSlug" element={<Layout><CampusFurnitureDesignDetail /></Layout>} />
               <Route path="/ai-digital-design-supply/:solutionSlug" element={<Layout><AiDigitalDesignSupplyDetail /></Layout>} />
               <Route path="/collaboration-spaces/:spaceSlug" element={<Layout><CollaborationSpacesDetail /></Layout>} />
               <Route path="/sports-infrastructure/:facilitySlug" element={<Layout><SportsInfrastructureDetail /></Layout>} />

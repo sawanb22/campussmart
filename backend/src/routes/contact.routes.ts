@@ -68,10 +68,14 @@ router.post('/quote', async (req: Request, res: Response) => {
             return;
         }
         const quote = await prisma.quoteRequest.create({ data: { name, email, phone, institution, items, message } });
-        await syncToSpreadsheet({ type: 'Quote Request', id: quote.id, name, email, phone, institution, items, message, createdAt: quote.createdAt });
+        // Non-blocking sync: external spreadsheet errors should never fail customer quote persistence
+        syncToSpreadsheet({ type: 'Quote Request', id: quote.id, name, email, phone, institution, items, message, createdAt: quote.createdAt })
+            .catch((sheetError) => console.error('Spreadsheet sync error (non-fatal):', sheetError));
+
         res.status(201).json({ message: 'Quote request submitted successfully', id: quote.id });
-    } catch {
-        res.status(500).json({ error: 'Failed to submit quote request' });
+    } catch (err) {
+        console.error('Failed to submit quote request in database:', err);
+        res.status(500).json({ error: 'Failed to submit quote request. Please check your details and try again.' });
     }
 });
 
