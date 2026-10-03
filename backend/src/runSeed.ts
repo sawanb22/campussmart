@@ -521,6 +521,16 @@ const PAGE_DATA: Record<string, object> = {
 async function seed() {
     console.log('🌱 Running production seed...');
 
+    // ── Idempotent 1-Time Seed Guard ──────────────────────────────────────
+    const bootstrapFlag = await prisma.siteContent.findUnique({
+        where: { key: 'system_bootstrapped' },
+    });
+    if (bootstrapFlag?.value === 'true') {
+        console.log('🔒 Database already bootstrapped (system_bootstrapped = true). Exiting seed safely without altering data.');
+        await prisma.$disconnect();
+        return;
+    }
+
     // ── Admin user ────────────────────────────────────────────────────────
     const adminEmail = process.env.ADMIN_INITIAL_EMAIL || 'admin@campusmart.in';
     const existingAdmin = await prisma.user.findFirst({
@@ -713,18 +723,7 @@ async function seed() {
         await prisma.blogPost.upsert({ where: { slug: post.slug }, update: {}, create: post });
     }
 
-    // ── Catalogues ────────────────────────────────────────────────────────
-    const catalogues = [
-        { title: 'Furniture Catalogue 2025', description: 'Complete range of school and college furniture solutions', fileUrl: '/uploads/catalogues/furniture-2025.pdf', thumbnailUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=300&q=80' },
-        { title: 'Lab Equipment Catalogue', description: 'State-of-the-art laboratory setup and equipment', fileUrl: '/uploads/catalogues/lab-equipment.pdf', thumbnailUrl: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=300&q=80' },
-        { title: 'Technology Solutions Catalogue', description: 'Smart classroom and digital learning solutions', fileUrl: '/uploads/catalogues/technology.pdf', thumbnailUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=300&q=80' },
-    ];
-    for (const cat of catalogues) {
-        const existingCat = await prisma.catalogue.findFirst({ where: { title: cat.title } });
-        if (!existingCat) await prisma.catalogue.create({ data: cat });
-    }
-
-    console.log('✓ Products, Blog Posts, and Catalogues seeded');
+    console.log('✓ Products and Blog Posts seeded');
 
     // ── Pages ─────────────────────────────────────────────────────────────
     const corePages = [
@@ -808,6 +807,14 @@ async function seed() {
     }
 
     console.log(`✓ ${corePages.length} pages seeded with pageData`);
+
+    // ── Mark System Bootstrapped ──────────────────────────────────────────
+    await prisma.siteContent.upsert({
+        where: { key: 'system_bootstrapped' },
+        update: { value: 'true' },
+        create: { key: 'system_bootstrapped', value: 'true' },
+    });
+    console.log('✓ System bootstrap flag marked as true');
 
     await prisma.$disconnect();
 }

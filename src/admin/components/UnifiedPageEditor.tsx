@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Save, Plus, Trash2, Link as LinkIcon, X, ArrowLeft } from 'lucide-react';
+import { Save, Plus, Trash2, Link as LinkIcon, X, ArrowLeft, FileText } from 'lucide-react';
 import api from '../api/client';
 import { pageDefaults } from '../pageDefaults';
 import MediaImageField from './MediaImageField';
@@ -322,6 +322,93 @@ export default function UnifiedPageEditor({
     const [saved, setSaved] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
 
+    // Starter Template Modal state
+    const [showTemplateModal, setShowTemplateModal] = useState(false);
+    const [templateMode, setTemplateMode] = useState<'append' | 'replace'>('append');
+
+    const handleApplyStarterTemplate = () => {
+        if (!effectiveDefaults || Object.keys(effectiveDefaults).length === 0) {
+            alert('No starter template defaults found for this page.');
+            setShowTemplateModal(false);
+            return;
+        }
+
+        if (templateMode === 'replace') {
+            const cloned = JSON.parse(JSON.stringify(effectiveDefaults));
+            setData(cloned);
+            setShowTemplateModal(false);
+            return;
+        }
+
+        // Mode: 'append' (Safe, Non-Destructive)
+        // 1. Preserve user-created cards at the top and only append non-duplicate sample cards
+        const currentCards = Array.isArray(data.cards) ? [...data.cards] : [];
+        const sampleCards = Array.isArray(effectiveDefaults.cards) ? effectiveDefaults.cards : [];
+
+        const existingTitles = new Set(
+            currentCards
+                .map((c: any) => (c?.title || '').trim().toLowerCase())
+                .filter(Boolean)
+        );
+
+        const nonDuplicateSamples = sampleCards.filter((sample: any) => {
+            const titleKey = (sample?.title || '').trim().toLowerCase();
+            return !existingTitles.has(titleKey);
+        });
+
+        const mergedCards = [...currentCards, ...JSON.parse(JSON.stringify(nonDuplicateSamples))];
+
+        // 2. Additional card sets deduplication
+        let mergedSection2Cards = data.section2Cards;
+        if (Array.isArray(effectiveDefaults.section2Cards)) {
+            const current = Array.isArray(data.section2Cards) ? [...data.section2Cards] : [];
+            const existingS2Titles = new Set(current.map((c: any) => (c?.title || '').trim().toLowerCase()).filter(Boolean));
+            const nonDup = effectiveDefaults.section2Cards.filter((s: any) => !existingS2Titles.has((s?.title || '').trim().toLowerCase()));
+            mergedSection2Cards = [...current, ...JSON.parse(JSON.stringify(nonDup))];
+        }
+
+        let mergedCaseStudies = data.caseStudies;
+        if (Array.isArray(effectiveDefaults.caseStudies)) {
+            const current = Array.isArray(data.caseStudies) ? [...data.caseStudies] : [];
+            const existingCSTitles = new Set(current.map((c: any) => (c?.title || '').trim().toLowerCase()).filter(Boolean));
+            const nonDup = effectiveDefaults.caseStudies.filter((s: any) => !existingCSTitles.has((s?.title || '').trim().toLowerCase()));
+            mergedCaseStudies = [...current, ...JSON.parse(JSON.stringify(nonDup))];
+        }
+
+        let mergedMoreCards = data.moreCards;
+        if (Array.isArray(effectiveDefaults.moreCards)) {
+            const current = Array.isArray(data.moreCards) ? [...data.moreCards] : [];
+            const existingMoreTitles = new Set(current.map((c: any) => (c?.title || '').trim().toLowerCase()).filter(Boolean));
+            const nonDup = effectiveDefaults.moreCards.filter((s: any) => !existingMoreTitles.has((s?.title || '').trim().toLowerCase()));
+            mergedMoreCards = [...current, ...JSON.parse(JSON.stringify(nonDup))];
+        }
+
+        // 3. Backfill empty scalar properties from effectiveDefaults without overwriting existing non-empty values
+        const mergedData: PageData = { ...data };
+        Object.entries(effectiveDefaults).forEach(([key, val]) => {
+            if (key === 'cards' || key === 'section2Cards' || key === 'caseStudies' || key === 'moreCards') return;
+            if (mergedData[key] === undefined || mergedData[key] === null || mergedData[key] === '') {
+                mergedData[key] = JSON.parse(JSON.stringify(val));
+            }
+        });
+
+        if (Array.isArray(effectiveDefaults.cards)) {
+            mergedData.cards = mergedCards;
+        }
+        if (Array.isArray(effectiveDefaults.section2Cards)) {
+            mergedData.section2Cards = mergedSection2Cards;
+        }
+        if (Array.isArray(effectiveDefaults.caseStudies)) {
+            mergedData.caseStudies = mergedCaseStudies;
+        }
+        if (Array.isArray(effectiveDefaults.moreCards)) {
+            mergedData.moreCards = mergedMoreCards;
+        }
+
+        setData(mergedData);
+        setShowTemplateModal(false);
+    };
+
     const set = (key: string, value: any) => setData((p: any) => ({ ...p, [key]: value }));
 
     // Generic Handlers
@@ -487,6 +574,14 @@ export default function UnifiedPageEditor({
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
+                    <button
+                        type="button"
+                        onClick={() => setShowTemplateModal(true)}
+                        className="flex items-center gap-2 px-3.5 py-2 text-xs font-bold border border-blue-200 text-blue-700 bg-blue-50/90 hover:bg-blue-100 rounded-xl transition-all shadow-sm active:scale-95"
+                        title="Load recommended template samples for this page"
+                    >
+                        <FileText className="w-3.5 h-3.5" /> Load Starter Template
+                    </button>
                     <a
                         href={`/${page.slug}`}
                         target="_blank"
@@ -1155,13 +1250,13 @@ export default function UnifiedPageEditor({
                         )}
 
                         {/* Catalogues shortcut banner */}
-                        {page.slug === 'catalogues' ? (
+                        {page.slug === 'catalogues' && (
                             <section className="space-y-4 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-6">
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                     <div>
-                                        <h4 className="text-sm font-bold text-emerald-900">Manage Downloadable Catalogues &amp; PDF Uploads</h4>
+                                        <h4 className="text-sm font-bold text-emerald-900">Downloadable Catalogues &amp; Custom Solutions</h4>
                                         <p className="text-xs text-emerald-700 mt-1 max-w-xl">
-                                            Downloadable PDF files and cover images are managed centrally in the Catalogues module backed by the database. Hero and CTA banner copy can be customized directly on this page.
+                                            Edit the catalogue cards below directly or click "Load Starter Template" to load default cards. Uploaded PDFs allow visitors to download directly; cards without uploaded files automatically display "Request Catalogue".
                                         </p>
                                     </div>
                                     <Link
@@ -1172,11 +1267,13 @@ export default function UnifiedPageEditor({
                                     </Link>
                                 </div>
                             </section>
-                        ) : ('cards' in effectiveDefaults || page.slug === 'colleges-universities-for-sale') && (() => {
+                        )}
+
+                        {('cards' in effectiveDefaults || page.slug === 'colleges-universities-for-sale' || page.slug === 'catalogues') && (() => {
                             const cardsUseCategories = (effectiveDefaults.cards ?? []).some((c: any) => Array.isArray(c?.categories));
                             const cardsUseHref = (effectiveDefaults.cards ?? []).some((c: any) => 'href' in (c || {}));
-                            const cardsUseDownloadLink = (effectiveDefaults.cards ?? []).some((c: any) => 'downloadLink' in (c || {}));
-                            const cardsUseSize = (effectiveDefaults.cards ?? []).some((c: any) => 'size' in (c || {}));
+                            const cardsUseDownloadLink = (effectiveDefaults.cards ?? []).some((c: any) => 'downloadLink' in (c || {})) || page.slug === 'catalogues';
+                            const cardsUseSize = (effectiveDefaults.cards ?? []).some((c: any) => 'size' in (c || {})) || page.slug === 'catalogues';
                             return (
                                 <section className="space-y-6">
                                     <div className="flex items-center justify-between pb-2 border-b border-gray-100">
@@ -1248,7 +1345,11 @@ export default function UnifiedPageEditor({
                                                         <Field label="Card Link" value={card.href ?? ''} onChange={(v) => setCard(i, 'href', v)} />
                                                     )}
                                                     {('downloadLink' in card || cardsUseDownloadLink) && (
-                                                        <Field label="Download URL" value={card.downloadLink ?? ''} onChange={(v) => setCard(i, 'downloadLink', v)} />
+                                                        <DocumentUploadField
+                                                            label="Download PDF Document"
+                                                            value={card.downloadLink ?? ''}
+                                                            onChange={(v) => setCard(i, 'downloadLink', v)}
+                                                        />
                                                     )}
                                                     {('size' in card || cardsUseSize) && (
                                                         <Field label="File Size (e.g. 10 MB)" value={card.size ?? ''} onChange={(v) => setCard(i, 'size', v)} />
@@ -1397,13 +1498,14 @@ export default function UnifiedPageEditor({
                             </section>
                         )}
 
-                        {('ctaTitle' in effectiveDefaults || 'ctaButtonLabel' in effectiveDefaults || 'ctaHref' in effectiveDefaults) && (
+                        {('ctaTitle' in effectiveDefaults || 'ctaSubtitle' in effectiveDefaults || 'ctaButtonLabel' in effectiveDefaults || 'ctaHref' in effectiveDefaults) && (
                             <section className="space-y-6">
                                 <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
                                     <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Call-to-Action Footer</h4>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {('ctaTitle' in effectiveDefaults) && <Field label="CTA Heading" value={data.ctaTitle ?? ''} onChange={(v) => set('ctaTitle', v)} />}
+                                    {('ctaSubtitle' in effectiveDefaults) && <Field label="CTA Subtitle" value={data.ctaSubtitle ?? ''} onChange={(v) => set('ctaSubtitle', v)} multiline />}
                                     {('ctaButtonLabel' in effectiveDefaults) && <Field label="CTA Button Label" value={data.ctaButtonLabel ?? ''} onChange={(v) => set('ctaButtonLabel', v)} />}
                                     {('ctaHref' in effectiveDefaults) && <Field label="CTA Link" value={data.ctaHref ?? ''} onChange={(v) => set('ctaHref', v)} />}
                                 </div>
@@ -1481,17 +1583,6 @@ export default function UnifiedPageEditor({
                             </section>
                         )}
 
-                        {page.slug !== 'setup-college' && (
-                            <section className="space-y-6">
-                                <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-                                    <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Conversion / CTA Footer</h4>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <Field label="Call-to-Action Text" value={data.ctaTitle ?? ''} onChange={(v) => set('ctaTitle', v)} placeholder="Heading for footer..." />
-                                    <Field label="Sub-text Description" value={data.ctaSubtitle ?? ''} onChange={(v) => set('ctaSubtitle', v)} multiline placeholder="Actionable subtitle text…" />
-                                </div>
-                            </section>
-                        )}
                     </>
                 )}
 
@@ -1519,6 +1610,98 @@ export default function UnifiedPageEditor({
                     </button>
                 </div>
             </div>
+
+            {/* Load Starter Template Modal */}
+            {showTemplateModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm" role="dialog" aria-modal="true">
+                    <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="flex items-start justify-between border-b border-slate-100 p-6">
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-900">Load Starter Template</h3>
+                                <p className="mt-1 text-xs text-slate-500">
+                                    Populate <strong>/{page.slug}</strong> with recommended starter content and sample cards.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setShowTemplateModal(false)}
+                                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
+
+                        <div className="p-6 space-y-4">
+                            <label
+                                className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition ${
+                                    templateMode === 'append'
+                                        ? 'border-blue-600 bg-blue-50/50'
+                                        : 'border-slate-200 hover:border-slate-300'
+                                }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="templateMode"
+                                    checked={templateMode === 'append'}
+                                    onChange={() => setTemplateMode('append')}
+                                    className="mt-1 text-blue-600 focus:ring-blue-500"
+                                />
+                                <div>
+                                    <div className="font-bold text-sm text-slate-900">
+                                        Append Samples (Keep my current cards) <span className="ml-1 text-[11px] font-semibold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">Recommended</span>
+                                    </div>
+                                    <p className="mt-1 text-xs text-slate-500 leading-relaxed">
+                                        Preserves all your existing custom cards at the top. Only appends non-duplicate sample cards from the starter template.
+                                    </p>
+                                </div>
+                            </label>
+
+                            <label
+                                className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition ${
+                                    templateMode === 'replace'
+                                        ? 'border-red-500 bg-red-50/50'
+                                        : 'border-slate-200 hover:border-slate-300'
+                                }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="templateMode"
+                                    checked={templateMode === 'replace'}
+                                    onChange={() => setTemplateMode('replace')}
+                                    className="mt-1 text-red-600 focus:ring-red-500"
+                                />
+                                <div>
+                                    <div className="font-bold text-sm text-slate-900">Replace All</div>
+                                    <p className="mt-1 text-xs text-slate-500 leading-relaxed">
+                                        Replaces your current content and cards with the original template defaults. Existing custom edits on this page will be overwritten.
+                                    </p>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-3 bg-slate-50 px-6 py-4 border-t border-slate-100">
+                            <button
+                                type="button"
+                                onClick={() => setShowTemplateModal(false)}
+                                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200/70 rounded-xl transition"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleApplyStarterTemplate}
+                                className={`px-5 py-2 text-xs font-bold text-white rounded-xl shadow-md transition ${
+                                    templateMode === 'replace'
+                                        ? 'bg-red-600 hover:bg-red-700'
+                                        : 'bg-blue-600 hover:bg-blue-700'
+                                }`}
+                            >
+                                {templateMode === 'replace' ? 'Replace All Content' : 'Append Starter Samples'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

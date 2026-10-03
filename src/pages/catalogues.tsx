@@ -1,6 +1,6 @@
-import { useEffect, useState, type MouseEvent } from 'react';
+import { useState, type MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { Download, FileText, Lock } from 'lucide-react';
+import { Download, FileText, Lock, Send, X, CheckCircle } from 'lucide-react';
 import api from '@/api/client';
 import { usePageData } from '@/hooks/usePageData';
 import LoginPromptModal from '@/components/login-prompt-modal';
@@ -8,13 +8,18 @@ import { resolveMediaUrl } from '@/lib/media-url';
 import { MediaImage } from '@/components/ui/media-image';
 import { getCardCover } from '@/lib/card-covers';
 
-const MASTER_CATALOGUE_FALLBACK = '/uploads/catalogues/1790872959601-232430012.pdf';
-
-const normalizeCatalogDownload = (value?: string) => {
-  if (!value || value === '#' || value.trim() === '') {
-    return resolveMediaUrl(MASTER_CATALOGUE_FALLBACK);
+const hasValidPdf = (url?: string): boolean => {
+  if (!url) return false;
+  const trimmed = url.trim();
+  if (!trimmed || trimmed === '#' || trimmed === '/') return false;
+  if (
+    trimmed.includes('furniture-2025.pdf') ||
+    trimmed.includes('lab-equipment.pdf') ||
+    trimmed.includes('technology.pdf')
+  ) {
+    return false;
   }
-  return resolveMediaUrl(value);
+  return true;
 };
 
 const slugify = (text: string) =>
@@ -118,22 +123,73 @@ const DEFAULTS = {
 };
 
 const Catalogues = () => {
-  const { data } = usePageData('catalogues');
+  const { data, loading } = usePageData('catalogues');
+
   const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
   const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
-  const heroImage = data.heroImage || DEFAULTS.heroImage;
+  const heroImage = data.heroImage !== undefined ? data.heroImage : DEFAULTS.heroImage;
   const ctaTitle = data.ctaTitle ?? DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? DEFAULTS.ctaSubtitle;
   const ctaButtonLabel = data.ctaButtonLabel ?? DEFAULTS.ctaButtonLabel;
   const ctaHref = data.ctaHref ?? DEFAULTS.ctaHref;
 
-  const [catalogueRows, setCatalogueRows] = useState<any[]>([]);
-  const [loadingCatalogues, setLoadingCatalogues] = useState(true);
-  const [caseStudyRows, setCaseStudyRows] = useState<any[]>([]);
-  const [loadingCaseStudies, setLoadingCaseStudies] = useState(true);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const isLoggedIn = Boolean(localStorage.getItem('cm_token'));
+
+  // Request Catalogue Modal state
+  const [requestTarget, setRequestTarget] = useState<any | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    institution: '',
+    message: '',
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [formError, setFormError] = useState('');
+
+  const openRequestModal = (catalogue: any) => {
+    setRequestTarget(catalogue);
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      institution: '',
+      message: `Please share the catalogue for "${catalogue.title}".`,
+    });
+    setSubmitted(false);
+    setFormError('');
+  };
+
+  const closeRequestModal = () => {
+    setRequestTarget(null);
+    setSubmitted(false);
+    setFormError('');
+  };
+
+  const handleRequestSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!requestTarget) return;
+    setSubmitting(true);
+    setFormError('');
+    try {
+      await api.post('/contact', {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        institution: formData.institution,
+        subject: `Catalogue Request: ${requestTarget.title}`,
+        message: formData.message,
+      });
+      setSubmitted(true);
+    } catch (err: any) {
+      setFormError(err.response?.data?.error || 'Failed to submit your request. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const handleDownloadClick = async (e: MouseEvent, catalogue: any) => {
     e.preventDefault();
@@ -142,13 +198,23 @@ const Catalogues = () => {
       return;
     }
 
-    const targetUrl = resolveMediaUrl(catalogue.downloadLink || MASTER_CATALOGUE_FALLBACK);
+    const downloadUrl = catalogue.downloadLink;
+    if (!hasValidPdf(downloadUrl)) {
+      openRequestModal(catalogue);
+      return;
+    }
+
+    const targetUrl = resolveMediaUrl(downloadUrl);
     const filename = `${(catalogue.title || 'catalogue').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'catalogue'}.pdf`;
     const token = localStorage.getItem('cm_token');
 
     try {
       const response = await fetch(targetUrl, token ? { headers: { Authorization: `Bearer ${token}` } } : undefined);
-      if (!response.ok) throw new Error('Download failed');
+      if (!response.ok) {
+        // If file returns 404 or fails, open request modal instead of throwing unhandled 404 error
+        openRequestModal(catalogue);
+        return;
+      }
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -159,80 +225,31 @@ const Catalogues = () => {
       link.remove();
       URL.revokeObjectURL(blobUrl);
     } catch {
-      const fallbackUrl = token ? `${targetUrl}${targetUrl.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}` : targetUrl;
-      window.open(fallbackUrl, '_blank', 'noopener,noreferrer');
+      // In case of network error, gracefully offer enquiry modal
+      openRequestModal(catalogue);
     }
   };
 
-  useEffect(() => {
-    let active = true;
-
-    api
-      .get('/catalogues')
-      .then((res) => {
-        if (!active) return;
-        const mapped = (Array.isArray(res.data) ? res.data : []).map((catalogue: any) => ({
-          title: catalogue.title,
-          description: catalogue.description || 'Download the catalogue PDF.',
-          image: catalogue.thumbnailUrl || '',
-          downloadLink: normalizeCatalogDownload(catalogue.fileUrl),
-          size: 'PDF',
-          date: catalogue.createdAt,
-        }));
-        setCatalogueRows(mapped);
-      })
-      .catch(() => {
-        if (active) setCatalogueRows([]);
-      })
-      .finally(() => {
-        if (active) setLoadingCatalogues(false);
-      });
-
-    api
-      .get('/case-studies')
-      .then((res) => {
-        if (!active) return;
-        setCaseStudyRows(Array.isArray(res.data) ? res.data : []);
-      })
-      .catch(() => {
-        if (active) setCaseStudyRows([]);
-      })
-      .finally(() => {
-        if (active) setLoadingCaseStudies(false);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const catalogues = loadingCatalogues
+  // Pure database-driven binding to usePageData('catalogues')
+  // Do NOT resurrect DEFAULTS when database provides an empty array []
+  const catalogues = loading
     ? []
-    : catalogueRows.length > 0
-      ? catalogueRows
-      : Array.isArray(data.cards) && data.cards.length > 0
-        ? data.cards.map((catalogue: any) => ({
-            ...catalogue,
-            image: catalogue.image || '',
-            downloadLink: normalizeCatalogDownload(catalogue.downloadLink ?? catalogue.fileUrl),
-          }))
-        : DEFAULTS.cards;
+    : Array.isArray(data.cards)
+      ? data.cards.map((c: any) => ({
+          ...c,
+          image: c.image || '',
+          downloadLink: c.downloadLink ?? c.fileUrl ?? '',
+        }))
+      : DEFAULTS.cards;
 
-  const caseStudies = loadingCaseStudies
+  const caseStudies = loading
     ? []
-    : caseStudyRows.length > 0
-      ? caseStudyRows.map((cs: any) => ({
-          title: cs.title,
-          description: cs.description || '',
-          image: cs.imageUrl || '',
+    : Array.isArray(data.caseStudies)
+      ? data.caseStudies.map((cs: any) => ({
+          ...cs,
           slug: cs.slug || slugify(cs.title),
         }))
-      : Array.isArray(data.caseStudies) && data.caseStudies.length > 0
-        ? data.caseStudies.map((cs: any) => ({
-            ...cs,
-            slug: cs.slug || slugify(cs.title),
-          }))
-        : DEFAULTS.caseStudies;
+      : DEFAULTS.caseStudies;
 
   const visibleCatalogues = catalogues.slice(0, visibleCount);
   const hasMore = visibleCount < catalogues.length;
@@ -280,7 +297,7 @@ const Catalogues = () => {
       <section className="px-4 pt-4 sm:px-6 lg:px-8">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 border-b border-gray-100 pb-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs font-semibold text-gray-500">
-            {loadingCatalogues ? 'Loading catalogue library...' : `Showing ${catalogues.length} catalogues`}
+            {loading ? 'Loading catalogue library...' : `Showing ${catalogues.length} catalogues`}
           </p>
         </div>
       </section>
@@ -288,7 +305,7 @@ const Catalogues = () => {
       {/* Catalogues Grid */}
       <section className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          {loadingCatalogues ? (
+          {loading ? (
             <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
               {[...Array(6)].map((_, idx) => (
                 <div key={idx} className="animate-pulse rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
@@ -309,9 +326,10 @@ const Catalogues = () => {
               <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
                 {visibleCatalogues.map((catalogue: any, index: number) => {
                   const cover = getCardCover(index);
-                  const hasDownload = Boolean(catalogue.downloadLink);
+                  const hasPdf = hasValidPdf(catalogue.downloadLink);
+
                   return (
-                    <div key={catalogue.title} className="group min-w-0 flex flex-col justify-between rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition hover:shadow-md">
+                    <div key={catalogue.title || index} className="group min-w-0 flex flex-col justify-between rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition hover:shadow-md">
                       <div>
                         <div className="relative h-48 overflow-hidden rounded-xl" style={{ background: cover.background }}>
                           <MediaImage
@@ -333,9 +351,9 @@ const Catalogues = () => {
                       </div>
 
                       <div className="pt-4">
-                        {hasDownload ? (
+                        {hasPdf ? (
                           <a
-                            href={catalogue.downloadLink}
+                            href={resolveMediaUrl(catalogue.downloadLink)}
                             onClick={(e) => handleDownloadClick(e, catalogue)}
                             className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-cm-blue px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-cm-blue-dark"
                           >
@@ -345,11 +363,11 @@ const Catalogues = () => {
                         ) : (
                           <button
                             type="button"
-                            disabled
-                            className="inline-flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-gray-100 px-4 py-2.5 text-sm font-semibold text-gray-400"
+                            onClick={() => openRequestModal(catalogue)}
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-cm-yellow px-4 py-2.5 text-sm font-bold text-cm-blue-dark transition-colors hover:bg-yellow-400 shadow-sm"
                           >
-                            <Download className="h-4 w-4" />
-                            PDF Unavailable
+                            <Send className="h-4 w-4" />
+                            Request Catalogue
                           </button>
                         )}
                       </div>
@@ -374,31 +392,21 @@ const Catalogues = () => {
         </div>
       </section>
 
-      {/* Case Studies Showcase */}
-      <section className="border-t border-gray-100 bg-slate-50/70 px-4 py-12 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-8 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-cm-blue">Proven Transformations</span>
-              <h2 className="text-2xl font-bold tracking-tight text-cm-blue-dark sm:text-3xl">Campus Case Studies</h2>
-              <p className="mt-1 text-sm text-gray-500">Explore real-world implementations delivered across leading institutions.</p>
+      {/* Case Studies Showcase - Omitted entirely when caseStudies.length === 0 */}
+      {!loading && caseStudies.length > 0 && (
+        <section className="border-t border-gray-100 bg-slate-50/70 px-4 py-12 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-8 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-cm-blue">Proven Transformations</span>
+                <h2 className="text-2xl font-bold tracking-tight text-cm-blue-dark sm:text-3xl">Campus Case Studies</h2>
+                <p className="mt-1 text-sm text-gray-500">Explore real-world implementations delivered across leading institutions.</p>
+              </div>
+              <Link to="/contact-us" className="text-xs font-semibold text-cm-blue hover:underline">
+                Partner on a Case Study &rarr;
+              </Link>
             </div>
-            <Link to="/contact-us" className="text-xs font-semibold text-cm-blue hover:underline">
-              Partner on a Case Study &rarr;
-            </Link>
-          </div>
 
-          {loadingCaseStudies ? (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="animate-pulse rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-                  <div className="h-44 rounded-xl bg-gray-200" />
-                  <div className="mt-4 h-5 w-2/3 rounded bg-gray-200" />
-                  <div className="mt-2 h-4 w-full rounded bg-gray-100" />
-                </div>
-              ))}
-            </div>
-          ) : caseStudies.length === 0 ? null : (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {caseStudies.map((study: any, index: number) => {
                 const cover = getCardCover(index);
@@ -430,9 +438,9 @@ const Catalogues = () => {
                 );
               })}
             </div>
-          )}
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
 
       {/* CTA Section */}
       <section className="bg-cm-yellow px-4 py-8 sm:px-6 md:py-10 lg:px-8">
@@ -454,6 +462,119 @@ const Catalogues = () => {
           </div>
         </div>
       </section>
+
+      {/* Request Catalogue Modal */}
+      {requestTarget && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm" role="dialog" aria-modal="true">
+          <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-start justify-between border-b border-slate-100 p-6">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-cm-blue">Request Custom Solution</span>
+                <h2 className="text-lg font-bold text-slate-950">Request Catalogue</h2>
+                <p className="mt-1 text-sm text-slate-500 font-medium">{requestTarget.title}</p>
+              </div>
+              <button
+                type="button"
+                onClick={closeRequestModal}
+                aria-label="Close"
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              {submitted ? (
+                <div className="rounded-xl border border-green-200 bg-green-50 p-5 text-center">
+                  <CheckCircle className="mx-auto h-8 w-8 text-green-600 mb-2" />
+                  <h3 className="text-sm font-bold text-green-900">Thank you for your request!</h3>
+                  <p className="text-xs text-green-700 mt-1">
+                    Our team has received your enquiry for <strong>{requestTarget.title}</strong> and will email the catalogue to you shortly.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={closeRequestModal}
+                    className="mt-4 inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-xs font-semibold text-white hover:bg-green-700"
+                  >
+                    Close
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleRequestSubmit} className="space-y-4">
+                  {formError && (
+                    <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+                      {formError}
+                    </div>
+                  )}
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Full Name *</label>
+                      <input
+                        className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-cm-blue focus:outline-none focus:ring-1 focus:ring-cm-blue"
+                        required
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="Enter your name"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Email *</label>
+                      <input
+                        type="email"
+                        className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-cm-blue focus:outline-none focus:ring-1 focus:ring-cm-blue"
+                        required
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        placeholder="your.email@example.com"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Phone *</label>
+                      <input
+                        type="tel"
+                        pattern="(?:\+91[ -]?)?[6-9][0-9]{9}"
+                        className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-cm-blue focus:outline-none focus:ring-1 focus:ring-cm-blue"
+                        required
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        placeholder="+91 98765 43210"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Institution / Organisation</label>
+                      <input
+                        className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-cm-blue focus:outline-none focus:ring-1 focus:ring-cm-blue"
+                        value={formData.institution}
+                        onChange={(e) => setFormData({ ...formData, institution: e.target.value })}
+                        placeholder="School / College / Organization"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Requirements / Message *</label>
+                    <textarea
+                      className="w-full min-h-[90px] rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-cm-blue focus:outline-none focus:ring-1 focus:ring-cm-blue resize-none"
+                      required
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-cm-blue px-4 py-3 font-semibold text-white hover:bg-cm-blue-dark disabled:opacity-60 transition shadow-sm text-sm"
+                  >
+                    <Send className="h-4 w-4" />
+                    {submitting ? 'Submitting Request...' : 'Send Catalogue Request'}
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };
