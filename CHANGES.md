@@ -49,6 +49,7 @@
 | `FIX-005` | 2026-10-03 19:15 | Database Sync, Seed Idempotency, Catalogues Refactor & Enquiry Pipeline | Connected backend to Render production PostgreSQL, added idempotent seed guard with system_bootstrapped flag, purged 3 broken mock records from catalogue table, bound /catalogues 100% to usePageData('catalogues') with Request Catalogue enquiry modal for missing physical PDFs, made contact enquiry spreadsheet sync non-blocking, and added smart non-destructive "Load Starter Template" to UnifiedPageEditor while removing duplicate CTA and banner blocks under SOLID principles. | 8 files (backend, admin, frontend) + DB | Completed |
 | `FIX-006` | 2026-10-03 19:55 | Admin CMS UX & Ergonomics | Smooth auto-scroll and auto-focus to newly added cards, secondary cards, process steps, team members, and case studies in UnifiedPageEditor across both Quick Edit modal and Full Editor page contexts under SOLID principles (Problem 1). | 1 file (admin) | Completed |
 | `FIX-007` | 2026-10-03 20:25 | Smart Classrooms Images & Product Card Spacing | Enriched Smart Classrooms cards with verified educational photography, added resilient fallbackNode to MediaImage, hardened MediaImageField preview, and resolved price vs. wishlist button horizontal collision in Shop product cards with gap-3, shrink-0, and compact vertical rhythm (Problems 2 & A). | 4 files (frontend, admin) | Completed |
+| `FIX-008` | 2026-10-03 20:40 | Campus Digital Journal Subtitles & Images | Increased subtitle, body, and metadata font sizes across Campus Digital Journal and AI Guide; restored missing featured article image container; wrapped card images in MediaImage with fallback support; eliminated fragile pravatar dependency; and strictly enforced compact vertical rhythm (Testing Team Issues 1 & 2). | 4 files (frontend, admin) | Completed |
 
 ---
 
@@ -1402,6 +1403,46 @@
   - Frontend TypeScript Check (`npx tsc -b`): Clean exit with code 0 (0 errors).
   - Backend TypeScript Check (`npx --prefix backend tsc --noEmit`): Clean exit with code 0 (0 errors).
   - Production Bundle (`npm run build`): Clean build in 8.02s, all assets compiled with 0 errors.
+
+---
+
+### [FIX-008] 2026-10-03 20:40 IST - Campus Digital Journal Subtitles Font Size & Images Restoration (Testing Team Issues 1 & 2)
+- **Author/Agent**: Antigravity Pair Programmer
+- **Scope / Category**: Frontend UI Typography, Media Resilience & Responsive Layout
+- **Files Modified**:
+  - `campusmart_final/src/pages/ugc-guidelines.tsx`
+  - `campusmart_final/src/pages/ugc-guideline-article.tsx`
+  - `campusmart_final/src/pages/ai-guide.tsx`
+  - `campusmart_final/src/admin/pageDefaults.ts`
+- **Description & Rationale**:
+  - **Issue 1 (Subtitles Too Small, Font Size Needs to be Increased)**:
+    - In `src/pages/ugc-guidelines.tsx` (Campus Digital Journal):
+      - Discovered that descriptions and subtitles were hardcoded to tiny sizes (`10px` for `.ugc-featured-description`, `7px` for `.ugc-article-meta`, `7px` for `.ugc-author`, `8px` for `.ugc-category` and `.ugc-eyebrow`, `9px` for `.ugc-read-link`, and `8-10px` in the footer).
+      - Increased featured guidance description / subtitle to `font-size: clamp(14px, 1.2vw, 15px); line-height: 1.6; color: rgba(255, 255, 255, 0.9)`.
+      - Added missing article excerpt / subtitle (`.ugc-article-desc`) to card listings with `font-size: 13px; line-height: 1.5; color: #50615b; line-clamp: 2`.
+      - Increased category chips to `12px font-semibold`, article meta to `11px`, article titles to `16px font-bold`, author name to `12px`, and footer text to `12px-13px`.
+    - In `src/pages/ai-guide.tsx`:
+      - Increased section subtitle (`.ai-guide-section-heading p`) from `11px` (with cramped `310px` max-width) to `15px` with generous `max-width: 520px` and `line-height: 1.6`.
+      - Increased featured article description from `10px` to `15px`, card descriptions from `9px` to `13px`, card meta from `7px` to `11px`, and newsletter description from `9px` to `13px`.
+  - **Issue 2 (Campus Digital Journal Images Not Loading)**:
+    - In `src/pages/ugc-guidelines.tsx`:
+      - Discovered that the featured article image was completely omitted from the JSX and suppressed with `.ugc-featured-art { display: none; }` in CSS.
+      - Restored the 2-column hero layout (`grid-template-columns: 1.15fr 0.85fr;`) and re-introduced `<div className="ugc-featured-art"><MediaImage src={featured.image} alt={featured.title} className="w-full h-full object-cover" /></div>`.
+      - Upgraded all article card images from raw `<img>` to `<MediaImage src={card.image} alt={card.title} className="w-full h-full object-cover" />` for robust `resolveMediaUrl` and fallback protection.
+      - Eliminated fragile external `pravatar.cc` avatar dependencies across defaults, replacing them with resilient circular initials fallback nodes.
+      - Rendered card images in the "More campus resources" section (`.ugc-simple-card-image`).
+    - In `src/pages/ugc-guideline-article.tsx`:
+      - Replaced raw `<img>` with `<MediaImage src={image} alt={article.title} className="h-64 w-full object-cover sm:h-[400px]" />` and refined subtitle quote typography.
+    - In `src/admin/pageDefaults.ts`:
+      - Removed flaky pravatar URLs from `ugc-guidelines` starter cards to guarantee stable out-of-the-box rendering.
+  - **Vertical Spacing Adherence**:
+    - Strictly avoided excessive vertical padding:
+      - Reduced outer padding on `ugc-journal-page` to `padding: 16px 3vw` (desktop) and `0` (mobile).
+      - Normalized section gaps (`margin-top: 32px; padding-top: 20px;` instead of `68px`).
+      - In `ai-guide.tsx`, reduced massive content padding from `67px 70px 90px` to `28px 48px 40px`, and newsletter margin from `70px` to `36px`.
+- **Validation**:
+  - TypeScript Compilation: `npx tsc --noEmit` exited cleanly with code 0 (0 errors).
+
 
 
 

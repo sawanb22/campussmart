@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
-import { resolveMediaUrl } from '@/lib/media-url';
+import MediaImage from '@/components/ui/media-image';
 import { DEFAULTS } from './ugc-guidelines';
 
 const slugify = (title: string) => title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -21,8 +21,31 @@ const UGCGuidelineArticle = () => {
   const image = article.image || fallback?.image;
 
   return (
-    <main className="min-h-screen bg-[#f5f4ef] py-8 sm:py-12">
-      <article className="mx-auto max-w-4xl px-4 sm:px-8"><Link to="/ugc-guidelines" className="mb-7 inline-flex items-center gap-2 text-sm font-semibold text-[#155b51]"><ArrowLeft size={16} /> Back to UGC Guidelines</Link><div className="overflow-hidden rounded-[25px] bg-[#f8f8f4] shadow-sm">{image && <img src={resolveMediaUrl(image)} alt={article.title} className="h-64 w-full object-cover sm:h-[440px]" />}<div className="px-6 py-8 sm:px-12 sm:py-11"><div className="mb-4 text-[10px] font-bold uppercase tracking-[0.14em] text-[#f47b20]">{article.category}{article.readTime ? ` · ${article.readTime}` : ''}</div><h1 className="mb-6 font-sans text-4xl font-bold leading-tight tracking-tight text-[#155b51] sm:text-6xl">{article.title}</h1><p className="max-w-2xl border-l-2 border-[#f47b20] pl-5 text-base leading-8 text-[#173e39] sm:text-lg">{article.description || `Practical guidance for education teams working on ${article.category.toLowerCase()} across a modern campus.`}</p></div></div><Link to="/ugc-guidelines" className="mt-7 inline-flex items-center gap-2 text-sm font-bold text-[#155b51]">Explore more guidance <ArrowRight size={15} /></Link></article>
+    <main className="min-h-screen bg-[#f5f4ef] py-6 sm:py-10">
+      <article className="mx-auto max-w-4xl px-4 sm:px-8">
+        <Link to="/ugc-guidelines" className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-[#155b51]">
+          <ArrowLeft size={16} /> Back to UGC Guidelines
+        </Link>
+        <div className="overflow-hidden rounded-[20px] bg-[#f8f8f4] shadow-sm border border-[#e5ebe7]">
+          {image && (
+            <MediaImage src={image} alt={article.title} className="h-64 w-full object-cover sm:h-[400px]" />
+          )}
+          <div className="px-6 py-6 sm:px-10 sm:py-9">
+            <div className="mb-3 text-xs font-bold uppercase tracking-[0.12em] text-[#f47b20]">
+              {article.category}{article.readTime ? ` · ${article.readTime}` : ''}
+            </div>
+            <h1 className="mb-5 font-sans text-3xl font-bold leading-tight tracking-tight text-[#155b51] sm:text-5xl">
+              {article.title}
+            </h1>
+            <p className="max-w-2xl border-l-2 border-[#f47b20] pl-5 text-base leading-relaxed text-[#173e39] sm:text-lg">
+              {article.description || `Practical guidance for education teams working on ${article.category.toLowerCase()} across a modern campus.`}
+            </p>
+          </div>
+        </div>
+        <Link to="/ugc-guidelines" className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-[#155b51]">
+          Explore more guidance <ArrowRight size={15} />
+        </Link>
+      </article>
     </main>
   );
 };
