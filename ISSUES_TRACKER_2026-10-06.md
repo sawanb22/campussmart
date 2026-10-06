@@ -25,7 +25,8 @@ This document tracks all identified application defects, UX friction points, and
 | **ISS-16** | Innovation Centres Product Discovery | Catalog / CMS Sync | Low | ✅ Completed | Immediate (`SYNC-001`) |
 | **ISS-17** | Smart Classrooms Homepage Image Resolution | Frontend / Media URL | Low | ✅ Completed | Immediate (`SYNC-001`) |
 | **ISS-18** | Furniture Category Products Loading & Subcategories | Store / Catalog | Medium | ✅ Completed | Immediate (`SYNC-001`) |
-| **ISS-02** | Masonry Cards Gradient (White/Blue instead of Black) | Frontend UI / Styling | Low | ⏳ Deferred to End | End |
+| **ISS-02** | Page Data Flicker & Internal Media Standardization | Frontend / Media / CMS | High | ✅ Completed | Immediate (`MEDIA-002`) |
+| **ISS-DEF-02** | Masonry Cards Gradient (White/Blue instead of Black) | Frontend UI / Styling | Low | ⏳ Deferred to End | End |
 
 ---
 
@@ -245,6 +246,58 @@ This document tracks all identified application defects, UX friction points, and
 - Removed route mapping from `PageTemplates` in `src/App.tsx`.
 - Added seamless redirect `<Route path="/tech-infra/products" element={<Navigate to="/tech-infra" replace />} />` ensuring all visitors land directly on the canonical `/tech-infra` page.
 - Reverted injected catalog banners on `/digital-transformation` and `/innovation-centres`.
+
+---
+
+### Issue #2: Page Data Flicker Elimination & Internal Media Standardization across Category Routes
+- **Tracking ID**: `ISS-20261006-02` (`MEDIA-002`)
+- **Category**: Frontend, Media Architecture, Performance, CMS Data Integrity
+- **Severity**: High (Impacting production category pages, visual stability, and image availability)
+- **Status**: ✅ Completed & Verified
+
+#### 1. Problem Description & Root Cause
+- **Flicker on Initial Render**:
+  - On `https://campussmart.vercel.app/ai-ml`, the page initially flashed 6 default/mock cards from `ai-ml.data.ts`, then morphed down to 2 cards once the API call completed.
+  - Root cause: `usePageData` returned an empty initial state while fetching from the database. The component rendered fallback defaults immediately instead of waiting for the database callback.
+- **Broken Media & Disappearing Images**:
+  - Uploaded card images (`/uploads/media/1791052836240-157043082.jpg` etc.) returned 404 or grey boxes on Vercel.
+  - Root cause: Render's free tier uses an ephemeral disk which wipes uploaded files on restart/redeployment, and `backend/uploads/` was in `.gitignore`. Additionally, `resolveMediaUrl()` attempted to prepend the Render backend URL (`https://campussmart.onrender.com`), introducing cold-start delays.
+- **Single Source of Truth (SSOT) & Category Chips**:
+  - The client had removed 4 cards in the Admin Page Editor, keeping exactly 2 cards ("AI Learning Stations" and "ML Labs"). Hardcoded fallback defaults would resurrect deleted cards if API was slow or errored.
+  - The category chip bar was missing filter values ("Learning Stations") due to missing `categories` array on DB card objects.
+
+#### 2. Architecture & Technical Solution
+1. **Persistent Media Bundling & 0ms Static Edge CDN**:
+   - Synced all 74 internal project media files from `backend/uploads/media/` into `campusmart_final/public/uploads/media/`.
+   - Updated `.gitignore` with `!public/uploads/` and `!public/uploads/**` so Git and Vercel track bundled static assets.
+   - Updated `src/lib/media-url.ts` so `/uploads/` paths remain relative (`/uploads/...`), served directly by Vercel Edge CDN with zero cold-start delay.
+2. **Skeleton Guards (Layout Shift & Flicker Elimination)**:
+   - Created reusable `PageCardGridSkeleton` component (`src/components/ui/page-skeleton.tsx`).
+   - Added `if (loading && !data.cards) return <PageCardGridSkeleton cardCount={...} />;` across all audited category pages:
+     - `/ai-ml` (`src/pages/ai-ml.tsx`)
+     - `/labs` (`src/pages/labs.tsx`)
+     - `/libraries` (`src/pages/libraries.tsx`)
+     - `/tech-infra` (`src/pages/tech-infra.tsx`)
+     - `/smart-classrooms` (`src/pages/smart-classrooms.tsx`)
+     - `/services` (`src/pages/services.tsx`)
+     - `/solutions` (`src/pages/solutions.tsx`)
+     - `/campus-furniture-design` (`src/pages/campus-furniture-design.tsx`)
+     - `/collaboration` (`src/pages/collaboration.tsx`)
+     - `/new-environments` (`src/pages/new-environments.tsx`)
+     - `/sports-infrastructure` (`src/pages/sports-infrastructure.tsx`)
+3. **Database Repair & SSOT Alignment**:
+   - Updated Render PostgreSQL `pageData` record for `ai-ml`:
+     - Preserved exactly 2 active cards ("AI Learning Stations", "ML Labs") without resurrecting deleted cards.
+     - Assigned verified internal media: Hero (`/uploads/media/1788160868601-107085202.jpg`), Card 1 (`/uploads/media/1788162454440-418400010.png`), Card 2 (`/uploads/media/1788162604444-713305043.jpg`).
+     - Added categories `['Learning Stations']` to both cards, restoring filter chips.
+4. **Internal Media Fallbacks**:
+   - Updated `src/pages/ai-ml.data.ts` defaults to match the 2-card configuration.
+   - Added `fallbackSrc` to all `<MediaImage>` components pointing to internal assets.
+   - Replaced external Unsplash fallbacks in `src/pages/ai-ml-detail.tsx` with internal media.
+
+#### 3. Verification
+- Production build (`tsc -b && vite build`): Exit code 0 (`✓ built in 8.64s`).
+- All 74 static media assets verified in `dist/uploads/media/`.
 
 ---
 

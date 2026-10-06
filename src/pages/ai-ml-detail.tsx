@@ -28,7 +28,7 @@ const AiMlDetail = () => {
   }
 
   const defaultCard = AI_ML_DEFAULTS.cards.find((c) => slugifyAiMlTitle(c.title) === moduleSlug);
-  const fallbackImage = defaultCard?.image || 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=800&q=80';
+  const fallbackImage = defaultCard?.image || '/uploads/media/1788160868601-107085202.jpg';
   const image = resolveMediaUrl(card.image) || fallbackImage;
 
   return (

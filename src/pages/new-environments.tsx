@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { Sparkles, Users, Palette, Music, Microscope, Zap } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import MediaImage from '@/components/ui/media-image';
+import { PageCardGridSkeleton } from '@/components/ui/page-skeleton';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -72,7 +73,7 @@ const ICONS = [Sparkles, Users, Palette, Music, Microscope, Zap];
 const NewEnvironments = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
-  const { data } = usePageData(NEW_ENVIRONMENTS_PAGE_SLUG);
+  const { data, loading } = usePageData(NEW_ENVIRONMENTS_PAGE_SLUG);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -111,6 +112,10 @@ const NewEnvironments = () => {
     : NEW_ENVIRONMENTS_DEFAULTS.cards;
 
   const cardLink = (card: Card) => card.href?.trim() || `/${NEW_ENVIRONMENTS_PAGE_SLUG}/${slugifyNewEnvironmentCard(card.title)}`;
+
+  if (loading && !data.cards) {
+    return <PageCardGridSkeleton cardCount={4} />;
+  }
 
   return (
     <main className="min-h-screen bg-white">

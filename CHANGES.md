@@ -57,6 +57,8 @@
 | `UX-012` | 2026-10-06 13:12 | Homepage & Cross-Platform Contact | Smart Contact Actions with Gmail Web, WhatsApp, and Desktop Dial Fallback (Issue #12) under SOLID principles. Fixed silent failures on tester machines lacking Outlook or telephony clients. | 8 files (frontend & test) | Completed |
 | `BLOG-001` | 2026-10-06 13:42 | Blog & Navigation | Removed "Showing [X] All articles" sidebar widget (Issue #5), removed artificial "All" category option, defaulted to 1st database category with URL sync (?category=slug), and decoupled static category fetching under SOLID principles. | 2 files (frontend, tracker) | Completed |
 | `SYNC-001` | 2026-10-06 14:35 | Homepage & Product Catalog Sync | Merged duplicate Sports category (ID 51 -> 3), reassigned Technology to Tech Infra, added Furniture subcategories (chairs, desks, storage), seeded AI/ML categories, added defensive shop category fallback, wrapped feature-cards in resolveMediaUrl(), and linked catalog equipment on Digital Transformation & Innovation Centres (Group 1: Issues #10, #14, #16, #17, #18). | 6 files (frontend, backend, DB) | Completed |
+| `CLEANUP-002` | 2026-10-06 15:25 | Tech Infra Routing Cleanup | Removed redundant /tech-infra/products page, added canonical redirect to /tech-infra, and reverted discovery banners on showcase pages. | 5 files (frontend) | Completed |
+| `MEDIA-002` | 2026-10-06 15:45 | Media Resilience & Category Flicker Guards | Standardized internal media assets (synced 74 files to public/uploads/media), updated media-url resolver for 0ms CDN serving, created PageCardGridSkeleton to eliminate page load flicker across 11 category routes, repaired Render PostgreSQL ai-ml record (enforcing 2-card SSOT & category chips), and purged external Unsplash fallbacks. | 16 files (frontend, DB, config) | Completed |
 
 ---
 
@@ -1663,6 +1665,47 @@
     - Removed added discovery banners from `/digital-transformation` and `/innovation-centres` to keep showcase pages clean.
 - **Validation**:
   - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 14.94s`).
+
+---
+
+### `MEDIA-002` | 2026-10-06 15:45 | Media Resilience, Skeleton Loading Guards & Category Flicker Elimination
+- **Files Affected**:
+  - `[CREATE] public/uploads/media/*` (74 permanent project media files copied and tracked in Git)
+  - `[CREATE] src/components/ui/page-skeleton.tsx` (`PageCardGridSkeleton`)
+  - `[MODIFY] .gitignore` (un-ignore `!public/uploads/` and `!public/uploads/**`)
+  - `[MODIFY] src/lib/media-url.ts`
+  - `[MODIFY] src/pages/ai-ml.tsx`
+  - `[MODIFY] src/pages/ai-ml.data.ts`
+  - `[MODIFY] src/pages/ai-ml-detail.tsx`
+  - `[MODIFY] src/pages/campus-furniture-design.tsx`
+  - `[MODIFY] src/pages/collaboration.tsx`
+  - `[MODIFY] src/pages/labs.tsx`
+  - `[MODIFY] src/pages/libraries.tsx`
+  - `[MODIFY] src/pages/services.tsx`
+  - `[MODIFY] src/pages/smart-classrooms.tsx`
+  - `[MODIFY] src/pages/solutions.tsx`
+  - `[MODIFY] src/pages/tech-infra.tsx`
+  - `[MODIFY] src/pages/new-environments.tsx`
+  - `[MODIFY] src/pages/sports-infrastructure.tsx`
+  - `[DATABASE] Live Render PostgreSQL (public."Pages" record for ai-ml)`
+  - `[MODIFY] ISSUES_TRACKER_2026-10-06.md`
+- **Description & Rationale (under SOLID Principles)**:
+  - **Single Responsibility Principle (SRP) & Media Resilience**:
+    - Mirrored all 74 internal project media uploads into `campusmart_final/public/uploads/media/` and tracked them in Git.
+    - Updated `src/lib/media-url.ts` so relative `/uploads/...` paths remain relative, serving directly from Vercel's global Edge CDN at 0ms latency without relying on Render's ephemeral disk or sleeping free instances.
+    - Replaced external Unsplash fallbacks with internal project media paths across `ai-ml.data.ts`, `ai-ml.tsx`, and `ai-ml-detail.tsx`.
+  - **Single Source of Truth (SSOT) & Database Alignment**:
+    - Repaired Render PostgreSQL `pageData` record for `ai-ml`: strictly preserved the client's 2 active cards ("AI Learning Stations" and "ML Labs") without resurrecting deleted cards.
+    - Bound cards to verified internal media assets and added `categories: ['Learning Stations']` to restore active category chip filtering.
+    - Aligned `AI_ML_DEFAULTS` in `ai-ml.data.ts` to match the 2-card structure so code defaults never disagree with production CMS state.
+  - **Open/Closed Principle & Flicker Elimination**:
+    - Created modular `PageCardGridSkeleton` component adhering to OCP with configurable `cardCount` and layout presets.
+    - Embedded skeleton loading guards across 11 category pages (`ai-ml`, `campus-furniture-design`, `collaboration`, `labs`, `libraries`, `services`, `smart-classrooms`, `solutions`, `tech-infra`, `new-environments`, `sports-infrastructure`).
+    - Eliminates initial-paint layout shift and card morphing by cleanly displaying a branded shimmer state until database callbacks resolve.
+- **Validation**:
+  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 8.64s`).
+  - Dist Directory Verification: All 74 media assets confirmed present in `dist/uploads/media/`.
+
 
 
 

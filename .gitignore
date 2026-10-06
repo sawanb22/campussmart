@@ -28,8 +28,10 @@ backend/prisma/dev.db
 backend/prisma/dev.db-journal
 
 # Uploads, local media and user generated files
-uploads/
+/uploads/
 backend/uploads/
+!public/uploads/
+!public/uploads/**
 backend/private-resumes/
 test_extract/
 backend/test_extract/

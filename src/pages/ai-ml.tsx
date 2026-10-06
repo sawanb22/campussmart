@@ -8,6 +8,7 @@ import { usePageCategories } from '@/hooks/usePageCategories';
 import { useDesignWishlist } from '@/hooks/useDesignWishlist';
 import LoginPromptModal from '@/components/login-prompt-modal';
 import { MediaImage } from '@/components/ui/media-image';
+import { PageCardGridSkeleton } from '@/components/ui/page-skeleton';
 import { AI_ML_PAGE_SLUG, AI_ML_DEFAULTS, slugifyAiMlTitle, type AiMlCard } from './ai-ml.data';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -15,7 +16,7 @@ gsap.registerPlugin(ScrollTrigger);
 const AIML = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
-  const { data } = usePageData(AI_ML_PAGE_SLUG);
+  const { data, loading } = usePageData(AI_ML_PAGE_SLUG);
   const { categories: shopCategories } = usePageCategories('ai-ml');
   const { isSaved, isPending, add, remove, showLoginPrompt, setShowLoginPrompt } = useDesignWishlist('ai-ml');
   const [activeCategory, setActiveCategory] = useState('All');
@@ -57,6 +58,10 @@ const AIML = () => {
   const cardLink = (card: AiMlCard) =>
     card.href?.trim() || `/${AI_ML_PAGE_SLUG}/${card.slug?.trim() || slugifyAiMlTitle(card.title)}`;
 
+  if (loading && !data.cards) {
+    return <PageCardGridSkeleton cardCount={2} />;
+  }
+
   return (
     <main className="min-h-screen bg-white">
       <LoginPromptModal open={showLoginPrompt} onClose={() => setShowLoginPrompt(false)} />
@@ -85,7 +90,12 @@ const AIML = () => {
           <div className="relative mx-auto hidden aspect-square w-full max-w-sm lg:block">
             <div className="absolute right-0 top-4 h-64 w-64 rounded-full bg-orange-400/90" />
             <div className="absolute left-2 top-10 h-56 w-72 overflow-hidden rounded-2xl shadow-xl">
-              <MediaImage src={heroImage} alt={heroTitle} className="h-full w-full object-cover" />
+              <MediaImage
+                src={heroImage}
+                alt={heroTitle}
+                fallbackSrc="/uploads/media/1788160868601-107085202.jpg"
+                className="h-full w-full object-cover"
+              />
             </div>
           </div>
         </div>
@@ -119,6 +129,7 @@ const AIML = () => {
                   <MediaImage
                     src={featured.image}
                     alt={featured.title}
+                    fallbackSrc="/uploads/media/1788162454440-418400010.png"
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
@@ -142,7 +153,12 @@ const AIML = () => {
                       <article key={card.title} className="group min-w-0">
                         <Link to={cardLink(card)} className="block">
                           <div className="aspect-[4/3] w-full overflow-hidden rounded-xl bg-stone-100">
-                            <MediaImage src={card.image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                            <MediaImage
+                              src={card.image}
+                              alt={card.title}
+                              fallbackSrc="/uploads/media/1788162604444-713305043.jpg"
+                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
                           </div>
                           <span className="mt-3 block text-xs font-bold uppercase tracking-wide text-orange-600">{card.categories?.[0] ?? 'AI/ML'}</span>
                           <h3 className="font-playfair mt-1 text-lg font-semibold leading-snug text-stone-900">{card.title}</h3>

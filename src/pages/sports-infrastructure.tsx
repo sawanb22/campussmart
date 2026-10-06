@@ -5,13 +5,14 @@ import { Link } from 'react-router-dom';
 import { ArrowUpRight, Trophy } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { MediaImage } from '@/components/ui/media-image';
+import { PageCardGridSkeleton } from '@/components/ui/page-skeleton';
 import { SPORTS_INFRASTRUCTURE_PAGE_SLUG, SPORTS_INFRASTRUCTURE_DEFAULTS, slugifySportsInfrastructureTitle, type SportsInfrastructureCard } from './sports-infrastructure.data';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const SportsInfrastructure = () => {
   const gridRef = useRef<HTMLDivElement>(null);
-  const { data } = usePageData(SPORTS_INFRASTRUCTURE_PAGE_SLUG);
+  const { data, loading } = usePageData(SPORTS_INFRASTRUCTURE_PAGE_SLUG);
   const [activeCategory, setActiveCategory] = useState('All');
 
   useEffect(() => {
@@ -43,6 +44,10 @@ const SportsInfrastructure = () => {
   );
   const cardLink = (card: SportsInfrastructureCard) =>
     card.href?.trim() || `/${SPORTS_INFRASTRUCTURE_PAGE_SLUG}/${card.slug?.trim() || slugifySportsInfrastructureTitle(card.title)}`;
+
+  if (loading && !data.cards) {
+    return <PageCardGridSkeleton cardCount={4} />;
+  }
 
   return (
     <main className="min-h-screen bg-[#f5f8e8]">
