@@ -1,6 +1,6 @@
 import { useState, type MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { Download, FileText, Lock, Send, X, CheckCircle } from 'lucide-react';
+import { FileText, Eye, Lock, Send, X, CheckCircle } from 'lucide-react';
 import api from '@/api/client';
 import { usePageData } from '@/hooks/usePageData';
 import LoginPromptModal from '@/components/login-prompt-modal';
@@ -223,26 +223,10 @@ const Catalogues = () => {
     const targetUrl = token
       ? `${resolvedUrl}${resolvedUrl.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}`
       : resolvedUrl;
-    const filename = `${(catalogue.title || 'catalogue').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'catalogue'}.pdf`;
 
     try {
-      const response = await fetch(targetUrl, token ? { headers: { Authorization: `Bearer ${token}` } } : undefined);
-      if (!response.ok) {
-        // If file returns 404 or fails, open request modal instead of throwing unhandled 404 error
-        openRequestModal(catalogue);
-        return;
-      }
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(blobUrl);
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
     } catch {
-      // In case of network error, gracefully offer enquiry modal
       openRequestModal(catalogue);
     }
   };
@@ -280,8 +264,8 @@ const Catalogues = () => {
         onClose={() => setShowLoginPrompt(false)}
         icon={Lock}
         eyebrow="Registered users only"
-        title="Register to download catalogues"
-        description="Create a free account to download our product catalogues and case study PDFs."
+        title="Register to view catalogues"
+        description="Create a free account to view our product catalogues and case study PDFs."
       />
 
       {/* Hero Section */}
@@ -377,11 +361,13 @@ const Catalogues = () => {
                                 ? `${resolveMediaUrl(catalogue.downloadLink)}${catalogue.downloadLink.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}`
                                 : resolveMediaUrl(catalogue.downloadLink)
                             }
+                            target="_blank"
+                            rel="noopener noreferrer"
                             onClick={(e) => handleDownloadClick(e, catalogue)}
                             className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-cm-blue px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-cm-blue-dark"
                           >
-                            {isLoggedIn ? <Download className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-                            Download PDF
+                            {isLoggedIn ? <Eye className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+                            View PDF
                           </a>
                         ) : (
                           <button

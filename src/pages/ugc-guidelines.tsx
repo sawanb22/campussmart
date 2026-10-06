@@ -81,9 +81,12 @@ const UGCGuidelines = () => {
           --ugc-muted: #5e6b66;
           background: var(--ugc-cream);
           color: var(--ugc-text);
-          font-family: "DM Sans", "Open Sans", sans-serif;
+          font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
           min-height: 100vh;
           padding: 16px 3vw;
+        }
+        .ugc-page-title, .ugc-featured-title, .ugc-article-title, .ugc-website h1, .ugc-website h2, .ugc-website h3 {
+          font-family: "Poppins", "Open Sans", -apple-system, BlinkMacSystemFont, sans-serif;
         }
         .ugc-journal-page *, .ugc-journal-page *::before, .ugc-journal-page *::after { box-sizing: border-box; }
         .ugc-journal-page a { color: inherit; text-decoration: none; }

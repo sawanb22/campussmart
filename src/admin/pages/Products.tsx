@@ -294,7 +294,7 @@ export default function Products() {
                         value={categoryFilter}
                         onChange={(e) => setCategoryFilter(e.target.value)}
                         aria-label="Filter products by category"
-                        className="w-full sm:w-auto shrink-0 border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-white text-slate-700 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer shadow-sm"
+                        className="w-full sm:w-auto shrink-0 border border-gray-300 rounded-xl px-4 py-3 text-base bg-white text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all cursor-pointer shadow-xs"
                     >
                         <option value="all">All Categories ({products.length})</option>
                         {categories.map((c) => {
@@ -523,9 +523,9 @@ export default function Products() {
                                 <input type="number" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-black text-blue-600" value={editing.price || ''} onChange={(e) => setEditing({ ...editing, price: Number(e.target.value) })} />
                             </div>
                             <div className="space-y-1.5">
-                                <label className="text-sm font-bold text-slate-700 uppercase tracking-widest text-[10px]">Category Classification *</label>
-                                <select className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-white font-bold text-slate-600" value={editing.categoryId || ''} onChange={(e) => setEditing({ ...editing, categoryId: Number(e.target.value) })}>
-                                    {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Category Classification *</label>
+                                <select className="w-full border border-gray-300 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all bg-white font-bold text-slate-800" value={editing.categoryId || ''} onChange={(e) => setEditing({ ...editing, categoryId: Number(e.target.value) })}>
+                                    {categories.map((c) => <option key={c.id} value={c.id} className="py-1 text-sm font-semibold">{c.name}</option>)}
                                 </select>
                             </div>
                             <MediaImageField label="Cover Image" value={editing.imageUrl || ''} onChange={value => setEditing({ ...editing, imageUrl: value })} previewClassName="h-32 rounded-xl" />

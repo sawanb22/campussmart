@@ -1339,7 +1339,7 @@ export default function UnifiedPageEditor({
                                                             <div className="space-y-1.5">
                                                                 <label className="block text-sm font-bold text-gray-700">Region</label>
                                                                 <select
-                                                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm bg-white"
+                                                                    className="w-full border border-gray-300 rounded-xl px-4 py-3.5 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all shadow-xs bg-white text-slate-800"
                                                                     value={card.region ?? ''}
                                                                     onChange={(e) => setCard(i, 'region', e.target.value || undefined)}
                                                                 >

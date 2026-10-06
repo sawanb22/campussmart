@@ -206,13 +206,13 @@ export default function Categories() {
                                 />
                             </div>
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Show Category On</label>
+                                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Show Category On Page</label>
                                 <select
-                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-bold bg-white"
+                                    className="w-full border border-gray-300 rounded-xl px-4 py-3.5 text-base font-bold bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 shadow-xs transition-all cursor-pointer"
                                     value={editing.page || 'furniture'}
                                     onChange={(e) => setEditing({ ...editing, page: e.target.value })}
                                 >
-                                    {PAGE_OPTIONS.map((page) => <option key={page.value} value={page.value}>{page.label}</option>)}
+                                    {PAGE_OPTIONS.map((page) => <option key={page.value} value={page.value} className="py-1 text-sm font-semibold">{page.label}</option>)}
                                 </select>
                             </div>
                             {editing.id && (

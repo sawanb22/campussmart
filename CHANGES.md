@@ -1764,3 +1764,30 @@
   - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 8.07s`).
   - Backend Build: `npm run build` (`prisma generate && tsc`) passed with exit code 0.
   - Database Query: Verified database contains only `sports-infra` and `innovation-centres`, with zero duplicate entries.
+
+---
+
+### [2026-10-06] Group 4: UI, Media & Typography Polish (Issues #1, #11, #13, #19, #22)
+- **Scope & Objectives**:
+  - Improve UI reactivity on product categories, switch Lookbook actions from forced downloads to direct PDF viewing, standardize UGC guidelines fonts to platform standards, provide video playback controls on case studies, and enlarge admin dropdown font sizes.
+- **Key Changes**:
+  - **Issue #1 (Reactive Product Page Category Filtering)**:
+    - Added reactive `useEffect` listening to `searchParams.get('category')` in `src/pages/shop.tsx` so category navigation triggers immediate reactive loading without manual page refreshes.
+    - Made the category badge tag on `src/pages/product-detail.tsx` clickable, routing directly to `/shop?category=...`.
+  - **Issue #11 (Lookbook / Catalogues Action "View PDF")**:
+    - Replaced "Download PDF" button label and icon with "View PDF" and `Eye` icon across `src/pages/catalogues.tsx` and `src/pages/product-catalog.tsx`.
+    - Updated click action to open PDFs directly in browser viewer tabs with graceful enquiry modal fallback if files are missing.
+  - **Issue #13 (UGC Guidelines Typography Harmonization)**:
+    - Removed `"DM Sans"` in `src/pages/ugc-guidelines.tsx` and aligned typography to `Open Sans` for body copy and `Poppins` for headings.
+    - Updated `src/pages/ugc-guideline-article.tsx` with `font-opensans` and `font-poppins`.
+  - **Issue #19 (Case Study Video Player Controls)**:
+    - Added video file detection in `src/pages/case-study-detail.tsx` to render HTML5 `<video controls playsInline>` with full playback controls (play/pause, progress timeline, volume, fullscreen).
+    - Added CSS and a reactive effect to ensure all embedded `<video>` elements in `study.body` HTML have native controls enabled.
+  - **Issue #22 (Admin Dropdowns Readability & Font Sizing)**:
+    - Enlarged "Show Category On Page" dropdown in `src/admin/pages/Categories.tsx` to `text-base py-3.5 px-4 font-bold`.
+    - Enlarged Category filter dropdown and product edit modal category select in `src/admin/pages/Products.tsx` to `text-base py-3 px-4 font-bold`.
+    - Enlarged select styling in `src/admin/components/UnifiedPageEditor.tsx`.
+- **Validation**:
+  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 8.09s`).
+  - Backend Build: `npm run build` (`prisma generate && tsc`) passed with exit code 0.
+

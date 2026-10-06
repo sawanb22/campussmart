@@ -379,11 +379,54 @@ This document tracks all identified application defects, UX friction points, and
 
 ---
 
+### Group 4: UI, Media & Typography Polish (Issues #1, #11, #13, #19, #22)
+- **Tracking ID**: `GRP-20261006-04`
+- **Category**: Frontend, Typography, Media Player, Admin Readability
+- **Severity**: Medium
+- **Status**: ✅ Completed & Verified
+
+#### 1. Issue #1: Reactive Product Page Category Filtering
+- **Problem**: On individual product detail pages (`/product/:slug`), clicking a category button showed 0 products until refresh because `Shop.tsx` only initialized `selectedCategory` once on mount.
+- **Solution**:
+  - Added a reactive `useEffect` listening to `searchParams.get('category')` in `src/pages/shop.tsx`.
+  - Made the category badge tag on `src/pages/product-detail.tsx` clickable, routing directly to `/shop?category=...`.
+
+#### 2. Issue #11: Lookbook / Catalogues "View PDF" Action
+- **Problem**: Lookbook/Catalogue buttons were labeled "Download PDF" and forced invisible file downloads.
+- **Solution**:
+  - Renamed button labels from "Download PDF" to "View PDF" across `src/pages/catalogues.tsx` and `src/pages/product-catalog.tsx`.
+  - Replaced `Download` icon with `Eye` icon.
+  - Updated action to open PDFs directly in browser tab viewer with graceful modal enquiry fallback if file is missing.
+
+#### 3. Issue #13: UGC Guidelines Typography Harmonization
+- **Problem**: `/ugc-guidelines` declared `"DM Sans"` which was not loaded in `index.html`, causing mismatched system font fallbacks.
+- **Solution**:
+  - Removed `"DM Sans"` in `src/pages/ugc-guidelines.tsx` and unified typography to `Open Sans` for body copy and `Poppins` for headings.
+  - Added `font-opensans` and `font-poppins` to `src/pages/ugc-guideline-article.tsx`.
+
+#### 4. Issue #19: Case Study Video Player Controls
+- **Problem**: On case study pages (`/case-studies/:slug`), videos were rendered via `MediaImage` (`<img>`), producing unplayable broken containers without controls.
+- **Solution**:
+  - Added `isVideoMedia()` detector in `src/pages/case-study-detail.tsx`.
+  - Rendered HTML5 `<video controls playsInline preload="metadata">` with browser player controls (play/pause, scrubber timeline, volume, fullscreen).
+  - Added CSS and a reactive effect ensuring embedded `<video>` elements in `study.body` HTML have native controls enabled.
+
+#### 5. Issue #22: Admin Dropdowns Readability & Font Sizing
+- **Problem**: Admin select dropdowns had tiny font sizing (`text-[10px]` / `text-xs`), making page classification hard to read.
+- **Solution**:
+  - Enlarged "Show Category On Page" dropdown in `src/admin/pages/Categories.tsx` to `text-base py-3.5 px-4 font-bold`.
+  - Enlarged Category filter and modal classification dropdowns in `src/admin/pages/Products.tsx` to `text-base py-3 px-4 font-bold`.
+  - Enlarged select styling in `src/admin/components/UnifiedPageEditor.tsx`.
+
+#### 6. Verification
+- Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 8.09s`).
+- Backend Build: `npm run build` (`prisma generate && tsc`) passed with exit code 0.
+
+---
+
 ### Deferred Issues
 *(Shifted to end per user instruction)*
 - **Issue #2**: Masonry Cards Gradient (White/Blue instead of Black)
 - **Issue #8**: Explanation & guidance on how Admin Categories connect to store pages
 - **Issue #9**: Quick search for subpages (e.g. "Group Study") in Admin Pages Manager
-
-
-
+- **Group 2 (Issue #7)**: Skipped per user instruction.

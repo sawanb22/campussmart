@@ -21,7 +21,7 @@ const UGCGuidelineArticle = () => {
   const image = article.image || fallback?.image;
 
   return (
-    <main className="min-h-screen bg-[#f5f4ef] py-6 sm:py-10">
+    <main className="min-h-screen bg-[#f5f4ef] py-6 sm:py-10 font-opensans">
       <article className="mx-auto max-w-4xl px-4 sm:px-8">
         <Link to="/ugc-guidelines" className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-[#155b51]">
           <ArrowLeft size={16} /> Back to UGC Guidelines
@@ -34,7 +34,7 @@ const UGCGuidelineArticle = () => {
             <div className="mb-3 text-xs font-bold uppercase tracking-[0.12em] text-[#f47b20]">
               {article.category}{article.readTime ? ` · ${article.readTime}` : ''}
             </div>
-            <h1 className="mb-5 font-sans text-3xl font-bold leading-tight tracking-tight text-[#155b51] sm:text-5xl">
+            <h1 className="mb-5 font-poppins text-3xl font-bold leading-tight tracking-tight text-[#155b51] sm:text-5xl">
               {article.title}
             </h1>
             <p className="max-w-2xl border-l-2 border-[#f47b20] pl-5 text-base leading-relaxed text-[#173e39] sm:text-lg">

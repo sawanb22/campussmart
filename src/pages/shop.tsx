@@ -83,8 +83,17 @@ const Shop = ({
   }, [categoryPage]);
 
   useEffect(() => {
-    if (categorySlug) setSelectedCategory(categorySlug);
-  }, [categorySlug]);
+    if (categorySlug) {
+      setSelectedCategory(categorySlug);
+      return;
+    }
+    const cat = searchParams.get('category');
+    if (cat && cat !== 'all') {
+      setSelectedCategory(cat);
+    } else if (cat === 'all' && !hideAllCategoriesOption) {
+      setSelectedCategory('all');
+    }
+  }, [categorySlug, searchParams, hideAllCategoriesOption]);
 
   useEffect(() => {
     if (!categoriesLoaded || categories.length === 0) return;
