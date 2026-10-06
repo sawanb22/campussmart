@@ -199,7 +199,6 @@ async function main() {
         { title: 'Innovation', slug: 'innovation' },
         { title: 'Labs', slug: 'labs' },
         { title: 'Libraries', slug: 'libraries' },
-        { title: 'Library Products', slug: 'library-products' },
         { title: 'Library Management', slug: 'library-management' },
         { title: 'Learning Management System', slug: 'lms' },
         { title: 'Lookbook', slug: 'lookbook' },
@@ -211,7 +210,6 @@ async function main() {
         { title: 'Setup College', slug: 'setup-college' },
         { title: 'Sports Design Execution', slug: 'sports-design-execution' },
         { title: 'Sports Infrastructure', slug: 'sports-infra' },
-        { title: 'Sports Products', slug: 'sports-products' },
         { title: 'Tech Infrastructure', slug: 'tech-infra' },
         { title: 'Terms of Use', slug: 'terms-of-use' },
         { title: 'UGC Guidelines', slug: 'ugc-guidelines' },
@@ -221,7 +219,6 @@ async function main() {
         { title: 'My Account', slug: 'my-account' },
         { title: 'Login', slug: 'login' },
         { title: 'Registration', slug: 'registration' },
-        { title: 'Lab Products', slug: 'lab-products' },
     ];
 
     for (const page of pages) {

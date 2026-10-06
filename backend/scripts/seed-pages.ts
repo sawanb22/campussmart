@@ -29,9 +29,6 @@ const PAGES = [
     { slug: 'ugc-guidelines', title: 'UGC Guidelines', template: 'ugc-guidelines' },
     // These 5 already use the hook, but let's make sure they are in the DB:
     { slug: 'labs', title: 'Laboratory Solutions', template: 'labs' },
-    { slug: 'lab-products', title: 'Lab Products', template: 'lab-products' },
-    { slug: 'library-products', title: 'Library Products', template: 'library-products' },
-    { slug: 'sports-products', title: 'Sports Products', template: 'sports-products' },
     { slug: 'innovation', title: 'Innovation Centers', template: 'innovation' },
     { slug: 'furniture', title: 'Campus Furniture', template: 'furniture' },
     { slug: 'campus-design', title: 'Campus Master Planning', template: 'campus-design' },

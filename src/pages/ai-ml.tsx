@@ -2,9 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Heart, Check, Trash2, ShoppingBag } from 'lucide-react';
+import { ArrowRight, Heart, Check, Trash2 } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
-import { usePageCategories } from '@/hooks/usePageCategories';
 import { useDesignWishlist } from '@/hooks/useDesignWishlist';
 import LoginPromptModal from '@/components/login-prompt-modal';
 import { MediaImage } from '@/components/ui/media-image';
@@ -17,7 +16,6 @@ const AIML = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const { data, loading } = usePageData(AI_ML_PAGE_SLUG);
-  const { categories: shopCategories } = usePageCategories('ai-ml');
   const { isSaved, isPending, add, remove, showLoginPrompt, setShowLoginPrompt } = useDesignWishlist('ai-ml');
   const [activeCategory, setActiveCategory] = useState('All');
 
@@ -78,12 +76,6 @@ const AIML = () => {
             <div className="mt-5 flex flex-wrap gap-3">
               <Link to="/request-quote" className="btn-primary inline-flex items-center gap-2">
                 Deploy Solutions <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                to="/ai-ml/products"
-                className="inline-flex items-center gap-2 rounded-full border border-stone-300 px-5 py-2.5 text-sm font-bold text-stone-700 transition-colors hover:border-stone-400"
-              >
-                <ShoppingBag className="h-4 w-4" /> Shop AI/ML Products
               </Link>
             </div>
           </div>
@@ -197,21 +189,6 @@ const AIML = () => {
                 </div>
               )}
             </>
-          )}
-
-          {shopCategories.length > 0 && (
-            <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-stone-100 pt-4">
-              <span className="mr-1 text-xs font-bold uppercase tracking-wide text-stone-400">Shop by category:</span>
-              {shopCategories.map((category) => (
-                <Link
-                  key={category.id}
-                  to={`/ai-ml/products?category=${category.slug}`}
-                  className="rounded-full border border-stone-200 px-3.5 py-1.5 text-xs font-semibold text-stone-600 transition-colors hover:border-stone-400"
-                >
-                  {category.name}
-                </Link>
-              ))}
-            </div>
           )}
         </div>
       </section>

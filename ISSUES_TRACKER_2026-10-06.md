@@ -301,6 +301,35 @@ This document tracks all identified application defects, UX friction points, and
 
 ---
 
+### Redundant Product Pages Cleanup & Route Canonicalization
+- **Tracking ID**: `ISS-20261006-PROD-CLEANUP` (`CLEANUP-003`)
+- **Category**: Routing, UX Architecture, Database Hygiene
+- **Severity**: Medium
+- **Status**: ✅ Completed & Verified
+
+#### 1. Problem Description & Audit Findings
+- In addition to `/tech-infra/products`, 4 other legacy product wrapper pages (`/ai-ml/products`, `/lab-products`, `/library-products`, `/sports-products`) existed in the codebase.
+- Audit confirmed that **Labs**, **Libraries**, and **Sports Products** had **zero buttons or links** anywhere on the entire site (header, footer, category bar, or inner pages), serving purely as dead-weight orphan pages.
+- **AI/ML Products** only had two buttons on `/ai-ml` ("Shop AI/ML Products" and "Shop by category"), creating duplicate, confusing views alongside the canonical `/ai-ml` showcase page.
+
+#### 2. Technical Solution
+- Deleted all 4 redundant page components: `ai-ml-products.tsx`, `lab-products.tsx`, `library-products.tsx`, `sports-products.tsx`.
+- Removed their route mappings from `PageTemplates` in `src/App.tsx`.
+- Added automatic 301 redirects in `src/App.tsx`:
+  - `/ai-ml/products` ➔ `/ai-ml`
+  - `/lab-products` & `/labs/products` ➔ `/labs`
+  - `/library-products` & `/libraries/products` ➔ `/libraries`
+  - `/sports-products` & `/sports-infra/products` ➔ `/sports-infra`
+- Cleaned up `/ai-ml`: removed the redundant "Shop AI/ML Products" button and bottom category chips, creating a clean, consistent showcase experience matching `/tech-infra`.
+- Cleaned database & seeders: purged orphan page records (`lab-products`, `library-products`, `sports-products`) from the database and updated seed scripts.
+- Removed legacy page defaults from `src/admin/pageDefaults.ts`.
+
+#### 3. Verification
+- `npm run build` (`tsc -b && vite build`): Exit code 0 (`✓ built in 8.57s`).
+- Backend build (`prisma generate && tsc`): Exit code 0.
+
+---
+
 ### Deferred Issues
 *(Shifted to end per user instruction)*
 - **Issue #2**: Masonry Cards Gradient (White/Blue instead of Black)

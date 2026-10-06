@@ -550,10 +550,6 @@ export const pageDefaults: Record<string, any> = {
   ctaTitle: 'Ready to talk?',
   ctaSubtitle: 'Connect with our programme managers for a walkthrough of what a managed innovation centre looks like on your campus.',
 },
-  'lab-products': {
-  heroTitle: 'Lab Products',
-  heroSubtitle: 'Explore equipment and solutions for modern school and college laboratories.',
-},
   'labs': {
   heroTitle: 'Laboratory Solutions',
   heroSubtitle: 'State-of-the-art laboratory setups for schools and colleges. From STEM labs to specialized research facilities, we deliver excellence.',
@@ -599,10 +595,6 @@ export const pageDefaults: Record<string, any> = {
     { title: 'Usage Analytics & Reports', description: 'See which titles, sections and hours get used most, so your next acquisition budget goes further.', categories: ['Insights'], image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=900&q=85' },
     { title: 'Automated Reminders', description: 'SMS and email reminders for due dates and reservations, sent automatically so nothing slips through.', categories: ['Automation'], image: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=900&q=85' }
   ]
-},
-  'library-products': {
-  heroTitle: 'Library Furniture',
-  heroSubtitle: 'Explore furniture and equipment for modern library spaces.',
 },
   'lms': {
   heroTitle: 'Learning Management System',
@@ -899,11 +891,6 @@ export const pageDefaults: Record<string, any> = {
     { title: 'Kids Play & Recreation Zones', description: 'Safety-certified play equipment and soft-fall surfacing designed for younger students.', categories: ['Kids'], image: 'https://images.unsplash.com/photo-1472162072942-cd5147eb3902?auto=format&fit=crop&w=900&q=85' },
     { title: 'Equipment Supply & Turf Maintenance', description: 'Ongoing supply of training equipment plus scheduled turf, track and court maintenance programmes.', categories: ['Equipment'], image: 'https://images.unsplash.com/photo-1547347298-4074fc3086f0?auto=format&fit=crop&w=900&q=85' },
   ],
-},
-  'sports-products': {
-  heroTitle: 'Sports Products',
-  heroSubtitle: 'Explore sports equipment and solutions for schools, colleges, and training facilities.',
-  heroImage: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
 },
   'science-tech-labs': {
   heroTitle: 'Labs Built for Real Discovery',

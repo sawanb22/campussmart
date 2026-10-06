@@ -1706,6 +1706,38 @@
   - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 8.64s`).
   - Dist Directory Verification: All 74 media assets confirmed present in `dist/uploads/media/`.
 
+---
+
+### `CLEANUP-003` | 2026-10-06 16:15 | Purge of Redundant Product Wrapper Pages & Route Canonicalization
+- **Files Affected**:
+  - `[DELETE] src/pages/ai-ml-products.tsx`
+  - `[DELETE] src/pages/lab-products.tsx`
+  - `[DELETE] src/pages/library-products.tsx`
+  - `[DELETE] src/pages/sports-products.tsx`
+  - `[MODIFY] src/App.tsx`
+  - `[MODIFY] src/pages/ai-ml.tsx`
+  - `[MODIFY] src/admin/pageDefaults.ts`
+  - `[MODIFY] backend/prisma/seed.ts`
+  - `[MODIFY] backend/scripts/seed-pages.ts`
+  - `[MODIFY] backend/src/runSeed.ts`
+  - `[MODIFY] ISSUES_TRACKER_2026-10-06.md`
+- **Description & Rationale (under SOLID Principles)**:
+  - **Single Source of Truth & Dead Code Elimination**:
+    - Identified that `lab-products`, `library-products`, and `sports-products` were completely orphan pages with 0 buttons/links across the entire application.
+    - Completely deleted all 4 redundant product page components (`ai-ml-products.tsx`, `lab-products.tsx`, `library-products.tsx`, `sports-products.tsx`).
+    - Removed their templates from `PageTemplates` in `src/App.tsx`.
+    - Added automated 301 route redirects in `src/App.tsx`:
+      - `/ai-ml/products` ➔ `/ai-ml`
+      - `/lab-products` & `/labs/products` ➔ `/labs`
+      - `/library-products` & `/libraries/products` ➔ `/libraries`
+      - `/sports-products` & `/sports-infra/products` ➔ `/sports-infra`
+    - Removed redundant "Shop AI/ML Products" button and bottom category chips from `src/pages/ai-ml.tsx`, unifying the layout style with `/tech-infra`.
+    - Removed orphan template defaults from `src/admin/pageDefaults.ts`.
+    - Purged orphan page records from SQLite database (`lab-products`, `library-products`, `sports-products`) and updated backend seed scripts to prevent recreation.
+- **Validation**:
+  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 8.57s`).
+  - Backend Build: `npm run build` (`prisma generate && tsc`) passed with exit code 0.
+
 
 
 

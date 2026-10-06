@@ -36,7 +36,6 @@ const PageTemplates: Record<string, any> = {
   'ai-digital-design-supply': lazy(() => import('@/pages/ai-digital-design-supply')),
   'ai-guide': lazy(() => import('@/pages/ai-guide')),
   'ai-ml': lazy(() => import('@/pages/ai-ml')),
-  'ai-ml/products': lazy(() => import('@/pages/ai-ml-products')),
   'ai-stations': lazy(() => import('@/pages/ai-stations')),
   'assessment-system': lazy(() => import('@/pages/assessment-system')),
   'blog': lazy(() => import('@/pages/blog')),
@@ -62,11 +61,7 @@ const PageTemplates: Record<string, any> = {
   'science-tech-labs': lazy(() => import('@/pages/science-tech-labs')),
   'job-openings': lazy(() => import('@/pages/job-openings')),
   'labs': lazy(() => import('@/pages/labs')),
-  'lab-products': lazy(() => import('@/pages/lab-products')),
-  'labs/products': lazy(() => import('@/pages/lab-products')),
   'libraries': lazy(() => import('@/pages/libraries')),
-  'library-products': lazy(() => import('@/pages/library-products')),
-  'libraries/products': lazy(() => import('@/pages/library-products')),
   'library-management': lazy(() => import('@/pages/library-management')),
   'lms': lazy(() => import('@/pages/lms')),
   'lookbook': lazy(() => import('@/pages/lookbook')),
@@ -86,8 +81,6 @@ const PageTemplates: Record<string, any> = {
   'sports-design-execution': lazy(() => import('@/pages/sports-design-execution')),
   'sports-infra': lazy(() => import('@/pages/sports-infra')),
   'sports-infrastructure': lazy(() => import('@/pages/sports-infrastructure')),
-  'sports-products': lazy(() => import('@/pages/sports-products')),
-  'sports-infra/products': lazy(() => import('@/pages/sports-products')),
   'tech-infra': lazy(() => import('@/pages/tech-infra')),
   'terms-of-use': lazy(() => import('@/pages/terms-of-use')),
   'ugc-guidelines': lazy(() => import('@/pages/ugc-guidelines')),
@@ -151,9 +144,9 @@ const DynamicPageRoute = () => {
   // Resolve existing template component if specified (with alias normalization)
   const resolvedTemplate = templateId
     ? (PageTemplates[templateId]
-       || (templateId === 'lab-products' ? PageTemplates['labs/products'] : null)
-       || (templateId === 'library-products' ? PageTemplates['libraries/products'] : null)
-       || (templateId === 'sports-products' ? PageTemplates['sports-infra/products'] : null)
+       || (templateId === 'lab-products' ? PageTemplates['labs'] : null)
+       || (templateId === 'library-products' ? PageTemplates['libraries'] : null)
+       || (templateId === 'sports-products' ? PageTemplates['sports-infra'] : null)
        || (templateId === 'tech-infra-products' ? PageTemplates['tech-infra'] : null)
        || (templateId === 'home' || slug === 'home' ? Home : null))
     : null;
@@ -251,6 +244,13 @@ function App() {
               <Route path="/cart" element={<Navigate to="/my-account?tab=wishlist" replace />} />
               <Route path="/corporate" element={<Navigate to="/about-us" replace />} />
               <Route path="/tech-infra/products" element={<Navigate to="/tech-infra" replace />} />
+              <Route path="/ai-ml/products" element={<Navigate to="/ai-ml" replace />} />
+              <Route path="/lab-products" element={<Navigate to="/labs" replace />} />
+              <Route path="/labs/products" element={<Navigate to="/labs" replace />} />
+              <Route path="/library-products" element={<Navigate to="/libraries" replace />} />
+              <Route path="/libraries/products" element={<Navigate to="/libraries" replace />} />
+              <Route path="/sports-products" element={<Navigate to="/sports-infra" replace />} />
+              <Route path="/sports-infra/products" element={<Navigate to="/sports-infra" replace />} />
 
               {/* Static pages explicitly mapped so they always work */}
               {Object.keys(PageTemplates).map((path) => {
