@@ -1,8 +1,9 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
+import { ShieldAlert, LogOut, ArrowLeft } from 'lucide-react';
 import Layout from './components/Layout';
-import Login from './pages/Login';
-import { isAdminLoggedIn, ensureSessionSynced } from './lib/auth';
+import { isAdminLoggedIn, ensureSessionSynced, getCurrentUser, clearAdminSession } from './lib/auth';
+import { clearUserSession } from '@/lib/auth-session';
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Products = lazy(() => import('./pages/Products'));
@@ -20,9 +21,68 @@ const PageEditor = lazy(() => import('./pages/PageEditor'));
 const Categories = lazy(() => import('./pages/Categories'));
 const WishlistReports = lazy(() => import('./pages/WishlistReports'));
 
+function AccessDenied({ userEmail, role }: { userEmail?: string; role?: string }) {
+  const navigate = useNavigate();
+
+  const handleSwitchAccount = () => {
+    clearAdminSession();
+    clearUserSession();
+    navigate('/login?redirect=/admin/dashboard', { replace: true });
+  };
+
+  const handleGoToPortal = () => {
+    navigate('/my-account', { replace: true });
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 text-center border border-slate-200">
+        <div className="w-16 h-16 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-100">
+          <ShieldAlert className="w-8 h-8" />
+        </div>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
+        <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+          Administrator privileges are required to view this panel. You are currently signed in as{' '}
+          <strong className="text-gray-900">{userEmail || 'a standard user'}</strong>
+          {role ? ` (role: ${role})` : ''}.
+        </p>
+
+        <div className="space-y-3">
+          <button
+            type="button"
+            onClick={handleSwitchAccount}
+            className="w-full flex items-center justify-center gap-2 bg-[#0a2463] text-white font-semibold py-3 px-4 rounded-xl hover:bg-[#1a3a8f] transition-colors"
+          >
+            <LogOut className="w-4 h-4" /> Switch to Admin Account
+          </button>
+          <button
+            type="button"
+            onClick={handleGoToPortal}
+            className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 font-semibold py-3 px-4 rounded-xl hover:bg-gray-200 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" /> Return to Customer Portal
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   ensureSessionSynced();
-  return isAdminLoggedIn() ? <>{children}</> : <Navigate to="/admin/login" replace />;
+  const location = useLocation();
+
+  if (isAdminLoggedIn()) {
+    return <>{children}</>;
+  }
+
+  const currentUser = getCurrentUser();
+  if (currentUser && currentUser.role !== 'admin') {
+    return <AccessDenied userEmail={currentUser.email} role={currentUser.role} />;
+  }
+
+  const redirectTarget = encodeURIComponent(location.pathname + location.search);
+  return <Navigate to={`/login?redirect=${redirectTarget}`} replace />;
 }
 
 function Loader() {
@@ -36,7 +96,7 @@ function Loader() {
 function AdminRoutes() {
   return (
     <Routes>
-      <Route path="login" element={<Login />} />
+      <Route path="login" element={<Navigate to="/login?redirect=/admin/dashboard" replace />} />
       <Route
         path=""
         element={

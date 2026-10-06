@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { clearUserSession } from '@/lib/auth-session';
+import { clearUserSession, getUserToken } from '@/lib/auth-session';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
@@ -9,7 +9,7 @@ const api = axios.create({
 
 // Add auth token to all requests
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('cm_token');
+    const token = getUserToken();
 
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;

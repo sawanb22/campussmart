@@ -5,6 +5,7 @@ import {
     FileText, ChevronRight, Bell, Layers, Heart
 } from 'lucide-react';
 import { clearAdminSession } from '../lib/auth';
+import { clearUserSession } from '@/lib/auth-session';
 
 // ── Grouped Navigation ─────────────────────────────────────────────────────────
 const navGroups = [
@@ -60,7 +61,8 @@ export default function Layout() {
 
     const handleLogout = () => {
         clearAdminSession();
-        navigate('/admin/login');
+        clearUserSession();
+        navigate('/login?redirect=/admin/dashboard');
     };
 
     const isActive = (to: string) => {

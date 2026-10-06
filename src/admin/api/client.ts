@@ -24,7 +24,9 @@ api.interceptors.response.use(
     (err) => {
         if (err.response?.status === 401) {
             clearAdminSession();
-            window.location.href = '/admin/login';
+            const currentPath = window.location.pathname + window.location.search;
+            const redirectParam = currentPath.startsWith('/admin') ? `?redirect=${encodeURIComponent(currentPath)}` : '';
+            window.location.href = `/login${redirectParam}`;
         }
 
         return Promise.reject(err);

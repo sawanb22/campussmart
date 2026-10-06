@@ -189,7 +189,11 @@ router.post('/login', async (req: Request, res: Response) => {
             where: { email: { equals: normalizedEmail, mode: 'insensitive' } }
         });
         if (!user) { res.status(401).json({ error: 'Invalid credentials' }); return; }
-        const valid = await bcrypt.compare(password, user.passwordHash);
+        let valid = await bcrypt.compare(password, user.passwordHash);
+        if (!valid && typeof password === 'string' && password.trim() !== password) {
+            // Defensively test against trimmed password if comparison against raw password fails
+            valid = await bcrypt.compare(password.trim(), user.passwordHash);
+        }
         if (!valid) { res.status(401).json({ error: 'Invalid credentials' }); return; }
 
         if (!user.emailVerified) {

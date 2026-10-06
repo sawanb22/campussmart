@@ -19,17 +19,17 @@ const parseUser = (raw: string | null): UserSession | null => {
 };
 
 /**
- * Returns the currently authenticated user from localStorage.
+ * Returns the currently authenticated user from sessionStorage or localStorage.
  */
 export const getUserSession = (): UserSession | null => {
-  return parseUser(localStorage.getItem('cm_user'));
+  return parseUser(sessionStorage.getItem('cm_user')) || parseUser(localStorage.getItem('cm_user'));
 };
 
 /**
- * Returns the current JWT access token from localStorage.
+ * Returns the current JWT access token from sessionStorage or localStorage.
  */
 export const getUserToken = (): string | null => {
-  return localStorage.getItem('cm_token');
+  return sessionStorage.getItem('cm_token') || localStorage.getItem('cm_token');
 };
 
 /**
@@ -41,18 +41,22 @@ export const isUserLoggedIn = (): boolean => {
 
 /**
  * Saves authenticated user credentials across storages adhering to role requirements.
- * Synchronizes admin credentials with sessionStorage to maintain admin portal state.
+ * Atomically synchronizes credentials across both localStorage and sessionStorage.
  */
 export const setUserSession = (token: string, user: UserSession): void => {
   const userStr = JSON.stringify(user);
   localStorage.setItem('cm_token', token);
   localStorage.setItem('cm_user', userStr);
+  sessionStorage.setItem('cm_token', token);
+  sessionStorage.setItem('cm_user', userStr);
 
   if (user.role === 'admin') {
     localStorage.setItem('cm_admin_token', token);
     sessionStorage.setItem('cm_admin_token', token);
-    sessionStorage.setItem('cm_token', token);
-    sessionStorage.setItem('cm_user', userStr);
+  } else {
+    // If regular user, eliminate any stale admin tokens to prevent privilege elevation
+    localStorage.removeItem('cm_admin_token');
+    sessionStorage.removeItem('cm_admin_token');
   }
 };
 

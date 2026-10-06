@@ -28,6 +28,6 @@ Start-Process powershell -ArgumentList "-NoExit -Command `"cd '$rootDir'; npm ru
 
 Write-Host "`n✅ All services starting! Please wait a few seconds..." -ForegroundColor Green
 Write-Host "`n   Frontend:  http://localhost:5173" -ForegroundColor White
-Write-Host "   Frontend Admin: http://localhost:5173/admin/login" -ForegroundColor White
+Write-Host "   Frontend Admin: http://localhost:5173/login?redirect=/admin/dashboard" -ForegroundColor White
 Write-Host "   Backend:   http://localhost:3001" -ForegroundColor White
 Write-Host "`n   Admin login: admin@campusmart.in / Admin@1234`n" -ForegroundColor Yellow

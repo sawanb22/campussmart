@@ -74,6 +74,14 @@ export const isAdminLoggedIn = (): boolean => {
     return Boolean(token && user && user.role === 'admin');
 };
 
+/**
+ * Returns the currently authenticated user in either session or local storage,
+ * regardless of role. Used to detect standard users attempting to access admin routes.
+ */
+export const getCurrentUser = (): StoredUser | null => {
+    return parseUser(sessionStorage.getItem('cm_user')) || parseUser(localStorage.getItem('cm_user'));
+};
+
 export const syncAdminSession = (token: string, user: StoredUser): void => {
     const userStr = JSON.stringify(user);
     sessionStorage.setItem('cm_admin_token', token);
@@ -98,18 +106,31 @@ export const clearAdminSession = (): void => {
 /**
  * Ensures session synchronization between localStorage and sessionStorage.
  * If an admin session exists in either storage (e.g., from public /login),
- * it synchronizes both storages so neither is left stale or mismatched.
+ * it synchronizes both storages bidirectionally so neither is left stale or mismatched.
  */
 export const ensureSessionSynced = (): void => {
     const user = getAdminUser();
     const token = getAdminToken();
     if (token && user && user.role === 'admin') {
+        const userStr = JSON.stringify(user);
         if (sessionStorage.getItem('cm_admin_token') !== token) {
             sessionStorage.setItem('cm_admin_token', token);
         }
         if (sessionStorage.getItem('cm_token') !== token) {
             sessionStorage.setItem('cm_token', token);
         }
-        sessionStorage.setItem('cm_user', JSON.stringify(user));
+        if (sessionStorage.getItem('cm_user') !== userStr) {
+            sessionStorage.setItem('cm_user', userStr);
+        }
+
+        if (localStorage.getItem('cm_admin_token') !== token) {
+            localStorage.setItem('cm_admin_token', token);
+        }
+        if (localStorage.getItem('cm_token') !== token) {
+            localStorage.setItem('cm_token', token);
+        }
+        if (localStorage.getItem('cm_user') !== userStr) {
+            localStorage.setItem('cm_user', userStr);
+        }
     }
 };

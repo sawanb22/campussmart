@@ -53,6 +53,7 @@
 | `FIX-009` | 2026-10-03 21:05 | Media Resilience & Asset Alignment | Indoor Sports & AI Learning Stations Image 404 & Alignment Repair: replaced dead Unsplash URLs and misassigned sports courts with verified active assets. | 3 files (frontend & admin) | Completed |
 | `CLEAN-001` | 2026-10-03 22:38 | Maintenance & Build Hygiene | Inactive database purge, stale artifacts cleanup (cloudflared, logs, legacy zip), and frontend TypeScript build stabilization (`tsc -b`) under SOLID principles. | 9 files (frontend, backend, root) | Completed |
 | `NAV-004` | 2026-10-04 01:10 | Product & Wishlist Navigation Standardization | Fixed React error #310 hook placement in product-detail.tsx, made Wishlist products and designs universally clickable with image fallbacks, enabled optimistic instant rendering across Labs, Sports, and AI/ML detail pages, and aligned DB assets under SOLID principles. | 5 files (frontend) + DB | Completed |
+| `AUTH-003` | 2026-10-06 12:15 | Authentication & Security | Standardized unified login portal (/login), deprecated /admin/login with bridge redirect, added mobile keyboard defenses & input trimming, implemented open redirect defense, added RBAC 403 Access Denied view to prevent infinite loops, implemented backend defensive whitespace trimming without database password resets, and enforced bidirectional session atomicity. | 9 files (frontend, admin, backend) | Completed |
 
 ---
 
@@ -1522,3 +1523,56 @@
   - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 7.32s`).
   - Backend Build: `npm run build` (`prisma generate && tsc`) passed with exit code 0.
   - Database queries: Verified table updates for `page` and `wishlistitem` in Render PostgreSQL.
+
+---
+
+### [AUTH-003] 2026-10-06 12:30 IST - Unified Single Login Portal, Input Hardening, Open Redirect Defense, Loop Prevention & Storage Atomicity
+- **Author/Agent**: Antigravity Pair Programmer
+- **Scope / Category**: Authentication, Security, RBAC & Multi-Persona Architecture
+- **Files Modified / Created**:
+  - `[CREATE] src/lib/redirect.ts`
+  - `[MODIFY] src/pages/login.tsx`
+  - `[MODIFY] src/admin/AdminRoutes.tsx`
+  - `[MODIFY] src/admin/pages/Login.tsx`
+  - `[MODIFY] src/lib/auth-session.ts`
+  - `[MODIFY] src/admin/lib/auth.ts`
+  - `[MODIFY] src/admin/api/client.ts`
+  - `[MODIFY] src/admin/components/Layout.tsx`
+  - `[MODIFY] src/api/client.ts`
+  - `[MODIFY] backend/src/routes/auth.routes.ts`
+  - `[MODIFY] start-all.ps1`
+  - `[CREATE] backend/scripts/test-unified-auth.ts`
+  - `[CREATE] scripts/test-unified-auth-live.ts`
+  - `[MODIFY] ISSUES_TRACKER_2026-10-06.md`
+- **Description & Rationale (under SOLID Principles)**:
+  - **Single Responsibility Principle (SRP)**:
+    - Centralized all user authentication ingestion into single unified portal at `/login` (`src/pages/login.tsx`).
+    - Extracted safe redirection policies, self-referential loop detection, and RBAC divert rules into dedicated utility `src/lib/redirect.ts`.
+    - Deprecated `/admin/login` and converted `src/admin/pages/Login.tsx` into an immediate redirect bridge to `/login?redirect=/admin/dashboard`.
+    - Handled route access protection and Access Denied rendering cleanly within `ProtectedRoute` in `src/admin/AdminRoutes.tsx`.
+  - **Open/Closed Principle (OCP)**:
+    - The authentication router accepts extensible persona redirects based on `user.role` without altering core login mechanics.
+    - Standard users accessing `/admin/*` are intercepted by a branded RBAC 403 Access Denied view with "Switch to Admin Account" and "Return to Customer Portal" actions, eliminating infinite redirect loops.
+    - Deep-links and bookmarks to `/admin/login` are seamlessly preserved through immediate redirection.
+    - Already-authenticated administrators landing on `/login?redirect=/admin/*` are automatically forwarded directly to their destination without redundant login prompts.
+  - **Liskov Substitution Principle (LSP)**:
+    - Unified authentication contract accepts credentials polymorphically across all roles (customers, testers, administrators) with identical payload signatures.
+  - **Interface Segregation Principle (ISP)**:
+    - Session management synchronizes `cm_token`, `cm_user`, and role-scoped `cm_admin_token` across `localStorage` and `sessionStorage`.
+    - Admin-specific session helpers (`getAdminToken`, `getAdminUser`) and generic helpers (`getUserSession`, `getUserToken`, `getCurrentUser`) maintain clear contracts.
+  - **Dependency Inversion Principle (DIP)**:
+    - Public and admin Axios API clients depend on abstracted token retrieval functions (`getUserToken`, `getAdminToken`) from shared auth modules rather than direct fragmented storage reads.
+  - **Enterprise Security & Input Hardening**:
+    - Mobile keyboard defenses: Added `autoCapitalize="none"`, `autoCorrect="off"`, `spellCheck={false}` to email and password fields.
+    - Automatic input sanitization: Stripped whitespace and lowercased email (`email.trim().toLowerCase()`), trimmed password on submission (`password.trim()`), and added `onBlur` whitespace cleaning on email.
+    - Whitespace-tolerant HTML5 email pattern: Updated pattern to `\s*[^\s@]+@[^\s@]+\.[^\s@]+\s*` preventing browser constraint validation from blocking form submission when pasting emails with spaces.
+    - Open Redirect Defense & Loop Prevention: Strictly sanitized `?redirect=` target URLs using regex `^\/[a-zA-Z0-9_\-\/?&=#.]*$`, rejecting external protocols (`https://`, `http://`, `//`, `javascript:`, `/\`). Diverted standard users away from `/admin/*` redirect targets to `/my-account` case-insensitively (`/Admin`, `/ADMIN`). Prevented self-referencing redirect loops back to `/login` or `/admin/login`.
+    - Backend defensive trimming: In `POST /api/auth/login`, defensively tested against `bcrypt.compare(password.trim(), user.passwordHash)` if raw comparison fails, resolving copy-pasted trailing whitespace issues without altering database hashes.
+    - Prevented double submissions: Disabled submit button with active loading spinner during authentication requests.
+- **Validation**:
+  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 7.78s`).
+  - Backend Build: `npm run build` (`prisma generate && tsc`) passed with exit code 0.
+  - Live Module Test Suite (`scripts/test-unified-auth-live.ts`): 41/41 live module assertions passed (100%).
+  - Automated Unit Test Suite (`backend/scripts/test-unified-auth.ts`): 51/51 assertions passed (100%).
+  - Admin Auth Storage Test Suite (`backend/scripts/test-admin-auth.ts`): 25/25 assertions passed (100%).
+
