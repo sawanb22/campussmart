@@ -3,10 +3,13 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { MessageCircle, Phone, Send } from 'lucide-react';
 import api from '@/api/client';
+import { useContactAction } from '@/hooks/useContactAction';
+import ContactActionModal from '@/components/ui/contact-action-modal';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const PartnershipForm = () => {
+  const { modalState, closeModal, triggerPhone } = useContactAction();
   const containerRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const contactRef = useRef<HTMLDivElement>(null);
@@ -266,18 +269,21 @@ const PartnershipForm = () => {
                 Connect On WhatsApp
               </a>
 
-              <a
-                href="tel:+919966109191"
-                className="contact-btn btn-call w-full justify-center"
+              <button
+                type="button"
+                onClick={() => triggerPhone('+919966109191', 'Call Campus Mart Support')}
+                className="contact-btn btn-call w-full justify-center cursor-pointer"
+                title="Call +91 9966109191"
               >
                 <Phone className="w-5 h-5" />
                 Call Us 9966109191
-              </a>
+              </button>
             </div>
 
           </div>
         </div>
       </div>
+      <ContactActionModal state={modalState} onClose={closeModal} />
     </section>
   );
 };

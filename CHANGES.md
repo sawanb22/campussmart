@@ -54,6 +54,7 @@
 | `CLEAN-001` | 2026-10-03 22:38 | Maintenance & Build Hygiene | Inactive database purge, stale artifacts cleanup (cloudflared, logs, legacy zip), and frontend TypeScript build stabilization (`tsc -b`) under SOLID principles. | 9 files (frontend, backend, root) | Completed |
 | `NAV-004` | 2026-10-04 01:10 | Product & Wishlist Navigation Standardization | Fixed React error #310 hook placement in product-detail.tsx, made Wishlist products and designs universally clickable with image fallbacks, enabled optimistic instant rendering across Labs, Sports, and AI/ML detail pages, and aligned DB assets under SOLID principles. | 5 files (frontend) + DB | Completed |
 | `AUTH-003` | 2026-10-06 12:15 | Authentication & Security | Standardized unified login portal (/login), deprecated /admin/login with bridge redirect, added mobile keyboard defenses & input trimming, implemented open redirect defense, added RBAC 403 Access Denied view to prevent infinite loops, implemented backend defensive whitespace trimming without database password resets, and enforced bidirectional session atomicity. | 9 files (frontend, admin, backend) | Completed |
+| `UX-012` | 2026-10-06 13:12 | Homepage & Cross-Platform Contact | Smart Contact Actions with Gmail Web, WhatsApp, and Desktop Dial Fallback (Issue #12) under SOLID principles. Fixed silent failures on tester machines lacking Outlook or telephony clients. | 8 files (frontend & test) | Completed |
 
 ---
 
@@ -1575,4 +1576,32 @@
   - Live Module Test Suite (`scripts/test-unified-auth-live.ts`): 41/41 live module assertions passed (100%).
   - Automated Unit Test Suite (`backend/scripts/test-unified-auth.ts`): 51/51 assertions passed (100%).
   - Admin Auth Storage Test Suite (`backend/scripts/test-admin-auth.ts`): 25/25 assertions passed (100%).
+
+### `UX-012` | 2026-10-06 13:12 | Homepage & Cross-Platform Contact | Smart Contact Actions with Gmail Web, WhatsApp, and Desktop Dial Fallback (Issue #12)
+- **Files Affected**:
+  - `[CREATE] src/lib/contact-actions.ts`
+  - `[CREATE] src/components/ui/contact-action-modal.tsx`
+  - `[CREATE] src/hooks/useContactAction.ts`
+  - `[CREATE] scripts/test-contact-actions.ts`
+  - `[MODIFY] src/components/layout/topbar.tsx`
+  - `[MODIFY] src/components/sections/feature-cards.tsx`
+  - `[MODIFY] src/components/sections/partnership-form.tsx`
+  - `[MODIFY] ISSUES_TRACKER_2026-10-06.md`
+- **Description & Rationale (under SOLID Principles)**:
+  - **Single Responsibility Principle (SRP)**:
+    - Separated protocol string parsing, international phone formatting, sanitization, and URL generators into dedicated utility `src/lib/contact-actions.ts`.
+    - Extracted UI presentation of desktop fallback options into standalone `ContactActionModal.tsx`.
+    - Coordinated device capability detection and dispatch mechanics cleanly via `useContactAction.ts`.
+  - **Open/Closed Principle (OCP)**:
+    - The fallback sheet supports polymorphic contact types (`'email' | 'phone'`) with 1-click webmail and WhatsApp actions without altering component view hierarchies.
+  - **Interface Segregation Principle (ISP)**:
+    - Hook exposes minimal necessary contracts (`triggerEmail`, `triggerPhone`, `triggerContact`, `modalState`, `closeModal`) keeping parent components decoupled from modal internals.
+  - **Security & Input Sanitization**:
+    - Sanitized email with RFC regex, stripping `mailto:` and lowercasing/trimming to prevent XSS and protocol injections.
+    - Sanitized phone input by stripping non-digit characters, formatting Indian numbers to `+91` international standard, and safeguarding against malicious schemes.
+    - Mitigated browser pop-up blocker issues by rendering an immediate interactive action sheet for webmail compose (`mail.google.com`) and WhatsApp Web (`wa.me`) rather than asynchronous timeouts.
+- **Validation**:
+  - Automated Unit Test Suite (`scripts/test-contact-actions.ts`): 100% assertions passed.
+  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 11.22s`).
+  - Backend Build: `npm run build` (`prisma generate && tsc`) passed with exit code 0.
 

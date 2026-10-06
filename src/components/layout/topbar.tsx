@@ -6,6 +6,9 @@ import { useWishlist } from '@/contexts/WishlistContext';
 import { useSiteContent } from '@/contexts/SiteContentContext';
 import { getUserSession, isUserLoggedIn, clearUserSession } from '@/lib/auth-session';
 
+import { useContactAction } from '@/hooks/useContactAction';
+import ContactActionModal from '@/components/ui/contact-action-modal';
+
 const DEFAULT_SOCIAL_URLS: Record<string, string> = {
   social_facebook: 'https://www.facebook.com/campusmart.in/',
   social_twitter: 'https://x.com/campusmartindia',
@@ -17,6 +20,9 @@ const DEFAULT_SOCIAL_URLS: Record<string, string> = {
 
 const TopBar = () => {
   const { content } = useSiteContent();
+  const { modalState, closeModal, triggerEmail, triggerPhone } = useContactAction();
+  const contactEmail = content.contact_email || 'info@campusmart.in';
+  const contactPhone = content.contact_phone || '+91 9966109191';
   const resolveSocialUrl = (key: string) => (key in content ? content[key] : DEFAULT_SOCIAL_URLS[key]);
   const topBarRef = useRef<HTMLDivElement>(null);
   const leftContentRef = useRef<HTMLDivElement>(null);
@@ -95,21 +101,25 @@ const TopBar = () => {
         <div className="flex flex-wrap items-center justify-between gap-2 py-1">
           {/* Left - Contact Info */}
           <div ref={leftContentRef} className="flex min-w-0 items-center gap-2 text-[10px] sm:gap-4 sm:text-sm">
-            <a
-              href={`mailto:${content.contact_email || 'info@campusmart.in'}`}
-              className="flex items-center gap-1.5 text-white/90 hover:text-cm-yellow transition-colors duration-200 sm:gap-2"
+            <button
+              type="button"
+              onClick={() => triggerEmail(contactEmail, 'Campus Mart Enquiry', 'Email Campus Mart')}
+              className="flex items-center gap-1.5 text-white/90 hover:text-cm-yellow transition-colors duration-200 sm:gap-2 cursor-pointer text-left bg-transparent border-0 p-0"
+              title="Click to email info@campusmart.in"
             >
               <Mail className="w-3.5 h-3.5 shrink-0 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">{content.contact_email || 'info@campusmart.in'}</span>
-            </a>
+              <span className="hidden sm:inline">{contactEmail}</span>
+            </button>
             <span className="hidden md:inline text-blue-300">|</span>
-            <a
-              href={`tel:${String(content.contact_phone || '+91 9966109191').replace(/\s+/g, '')}`}
-              className="flex items-center gap-1.5 text-white/90 hover:text-cm-yellow transition-colors duration-200 sm:gap-2"
+            <button
+              type="button"
+              onClick={() => triggerPhone(contactPhone, 'Call Campus Mart Support')}
+              className="flex items-center gap-1.5 text-white/90 hover:text-cm-yellow transition-colors duration-200 sm:gap-2 cursor-pointer text-left bg-transparent border-0 p-0"
+              title="Click to call +91 9966109191"
             >
               <Phone className="w-3.5 h-3.5 shrink-0 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">{content.contact_phone || '+91 9966109191'}</span>
-            </a>
+              <span className="hidden sm:inline">{contactPhone}</span>
+            </button>
           </div>
 
           {/* Right - Social Icons & Auth */}
@@ -181,6 +191,7 @@ const TopBar = () => {
           </div>
         </div>
       </div>
+      <ContactActionModal state={modalState} onClose={closeModal} />
     </div>
   );
 };

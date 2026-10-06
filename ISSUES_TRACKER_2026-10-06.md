@@ -15,7 +15,8 @@ This document tracks all identified application defects, UX friction points, and
 | ID | Issue Title | Category | Severity | Status | Target Milestone |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **ISS-01** | Unified Single Login Portal & Input Hardening | Authentication / Security | High | ✅ Completed | Immediate (`AUTH-003`) |
-| **ISS-02** | *(Pending user input)* | – | – | ⏳ Awaiting Details | – |
+| **ISS-12** | Smart Contact Actions with Gmail & Desktop Call Fallback | User Experience / Cross-Platform | Medium | ✅ Completed | Immediate (`UX-012`) |
+| **ISS-02** | *(Pending next user selection)* | – | – | ⏳ Awaiting Details | – |
 | **ISS-03** | *(Pending user input)* | – | – | ⏳ Awaiting Details | – |
 
 ---
@@ -93,6 +94,38 @@ This document tracks all identified application defects, UX friction points, and
   - Live Module Test Suite (`scripts/test-unified-auth-live.ts`): 41/41 assertions passed (100%).
   - Automated Unit Test Suite (`backend/scripts/test-unified-auth.ts`): 51/51 assertions passed (100%).
   - Storage Sync Test Suite (`backend/scripts/test-admin-auth.ts`): 25/25 assertions passed (100%).
+
+---
+
+### Issue #12: Smart Contact Actions with Gmail & Desktop Call Fallback
+- **Tracking ID**: `ISS-20261006-12` (`UX-012`)
+- **Category**: User Experience, Cross-Platform Compatibility, Contact Systems
+- **Severity**: Medium (Impacting desktop visitors and QA testers lacking local Outlook/telephony clients)
+- **Status**: ✅ Completed & Verified (100% Build & Automated Test Suite Passed)
+
+#### 1. Problem Description & Root Cause
+- **Silent Failures on Desktop**: When users clicked `mailto:` or `tel:` links on desktop PCs lacking default email clients (Outlook, Windows Mail) or telephony dialers (Skype, Teams), browsers silently ignored the click or threw an unhandled protocol prompt. Testers reported that contact buttons were "dead".
+- **Mobile vs Desktop Discrepancy**: Mobile devices handle `mailto:` and `tel:` natively via system apps, while desktops require registered protocol handlers.
+
+#### 2. Architecture & Technical Solution
+- **Sanitization & URL Utilities (`src/lib/contact-actions.ts`)**:
+  - `sanitizeEmail`: Cleans, lowercases, and validates email syntax with RFC regex; blocks protocol injection and XSS payloads.
+  - `sanitizePhone`: Formats 10-digit Indian numbers (`+919966109191`), international prefixes, and dialer-compatible strings.
+  - `getGmailComposeUrl`: Generates official web compose URL (`https://mail.google.com/mail/?view=cm&fs=1&to=...`) with safe URI-encoded parameters.
+  - `getWhatsAppUrl`: Generates official WhatsApp web/app link (`https://wa.me/...`).
+  - `isMobileDevice`: Detects phone dialer / touch capability.
+- **Desktop Fallback Sheet (`src/components/ui/contact-action-modal.tsx`)**:
+  - Automatically activates on desktop clicks.
+  - Email actions: 1-click **Open in Gmail Web**, **Open Default App**, and **Copy Email**.
+  - Phone actions: 1-click **Chat on WhatsApp Web**, **Call via Desktop App**, and **Copy Number**.
+  - Mobile behavior: Directly triggers `mailto:` and `tel:` without modal interruption.
+- **Unified Hook (`src/hooks/useContactAction.ts`)**:
+  - Integrated cleanly across [topbar.tsx](file:///d:/thirdeye-campussmart/campusssmart/campusmart_final/src/components/layout/topbar.tsx), [feature-cards.tsx](file:///d:/thirdeye-campussmart/campusssmart/campusmart_final/src/components/sections/feature-cards.tsx), and [partnership-form.tsx](file:///d:/thirdeye-campussmart/campusssmart/campusmart_final/src/components/sections/partnership-form.tsx).
+
+#### 3. Resolution & Verification Summary
+- **Automated Tests (`scripts/test-contact-actions.ts`)**: 100% assertions passed for email/phone sanitization, XSS mitigation, and URL generation.
+- **Frontend Build (`tsc -b && vite build`)**: Compiled successfully in 11.22s with exit code 0.
+- **Backend Build (`prisma generate && tsc`)**: Compiled successfully with exit code 0.
 
 ---
 

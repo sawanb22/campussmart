@@ -4,6 +4,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
 import { FileText, MoveUpRight } from 'lucide-react';
 import { useSiteContent } from '@/contexts/SiteContentContext';
+import { useContactAction } from '@/hooks/useContactAction';
+import ContactActionModal from '@/components/ui/contact-action-modal';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -96,6 +98,7 @@ const FeatureCards = () => {
     href: (item.href && item.href !== '/') ? item.href : (getCanonicalProjectHref(item.label) || item.href || '/'),
   }));
   const contacts = Array.isArray(rawSidebar.contacts) ? rawSidebar.contacts : defaultSidebar.contacts;
+  const { modalState, closeModal, triggerContact } = useContactAction();
 
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -279,22 +282,28 @@ const FeatureCards = () => {
               </ul>
             </div>
 
-            {contacts.map(({ bg, title, contact, href, queryText }: any) => (
-              <a
-                key={title}
-                href={href}
-                className="block w-full py-4 px-4 rounded-xl text-center transition-all hover:brightness-95 hover:-translate-y-0.5 shadow-md border-b-4 border-black/10"
-                style={{ background: bg }}
-              >
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/60">{queryText}</p>
-                <p className="text-[14px] font-black uppercase tracking-wider text-black leading-tight mt-1">{title}</p>
-                <p className="text-[12px] text-black/80 mt-1.5 font-bold">{contact}</p>
-              </a>
-            ))}
+            {contacts.map(({ bg, title, contact, href, queryText }: any) => {
+              const target = href || contact;
+              return (
+                <button
+                  key={title}
+                  type="button"
+                  onClick={() => triggerContact(target, title)}
+                  className="block w-full py-4 px-4 rounded-xl text-center transition-all hover:brightness-95 hover:-translate-y-0.5 shadow-md border-b-4 border-black/10 cursor-pointer text-left"
+                  style={{ background: bg }}
+                  title={`Contact Campus Mart for ${title}`}
+                >
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/60 text-center">{queryText || 'FOR QUERIES ON'}</p>
+                  <p className="text-[14px] font-black uppercase tracking-wider text-black leading-tight mt-1 text-center">{title}</p>
+                  <p className="text-[12px] text-black/80 mt-1.5 font-bold text-center">{contact}</p>
+                </button>
+              );
+            })}
 
           </div>
         </div>
       </div>
+      <ContactActionModal state={modalState} onClose={closeModal} />
     </section>
   );
 };
