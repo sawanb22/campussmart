@@ -488,18 +488,6 @@ export const pageDefaults: Record<string, any> = {
     { title: 'Startup Incubators', description: 'Business development spaces for student entrepreneurs', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80' },
   ],
 },
-  'innovation-centers': {
-  heroTitle: 'Spaces Built for Breakthrough Thinking',
-  heroSubtitle: 'From first prototype to first pitch, explore the maker spaces, labs and studios that turn a campus innovation centre into somewhere students actually want to build.',
-  cards: [
-    { title: 'Maker & Prototyping Studios', description: 'Tool walls, 3D printers and workbenches where an idea can go from sketch to working prototype in an afternoon.', categories: ['Maker Spaces'], image: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&w=900&q=85' },
-    { title: 'Startup Incubation Bays', description: 'Dedicated desks, mentor hours and seed funding pathways for the student teams ready to turn a project into a company.', categories: ['Incubation'], image: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=900&q=85' },
-    { title: 'Robotics & IoT Labs', description: 'Sensor kits, microcontrollers and open bench space for teams building the next connected-device project.', categories: ['Robotics'], image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=900&q=85' },
-    { title: 'Design Thinking Studios', description: 'Whiteboard walls and modular furniture built for the messy, iterative work of user research and rapid ideation.', categories: ['Design'], image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=900&q=85' },
-    { title: 'Research & Innovation Cells', description: 'Quiet, well-equipped rooms for faculty-led research projects that need more focus than a shared lab allows.', categories: ['Research'], image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=900&q=85' },
-    { title: 'Industry Collaboration Hubs', description: 'Meeting and demo space designed for the site visits, sponsor reviews and industry mentoring that keep projects grounded.', categories: ['Collaboration'], image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=85' },
-  ],
-},
   'innovation': {
   heroTitle: 'Innovation & Startup Programme',
   heroSubtitle: 'A managed platform that takes student ideas from first sketch to a funded, market-ready startup — run on your campus.',
@@ -875,23 +863,8 @@ export const pageDefaults: Record<string, any> = {
     'Equipment Supply',
     'Maintenance'
   ],
-},
-  'sports-infrastructure': {
-  heroTitle: 'Sports Infrastructure',
-  heroSubtitle: 'World-class athletic facilities that nurture champions, wellness and team spirit — built to a competition standard from the ground up.',
-  heroImage: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1100&q=85',
-  ctaTitle: 'Build a Campus That Competes.',
-  ctaSubtitle: 'Tell us about your site and sport priorities — our infrastructure team will scope a facility plan and budget.',
-  ctaButtonLabel: 'Get Project Audit',
-  cards: [
-    { title: 'Basketball & Multi-Court Arenas', description: 'Indoor and outdoor courts built to tournament specification, with proper flooring, lighting and markings.', categories: ['Courts'], image: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=900&q=85' },
-    { title: 'Football & Athletics Grounds', description: 'Full-size pitches and running tracks engineered for drainage, turf health and year-round play.', categories: ['Outdoor'], image: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=900&q=85' },
-    { title: 'Indoor Badminton & Table Tennis Halls', description: 'Climate-controlled indoor halls with sprung flooring, sized for training squads and inter-college matches.', categories: ['Indoor'], image: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?auto=format&fit=crop&w=900&q=85' },
-    { title: 'Swimming Pools & Aquatic Centers', description: 'Filtration-certified pools with lane markings and deck safety built for both training and recreation.', categories: ['Aquatics'], image: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=900&q=85' },
-    { title: 'Kids Play & Recreation Zones', description: 'Safety-certified play equipment and soft-fall surfacing designed for younger students.', categories: ['Kids'], image: 'https://images.unsplash.com/photo-1472162072942-cd5147eb3902?auto=format&fit=crop&w=900&q=85' },
-    { title: 'Equipment Supply & Turf Maintenance', description: 'Ongoing supply of training equipment plus scheduled turf, track and court maintenance programmes.', categories: ['Equipment'], image: 'https://images.unsplash.com/photo-1547347298-4074fc3086f0?auto=format&fit=crop&w=900&q=85' },
-  ],
-},
+  },
+
   'science-tech-labs': {
   heroTitle: 'Labs Built for Real Discovery',
   heroSubtitle: 'Fully equipped science and technology labs designed around the way students actually learn — by testing, measuring and building things themselves.',

@@ -56,7 +56,6 @@ const PageTemplates: Record<string, any> = {
   'furniture-design-supply': lazy(() => import('@/pages/furniture-design-supply')),
   'furniture': lazy(() => import('@/pages/furniture')),
   'innovation-centres': lazy(() => import('@/pages/innovation-centres')),
-  'innovation-centers': lazy(() => import('@/pages/innovation-centers')),
   'innovation': lazy(() => import('@/pages/innovation')),
   'science-tech-labs': lazy(() => import('@/pages/science-tech-labs')),
   'job-openings': lazy(() => import('@/pages/job-openings')),
@@ -80,7 +79,6 @@ const PageTemplates: Record<string, any> = {
   'shop': lazy(() => import('@/pages/shop')),
   'sports-design-execution': lazy(() => import('@/pages/sports-design-execution')),
   'sports-infra': lazy(() => import('@/pages/sports-infra')),
-  'sports-infrastructure': lazy(() => import('@/pages/sports-infrastructure')),
   'tech-infra': lazy(() => import('@/pages/tech-infra')),
   'terms-of-use': lazy(() => import('@/pages/terms-of-use')),
   'ugc-guidelines': lazy(() => import('@/pages/ugc-guidelines')),
@@ -144,6 +142,8 @@ const DynamicPageRoute = () => {
   // Resolve existing template component if specified (with alias normalization)
   const resolvedTemplate = templateId
     ? (PageTemplates[templateId]
+       || (templateId === 'sports-infrastructure' ? PageTemplates['sports-infra'] : null)
+       || (templateId === 'innovation-centers' ? PageTemplates['innovation-centres'] : null)
        || (templateId === 'lab-products' ? PageTemplates['labs'] : null)
        || (templateId === 'library-products' ? PageTemplates['libraries'] : null)
        || (templateId === 'sports-products' ? PageTemplates['sports-infra'] : null)
@@ -173,7 +173,6 @@ const CollaborationDetail = lazy(() => import('@/pages/collaboration-detail'));
 const InnovationDetail = lazy(() => import('@/pages/innovation-detail'));
 const AiMlDetail = lazy(() => import('@/pages/ai-ml-detail'));
 const LibraryManagementDetail = lazy(() => import('@/pages/library-management-detail'));
-const InnovationCentersDetail = lazy(() => import('@/pages/innovation-centers-detail'));
 const InnovationCentresDetail = lazy(() => import('@/pages/innovation-centres-detail'));
 const ScienceTechLabsDetail = lazy(() => import('@/pages/science-tech-labs-detail'));
 const CampusMasterPlanningDetail = lazy(() => import('@/pages/campus-master-planning-detail'));
@@ -183,7 +182,6 @@ const FurnitureDesignSupplyDetail = lazy(() => import('@/pages/furniture-design-
 const CampusDesignExecutionDetail = lazy(() => import('@/pages/campus-design-execution-detail'));
 const AiDigitalDesignSupplyDetail = lazy(() => import('@/pages/ai-digital-design-supply-detail'));
 const CollaborationSpacesDetail = lazy(() => import('@/pages/collaboration-spaces-detail'));
-const SportsInfrastructureDetail = lazy(() => import('@/pages/sports-infrastructure-detail'));
 const AiStationsDetail = lazy(() => import('@/pages/ai-stations-detail'));
 const DigitalTransformationDetail = lazy(() => import('@/pages/digital-transformation-detail'));
 const NewEnvironmentsDetail = lazy(() => import('@/pages/new-environments-detail'));
@@ -215,7 +213,6 @@ function App() {
               <Route path="/innovation/:trackSlug" element={<Layout><InnovationDetail /></Layout>} />
               <Route path="/ai-ml/:moduleSlug" element={<Layout><AiMlDetail /></Layout>} />
               <Route path="/library-management/:moduleSlug" element={<Layout><LibraryManagementDetail /></Layout>} />
-              <Route path="/innovation-centers/:spaceSlug" element={<Layout><InnovationCentersDetail /></Layout>} />
               <Route path="/innovation-centres/:spaceSlug" element={<Layout><InnovationCentresDetail /></Layout>} />
               <Route path="/science-tech-labs/:labSlug" element={<Layout><ScienceTechLabsDetail /></Layout>} />
               <Route path="/campus-master-planning/:serviceSlug" element={<Layout><CampusMasterPlanningDetail /></Layout>} />
@@ -224,7 +221,6 @@ function App() {
               <Route path="/furniture-design-supply/:solutionSlug" element={<Layout><FurnitureDesignSupplyDetail /></Layout>} />
               <Route path="/ai-digital-design-supply/:solutionSlug" element={<Layout><AiDigitalDesignSupplyDetail /></Layout>} />
               <Route path="/collaboration-spaces/:spaceSlug" element={<Layout><CollaborationSpacesDetail /></Layout>} />
-              <Route path="/sports-infrastructure/:facilitySlug" element={<Layout><SportsInfrastructureDetail /></Layout>} />
               <Route path="/ai-stations/:stationSlug" element={<Layout><AiStationsDetail /></Layout>} />
               <Route path="/digital-transformation/:cardSlug" element={<Layout><DigitalTransformationDetail /></Layout>} />
               <Route path="/new-environments/:spaceSlug" element={<Layout><NewEnvironmentsDetail /></Layout>} />
@@ -251,6 +247,10 @@ function App() {
               <Route path="/libraries/products" element={<Navigate to="/libraries" replace />} />
               <Route path="/sports-products" element={<Navigate to="/sports-infra" replace />} />
               <Route path="/sports-infra/products" element={<Navigate to="/sports-infra" replace />} />
+              <Route path="/sports-infrastructure" element={<Navigate to="/sports-infra" replace />} />
+              <Route path="/sports-infrastructure/:facilitySlug" element={<Navigate to="/sports-infra" replace />} />
+              <Route path="/innovation-centers" element={<Navigate to="/innovation-centres" replace />} />
+              <Route path="/innovation-centers/:spaceSlug" element={<Navigate to="/innovation-centres" replace />} />
 
               {/* Static pages explicitly mapped so they always work */}
               {Object.keys(PageTemplates).map((path) => {

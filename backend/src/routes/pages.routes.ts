@@ -99,12 +99,10 @@ router.get('/', verifyToken, requireAdmin, async (_req: AuthRequest, res: Respon
         await ensurePartnerPage();
         await ensureJobOpeningsPage();
         await restorePartnershipIdentity();
-        await ensureSimplePage('innovation-centers', 'Innovation Centers');
         await ensureSimplePage('science-tech-labs', 'Science & Tech Labs');
         await ensureSimplePage('campus-master-planning', 'Campus Master Planning');
         await ensureSimplePage('ar-vr-experiences', 'AR / VR Learning');
         await ensureSimplePage('campus-furniture-design', 'Campus Furniture Design');
-        await ensureSimplePage('sports-infrastructure', 'Sports Infrastructure');
         await ensureSimplePage('collaboration-spaces', 'Collaboration Spaces');
         const pages = await prisma.page.findMany({
             orderBy: { title: 'asc' }

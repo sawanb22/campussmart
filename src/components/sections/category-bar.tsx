@@ -64,7 +64,7 @@ export const DEFAULT_CATEGORIES: CategoryItem[] = [
   { icon: 'Building2', label: 'Libraries', href: '/libraries' },
   { icon: 'Microscope', label: 'Labs', href: '/labs' },
   { icon: 'Users', label: 'Collaboration', href: '/collaboration' },
-  { icon: 'Lightbulb', label: 'Innovation', href: '/innovation' },
+  { icon: 'Lightbulb', label: 'Innovation', href: '/innovation-centres' },
 ];
 
 const CategoryBar = () => {

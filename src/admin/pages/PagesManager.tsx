@@ -21,8 +21,8 @@ const CATEGORY_SLUGS = new Set([
     'smart-classrooms', 'ar-vr-learning',
     'digital-transformation', 'campus-automation', 'assessment-system',
     'library-management', 'new-environments', 'setup-college',
-    'innovation-centres', 'innovation-centers', 'science-tech-labs', 'ai-guide',
-    'campus-master-planning', 'ar-vr-experiences', 'campus-furniture-design', 'sports-infrastructure',
+    'innovation-centres', 'science-tech-labs', 'ai-guide',
+    'campus-master-planning', 'ar-vr-experiences', 'campus-furniture-design',
 ]);
 
 type Group = { label: string; badge: string; badgeColor: string; pages: Page[] };

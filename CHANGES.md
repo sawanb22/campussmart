@@ -1738,6 +1738,29 @@
   - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 8.57s`).
   - Backend Build: `npm run build` (`prisma generate && tsc`) passed with exit code 0.
 
+---
 
-
-
+### [2026-10-06] Group 3: Page Routing & Duplicate Cleanup (Issues #15, #20, #21, #23)
+- **Scope & Objectives**:
+  - Eliminate duplicate sports infrastructure and innovation pages, establish canonical routes, harmonize mismatched service links, and stop backend auto-recreation of duplicate database entries.
+- **Key Changes**:
+  - **Issue #15 (Innovation Navigation Alignment)**:
+    - Updated CategoryBar "Innovation" link in `src/components/sections/category-bar.tsx` to point canonically to `/innovation-centres`.
+  - **Issue #20 (Homepage Service Cards Links)**:
+    - Fixed "Furniture Design+ Supply" link to `/furniture-design-supply` and "Campus Design+ Execution" link to `/campus-design-execution` in `src/components/sections/service-cards.tsx`.
+  - **Issue #21 (Duplicate Sports Infrastructure Route Elimination)**:
+    - Established `/sports-infra` as canonical.
+    - Deleted redundant files: `src/pages/sports-infrastructure.tsx`, `src/pages/sports-infrastructure-detail.tsx`, `src/pages/sports-infrastructure.data.ts`.
+    - Removed `sports-infrastructure` from `src/components/layout/breadcrumb-bar.tsx`, `src/components/sections/feature-cards.tsx`, `src/admin/pages/PagesManager.tsx`, and `src/admin/pageDefaults.ts`.
+    - Removed duplicate database record (ID 104) and disabled auto-recreation in `backend/src/routes/pages.routes.ts`.
+    - Added 301 redirects in `src/App.tsx` (`/sports-infrastructure` & `/sports-infrastructure/:facilitySlug` ➔ `/sports-infra`).
+  - **Issue #23 (Duplicate Innovation Centres/Centers Cleanup)**:
+    - Established `/innovation-centres` as canonical.
+    - Deleted redundant files: `src/pages/innovation-centers.tsx`, `src/pages/innovation-centers-detail.tsx`, `src/pages/innovation-centers.data.ts`.
+    - Removed `innovation-centers` from `src/components/layout/breadcrumb-bar.tsx`, `src/components/sections/feature-cards.tsx`, `src/admin/pages/PagesManager.tsx`, and `src/admin/pageDefaults.ts`.
+    - Removed duplicate database record (ID 99) and removed hardcoded `ensureSimplePage('innovation-centers', ...)` in `backend/src/routes/pages.routes.ts`.
+    - Added 301 redirects in `src/App.tsx` (`/innovation-centers` & `/innovation-centers/:spaceSlug` ➔ `/innovation-centres`).
+- **Validation**:
+  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 8.07s`).
+  - Backend Build: `npm run build` (`prisma generate && tsc`) passed with exit code 0.
+  - Database Query: Verified database contains only `sports-infra` and `innovation-centres`, with zero duplicate entries.

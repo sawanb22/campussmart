@@ -330,10 +330,60 @@ This document tracks all identified application defects, UX friction points, and
 
 ---
 
+### Group 3: Page Routing & Duplicate Cleanup (Issues #15, #20, #21, #23)
+- **Tracking ID**: `GRP-20261006-03`
+- **Category**: Routing, SEO, Navigation Architecture, Content Harmonization
+- **Severity**: High (Impacting user journeys, SEO canonical paths, and creating confusing administrative duplicates)
+- **Status**: ✅ Completed & Verified
+
+#### 1. Issue #15: Innovation Navigation Alignment
+- **Problem**: Header, solutions menu, and CategoryBar pointed to divergent URLs (`/innovation` vs `/innovation-centres`).
+- **Solution**: Standardized CategoryBar "Innovation" link to `/innovation-centres` (`src/components/sections/category-bar.tsx`). All ecosystem navigation now consistently leads to the main Innovation Centres hub.
+
+#### 2. Issue #20: Service Cards Link Mismatches
+- **Problem**: Homepage service cards pointed to wrong destinations:
+  - "Furniture Design+ Supply" card linked to `/campus-design-execution`.
+  - "Campus Design+ Execution" card linked to `/campus-master-planning`.
+- **Solution**: Fixed links in `src/components/sections/service-cards.tsx`:
+  - "Furniture Design+ Supply" ➔ `/furniture-design-supply`
+  - "Campus Design+ Execution" ➔ `/campus-design-execution`
+
+#### 3. Issue #21: Duplicate Sports Infrastructure Route Elimination
+- **Problem**: Competing duplicate pages existed for `/sports-infra` vs `/sports-infrastructure`.
+- **Solution**:
+  - Designated `/sports-infra` as canonical (features interactive quotation audit modal, category filtering, and wishlist integration).
+  - Deleted duplicate files: `src/pages/sports-infrastructure.tsx`, `src/pages/sports-infrastructure-detail.tsx`, `src/pages/sports-infrastructure.data.ts`.
+  - Cleaned up `src/components/sections/feature-cards.tsx`, `src/components/layout/breadcrumb-bar.tsx`, and `src/admin/pages/PagesManager.tsx`.
+  - Removed duplicate DB record (ID 104) and stopped auto-recreation in `backend/src/routes/pages.routes.ts`.
+  - Removed template defaults in `src/admin/pageDefaults.ts`.
+  - Added seamless 301 redirects in `src/App.tsx`:
+    - `/sports-infrastructure` ➔ `/sports-infra`
+    - `/sports-infrastructure/:facilitySlug` ➔ `/sports-infra`
+
+#### 4. Issue #23: Duplicate Innovation Centres/Centers (UK vs US Spelling)
+- **Problem**: Competing duplicate pages and admin entries existed for `/innovation-centres` (UK) vs `/innovation-centers` (US).
+- **Solution**:
+  - Designated `/innovation-centres` as canonical (matching Indian institutional convention).
+  - Deleted duplicate files: `src/pages/innovation-centers.tsx`, `src/pages/innovation-centers-detail.tsx`, `src/pages/innovation-centers.data.ts`.
+  - Cleaned up `src/components/sections/feature-cards.tsx`, `src/components/layout/breadcrumb-bar.tsx`, and `src/admin/pages/PagesManager.tsx`.
+  - Removed duplicate DB record (ID 99) and removed hardcoded `ensureSimplePage('innovation-centers', ...)` in `backend/src/routes/pages.routes.ts`.
+  - Removed template defaults in `src/admin/pageDefaults.ts`.
+  - Added seamless 301 redirects in `src/App.tsx`:
+    - `/innovation-centers` ➔ `/innovation-centres`
+    - `/innovation-centers/:spaceSlug` ➔ `/innovation-centres`
+
+#### 5. Verification
+- Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 8.07s`).
+- Backend Build: `npm run build` (`prisma generate && tsc`) passed with exit code 0.
+- Database Verification: Verified database contains only canonical records (`sports-infra`, `innovation-centres`). Zero duplicate records present.
+
+---
+
 ### Deferred Issues
 *(Shifted to end per user instruction)*
 - **Issue #2**: Masonry Cards Gradient (White/Blue instead of Black)
 - **Issue #8**: Explanation & guidance on how Admin Categories connect to store pages
 - **Issue #9**: Quick search for subpages (e.g. "Group Study") in Admin Pages Manager
+
 
 
