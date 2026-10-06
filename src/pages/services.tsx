@@ -5,6 +5,7 @@ import { LayoutGrid, Ruler, Trophy, Cpu } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePageData } from '@/hooks/usePageData';
 import { MediaImage } from '@/components/ui/media-image';
+import { PageCardGridSkeleton } from '@/components/ui/page-skeleton';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -41,7 +42,7 @@ const DEFAULTS = {
 
 const Services = () => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const { data } = usePageData('services');
+    const { data, loading } = usePageData('services');
 
     const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
     const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
@@ -75,6 +76,10 @@ const Services = () => {
         }, containerRef);
         return () => ctx.revert();
     }, [cardList]);
+
+    if (loading && !data.cards) {
+        return <PageCardGridSkeleton cardCount={4} />;
+    }
 
     return (
         <main className="min-h-screen pt-8 sm:pt-12 pb-10 sm:pb-12 bg-slate-50/60">

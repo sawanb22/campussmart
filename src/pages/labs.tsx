@@ -6,6 +6,7 @@ import { usePageData } from '@/hooks/usePageData';
 import { useDesignWishlist } from '@/hooks/useDesignWishlist';
 import LoginPromptModal from '@/components/login-prompt-modal';
 import { MediaImage } from '@/components/ui/media-image';
+import { PageCardGridSkeleton } from '@/components/ui/page-skeleton';
 
 interface Card { title: string; description: string; image?: string; name?: string; categories?: string[]; href?: string; slug?: string; }
 
@@ -42,7 +43,7 @@ export const LABS_DEFAULTS = {
 const Labs = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
-  const { data } = usePageData('labs');
+  const { data, loading } = usePageData('labs');
   const { isSaved, isPending, add, remove, showLoginPrompt, setShowLoginPrompt } = useDesignWishlist('labs');
   const [selectedCategory, setSelectedCategory] = useState('');
 
@@ -101,6 +102,10 @@ const Labs = () => {
 
   const cardLink = (card: Card) =>
     card.href?.trim() || `/${LABS_PAGE_SLUG}/${card.slug?.trim() || slugifyLabTitle(card.title)}`;
+
+  if (loading && !data.cards) {
+    return <PageCardGridSkeleton cardCount={4} />;
+  }
 
   return (
     <main className="min-h-screen bg-white">

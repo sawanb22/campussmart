@@ -5,13 +5,14 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import MediaImage from '@/components/ui/media-image';
+import { PageCardGridSkeleton } from '@/components/ui/page-skeleton';
 import { COLLAB_PAGE_SLUG, COLLAB_DEFAULTS, slugifyCollabTitle } from './collaboration.data';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Collaboration = () => {
   const cardsRef = useRef<HTMLDivElement>(null);
-  const { data } = usePageData(COLLAB_PAGE_SLUG);
+  const { data, loading } = usePageData(COLLAB_PAGE_SLUG);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -29,6 +30,10 @@ const Collaboration = () => {
 
   const cards = Array.isArray(data.cards) ? data.cards : COLLAB_DEFAULTS.cards;
   const cardLink = (card: any) => card.href?.trim() || `/${COLLAB_PAGE_SLUG}/${slugifyCollabTitle(card.title)}`;
+
+  if (loading && !data.cards) {
+    return <PageCardGridSkeleton cardCount={4} />;
+  }
 
   return (
     <main className="min-h-screen bg-white">

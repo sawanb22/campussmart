@@ -6,6 +6,7 @@ import { usePageData } from '@/hooks/usePageData';
 import { useDesignWishlist } from '@/hooks/useDesignWishlist';
 import LoginPromptModal from '@/components/login-prompt-modal';
 import { MediaImage } from '@/components/ui/media-image';
+import { PageCardGridSkeleton } from '@/components/ui/page-skeleton';
 
 interface CardItem { title: string; description: string; image?: string; categories?: string[]; href?: string; slug?: string; }
 
@@ -37,7 +38,7 @@ export const TECH_INFRA_DEFAULTS = {
 const TechInfra = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
-  const { data } = usePageData('tech-infra');
+  const { data, loading } = usePageData('tech-infra');
   const { isSaved, isPending, add, remove, showLoginPrompt, setShowLoginPrompt } = useDesignWishlist('tech-infra');
   const [selectedCategory, setSelectedCategory] = useState('');
 
@@ -94,6 +95,10 @@ const TechInfra = () => {
 
   const cardLink = (card: CardItem) =>
     card.href?.trim() || `/${TECH_INFRA_PAGE_SLUG}/${card.slug?.trim() || slugifyTechInfraTitle(card.title)}`;
+
+  if (loading && !data.cards) {
+    return <PageCardGridSkeleton cardCount={4} />;
+  }
 
   return (
     <main className="min-h-screen bg-white">

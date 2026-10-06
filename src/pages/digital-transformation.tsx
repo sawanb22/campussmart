@@ -196,19 +196,6 @@ const DigitalTransformation = () => {
         </div>
       </section>
 
-      {/* Hardware & Product Solutions Link */}
-      <section className="bg-slate-50 border-y border-slate-200/80 px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl flex flex-col md:flex-row items-center justify-between gap-4">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-cm-blue">Catalog Equipment</span>
-            <h3 className="text-xl font-bold text-cm-blue-dark">Explore Digital Hardware & Infrastructure Products</h3>
-            <p className="text-sm text-gray-500 mt-1">Interactive displays, server racks, Wi-Fi 6 access points, and digital consoles available in our store.</p>
-          </div>
-          <Link to="/tech-infra/products" className="btn-primary shrink-0 inline-flex items-center gap-2">
-            View Tech Products <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </section>
 
       {/* CTA */}
       <section className="bg-cm-blue px-4 py-6 text-center sm:px-6 sm:py-8 lg:px-8">

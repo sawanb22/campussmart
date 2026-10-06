@@ -229,17 +229,22 @@ This document tracks all identified application defects, UX friction points, and
 
 ---
 
-### Issues #14 & #16: Digital Transformation & Innovation Centres Product Discovery
+### Issues #14 & #16: Digital Transformation & Innovation Centres / Tech Pages Cleanup
 - **Tracking ID**: `ISS-20261006-14` & `ISS-20261006-16` (`SYNC-001`)
-- **Category**: Catalog / CMS Discovery
+- **Category**: Catalog / Routing Cleanup
 - **Severity**: Low
 - **Status**: ✅ Completed & Verified
 
-#### 1. Problem Description & Root Cause
-- Digital Transformation and Innovation Centres were purely CMS showcase pages without equipment discovery links, confusing users who added products in Admin and expected catalog connectivity.
+#### 1. Problem Description & User Feedback
+- User confirmed that `/tech-infra` (canonical Technology Solutions page) already comprehensively presents all technology solutions and solution cards.
+- The legacy separate page `/tech-infra/products` was redundant, unwanted, and caused confusion.
+- Additional discovery banners on showcase pages were reverted per preference to keep pages clean and focused.
 
 #### 2. Technical Solution
-- Added responsive equipment discovery banners on `/digital-transformation` (linking to `/tech-infra/products`) and `/innovation-centres` (linking to `/ai-ml/products`).
+- Completely removed legacy storefront wrapper `src/pages/tech-infra-products.tsx`.
+- Removed route mapping from `PageTemplates` in `src/App.tsx`.
+- Added seamless redirect `<Route path="/tech-infra/products" element={<Navigate to="/tech-infra" replace />} />` ensuring all visitors land directly on the canonical `/tech-infra` page.
+- Reverted injected catalog banners on `/digital-transformation` and `/innovation-centres`.
 
 ---
 

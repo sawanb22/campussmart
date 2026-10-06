@@ -4,6 +4,7 @@ import { ArrowRight, CheckCircle, Send, Sparkles } from 'lucide-react';
 import api from '@/api/client';
 import { usePageData } from '@/hooks/usePageData';
 import { MediaImage } from '@/components/ui/media-image';
+import { PageCardGridSkeleton } from '@/components/ui/page-skeleton';
 
 interface CardItem { title: string; description: string; image?: string; href?: string; }
 
@@ -45,7 +46,7 @@ const DEFAULTS = {
 };
 
 const SmartClassrooms = () => {
-  const { data } = usePageData('smart-classrooms');
+  const { data, loading } = usePageData('smart-classrooms');
 
   const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
   const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
@@ -73,6 +74,10 @@ const SmartClassrooms = () => {
       setSubmitting(false);
     }
   };
+
+  if (loading && !data.cards) {
+    return <PageCardGridSkeleton cardCount={5} />;
+  }
 
   return (
     <main className="min-h-screen bg-white">

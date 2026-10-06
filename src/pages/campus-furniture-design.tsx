@@ -5,13 +5,14 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { resolveMediaUrl } from '@/lib/media-url';
+import { PageCardGridSkeleton } from '@/components/ui/page-skeleton';
 import { FURNITURE_DESIGN_PAGE_SLUG, FURNITURE_DESIGN_DEFAULTS, slugifyFurnitureDesignTitle, type FurnitureDesignCard } from './campus-furniture-design.data';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const CampusFurnitureDesign = () => {
   const gridRef = useRef<HTMLDivElement>(null);
-  const { data } = usePageData(FURNITURE_DESIGN_PAGE_SLUG);
+  const { data, loading } = usePageData(FURNITURE_DESIGN_PAGE_SLUG);
   const [activeCategory, setActiveCategory] = useState('All');
 
   useEffect(() => {
@@ -42,6 +43,10 @@ const CampusFurnitureDesign = () => {
   const [featured, ...rest] = filteredCards;
   const cardLink = (card: FurnitureDesignCard) =>
     card.href?.trim() || `/${FURNITURE_DESIGN_PAGE_SLUG}/${slugifyFurnitureDesignTitle(card.title)}`;
+
+  if (loading && !data.cards) {
+    return <PageCardGridSkeleton cardCount={4} />;
+  }
 
   return (
     <main className="min-h-screen bg-white">

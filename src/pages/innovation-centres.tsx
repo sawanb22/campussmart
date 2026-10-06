@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { Link } from 'react-router-dom';
-import { Lightbulb, Zap, Users, Target, ArrowRight } from 'lucide-react';
+import { Lightbulb, Zap, Users, Target } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { MediaImage } from '@/components/ui/media-image';
+import { PageCardGridSkeleton } from '@/components/ui/page-skeleton';
 import {
   INNOVATION_CENTRES_PAGE_SLUG,
   INNOVATION_CENTRES_DEFAULTS,
@@ -15,7 +16,7 @@ const ICONS = [Lightbulb, Zap, Users, Target];
 
 const InnovationCentres = () => {
   const cardsRef = useRef<HTMLDivElement>(null);
-  const { data } = usePageData(INNOVATION_CENTRES_PAGE_SLUG);
+  const { data, loading } = usePageData(INNOVATION_CENTRES_PAGE_SLUG);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -43,6 +44,10 @@ const InnovationCentres = () => {
 
   const cardLink = (card: InnovationCentresCard) =>
     card.href?.trim() || `/${INNOVATION_CENTRES_PAGE_SLUG}/${card.slug?.trim() || slugifyInnovationCentreTitle(card.title)}`;
+
+  if (loading && !data.cards) {
+    return <PageCardGridSkeleton cardCount={4} />;
+  }
 
   return (
     <main className="min-h-screen bg-white">
@@ -90,19 +95,6 @@ const InnovationCentres = () => {
         </div>
       </section>
 
-      {/* Product Discovery Shelf Link */}
-      <section className="bg-slate-50 border-t border-slate-200/80 px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl flex flex-col md:flex-row items-center justify-between gap-4">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-cm-blue">Maker & AI Equipment</span>
-            <h3 className="text-xl font-bold text-cm-blue-dark">Explore AI Stations & Innovation Lab Equipment</h3>
-            <p className="text-sm text-gray-500 mt-1">Robotics kits, makerspace tables, and smart sensor modules in our product store.</p>
-          </div>
-          <Link to="/ai-ml/products" className="btn-primary shrink-0 inline-flex items-center gap-2">
-            View AI Products <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </section>
 
       {/* Trust Quote */}
       <section className="py-10 bg-slate-50 text-slate-800 rounded-[2rem] mx-3 sm:mx-6 lg:mx-8 mb-10 border border-slate-200 shadow-sm text-center">

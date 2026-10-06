@@ -89,7 +89,6 @@ const PageTemplates: Record<string, any> = {
   'sports-products': lazy(() => import('@/pages/sports-products')),
   'sports-infra/products': lazy(() => import('@/pages/sports-products')),
   'tech-infra': lazy(() => import('@/pages/tech-infra')),
-  'tech-infra/products': lazy(() => import('@/pages/tech-infra-products')),
   'terms-of-use': lazy(() => import('@/pages/terms-of-use')),
   'ugc-guidelines': lazy(() => import('@/pages/ugc-guidelines')),
   'services': lazy(() => import('@/pages/services')),
@@ -155,7 +154,7 @@ const DynamicPageRoute = () => {
        || (templateId === 'lab-products' ? PageTemplates['labs/products'] : null)
        || (templateId === 'library-products' ? PageTemplates['libraries/products'] : null)
        || (templateId === 'sports-products' ? PageTemplates['sports-infra/products'] : null)
-       || (templateId === 'tech-infra-products' ? PageTemplates['tech-infra/products'] : null)
+       || (templateId === 'tech-infra-products' ? PageTemplates['tech-infra'] : null)
        || (templateId === 'home' || slug === 'home' ? Home : null))
     : null;
 
@@ -251,6 +250,7 @@ function App() {
               <Route path="/wishlist" element={<Navigate to="/my-account?tab=wishlist" replace />} />
               <Route path="/cart" element={<Navigate to="/my-account?tab=wishlist" replace />} />
               <Route path="/corporate" element={<Navigate to="/about-us" replace />} />
+              <Route path="/tech-infra/products" element={<Navigate to="/tech-infra" replace />} />
 
               {/* Static pages explicitly mapped so they always work */}
               {Object.keys(PageTemplates).map((path) => {

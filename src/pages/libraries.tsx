@@ -6,6 +6,7 @@ import { usePageData } from '@/hooks/usePageData';
 import { useDesignWishlist } from '@/hooks/useDesignWishlist';
 import LoginPromptModal from '@/components/login-prompt-modal';
 import { MediaImage } from '@/components/ui/media-image';
+import { PageCardGridSkeleton } from '@/components/ui/page-skeleton';
 
 interface CardItem { title: string; description: string; image?: string; categories?: string[]; href?: string; slug?: string; }
 
@@ -41,7 +42,7 @@ export const LIBRARIES_DEFAULTS = {
 const Libraries = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
-  const { data } = usePageData('libraries');
+  const { data, loading } = usePageData('libraries');
   const { isSaved, isPending, add, remove, showLoginPrompt, setShowLoginPrompt } = useDesignWishlist('libraries');
   const [selectedCategory, setSelectedCategory] = useState('');
 
@@ -100,6 +101,10 @@ const Libraries = () => {
 
   const cardLink = (card: CardItem) =>
     card.href?.trim() || `/${LIBRARIES_PAGE_SLUG}/${card.slug?.trim() || slugifyLibraryTitle(card.title)}`;
+
+  if (loading && !data.cards) {
+    return <PageCardGridSkeleton cardCount={4} />;
+  }
 
   return (
     <main className="min-h-screen bg-white">

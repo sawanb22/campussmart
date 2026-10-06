@@ -1647,12 +1647,22 @@
     - Updated `src/pages/shop.tsx` with a defensive category fallback when `hideAllCategoriesOption` is enabled: if `selectedCategory` does not exist in loaded categories, it automatically defaults to `categories[0].slug` instead of querying an unmapped slug that yields 0 products.
   - **Media URL Resilience (Issue #17)**:
     - In `src/components/sections/feature-cards.tsx`, wrapped feature card background images in `resolveMediaUrl(image)` with typed `onError` fallbacks. Uploaded images (like custom Smart Classrooms images) now resolve cleanly to the backend rather than staying broken.
-  - **CMS Catalog Equipment Discovery (Issues #14 & #16)**:
-    - Added responsive catalog discovery banners on `/digital-transformation` (linking to `/tech-infra/products`) and `/innovation-centres` (linking to `/ai-ml/products`) so products are directly accessible.
+### `CLEANUP-002` | 2026-10-06 15:25 | Removal of Redundant Tech Infra Products Page & Canonical Route Harmonization
+- **Files Affected**:
+  - `[DELETE] src/pages/tech-infra-products.tsx`
+  - `[MODIFY] src/App.tsx`
+  - `[MODIFY] src/pages/digital-transformation.tsx`
+  - `[MODIFY] src/pages/innovation-centres.tsx`
+  - `[MODIFY] ISSUES_TRACKER_2026-10-06.md`
+- **Description & Rationale (under SOLID Principles)**:
+  - **Single Source of Truth & Route Simplification**:
+    - The canonical Technology Solutions page `/tech-infra` already provides an interactive, full-featured presentation with category tabs and solution cards.
+    - Legacy route `/tech-infra/products` (and `src/pages/tech-infra-products.tsx`) was an older redundant wrapper that created confusion.
+    - Completely deleted `src/pages/tech-infra-products.tsx` and removed its mapping from `PageTemplates`.
+    - Added an automatic route redirect `<Route path="/tech-infra/products" element={<Navigate to="/tech-infra" replace />} />` so any existing bookmarks or links smoothly land on the canonical `/tech-infra` page.
+    - Removed added discovery banners from `/digital-transformation` and `/innovation-centres` to keep showcase pages clean.
 - **Validation**:
-  - Prisma Migration: `npx ts-node backend/scripts/normalize-categories-group1.ts` executed with 0 errors. Verified all category counts.
-  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 8.60s`).
-  - Backend Build: `npm run build` (`prisma generate && tsc`) passed with exit code 0.
+  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 14.94s`).
 
 
 
