@@ -56,6 +56,7 @@
 | `AUTH-003` | 2026-10-06 12:15 | Authentication & Security | Standardized unified login portal (/login), deprecated /admin/login with bridge redirect, added mobile keyboard defenses & input trimming, implemented open redirect defense, added RBAC 403 Access Denied view to prevent infinite loops, implemented backend defensive whitespace trimming without database password resets, and enforced bidirectional session atomicity. | 9 files (frontend, admin, backend) | Completed |
 | `UX-012` | 2026-10-06 13:12 | Homepage & Cross-Platform Contact | Smart Contact Actions with Gmail Web, WhatsApp, and Desktop Dial Fallback (Issue #12) under SOLID principles. Fixed silent failures on tester machines lacking Outlook or telephony clients. | 8 files (frontend & test) | Completed |
 | `BLOG-001` | 2026-10-06 13:42 | Blog & Navigation | Removed "Showing [X] All articles" sidebar widget (Issue #5), removed artificial "All" category option, defaulted to 1st database category with URL sync (?category=slug), and decoupled static category fetching under SOLID principles. | 2 files (frontend, tracker) | Completed |
+| `SYNC-001` | 2026-10-06 14:35 | Homepage & Product Catalog Sync | Merged duplicate Sports category (ID 51 -> 3), reassigned Technology to Tech Infra, added Furniture subcategories (chairs, desks, storage), seeded AI/ML categories, added defensive shop category fallback, wrapped feature-cards in resolveMediaUrl(), and linked catalog equipment on Digital Transformation & Innovation Centres (Group 1: Issues #10, #14, #16, #17, #18). | 6 files (frontend, backend, DB) | Completed |
 
 ---
 
@@ -1625,5 +1626,33 @@
 - **Validation**:
   - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 7.73s`).
   - Bundle size for `blog-*.js` decreased from 7.30 kB to 6.92 kB.
+
+---
+
+### `SYNC-001` | 2026-10-06 14:35 | Homepage & Product Catalog Sync | Group 1 Resolutions (Issues #10, #14, #16, #17, #18)
+- **Files Affected**:
+  - `[CREATE] backend/scripts/normalize-categories-group1.ts`
+  - `[MODIFY] src/pages/shop.tsx`
+  - `[MODIFY] src/components/sections/feature-cards.tsx`
+  - `[MODIFY] src/pages/digital-transformation.tsx`
+  - `[MODIFY] src/pages/innovation-centres.tsx`
+  - `[MODIFY] ISSUES_TRACKER_2026-10-06.md`
+- **Description & Rationale (under SOLID Principles)**:
+  - **Single Responsibility Principle (SRP) & Database Hygiene (Issue #10)**:
+    - Merged duplicate Sports category (reassigned `volley ball 2` from category ID 51 to category ID 3; safely deleted ID 51).
+    - Fixed misplaced Technology category (reassigned category ID 4 from `furniture` to `tech-infra`).
+    - Seeded active AI/ML categories (`ai-robotics`, `vision-labs`) so AI/ML catalog pages are no longer empty.
+  - **Interface Segregation & Defensive Fallback (Issue #18)**:
+    - Added furniture subcategories (`chairs`, `desks`, `storage`) and distributed 6 products across them.
+    - Updated `src/pages/shop.tsx` with a defensive category fallback when `hideAllCategoriesOption` is enabled: if `selectedCategory` does not exist in loaded categories, it automatically defaults to `categories[0].slug` instead of querying an unmapped slug that yields 0 products.
+  - **Media URL Resilience (Issue #17)**:
+    - In `src/components/sections/feature-cards.tsx`, wrapped feature card background images in `resolveMediaUrl(image)` with typed `onError` fallbacks. Uploaded images (like custom Smart Classrooms images) now resolve cleanly to the backend rather than staying broken.
+  - **CMS Catalog Equipment Discovery (Issues #14 & #16)**:
+    - Added responsive catalog discovery banners on `/digital-transformation` (linking to `/tech-infra/products`) and `/innovation-centres` (linking to `/ai-ml/products`) so products are directly accessible.
+- **Validation**:
+  - Prisma Migration: `npx ts-node backend/scripts/normalize-categories-group1.ts` executed with 0 errors. Verified all category counts.
+  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 8.60s`).
+  - Backend Build: `npm run build` (`prisma generate && tsc`) passed with exit code 0.
+
 
 

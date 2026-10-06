@@ -86,6 +86,19 @@ const Shop = ({
     if (categorySlug) setSelectedCategory(categorySlug);
   }, [categorySlug]);
 
+  useEffect(() => {
+    if (!categoriesLoaded || categories.length === 0) return;
+    if (hideAllCategoriesOption) {
+      const isCurrentValid = categories.some((c) => c.slug.toLowerCase() === selectedCategory.toLowerCase());
+      if (!isCurrentValid || selectedCategory === 'all') {
+        const preferred = defaultCategorySlug && categories.some((c) => c.slug.toLowerCase() === defaultCategorySlug.toLowerCase())
+          ? defaultCategorySlug
+          : categories[0].slug;
+        setSelectedCategory(preferred);
+      }
+    }
+  }, [categoriesLoaded, categories, hideAllCategoriesOption, selectedCategory, defaultCategorySlug]);
+
   const handleToggleWishlist = async (product: Product) => {
     if (isInWishlist(product.id)) {
       const res = await removeProduct(product.id);
@@ -166,7 +179,7 @@ const Shop = ({
     if (inStockOnly) params.inStock = 'true';
 
     const activeCategory = categoryPage && selectedCategory !== 'all' && !categories.some((c) => c.slug.toLowerCase() === selectedCategory.toLowerCase())
-      ? 'all'
+      ? (hideAllCategoriesOption && categories.length > 0 ? categories[0].slug : 'all')
       : selectedCategory;
 
     if (categorySlug) params.category = categorySlug;

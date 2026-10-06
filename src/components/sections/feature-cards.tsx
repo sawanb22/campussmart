@@ -6,6 +6,7 @@ import { FileText, MoveUpRight } from 'lucide-react';
 import { useSiteContent } from '@/contexts/SiteContentContext';
 import { useContactAction } from '@/hooks/useContactAction';
 import ContactActionModal from '@/components/ui/contact-action-modal';
+import { resolveMediaUrl } from '@/lib/media-url';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -163,8 +164,15 @@ const FeatureCards = () => {
                     >
                     {/* Background image */}
                     <img
-                      src={image}
+                      src={resolveMediaUrl(image) || ''}
                       alt={title}
+                      onError={(e) => {
+                        const fallback = defaultFeatures.find((f) => f.title === title)?.image || '';
+                        const target = e.currentTarget;
+                        if (target.src !== fallback) {
+                          target.src = fallback;
+                        }
+                      }}
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                     />
 

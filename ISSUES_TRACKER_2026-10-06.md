@@ -19,7 +19,13 @@ This document tracks all identified application defects, UX friction points, and
 | **ISS-03** | Blog Changes Visible Verification | Content / CMS Sync | Medium | ✅ Verified Working (User Confirmed) | – |
 | **ISS-04** | Blog Category "All" Removal & Default to 1st Category | Blog / Navigation | Low | ✅ Completed | Immediate (`BLOG-001`) |
 | **ISS-05** | Remove "Showing [X] All articles" Blog Sidebar Widget | Blog / UI Layout | Low | ✅ Completed | Immediate (`BLOG-001`) |
-| **ISS-02** | Masonry Cards Gradient (White/Blue instead of Black) | Frontend UI / Styling | Low | ⏳ Ready for Implementation | Next |
+| **ISS-06** | Campus Design Inner Pages Article Navigation | CMS / Routing | Low | ✅ Completed (Verified Working) | – |
+| **ISS-10** | Duplicate Sports Category & Empty AI/ML / Tech Infra | Catalog / Database | Medium | ✅ Completed | Immediate (`SYNC-001`) |
+| **ISS-14** | Digital Transformation Product Discovery | Catalog / CMS Sync | Low | ✅ Completed | Immediate (`SYNC-001`) |
+| **ISS-16** | Innovation Centres Product Discovery | Catalog / CMS Sync | Low | ✅ Completed | Immediate (`SYNC-001`) |
+| **ISS-17** | Smart Classrooms Homepage Image Resolution | Frontend / Media URL | Low | ✅ Completed | Immediate (`SYNC-001`) |
+| **ISS-18** | Furniture Category Products Loading & Subcategories | Store / Catalog | Medium | ✅ Completed | Immediate (`SYNC-001`) |
+| **ISS-02** | Masonry Cards Gradient (White/Blue instead of Black) | Frontend UI / Styling | Low | ⏳ Deferred to End | End |
 
 ---
 
@@ -174,12 +180,73 @@ This document tracks all identified application defects, UX friction points, and
 
 ---
 
-### Upcoming Issues
-*(Placeholders for next problems provided by the user)*
+### Issue #10: Duplicate Sports Category & Empty AI/ML / Tech Infra
+- **Tracking ID**: `ISS-20261006-10` (`SYNC-001`)
+- **Category**: Catalog / Database Architecture
+- **Severity**: Medium
+- **Status**: ✅ Completed & Verified (Prisma Normalization Run & Clean Build)
 
-### Issue #2: Masonry Cards Gradient (White/Blue instead of Black)
-- **Tracking ID**: `ISS-20261006-02`
-- **Category**: Frontend UI / Styling
-- **Severity**: Low / Cosmetic
-- **Status**: ⏳ Ready for Implementation
+#### 1. Problem Description & Root Cause
+- In the PostgreSQL database, two separate Sports categories existed: ID 3 (`Sports`, slug: `sports`) and ID 51 (`sports`, slug: `sports-infra`).
+- Category `"Technology"` (ID 4) had its `page` misconfigured as `'furniture'` instead of `'tech-infra'`, causing Tech Infrastructure to appear completely empty of categories and products.
+- Page `'ai-ml'` had zero categories defined.
+
+#### 2. Architecture & Technical Solution (under SOLID Principles)
+- Reassigned `volley ball 2` from category 51 to canonical category 3 and deleted duplicate category 51.
+- Updated category 4 (`Technology Infrastructure`) page mapping from `furniture` to `tech-infra`.
+- Seeded base categories for AI/ML: `AI & Robotics Kits` (slug: `ai-robotics`) and `Vision & Language Labs` (slug: `vision-labs`).
+
+---
+
+### Issue #18: Furniture Category Products Loading & Subcategories
+- **Tracking ID**: `ISS-20261006-18` (`SYNC-001`)
+- **Category**: Store / Catalog
+- **Severity**: Medium
+- **Status**: ✅ Completed & Verified
+
+#### 1. Problem Description & Root Cause
+- `/furniture` was configured with `defaultCategorySlug="chairs"`, but the database only contained a single generic category `furniture`, with no category named `chairs`. This caused `/furniture` to request `category=chairs`, resulting in 0 matches and an empty store state.
+
+#### 2. Architecture & Technical Solution
+- Seeded distinct furniture subcategories: `Chairs & Seating` (slug: `chairs`), `Desks & Tables` (slug: `desks`), and `Storage & Fixtures` (slug: `storage`).
+- Reassigned existing furniture products across chairs, desks, and storage.
+- Added defensive fallback in `src/pages/shop.tsx`: if `hideAllCategoriesOption` is enabled and `selectedCategory` is not in the loaded categories, it automatically defaults to `categories[0].slug` instead of querying an unmapped category.
+
+---
+
+### Issue #17: Smart Classrooms Homepage Image Resolution
+- **Tracking ID**: `ISS-20261006-17` (`SYNC-001`)
+- **Category**: Frontend / Media Resilience
+- **Severity**: Low
+- **Status**: ✅ Completed & Verified
+
+#### 1. Problem Description & Root Cause
+- In `src/components/sections/feature-cards.tsx`, feature card images rendered raw `<img src={image}>` without `resolveMediaUrl(image)`.
+- When custom media was uploaded in Admin (`/uploads/media/...`), relative URLs failed to resolve to backend hosts and showed broken/empty images.
+
+#### 2. Technical Solution
+- Wrapped feature card image sources in `resolveMediaUrl(image)` with typed `onError` fallbacks defaulting to `defaultFeatures`.
+
+---
+
+### Issues #14 & #16: Digital Transformation & Innovation Centres Product Discovery
+- **Tracking ID**: `ISS-20261006-14` & `ISS-20261006-16` (`SYNC-001`)
+- **Category**: Catalog / CMS Discovery
+- **Severity**: Low
+- **Status**: ✅ Completed & Verified
+
+#### 1. Problem Description & Root Cause
+- Digital Transformation and Innovation Centres were purely CMS showcase pages without equipment discovery links, confusing users who added products in Admin and expected catalog connectivity.
+
+#### 2. Technical Solution
+- Added responsive equipment discovery banners on `/digital-transformation` (linking to `/tech-infra/products`) and `/innovation-centres` (linking to `/ai-ml/products`).
+
+---
+
+### Deferred Issues
+*(Shifted to end per user instruction)*
+- **Issue #2**: Masonry Cards Gradient (White/Blue instead of Black)
+- **Issue #8**: Explanation & guidance on how Admin Categories connect to store pages
+- **Issue #9**: Quick search for subpages (e.g. "Group Study") in Admin Pages Manager
+
 

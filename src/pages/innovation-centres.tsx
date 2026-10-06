@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { Link } from 'react-router-dom';
-import { Lightbulb, Zap, Users, Target } from 'lucide-react';
+import { Lightbulb, Zap, Users, Target, ArrowRight } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { MediaImage } from '@/components/ui/media-image';
 import {
@@ -87,6 +87,20 @@ const InnovationCentres = () => {
               );
             })}
           </div>
+        </div>
+      </section>
+
+      {/* Product Discovery Shelf Link */}
+      <section className="bg-slate-50 border-t border-slate-200/80 px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-cm-blue">Maker & AI Equipment</span>
+            <h3 className="text-xl font-bold text-cm-blue-dark">Explore AI Stations & Innovation Lab Equipment</h3>
+            <p className="text-sm text-gray-500 mt-1">Robotics kits, makerspace tables, and smart sensor modules in our product store.</p>
+          </div>
+          <Link to="/ai-ml/products" className="btn-primary shrink-0 inline-flex items-center gap-2">
+            View AI Products <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </section>
 
