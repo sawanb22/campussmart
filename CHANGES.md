@@ -60,6 +60,8 @@
 | `CLEANUP-002` | 2026-10-06 15:25 | Tech Infra Routing Cleanup | Removed redundant /tech-infra/products page, added canonical redirect to /tech-infra, and reverted discovery banners on showcase pages. | 5 files (frontend) | Completed |
 | `MEDIA-002` | 2026-10-06 15:45 | Media Resilience & Category Flicker Guards | Standardized internal media assets (synced 74 files to public/uploads/media), updated media-url resolver for 0ms CDN serving, created PageCardGridSkeleton to eliminate page load flicker across 11 category routes, repaired Render PostgreSQL ai-ml record (enforcing 2-card SSOT & category chips), and purged external Unsplash fallbacks. | 16 files (frontend, DB, config) | Completed |
 | `HERO-001` | 2026-10-06 17:40 | Homepage Hero Banner | Replaced floating blurred dark card container with seamless left-to-right deep blue gradient overlay matching design reference. | `src/components/sections/hero-banner.tsx` | Completed |
+| `FINAL-001` | 2026-10-06 18:35 | UI Polish & Admin Search / Guidance | Replaced homepage masonry black gradients with deep blue/white gradients (Issue #2), added interactive category guidance banner and 1-click live page test links in Admin Categories (Issue #8), and implemented subpage & card deep search with hierarchy filter chips in Admin Pages Manager (Issue #9). | 3 files (frontend & admin) | Completed |
+
 
 ---
 
@@ -1804,5 +1806,28 @@
     - Tuned vertical padding (`py-8 sm:py-12 md:py-14`), horizontal padding (`px-4 sm:px-6 lg:px-10`), and CTA button borders/hover styles.
 - **Validation**:
   - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 8.37s`).
+
+---
+
+### [2026-10-06] UI Polish & Admin Discovery / Guidance (Issues #2, #8, #9)
+- **Scope & Objectives**:
+  - Transform homepage masonry card overlays from dark black to branded deep blue/white gradients (Issue #2).
+  - Provide in-app architecture guidance and 1-click live storefront verification links in Admin Categories (Issue #8).
+  - Implement deep subpage/card search and hierarchy filter chips in Admin Pages Manager (Issue #9).
+  - (Issue #7 skipped per explicit user instruction as already implemented/unneeded).
+- **Key Changes**:
+  - **Issue #2 (Homepage Masonry Cards Gradient)**:
+    - Updated `src/components/sections/feature-cards.tsx`: replaced `from-black/75` vignette with `bg-gradient-to-t from-[#00173d]/85 via-[#002868]/25 to-white/10 group-hover:from-[#001e4d]/90`.
+    - Replaced bottom content overlay `from-black/80 via-black/40` with `bg-gradient-to-t from-[#001438]/95 via-[#002058]/65 to-transparent` with crisp text shadows.
+  - **Issue #8 (Admin Categories Guidance & Verification Links)**:
+    - Added collapsible "How Product Categories Connect to Store Pages" guide banner with dynamic page route destination map in `src/admin/pages/Categories.tsx`.
+    - Added 1-click `Open Store ↗` button on each category card linking directly to public store pages.
+  - **Issue #9 (Admin Pages Manager Deep Search & Filter Chips)**:
+    - Implemented `getSubpageMatch()` helper in `src/admin/pages/PagesManager.tsx` that recursively searches inside `pageData` (cards, secondary cards, process steps, case studies, sections).
+    - Displayed `Found in [Item]` badge on matched `PageCard` components.
+    - Added instant hierarchy filter chips (`All Pages`, `Main Navigation`, `Category Hubs`, `Inner Sub-Pages`) and a clear search button.
+- **Validation**:
+  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 7.50s`).
+
 
 

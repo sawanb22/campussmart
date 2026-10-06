@@ -176,8 +176,8 @@ const FeatureCards = () => {
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                     />
 
-                    {/* Permanent subtle vignette */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-black/5" />
+                    {/* Permanent subtle vignette — branded white/blue gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#00173d]/85 via-[#002868]/25 to-white/10 transition-opacity duration-500 group-hover:from-[#001e4d]/90" />
 
                     {/* Category badge */}
                     <div
@@ -196,11 +196,11 @@ const FeatureCards = () => {
                       <MoveUpRight className="w-4 h-4 text-white" />
                     </div>
 
-                    {/* Bottom content — always visible and readable */}
-                    <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 md:p-5 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+                    {/* Bottom content — always visible and readable with deep blue-to-transparent gradient */}
+                    <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 md:p-5 bg-gradient-to-t from-[#001438]/95 via-[#002058]/65 to-transparent">
                       <h3
                         className="mb-1 text-white font-extrabold text-[12px] leading-snug drop-shadow-lg break-words sm:text-[14px] md:text-lg"
-                        style={{ textShadow: '0 2px 12px rgba(0,0,0,0.8)' }}
+                        style={{ textShadow: '0 2px 10px rgba(0, 20, 50, 0.9)' }}
                       >
                         {title}
                       </h3>

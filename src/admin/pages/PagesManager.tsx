@@ -1,8 +1,73 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Eye, EyeOff, Pencil, X, Plus, Trash2, ExternalLink } from 'lucide-react';
+import { Eye, EyeOff, Pencil, X, Plus, Trash2, ExternalLink, Search } from 'lucide-react';
 import api from '../api/client';
 import UnifiedPageEditor, { type Page } from '../components/UnifiedPageEditor';
+
+// ─── Subpage & Deep Card Search Helper (Issue #9) ─────────────────────────────
+function getSubpageMatch(page: Page, query: string): string | null {
+    if (!query) return null;
+    if (!page.pageData) return null;
+
+    try {
+        const data = typeof page.pageData === 'string' ? JSON.parse(page.pageData) : page.pageData;
+        if (!data || typeof data !== 'object') return null;
+
+        // 1. Check feature / solution cards
+        if (Array.isArray(data.cards)) {
+            for (const c of data.cards) {
+                if (c?.title && c.title.toLowerCase().includes(query)) {
+                    return `Card: "${c.title}"`;
+                }
+                if (c?.category && c.category.toLowerCase().includes(query)) {
+                    return `Category: "${c.category}"`;
+                }
+                if (c?.description && c.description.toLowerCase().includes(query)) {
+                    return `Card content: "${c.title || 'Item'}"`;
+                }
+            }
+        }
+
+        // 2. Check secondary cards
+        if (Array.isArray(data.secondaryCards)) {
+            for (const c of data.secondaryCards) {
+                if (c?.title && c.title.toLowerCase().includes(query)) {
+                    return `Sub-card: "${c.title}"`;
+                }
+            }
+        }
+
+        // 3. Check process steps
+        if (Array.isArray(data.processSteps)) {
+            for (const s of data.processSteps) {
+                if (s?.title && s.title.toLowerCase().includes(query)) {
+                    return `Step: "${s.title}"`;
+                }
+            }
+        }
+
+        // 4. Check case studies
+        if (Array.isArray(data.caseStudies)) {
+            for (const cs of data.caseStudies) {
+                if (cs?.title && cs.title.toLowerCase().includes(query)) {
+                    return `Case Study: "${cs.title}"`;
+                }
+            }
+        }
+
+        // 5. Check hero or section titles if distinct
+        if (data.heroTitle && data.heroTitle.toLowerCase().includes(query) && !page.title.toLowerCase().includes(query)) {
+            return `Hero Title: "${data.heroTitle}"`;
+        }
+        if (data.section1Title && data.section1Title.toLowerCase().includes(query)) {
+            return `Section: "${data.section1Title}"`;
+        }
+    } catch {
+        // Safe fallback for malformed JSON
+    }
+
+    return null;
+}
 
 // ─── Page hierarchy classification ───────────────────────────────────────────
 // Main top-level pages that appear in primary navigation
@@ -45,12 +110,13 @@ function classifyPages(pages: Page[]): Group[] {
 }
 
 // ─── Page Card ────────────────────────────────────────────────────────────────
-function PageCard({ page, isEditing, onToggleEdit, onTogglePublish, onDelete }: {
+function PageCard({ page, isEditing, onToggleEdit, onTogglePublish, onDelete, matchedSubpage }: {
     page: Page;
     isEditing: boolean;
     onToggleEdit: () => void;
     onTogglePublish: () => void;
     onDelete: () => void;
+    matchedSubpage?: string | null;
 }) {
     return (
         <div className={`bg-white rounded-2xl border transition-all shadow-sm hover:shadow-md overflow-hidden flex flex-col justify-between ${
@@ -123,6 +189,14 @@ function PageCard({ page, isEditing, onToggleEdit, onTogglePublish, onDelete }: 
                     <p className="text-xs text-gray-400 font-mono truncate" title={`/${page.slug}`}>
                         /{page.slug}
                     </p>
+
+                    {/* Subpage / Deep Card Match Indicator (Issue #9) */}
+                    {matchedSubpage && (
+                        <div className="mt-2.5 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200/80 text-blue-700 text-[11px] font-semibold" title={`Found inside ${matchedSubpage}`}>
+                            <Search className="w-3 h-3 text-blue-500 shrink-0" />
+                            <span className="truncate">Found in {matchedSubpage}</span>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -167,6 +241,7 @@ export default function PagesManager() {
     const [loading, setLoading] = useState(true);
     const [editingPage, setEditingPage] = useState<Page | null>(null);
     const [search, setSearch] = useState('');
+    const [activeFilter, setActiveFilter] = useState<'all' | 'main' | 'category' | 'inner'>('all');
     const [creating, setCreating] = useState(false);
     const [newTitle, setNewTitle] = useState('');
     const [newSlug, setNewSlug] = useState('');
@@ -243,10 +318,36 @@ export default function PagesManager() {
     };
 
     const normalizedSearch = (search || '').trim().replace(/^\/+/, '').toLowerCase();
-    const filtered = pages.filter(p =>
-        (p.title || '').toLowerCase().includes(normalizedSearch) ||
-        (p.slug || '').toLowerCase().includes(normalizedSearch)
-    );
+
+    // Deep search across Title, Slug, and Inner PageData (cards, subtitles, facilities)
+    const searchMatches = useMemo(() => {
+        const map = new Map<number, string | null>();
+        pages.forEach(p => {
+            if (!normalizedSearch) {
+                map.set(p.id, null);
+                return;
+            }
+            const titleMatch = (p.title || '').toLowerCase().includes(normalizedSearch);
+            const slugMatch = (p.slug || '').toLowerCase().includes(normalizedSearch);
+            if (titleMatch || slugMatch) {
+                map.set(p.id, null); // Direct title/slug match
+            } else {
+                const subMatch = getSubpageMatch(p, normalizedSearch);
+                if (subMatch) {
+                    map.set(p.id, subMatch); // Subpage / inner card match
+                }
+            }
+        });
+        return map;
+    }, [pages, normalizedSearch]);
+
+    const filtered = pages.filter(p => {
+        if (!searchMatches.has(p.id)) return false;
+        if (activeFilter === 'main') return MAIN_SLUGS.has(p.slug);
+        if (activeFilter === 'category') return CATEGORY_SLUGS.has(p.slug);
+        if (activeFilter === 'inner') return !MAIN_SLUGS.has(p.slug) && !CATEGORY_SLUGS.has(p.slug);
+        return true;
+    });
 
     const groups = classifyPages(filtered);
 
@@ -257,30 +358,88 @@ export default function PagesManager() {
     );
 
     return (
-        <div className="max-w-7xl mx-auto space-y-8">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Pages Management</h1>
-                    <p className="text-gray-500 text-sm mt-1">
-                        <span className="font-semibold text-blue-600">{pages.length}</span> total pages · organised by hierarchy
-                    </p>
+        <div className="max-w-7xl mx-auto space-y-6">
+            {/* Header & Search Toolbar */}
+            <div className="flex flex-col gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900">Pages Management</h1>
+                        <p className="text-gray-500 text-sm mt-1">
+                            <span className="font-semibold text-blue-600">{pages.length}</span> total pages · organised by hierarchy
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <div className="relative w-full sm:w-80">
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search pages, cards, facilities…"
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                                className="border border-gray-200 rounded-xl pl-10 pr-9 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 w-full bg-white shadow-sm font-medium"
+                            />
+                            {search && (
+                                <button
+                                    onClick={() => setSearch('')}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5 cursor-pointer"
+                                    title="Clear search"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            )}
+                        </div>
+                        <button
+                            onClick={() => setCreating(v => !v)}
+                            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-sm shadow-blue-200 hover:bg-blue-700 transition-all shrink-0 cursor-pointer"
+                        >
+                            <Plus className="w-4 h-4" />
+                            {creating ? 'Cancel' : 'New Page'}
+                        </button>
+                    </div>
                 </div>
-                <div className="flex items-center gap-3 w-full sm:w-auto">
-                    <input
-                        type="text"
-                        placeholder="🔍  Search pages…"
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        className="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 w-full sm:w-64 bg-white shadow-sm"
-                    />
+
+                {/* Filter Chips Toolbar (Issue #9) */}
+                <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-100">
                     <button
-                        onClick={() => setCreating(v => !v)}
-                        className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-sm shadow-blue-200 hover:bg-blue-700 transition-all"
+                        onClick={() => setActiveFilter('all')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            activeFilter === 'all' ? 'bg-blue-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                        }`}
                     >
-                        <Plus className="w-4 h-4" />
-                        {creating ? 'Cancel' : 'New Page'}
+                        All Pages ({pages.length})
                     </button>
+                    <button
+                        onClick={() => setActiveFilter('main')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            activeFilter === 'main' ? 'bg-blue-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                        }`}
+                    >
+                        Main Navigation
+                    </button>
+                    <button
+                        onClick={() => setActiveFilter('category')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            activeFilter === 'category' ? 'bg-blue-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                        }`}
+                    >
+                        Category / Solution Hubs
+                    </button>
+                    <button
+                        onClick={() => setActiveFilter('inner')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            activeFilter === 'inner' ? 'bg-blue-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                        }`}
+                    >
+                        Inner Sub-Pages
+                    </button>
+                    {search && (
+                        <span className="text-xs font-semibold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-xl border border-blue-200 flex items-center gap-1.5">
+                            <span>Matching: <strong>"{search}"</strong> ({filtered.length} found)</span>
+                            <button onClick={() => setSearch('')} className="text-blue-500 hover:text-blue-800 underline ml-1 cursor-pointer">
+                                Clear
+                            </button>
+                        </span>
+                    )}
                 </div>
             </div>
 
@@ -342,6 +501,7 @@ export default function PagesManager() {
                             <PageCard
                                 key={page.id}
                                 page={page}
+                                matchedSubpage={searchMatches.get(page.id)}
                                 isEditing={editingPage?.id === page.id}
                                 onToggleEdit={() => setEditingPage(editingPage?.id === page.id ? null : page)}
                                 onTogglePublish={() => togglePublish(page.id, page.published)}
@@ -353,8 +513,16 @@ export default function PagesManager() {
             ))}
 
             {filtered.length === 0 && (
-                <div className="text-center py-16 text-gray-400 text-sm bg-white rounded-2xl border border-dashed border-gray-200">
-                    No pages match your search.
+                <div className="text-center py-16 text-gray-400 text-sm bg-white rounded-2xl border border-dashed border-gray-200 space-y-2">
+                    <p>No pages match your search or filter.</p>
+                    {(search || activeFilter !== 'all') && (
+                        <button
+                            onClick={() => { setSearch(''); setActiveFilter('all'); }}
+                            className="text-xs font-bold text-blue-600 hover:text-blue-800 underline cursor-pointer"
+                        >
+                            Reset search & filters
+                        </button>
+                    )}
                 </div>
             )}
             <p className="text-xs text-gray-400 text-right">Showing {filtered.length} of {pages.length} pages</p>

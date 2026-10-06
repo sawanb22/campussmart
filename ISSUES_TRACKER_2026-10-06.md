@@ -26,7 +26,10 @@ This document tracks all identified application defects, UX friction points, and
 | **ISS-17** | Smart Classrooms Homepage Image Resolution | Frontend / Media URL | Low | ✅ Completed | Immediate (`SYNC-001`) |
 | **ISS-18** | Furniture Category Products Loading & Subcategories | Store / Catalog | Medium | ✅ Completed | Immediate (`SYNC-001`) |
 | **ISS-02** | Page Data Flicker & Internal Media Standardization | Frontend / Media / CMS | High | ✅ Completed | Immediate (`MEDIA-002`) |
-| **ISS-DEF-02** | Masonry Cards Gradient (White/Blue instead of Black) | Frontend UI / Styling | Low | ⏳ Deferred to End | End |
+| **ISS-DEF-02** | Masonry Cards Gradient (White/Blue instead of Black) | Frontend UI / Styling | Low | ✅ Completed | Final Milestone (`FINAL-001`) |
+| **ISS-08** | Admin Categories Guidance & Live Page Links | Admin CMS / IA | Low | ✅ Completed | Final Milestone (`FINAL-001`) |
+| **ISS-09** | Admin Pages Manager Subpage & Deep Card Search | Admin CMS / Ergonomics | Medium | ✅ Completed | Final Milestone (`FINAL-001`) |
+| **ISS-07** | Furniture Catalog Subcategory Layout | Catalog UI | Low | ⏭️ Skipped (Per User Instruction) | Skipped |
 
 ---
 
@@ -424,9 +427,25 @@ This document tracks all identified application defects, UX friction points, and
 
 ---
 
-### Deferred Issues
-*(Shifted to end per user instruction)*
-- **Issue #2**: Masonry Cards Gradient (White/Blue instead of Black)
-- **Issue #8**: Explanation & guidance on how Admin Categories connect to store pages
-- **Issue #9**: Quick search for subpages (e.g. "Group Study") in Admin Pages Manager
-- **Group 2 (Issue #7)**: Skipped per user instruction.
+### Final Milestone: UI Polish, Admin Guidance & Deep Discovery (Issues #2, #8, #9)
+- **Tracking ID**: `GRP-20261006-FINAL` (`FINAL-001`)
+- **Status**: ✅ Completed & Verified
+
+#### 1. Issue #2: Homepage Masonry Cards Gradient (White/Blue instead of Black)
+- **Problem**: Homepage masonry cards had heavy black gradient overlays (`from-black/75` and `from-black/80`), creating a dark, gloomy feel.
+- **Solution**: Replaced black overlays with high-contrast, modern deep blue-to-transparent gradients (`bg-gradient-to-t from-[#00173d]/85 via-[#002868]/25 to-white/10 group-hover:from-[#001e4d]/90` and `from-[#001438]/95 via-[#002058]/65 to-transparent`) in `src/components/sections/feature-cards.tsx`.
+
+#### 2. Issue #8: Admin Categories Guidance & Live Page Links
+- **Problem**: Admin Categories page lacked documentation explaining how categories connect to storefront pages, causing confusion during product management.
+- **Solution**: Added interactive "How Product Categories Connect to Store Pages" guide banner with live route destination map and 1-click `Open Store ↗` links for each category in `src/admin/pages/Categories.tsx`.
+
+#### 3. Issue #9: Admin Pages Manager Subpage & Deep Card Search
+- **Problem**: Searching in Admin Pages Manager only matched page titles and slugs; subpages, facility cards, and sections inside `pageData` (e.g. "Group Study", "Badminton") were unsearchable.
+- **Solution**: Implemented recursive `getSubpageMatch()` search in `src/admin/pages/PagesManager.tsx` with dynamic `Found in [Card]` match badges, hierarchy filter chips (`All`, `Main Navigation`, `Category Hubs`, `Inner Sub-Pages`), and clear search controls.
+
+#### 4. Issue #7: Furniture Catalog Subcategory Layout
+- **Status**: ⏭️ Skipped per explicit user instruction (already implemented / not needed).
+
+#### 5. Verification
+- Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 7.50s`).
+

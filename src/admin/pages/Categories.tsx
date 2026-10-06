@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Plus, Pencil, Trash2, Search, X, Tag } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, X, Tag, ExternalLink, HelpCircle } from 'lucide-react';
 import api from '../api/client';
 import { clearPageCategoriesCache } from '@/hooks/usePageCategories';
 
@@ -20,6 +20,15 @@ const PAGE_OPTIONS = [
     { value: 'tech-infra', label: 'Tech Infrastructure' },
 ];
 
+const PAGE_ROUTE_MAP: Record<string, { label: string; href: string }> = {
+    'furniture': { label: 'Furniture Solutions', href: '/furniture' },
+    'libraries': { label: 'Smart Libraries', href: '/libraries' },
+    'labs': { label: 'Science & Tech Labs', href: '/labs' },
+    'sports': { label: 'Sports Infrastructure', href: '/sports-infra' },
+    'ai-ml': { label: 'AI/ML Solutions', href: '/ai-ml' },
+    'tech-infra': { label: 'Tech Infrastructure', href: '/tech-infra' },
+};
+
 const EMPTY: Partial<Category> = { name: '', slug: '', page: 'furniture' };
 
 export default function Categories() {
@@ -27,6 +36,7 @@ export default function Categories() {
     const [search, setSearch] = useState('');
     const [activePage, setActivePage] = useState('all');
     const [showModal, setShowModal] = useState(false);
+    const [showGuide, setShowGuide] = useState(true);
     const [editing, setEditing] = useState<Partial<Category>>(EMPTY);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -114,6 +124,77 @@ export default function Categories() {
                 </button>
             </div>
 
+            {/* Interactive Architecture Guide Banner (Issue #8) */}
+            <div className="bg-gradient-to-r from-blue-950 via-blue-900 to-indigo-950 rounded-3xl p-6 text-white shadow-lg space-y-4 border border-blue-800/40">
+                <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-blue-200 shrink-0">
+                            <HelpCircle className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                            <h2 className="text-base font-bold text-white">How Product Categories Connect to Store Pages</h2>
+                            <p className="text-xs text-blue-200 mt-0.5">
+                                Categories organize e-commerce products and dynamically route them to showcase pages.
+                            </p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => setShowGuide(v => !v)}
+                        className="text-xs font-bold text-blue-200 hover:text-white px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 transition-all shrink-0 cursor-pointer"
+                    >
+                        {showGuide ? 'Collapse Guide' : 'Expand Guide'}
+                    </button>
+                </div>
+
+                {showGuide && (
+                    <div className="pt-3 border-t border-white/10 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <div className="space-y-1.5">
+                            <div className="font-bold text-blue-100 flex items-center gap-1.5">
+                                <span className="w-2 h-2 rounded-full bg-cm-yellow inline-block"></span>
+                                1. Why Categories Exist
+                            </div>
+                            <p className="text-blue-100/80 leading-relaxed">
+                                Every e-commerce product is tagged with a Category (e.g. <em>Chairs</em>, <em>Whiteboards</em>, <em>Badminton</em>). These act as the filter chips and shopping categories for customers.
+                            </p>
+                        </div>
+                        <div className="space-y-1.5">
+                            <div className="font-bold text-blue-100 flex items-center gap-1.5">
+                                <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>
+                                2. The "Show On Page" Setting
+                            </div>
+                            <p className="text-blue-100/80 leading-relaxed">
+                                Assigning a category to a <strong>Page</strong> (e.g., <em>Tech Infrastructure</em>) automatically embeds all products tagged with this category into that page's store catalog on the live site.
+                            </p>
+                        </div>
+
+                        {/* Quick Reference Page Links */}
+                        <div className="col-span-full pt-2">
+                            <div className="text-[11px] font-bold uppercase tracking-wider text-blue-300 mb-2">Live Page Destination Map:</div>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                {PAGE_OPTIONS.map((opt) => {
+                                    const target = PAGE_ROUTE_MAP[opt.value] || { label: opt.label, href: `/${opt.value}` };
+                                    return (
+                                        <a
+                                            key={opt.value}
+                                            href={target.href}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="flex items-center justify-between p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors text-white font-medium group"
+                                            title={`Open live ${target.label} page`}
+                                        >
+                                            <span className="truncate">{target.label}</span>
+                                            <span className="font-mono text-[10px] text-blue-300 group-hover:text-white flex items-center gap-1 shrink-0 ml-1.5">
+                                                {target.href} <ExternalLink className="w-3 h-3" />
+                                            </span>
+                                        </a>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+
             {/* Page tabs */}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-2 flex flex-wrap gap-1.5">
                 <button
@@ -164,12 +245,31 @@ export default function Categories() {
                                 <div className="flex items-center gap-2 mt-1">
                                     <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">{PAGE_OPTIONS.find((page) => page.value === cat.page)?.label || cat.page}</p>
                                     <span className="text-[10px] font-bold text-slate-400">&middot; {cat._count?.products ?? 0} product{cat._count?.products === 1 ? '' : 's'}</span>
+                                    <a
+                                        href={`${PAGE_ROUTE_MAP[cat.page]?.href || '/shop'}?category=${cat.slug}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded-md transition-colors ml-1"
+                                        title="View live storefront filtered by this category"
+                                    >
+                                        <span>Open Store</span>
+                                        <ExternalLink className="w-2.5 h-2.5" />
+                                    </a>
                                 </div>
                             </div>
                         </div>
                         <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={() => openEdit(cat)} className="p-2 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg transition-all border border-blue-100 hover:border-blue-600"><Pencil className="w-4 h-4" /></button>
-                            <button onClick={() => deleteCategory(cat.id)} className="p-2 text-red-600 hover:bg-red-600 hover:text-white rounded-lg transition-all border border-red-100 hover:border-red-600"><Trash2 className="w-4 h-4" /></button>
+                            <a
+                                href={`${PAGE_ROUTE_MAP[cat.page]?.href || '/shop'}?category=${cat.slug}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="p-2 text-slate-500 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all border border-gray-100"
+                                title="View in new tab"
+                            >
+                                <ExternalLink className="w-4 h-4" />
+                            </a>
+                            <button onClick={() => openEdit(cat)} className="p-2 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg transition-all border border-blue-100 hover:border-blue-600" title="Edit"><Pencil className="w-4 h-4" /></button>
+                            <button onClick={() => deleteCategory(cat.id)} className="p-2 text-red-600 hover:bg-red-600 hover:text-white rounded-lg transition-all border border-red-100 hover:border-red-600" title="Delete"><Trash2 className="w-4 h-4" /></button>
                         </div>
                     </div>
                 ))}
