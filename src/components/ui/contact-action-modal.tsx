@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Mail, Phone, Copy, Check, ExternalLink, X, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
@@ -83,9 +84,11 @@ export default function ContactActionModal({ state, onClose }: ContactActionModa
     }
   };
 
-  return (
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -232,6 +235,7 @@ export default function ContactActionModal({ state, onClose }: ContactActionModa
           </Link>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
