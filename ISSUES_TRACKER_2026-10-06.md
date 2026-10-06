@@ -16,8 +16,10 @@ This document tracks all identified application defects, UX friction points, and
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **ISS-01** | Unified Single Login Portal & Input Hardening | Authentication / Security | High | ✅ Completed | Immediate (`AUTH-003`) |
 | **ISS-12** | Smart Contact Actions with Gmail & Desktop Call Fallback | User Experience / Cross-Platform | Medium | ✅ Completed | Immediate (`UX-012`) |
-| **ISS-02** | *(Pending next user selection)* | – | – | ⏳ Awaiting Details | – |
-| **ISS-03** | *(Pending user input)* | – | – | ⏳ Awaiting Details | – |
+| **ISS-03** | Blog Changes Visible Verification | Content / CMS Sync | Medium | ✅ Verified Working (User Confirmed) | – |
+| **ISS-04** | Blog Category "All" Removal & Default to 1st Category | Blog / Navigation | Low | ✅ Completed | Immediate (`BLOG-001`) |
+| **ISS-05** | Remove "Showing [X] All articles" Blog Sidebar Widget | Blog / UI Layout | Low | ✅ Completed | Immediate (`BLOG-001`) |
+| **ISS-02** | Masonry Cards Gradient (White/Blue instead of Black) | Frontend UI / Styling | Low | ⏳ Ready for Implementation | Next |
 
 ---
 
@@ -129,19 +131,55 @@ This document tracks all identified application defects, UX friction points, and
 
 ---
 
-### Upcoming Issues
-*(Placeholders for next problems provided by the user)*
-
-### Issue #2: [Pending Next User Request]
-- **Tracking ID**: `ISS-20261006-02`
-- **Category**: *To be determined*
-- **Severity**: *To be determined*
-- **Status**: ⏳ Awaiting Details
+### Issue #3: Changes Made in Blog Page Arent Visible
+- **Tracking ID**: `ISS-20261006-03`
+- **Category**: Content / CMS Sync / Blog
+- **Severity**: Low (Operational / Verification)
+- **Status**: ✅ Verified Working (Confirmed by user: blog posts and edits display as expected)
 
 ---
 
-### Issue #3: [Pending Next User Request]
-- **Tracking ID**: `ISS-20261006-03`
-- **Category**: *To be determined*
-- **Severity**: *To be determined*
-- **Status**: ⏳ Awaiting Details
+### Issue #4: Blog Category "All" Removal & Default to 1st Category
+- **Tracking ID**: `ISS-20261006-04` (`BLOG-001`)
+- **Category**: Frontend Navigation & Filtering
+- **Severity**: Low
+- **Status**: ✅ Completed & Verified (Clean Vite Build 0 Errors)
+
+#### 1. Problem Description & Root Cause
+- The blog page (`/blog`) previously displayed a hardcoded `"All"` category button at the top of both the desktop sidebar and mobile horizontal scroll chips.
+- Selecting or visiting the page defaulted `activeCategory` to `null`, loading unfiltered articles across all categories simultaneously.
+- Furthermore, switching categories triggered redundant re-fetching of all static categories on every click due to coupled `Promise.all` in `useEffect([activeCategory])`.
+
+#### 2. Architecture & Technical Solution (under SOLID Principles)
+- **Single Responsibility Principle (SRP)**: Separated category fetching from post fetching. Categories are fetched once on initial mount (`useEffect([], ...)`).
+- **Default Category Selection**: When categories load, if no valid `?category=` query parameter exists in the URL, `activeCategory` automatically initializes to the first database category (`categories[0].slug`).
+- **URL Synchronization**: Synchronized active category with `useSearchParams` (`?category=<slug>`), enabling direct bookmarking, link sharing, and seamless browser back/forward history navigation.
+- **Removed "All" Buttons**: Completely eliminated the `"All"` button from both desktop category sidebar and mobile chip navigation.
+
+---
+
+### Issue #5: Remove "Showing [X] All articles" Blog Sidebar Widget
+- **Tracking ID**: `ISS-20261006-05` (`BLOG-001`)
+- **Category**: Frontend UI / Layout
+- **Severity**: Low (Cosmetic & Clutter)
+- **Status**: ✅ Completed & Verified (Clean Vite Build 0 Errors)
+
+#### 1. Problem Description & Root Cause
+- As shown in tester screenshot `media_1791273754651.png`, the blog sidebar rendered an unwanted card displaying `"Showing [X] All articles"`.
+- This card consumed vertical space unnecessarily and showed redundant article counts.
+
+#### 2. Technical Solution
+- Completely removed the `<div className="mt-8 rounded-3xl bg-cm-blue-dark/5 p-4">...</div>` widget from `src/pages/blog.tsx`.
+- Applied `self-start sticky top-24` to the `<aside>` container to preserve vertical balance without visual collapse.
+
+---
+
+### Upcoming Issues
+*(Placeholders for next problems provided by the user)*
+
+### Issue #2: Masonry Cards Gradient (White/Blue instead of Black)
+- **Tracking ID**: `ISS-20261006-02`
+- **Category**: Frontend UI / Styling
+- **Severity**: Low / Cosmetic
+- **Status**: ⏳ Ready for Implementation
+

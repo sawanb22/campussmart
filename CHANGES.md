@@ -55,6 +55,7 @@
 | `NAV-004` | 2026-10-04 01:10 | Product & Wishlist Navigation Standardization | Fixed React error #310 hook placement in product-detail.tsx, made Wishlist products and designs universally clickable with image fallbacks, enabled optimistic instant rendering across Labs, Sports, and AI/ML detail pages, and aligned DB assets under SOLID principles. | 5 files (frontend) + DB | Completed |
 | `AUTH-003` | 2026-10-06 12:15 | Authentication & Security | Standardized unified login portal (/login), deprecated /admin/login with bridge redirect, added mobile keyboard defenses & input trimming, implemented open redirect defense, added RBAC 403 Access Denied view to prevent infinite loops, implemented backend defensive whitespace trimming without database password resets, and enforced bidirectional session atomicity. | 9 files (frontend, admin, backend) | Completed |
 | `UX-012` | 2026-10-06 13:12 | Homepage & Cross-Platform Contact | Smart Contact Actions with Gmail Web, WhatsApp, and Desktop Dial Fallback (Issue #12) under SOLID principles. Fixed silent failures on tester machines lacking Outlook or telephony clients. | 8 files (frontend & test) | Completed |
+| `BLOG-001` | 2026-10-06 13:42 | Blog & Navigation | Removed "Showing [X] All articles" sidebar widget (Issue #5), removed artificial "All" category option, defaulted to 1st database category with URL sync (?category=slug), and decoupled static category fetching under SOLID principles. | 2 files (frontend, tracker) | Completed |
 
 ---
 
@@ -1604,4 +1605,25 @@
   - Automated Unit Test Suite (`scripts/test-contact-actions.ts`): 100% assertions passed.
   - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 11.22s`).
   - Backend Build: `npm run build` (`prisma generate && tsc`) passed with exit code 0.
+
+---
+
+### `BLOG-001` | 2026-10-06 13:42 | Blog & Navigation | Blog Page Category Filtering & Sidebar Counter Cleanup (Issues #4 & #5)
+- **Files Affected**:
+  - `[MODIFY] src/pages/blog.tsx`
+  - `[MODIFY] ISSUES_TRACKER_2026-10-06.md`
+- **Description & Rationale (under SOLID Principles)**:
+  - **Single Responsibility Principle (SRP)**:
+    - Decoupled static category list fetching (`/blog/categories`) from dynamic post fetching (`/blog?category=...`). Categories are requested once on mount rather than re-querying on every user tab interaction.
+  - **Interface Segregation & URL Synchronization**:
+    - Integrated `useSearchParams` (`?category=<slug>`) to synchronize active category selection seamlessly with browser history, enabling deep linking, bookmarking, and back/forward navigation.
+  - **Default Category Selection**:
+    - Removed hardcoded `"All"` buttons from desktop sidebar and mobile horizontal chips.
+    - Automatically defaults `activeCategory` to the first category in the database (`categories[0].slug`) on load if no specific valid category is specified in the URL query string.
+  - **UI / Layout Decluttering (Issue #5)**:
+    - Completely removed the redundant `<div className="mt-8 rounded-3xl bg-cm-blue-dark/5 p-4">Showing [X] All articles</div>` card from the left sidebar as requested in QA screenshot `media_1791273754651.png`.
+- **Validation**:
+  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 7.73s`).
+  - Bundle size for `blog-*.js` decreased from 7.30 kB to 6.92 kB.
+
 

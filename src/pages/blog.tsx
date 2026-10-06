@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import api from '@/api/client';
 import { resolveMediaUrl } from '@/lib/media-url';
@@ -18,33 +18,105 @@ const formatDate = (value?: string) => {
 };
 
 const Blog = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [posts, setPosts] = useState<Post[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [loadingPosts, setLoadingPosts] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  const fetchData = () => {
-    setLoading(true);
+  // Fetch categories once on mount
+  useEffect(() => {
+    let isMounted = true;
+    api.get('/blog/categories')
+      .then((catRes) => {
+        if (!isMounted) return;
+        const fetchedCategories: Category[] = Array.isArray(catRes.data) ? catRes.data : [];
+        setCategories(fetchedCategories);
+
+        if (fetchedCategories.length > 0) {
+          const urlCat = searchParams.get('category');
+          const matchedCat = fetchedCategories.find((c) => c.slug === urlCat);
+          const initialSlug = matchedCat ? matchedCat.slug : fetchedCategories[0].slug;
+          setActiveCategory(initialSlug);
+          if (!urlCat || !matchedCat) {
+            setSearchParams((prev) => {
+              const next = new URLSearchParams(prev);
+              next.set('category', initialSlug);
+              return next;
+            }, { replace: true });
+          }
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load blog categories:', err);
+      })
+      .finally(() => {
+        if (isMounted) setLoadingCategories(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Sync category if URL parameter changes (e.g., browser back/forward)
+  useEffect(() => {
+    const urlCat = searchParams.get('category');
+    if (urlCat && categories.length > 0 && categories.some((c) => c.slug === urlCat)) {
+      if (activeCategory !== urlCat) {
+        setActiveCategory(urlCat);
+      }
+    }
+  }, [searchParams, categories, activeCategory]);
+
+  // Fetch posts whenever activeCategory changes
+  useEffect(() => {
+    if (!activeCategory && categories.length > 0) return;
+
+    let isMounted = true;
+    setLoadingPosts(true);
     const params = new URLSearchParams();
     params.set('limit', '50');
     if (activeCategory) params.set('category', activeCategory);
 
-    Promise.all([
-      api.get('/blog?' + params.toString()),
-      api.get('/blog/categories'),
-    ]).then(([postsRes, catRes]) => {
-      setPosts(postsRes.data.posts.map((post: Post) => ({ ...post, category: post.category ?? post.blogcategory })));
-      setCategories(catRes.data);
-    }).finally(() => setLoading(false));
+    api.get('/blog?' + params.toString())
+      .then((postsRes) => {
+        if (!isMounted) return;
+        setPosts(
+          (postsRes.data?.posts || []).map((post: Post) => ({
+            ...post,
+            category: post.category ?? post.blogcategory,
+          }))
+        );
+      })
+      .catch((err) => {
+        console.error('Failed to load posts:', err);
+        if (isMounted) setPosts([]);
+      })
+      .finally(() => {
+        if (isMounted) setLoadingPosts(false);
+      });
+
+    setVisibleCount(PAGE_SIZE);
+    return () => {
+      isMounted = false;
+    };
+  }, [activeCategory, categories.length]);
+
+  const handleCategorySelect = (slug: string) => {
+    setActiveCategory(slug);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set('category', slug);
+      return next;
+    });
   };
 
-  useEffect(() => {
-    fetchData();
-    setVisibleCount(PAGE_SIZE);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeCategory]);
+  const loading = loadingCategories || loadingPosts;
 
   const filteredPosts = useMemo(
     () =>
@@ -80,23 +152,14 @@ const Blog = () => {
 
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[240px_minmax(0,1fr)]">
             {/* Left menu */}
-            <aside className="hidden lg:block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <aside className="hidden lg:block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm self-start sticky top-24">
               <h3 className="mb-5 text-sm font-semibold uppercase tracking-[0.3em] text-cm-blue-dark">Categories</h3>
               <div className="space-y-3">
-                <button
-                  type="button"
-                  onClick={() => setActiveCategory(null)}
-                  className={`block w-full rounded-2xl px-4 py-3 text-left transition-all duration-200 ${
-                    activeCategory === null ? 'bg-cm-blue text-white shadow-lg' : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  All
-                </button>
                 {categories.map((cat) => (
                   <button
                     key={cat.id}
                     type="button"
-                    onClick={() => setActiveCategory(cat.slug)}
+                    onClick={() => handleCategorySelect(cat.slug)}
                     className={`block w-full rounded-2xl px-4 py-3 text-left transition-all duration-200 ${
                       activeCategory === cat.slug ? 'bg-cm-blue text-white shadow-lg' : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
                     }`}
@@ -104,15 +167,9 @@ const Blog = () => {
                     {cat.name}
                   </button>
                 ))}
-                {categories.length === 0 && (
+                {!loadingCategories && categories.length === 0 && (
                   <p className="px-1 text-xs text-slate-400">No categories yet. Add one in Admin &rarr; Blog Posts.</p>
                 )}
-              </div>
-
-              <div className="mt-8 rounded-3xl bg-cm-blue-dark/5 p-4">
-                <p className="mb-3 text-sm font-semibold text-cm-blue-dark">Showing</p>
-                <p className="text-4xl font-black text-cm-blue-dark">{filteredPosts.length}</p>
-                <p className="mt-2 text-sm text-slate-500">{activeCategory ? categories.find((c) => c.slug === activeCategory)?.name : 'All'} articles</p>
               </div>
             </aside>
 
@@ -120,22 +177,13 @@ const Blog = () => {
             <div className="min-w-0">
               {/* Mobile category chips (sidebar is hidden below lg) */}
               <div className="mb-5 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:hidden">
-                <button
-                  type="button"
-                  onClick={() => setActiveCategory(null)}
-                  className={`shrink-0 rounded-full border px-4 py-2 text-xs font-semibold transition-colors ${
-                    activeCategory === null ? 'border-cm-blue/20 bg-blue-50 text-cm-blue' : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                  }`}
-                >
-                  All
-                </button>
                 {categories.map((cat) => (
                   <button
                     key={cat.id}
                     type="button"
-                    onClick={() => setActiveCategory(cat.slug)}
+                    onClick={() => handleCategorySelect(cat.slug)}
                     className={`shrink-0 rounded-full border px-4 py-2 text-xs font-semibold transition-colors ${
-                      activeCategory === cat.slug ? 'border-cm-blue/20 bg-blue-50 text-cm-blue' : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                      activeCategory === cat.slug ? 'border-cm-blue/20 bg-blue-50 text-cm-blue font-bold' : 'border-gray-200 text-gray-500 hover:border-gray-300'
                     }`}
                   >
                     {cat.name}
