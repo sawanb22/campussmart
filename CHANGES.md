@@ -61,6 +61,8 @@
 | `MEDIA-002` | 2026-10-06 15:45 | Media Resilience & Category Flicker Guards | Standardized internal media assets (synced 74 files to public/uploads/media), updated media-url resolver for 0ms CDN serving, created PageCardGridSkeleton to eliminate page load flicker across 11 category routes, repaired Render PostgreSQL ai-ml record (enforcing 2-card SSOT & category chips), and purged external Unsplash fallbacks. | 16 files (frontend, DB, config) | Completed |
 | `HERO-001` | 2026-10-06 17:40 | Homepage Hero Banner | Replaced floating blurred dark card container with seamless left-to-right deep blue gradient overlay matching design reference. | `src/components/sections/hero-banner.tsx` | Completed |
 | `FINAL-001` | 2026-10-06 18:35 | UI Polish & Admin Search / Guidance | Replaced homepage masonry black gradients with deep blue/white gradients (Issue #2), added interactive category guidance banner and 1-click live page test links in Admin Categories (Issue #8), and implemented subpage & card deep search with hierarchy filter chips in Admin Pages Manager (Issue #9). | 3 files (frontend & admin) | Completed |
+| `CHUNK-001` | 2026-10-06 18:42 | Enterprise Deployment Resilience | Implemented automatic stale chunk recovery with lazyWithRetry, vite:preloadError global listener, ErrorBoundary self-healing, and Vercel Cache-Control headers to eliminate dynamic module import failures across production deployments. | 6 files (frontend & config) | Completed |
+
 
 
 ---
@@ -1828,6 +1830,21 @@
     - Added instant hierarchy filter chips (`All Pages`, `Main Navigation`, `Category Hubs`, `Inner Sub-Pages`) and a clear search button.
 - **Validation**:
   - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 7.50s`).
+
+---
+
+### [2026-10-06] Enterprise Deployment Resilience: Stale Chunk Auto-Recovery
+- **Scope & Objectives**:
+  - Eliminate "Failed to fetch dynamically imported module" errors when visitors keep tabs open across new production deployments.
+- **Key Changes**:
+  - **`src/lib/lazy-with-retry.ts`**: Created enterprise `lazyWithRetry` wrapper for dynamic module imports with 10-second debounce loop protection in `sessionStorage`.
+  - **`src/App.tsx` & `src/admin/AdminRoutes.tsx`**: Routed all lazy component imports through `lazyWithRetry`.
+  - **`src/main.tsx`**: Added native `vite:preloadError` event listener to gracefully reload on stale chunk detection.
+  - **`src/components/ErrorBoundary.tsx`**: Added chunk error recognition with branded "Updating CampusMart..." auto-recovery screen.
+  - **`vercel.json`**: Configured `Cache-Control: public, max-age=0, must-revalidate` for `index.html` and immutable caching for `/assets/*`.
+- **Validation**:
+  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 7.67s`).
+
 
 
 

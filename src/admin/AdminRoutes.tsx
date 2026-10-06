@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { Suspense, lazy } from 'react';
+import { Suspense } from 'react';
+import { lazy } from '@/lib/lazy-with-retry';
 import { ShieldAlert, LogOut, ArrowLeft } from 'lucide-react';
 import Layout from './components/Layout';
 import { isAdminLoggedIn, ensureSessionSynced, getCurrentUser, clearAdminSession } from './lib/auth';

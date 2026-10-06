@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation, useParams, Navigate } from 'react-router-dom';
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
+import { lazy } from '@/lib/lazy-with-retry';
 import { SiteContentProvider } from '@/contexts/SiteContentContext';
 import { WishlistProvider } from '@/contexts/WishlistContext';
 import api from '@/api/client';
