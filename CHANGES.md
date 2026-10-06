@@ -59,6 +59,7 @@
 | `SYNC-001` | 2026-10-06 14:35 | Homepage & Product Catalog Sync | Merged duplicate Sports category (ID 51 -> 3), reassigned Technology to Tech Infra, added Furniture subcategories (chairs, desks, storage), seeded AI/ML categories, added defensive shop category fallback, wrapped feature-cards in resolveMediaUrl(), and linked catalog equipment on Digital Transformation & Innovation Centres (Group 1: Issues #10, #14, #16, #17, #18). | 6 files (frontend, backend, DB) | Completed |
 | `CLEANUP-002` | 2026-10-06 15:25 | Tech Infra Routing Cleanup | Removed redundant /tech-infra/products page, added canonical redirect to /tech-infra, and reverted discovery banners on showcase pages. | 5 files (frontend) | Completed |
 | `MEDIA-002` | 2026-10-06 15:45 | Media Resilience & Category Flicker Guards | Standardized internal media assets (synced 74 files to public/uploads/media), updated media-url resolver for 0ms CDN serving, created PageCardGridSkeleton to eliminate page load flicker across 11 category routes, repaired Render PostgreSQL ai-ml record (enforcing 2-card SSOT & category chips), and purged external Unsplash fallbacks. | 16 files (frontend, DB, config) | Completed |
+| `HERO-001` | 2026-10-06 17:40 | Homepage Hero Banner | Replaced floating blurred dark card container with seamless left-to-right deep blue gradient overlay matching design reference. | `src/components/sections/hero-banner.tsx` | Completed |
 
 ---
 
@@ -1790,4 +1791,18 @@
 - **Validation**:
   - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 8.09s`).
   - Backend Build: `npm run build` (`prisma generate && tsc`) passed with exit code 0.
+
+---
+
+### [2026-10-06] Homepage Hero Banner: Blue Fade Gradient Overlay
+- **Scope & Objectives**:
+  - Replace the floating dark blurred glass card (`bg-slate-950/20 backdrop-blur-[2px] rounded-2xl border border-white/10`) with a smooth left-to-right deep blue gradient overlay faded from the left edge across the text, seamlessly exposing the architectural photograph on the right matching Image 2 reference.
+- **Key Changes**:
+  - **Hero Banner (`src/components/sections/hero-banner.tsx`)**:
+    - Removed the enclosed glass card container around hero text elements.
+    - Implemented layer separation: base background photograph and an absolute horizontal blue fade overlay: `linear-gradient(90deg, rgba(0, 26, 70, 0.97) 0%, rgba(0, 34, 90, 0.94) 30%, rgba(0, 42, 108, 0.78) 48%, rgba(0, 42, 108, 0.35) 68%, rgba(0, 42, 108, 0) 86%)`.
+    - Tuned vertical padding (`py-8 sm:py-12 md:py-14`), horizontal padding (`px-4 sm:px-6 lg:px-10`), and CTA button borders/hover styles.
+- **Validation**:
+  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 8.37s`).
+
 

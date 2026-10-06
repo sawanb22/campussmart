@@ -69,30 +69,41 @@ const HeroBanner = () => {
   return (
     <div
       ref={containerRef}
-      className="relative overflow-hidden w-full"
+      className="relative overflow-hidden w-full bg-[#001f52]"
       style={{
-        minHeight: '280px',
-        backgroundImage: `linear-gradient(90deg, rgba(5,20,50,0.50) 0%, rgba(5,20,50,0.30) 45%, rgba(5,20,50,0.05) 85%), url('${bgImageUrl}')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        minHeight: '300px',
       }}
     >
+      {/* Background Photograph */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url('${bgImageUrl}')` }}
+      />
+
+      {/* Blue Faded Gradient from Left to Right (matches reference Image 2) */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'linear-gradient(90deg, rgba(0, 26, 70, 0.97) 0%, rgba(0, 34, 90, 0.94) 30%, rgba(0, 42, 108, 0.78) 48%, rgba(0, 42, 108, 0.35) 68%, rgba(0, 42, 108, 0) 86%)',
+        }}
+      />
+
       {/* Content */}
-      <div className="relative z-10 h-full flex items-center py-6 sm:py-8">
-        <div className="w-full px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 h-full flex items-center py-8 sm:py-12 md:py-14">
+        <div className="w-full px-4 sm:px-6 lg:px-10">
           <div className="max-w-6xl mx-auto">
-            <div className="max-w-2xl text-white bg-slate-950/20 backdrop-blur-[2px] p-4 sm:p-6 rounded-2xl border border-white/10">
+            <div className="max-w-2xl text-white">
               <div 
                 ref={subtitleRef}
-                className="text-[10px] sm:text-xs md:text-sm font-black uppercase tracking-widest text-blue-300 mb-2"
+                className="text-[11px] sm:text-xs md:text-sm font-black uppercase tracking-widest text-[#8fc7ff] mb-2 sm:mb-3"
               >
                 {heroData.eyebrow || 'Future-ready campus infrastructure'}
               </div>
               
               <h1
                 ref={titleRef}
-                className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black leading-tight mb-2"
-                style={{ letterSpacing: '-1.5px' }}
+                className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] font-black leading-[1.12] mb-3 text-white"
+                style={{ letterSpacing: '-1px' }}
               >
                 {String(heroData.title || '').split('\n').map((line: string, index: number, lines: string[]) => (
                   <span key={`${line}-${index}`}>
@@ -102,7 +113,7 @@ const HeroBanner = () => {
                 ))}
               </h1>
               
-              <p className="text-sm sm:text-base text-blue-100 mb-3 max-w-3xl leading-snug">
+              <p className="text-sm sm:text-base text-white/90 mb-5 max-w-xl leading-relaxed font-medium">
                 {heroData.subtitle || 'End-to-end infrastructure and technology solutions that transform universities into intelligent, sustainable and future-ready campuses.'}
               </p>
 
@@ -110,7 +121,7 @@ const HeroBanner = () => {
               <div className="flex flex-wrap gap-3">
                 <a 
                   href={heroData.ctaHref || '/contact-us'} 
-                  className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 border border-white/50 text-white font-black rounded-md hover:bg-white/10 transition-all duration-300 text-xs sm:text-sm"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-2.5 sm:py-3 border border-white/60 text-white font-bold rounded-lg hover:bg-white/15 transition-all duration-300 text-xs sm:text-sm shadow-sm"
                 >
                   {heroData.ctaLabel || 'Schedule Campus Audit →'}
                 </a>
