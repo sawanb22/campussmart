@@ -144,7 +144,6 @@ const Catalogues = () => {
   const ctaTitle = data.ctaTitle ?? DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? DEFAULTS.ctaSubtitle;
   const ctaButtonLabel = data.ctaButtonLabel ?? DEFAULTS.ctaButtonLabel;
-  const ctaHref = data.ctaHref ?? DEFAULTS.ctaHref;
 
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -461,9 +460,13 @@ const Catalogues = () => {
           </p>
 
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
-            <Link to={ctaHref?.trim() || '/request-quote'} className="btn-primary">
+            <button
+              type="button"
+              onClick={() => openRequestModal({ title: 'Custom Institutional Catalogue', slug: 'custom-catalogue' })}
+              className="btn-primary cursor-pointer shadow-sm hover:shadow-md transition text-center"
+            >
               {ctaButtonLabel || 'Request Custom Catalogue'}
-            </Link>
+            </button>
 
             <Link to="/contact-us" className="rounded-full bg-white px-6 py-3 font-semibold text-cm-blue-dark transition-colors hover:bg-gray-100">
               Contact Sales

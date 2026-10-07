@@ -25,7 +25,6 @@ const ReplacementReturn = lazy(() => import('@/pages/replacement-return'));
 const BlogPost = lazy(() => import('@/pages/blog-post'));
 const CaseStudyDetail = lazy(() => import('@/pages/case-study-detail'));
 const CampusDesignService = lazy(() => import('@/pages/campus-design-service'));
-const HomeFeatureDetail = lazy(() => import('@/pages/home-feature-detail'));
 const SmartClassrooms = lazy(() => import('@/pages/smart-classrooms'));
 const AIGuideArticle = lazy(() => import('@/pages/ai-guide-article'));
 const SetupCollegeArticle = lazy(() => import('@/pages/setup-college-article'));
@@ -236,7 +235,7 @@ function App() {
               <Route path="/ai-guide/:articleSlug" element={<Layout><AIGuideArticle /></Layout>} />
               <Route path="/setup-college/:articleSlug" element={<Layout><SetupCollegeArticle /></Layout>} />
               <Route path="/ugc-guidelines/:articleSlug" element={<Layout><UGCGuidelineArticle /></Layout>} />
-              <Route path="/ar-vr-learning" element={<Layout><HomeFeatureDetail /></Layout>} />
+              <Route path="/ar-vr-learning" element={<Navigate to="/ar-vr-experiences" replace />} />
               <Route path="/admin/*" element={<AdminRoutes />} />
               <Route path="/wishlist" element={<Navigate to="/my-account?tab=wishlist" replace />} />
               <Route path="/cart" element={<Navigate to="/my-account?tab=wishlist" replace />} />

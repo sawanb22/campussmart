@@ -1848,3 +1848,29 @@
 
 
 
+
+---
+
+### [2026-10-07] Six Core Pending Issues Resolution (Issues #6, #11, #13, #15, #20, #23)
+- **Scope & Objectives**:
+  - Implement and verify the 6 core pending items from the original checklist: Campus Design showcase layout (#6), Classifieds typography sizing (#11), Colleges for Sale title & dossier modal (#13), Admin AI Stations search (#15), Catalogues CTA modal (#20), and AR/VR canonical route consolidation (#23).
+- **Key Changes**:
+  - **Issue #6 (`src/pages/campus-design-service.tsx`)**:
+    - Replaced the intrusive quotation form with an informative architectural showcase article.
+    - Added structured deliverables breakdown, pedagogical methodology, regulatory compliance details, related blog links, and an on-demand quote modal.
+  - **Issue #11 (`src/pages/classifieds.tsx`)**:
+    - Upgraded category pill buttons, card categories, descriptions, and CTA buttons from hardcoded 8px/9px/10px to modern 12px/13px/14px readable typography.
+  - **Issue #13 (`src/pages/colleges-universities-for-sale.tsx`)**:
+    - Removed `truncate text-sm` constraint on property titles and fixed `<h2>` to display `listing.title`.
+    - Eliminated subtitle duplication between heading and body paragraph.
+    - Built an interactive Listing Dossier Modal with complete asset specs, financial metrics, and NDA/Mandate download links.
+  - **Issue #15 (`backend/src/runSeed.ts`, `backend/prisma/seed.ts`, `src/admin/pages/PagesManager.tsx`)**:
+    - Updated PostgreSQL database record and seed templates for slug `ai-stations` from "AI Stations" to "AI-Powered Learning Stations".
+    - Added search alias resolution in `PagesManager.tsx` matching "AI-Powered", "Learning Stations", and "AI Stations".
+  - **Issue #20 (`src/pages/catalogues.tsx`)**:
+    - Replaced the bottom CTA redirect to `/request-quote` with an in-page trigger for `openRequestModal`.
+  - **Issue #23 (`src/App.tsx`, `src/admin/pages/PagesManager.tsx`, `src/admin/pages/HomepageEditor.tsx`)**:
+    - Consolidated to canonical route `/ar-vr-experiences`, redirected `/ar-vr-learning`, and removed duplicate from Admin.
+- **Validation**:
+  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 10.41s`).
+  - Backend Build: `prisma generate && tsc` passed with exit code 0.

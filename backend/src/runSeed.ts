@@ -732,7 +732,7 @@ async function seed() {
         { slug: 'ai-digital-design-supply', title: 'AI/Digital Design & Supply', template: 'ai-digital-design-supply' },
         { slug: 'ai-guide', title: 'AI Guide', template: 'ai-guide' },
         { slug: 'ai-ml', title: 'AI & ML Labs', template: 'ai-ml' },
-        { slug: 'ai-stations', title: 'AI Stations', template: 'ai-stations' },
+        { slug: 'ai-stations', title: 'AI-Powered Learning Stations', template: 'ai-stations' },
         { slug: 'assessment-system', title: 'Assessment System', template: 'assessment-system' },
         { slug: 'blog', title: 'Blog', template: 'blog' },
         { slug: 'campus-automation', title: 'Campus Automation', template: 'campus-automation' },

@@ -83,7 +83,7 @@ const MAIN_SLUGS = new Set([
 const CATEGORY_SLUGS = new Set([
     'campus-design', 'furniture', 'sports-infra', 'ai-ml', 'tech-infra',
     'libraries', 'labs', 'collaboration', 'innovation', 'lms',
-    'smart-classrooms', 'ar-vr-learning',
+    'smart-classrooms',
     'digital-transformation', 'campus-automation', 'assessment-system',
     'library-management', 'new-environments', 'setup-college',
     'innovation-centres', 'science-tech-labs', 'ai-guide',
@@ -327,10 +327,20 @@ export default function PagesManager() {
                 map.set(p.id, null);
                 return;
             }
-            const titleMatch = (p.title || '').toLowerCase().includes(normalizedSearch);
-            const slugMatch = (p.slug || '').toLowerCase().includes(normalizedSearch);
-            if (titleMatch || slugMatch) {
-                map.set(p.id, null); // Direct title/slug match
+            const titleLower = (p.title || '').toLowerCase();
+            const slugLower = (p.slug || '').toLowerCase();
+            const titleMatch = titleLower.includes(normalizedSearch) || (titleLower.length >= 4 && normalizedSearch.includes(titleLower));
+            const slugMatch = slugLower.includes(normalizedSearch);
+            // Search aliases for AI-Powered Learning Stations
+            const isAliasMatch = (slugLower === 'ai-stations' || p.id === 6) && (
+                normalizedSearch.includes('ai-powered') ||
+                normalizedSearch.includes('ai powered') ||
+                normalizedSearch.includes('learning station') ||
+                normalizedSearch.includes('learning stations')
+            );
+
+            if (titleMatch || slugMatch || isAliasMatch) {
+                map.set(p.id, null); // Direct title/slug/alias match
             } else {
                 const subMatch = getSubpageMatch(p, normalizedSearch);
                 if (subMatch) {

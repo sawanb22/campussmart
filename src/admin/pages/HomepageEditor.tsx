@@ -75,7 +75,7 @@ export default function HomepageEditor() {
                 setFeatures(savedFeatures.map((feature: any) => feature.title === 'Smart Classrooms'
                     ? { ...feature, href: '/smart-classrooms' }
                     : feature.title === 'AR / VR Learning' || feature.title === 'AR/VR Learning'
-                        ? { ...feature, href: '/ar-vr-learning' }
+                        ? { ...feature, href: '/ar-vr-experiences' }
                         : feature));
             } catch { /**/ }
             try {

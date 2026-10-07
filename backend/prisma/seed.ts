@@ -186,7 +186,7 @@ async function main() {
         { title: 'AI Digital Design Supply', slug: 'ai-digital-design-supply' },
         { title: 'AI Guide', slug: 'ai-guide' },
         { title: 'AI & ML', slug: 'ai-ml' },
-        { title: 'AI Stations', slug: 'ai-stations' },
+        { title: 'AI-Powered Learning Stations', slug: 'ai-stations' },
         { title: 'Assessment System', slug: 'assessment-system' },
         { title: 'Campus Automation', slug: 'campus-automation' },
         { title: 'Campus Design Execution', slug: 'campus-design-execution' },

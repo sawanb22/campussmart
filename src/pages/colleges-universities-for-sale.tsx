@@ -81,6 +81,7 @@ export default function CollegesUniversitiesForSale() {
   const [selectedRegion, setSelectedRegion] = useState<Region | 'All'>('All');
   const listings: Listing[] = Array.isArray(data.cards) ? data.cards : DEFAULTS.cards;
   const [contactListing, setContactListing] = useState<Listing | null>(null);
+  const [dossierListing, setDossierListing] = useState<Listing | null>(null);
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -291,11 +292,33 @@ export default function CollegesUniversitiesForSale() {
                   {(listing.premium || index < 2) && <span className="absolute right-0 top-0 bg-emerald-600 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">Premium</span>}
                   {listing.image && <MediaImage src={listing.image} alt={listing.title} className={`${view === 'list' ? 'h-32 w-44' : 'mb-5 h-40 w-full'} object-cover`} />}
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 text-[#087ea4]"><span className="h-3 w-3 rounded-full bg-emerald-500" /><span className="truncate text-sm font-medium">{listing.title}</span></div>
-                    <h2 className="mt-3 line-clamp-3 text-xl font-semibold leading-8 text-slate-950">{listing.description || listing.title}</h2>
-                    <div className="mt-4 flex flex-wrap gap-3 text-xs text-slate-500"><span><Mail className="mr-1 inline h-3.5 w-3.5 text-[#087ea4]" />Email</span><span><Phone className="mr-1 inline h-3.5 w-3.5 text-emerald-600" />Phone</span><span>Google</span><span>LinkedIn</span></div>
-                    <p className="mt-5 line-clamp-3 text-sm leading-7 text-slate-600">{listing.description}</p>
-                    <div className="mt-4 flex items-center gap-5 text-sm font-semibold"><span className="text-amber-500"><Star className="mr-1 inline h-4 w-4 fill-current" />{listing.rating ?? '6.8'}</span><span><MapPin className="mr-1 inline h-4 w-4 text-red-500" />{listing.location ?? 'India'}</span></div>
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#087ea4]">
+                        <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                        {listing.region ? `${listing.region} India` : 'Verified Institution'}
+                      </div>
+                      <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
+                        <MapPin className="h-3.5 w-3.5 text-red-500 inline" />
+                        {listing.location ?? 'India'}
+                      </span>
+                    </div>
+
+                    <h2
+                      className="text-lg sm:text-xl font-bold leading-snug text-slate-950 mb-2 cursor-pointer hover:text-[#087ea4] transition-colors"
+                      onClick={() => setDossierListing(listing)}
+                      title="Click to view full asset dossier"
+                    >
+                      {listing.title}
+                    </h2>
+
+                    <div className="mt-2 flex flex-wrap gap-3 text-xs text-slate-500">
+                      <span><Mail className="mr-1 inline h-3.5 w-3.5 text-[#087ea4]" />Email Verified</span>
+                      <span><Phone className="mr-1 inline h-3.5 w-3.5 text-emerald-600" />Direct Mandate</span>
+                      <span className="text-amber-600 font-semibold flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-current" />{listing.rating ?? '6.8'} Rating</span>
+                    </div>
+
+                    <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-slate-600">{listing.description}</p>
+
                     {(listing.ndaUrl || listing.mandateUrl) && (
                       <div className="mt-3 flex flex-wrap gap-2">
                         {listing.ndaUrl && (
@@ -304,7 +327,7 @@ export default function CollegesUniversitiesForSale() {
                             onClick={handleDownloadClick}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1 rounded bg-[#087ea4]/10 px-2 py-1 text-[10px] font-semibold text-[#087ea4] hover:bg-[#087ea4]/20"
+                            className="inline-flex items-center gap-1 rounded bg-[#087ea4]/10 px-2.5 py-1 text-xs font-semibold text-[#087ea4] hover:bg-[#087ea4]/20 transition"
                           >
                             <FileText className="h-3 w-3" /> NDA
                           </a>
@@ -315,16 +338,34 @@ export default function CollegesUniversitiesForSale() {
                             onClick={handleDownloadClick}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1 rounded bg-[#087ea4]/10 px-2 py-1 text-[10px] font-semibold text-[#087ea4] hover:bg-[#087ea4]/20"
+                            className="inline-flex items-center gap-1 rounded bg-[#087ea4]/10 px-2.5 py-1 text-xs font-semibold text-[#087ea4] hover:bg-[#087ea4]/20 transition"
                           >
                             <FileText className="h-3 w-3" /> Mandate
                           </a>
                         )}
                       </div>
                     )}
-                    <div className="mt-5 border-t border-slate-100 pt-4 text-sm"><div className="flex justify-between"><span className="text-slate-500">Run Rate Sales</span><strong>{listing.sales ?? 'Price on request'}</strong></div><div className="mt-3 flex justify-between"><span className="text-slate-500">EBITDA Margin</span><strong>{listing.margin ?? '25 %'}</strong></div></div>
-                    <div className="mt-3 flex justify-between text-sm"><span className="text-slate-500">Business for Sale</span><strong className="text-[#087ea4]">{listing.askingPrice ?? 'Contact us'}</strong></div>
-                    <button type="button" onClick={() => openContactForm(listing)} className="mt-5 w-full rounded bg-[#e6bb00] px-4 py-3 font-semibold text-slate-950 hover:bg-[#d5ab00]">Contact Business</button>
+                    <div className="mt-4 border-t border-slate-100 pt-3 text-sm">
+                      <div className="flex justify-between"><span className="text-slate-500">Run Rate Sales</span><strong>{listing.sales ?? 'Price on request'}</strong></div>
+                      <div className="mt-2 flex justify-between"><span className="text-slate-500">EBITDA Margin</span><strong className="text-emerald-600 font-bold">{listing.margin ?? '25 %'}</strong></div>
+                      <div className="mt-2 flex justify-between"><span className="text-slate-500">Asking Price</span><strong className="text-[#087ea4] font-bold">{listing.askingPrice ?? 'Contact us'}</strong></div>
+                    </div>
+                    <div className="mt-5 grid grid-cols-2 gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => setDossierListing(listing)}
+                        className="rounded-lg border border-[#087ea4] bg-white px-3 py-2.5 text-xs sm:text-sm font-bold text-[#087ea4] hover:bg-[#087ea4]/5 transition text-center cursor-pointer shadow-xs"
+                      >
+                        View Dossier
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => openContactForm(listing)}
+                        className="rounded-lg bg-[#e6bb00] px-3 py-2.5 text-xs sm:text-sm font-bold text-slate-950 hover:bg-[#d5ab00] transition text-center cursor-pointer shadow-xs"
+                      >
+                        Contact Business
+                      </button>
+                    </div>
                   </div>
                 </article>
               ))}
@@ -385,6 +426,133 @@ export default function CollegesUniversitiesForSale() {
                   </button>
                 </form>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Full Institutional Dossier Modal */}
+      {dossierListing && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm overflow-y-auto" role="dialog" aria-modal="true">
+          <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl my-8 overflow-hidden max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="flex items-start justify-between border-b border-slate-100 p-5 sm:p-6 bg-slate-50/80">
+              <div>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#087ea4]">
+                    {dossierListing.region ? `${dossierListing.region} India` : 'Verified Institution'} &bull; {dossierListing.location ?? 'India'}
+                  </span>
+                  {dossierListing.premium && (
+                    <span className="bg-emerald-600 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded">Premium</span>
+                  )}
+                </div>
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-950 leading-tight">
+                  {dossierListing.title}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDossierListing(null)}
+                aria-label="Close"
+                className="rounded-lg p-2 text-slate-400 hover:bg-slate-200/80 hover:text-slate-700 transition"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-5 sm:p-6 overflow-y-auto space-y-6 flex-1">
+              {dossierListing.image && (
+                <div className="rounded-xl overflow-hidden h-56 sm:h-72 w-full bg-slate-100 shadow-inner">
+                  <MediaImage src={dossierListing.image} alt={dossierListing.title} className="w-full h-full object-cover" />
+                </div>
+              )}
+
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Executive Summary & Overview</h3>
+                <p className="text-sm sm:text-base text-slate-700 leading-relaxed whitespace-pre-line bg-slate-50 p-4 rounded-xl border border-slate-100">
+                  {dossierListing.description}
+                </p>
+              </div>
+
+              {/* Financials & Key Stats Grid */}
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Institutional Valuation & Metrics</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 text-center">
+                    <span className="block text-[11px] font-semibold text-slate-400 uppercase">Run Rate Sales</span>
+                    <strong className="block text-sm sm:text-base font-bold text-slate-900 mt-1">{dossierListing.sales ?? 'On request'}</strong>
+                  </div>
+                  <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 text-center">
+                    <span className="block text-[11px] font-semibold text-slate-400 uppercase">EBITDA Margin</span>
+                    <strong className="block text-sm sm:text-base font-bold text-emerald-600 mt-1">{dossierListing.margin ?? '25 %'}</strong>
+                  </div>
+                  <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 text-center">
+                    <span className="block text-[11px] font-semibold text-slate-400 uppercase">Asking Price</span>
+                    <strong className="block text-sm sm:text-base font-bold text-[#087ea4] mt-1">{dossierListing.askingPrice ?? 'Contact us'}</strong>
+                  </div>
+                  <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 text-center">
+                    <span className="block text-[11px] font-semibold text-slate-400 uppercase">Asset Rating</span>
+                    <strong className="block text-sm sm:text-base font-bold text-amber-500 mt-1 flex items-center justify-center gap-1">
+                      <Star className="h-4 w-4 fill-current" />{dossierListing.rating ?? '6.8'}
+                    </strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* Legal Documents */}
+              {(dossierListing.ndaUrl || dossierListing.mandateUrl) && (
+                <div className="p-4 rounded-xl bg-blue-50/50 border border-blue-100/80">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#087ea4] mb-2.5">Confidential Due Diligence Documents</h3>
+                  <div className="flex flex-wrap gap-3">
+                    {dossierListing.ndaUrl && (
+                      <a
+                        href={resolveImage(dossierListing.ndaUrl)}
+                        onClick={handleDownloadClick}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-2 rounded-lg bg-white border border-[#087ea4]/30 px-3.5 py-2 text-xs font-bold text-[#087ea4] hover:bg-[#087ea4] hover:text-white transition shadow-xs"
+                      >
+                        <FileText className="h-4 w-4" /> Download NDA Document
+                      </a>
+                    )}
+                    {dossierListing.mandateUrl && (
+                      <a
+                        href={resolveImage(dossierListing.mandateUrl)}
+                        onClick={handleDownloadClick}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-2 rounded-lg bg-white border border-[#087ea4]/30 px-3.5 py-2 text-xs font-bold text-[#087ea4] hover:bg-[#087ea4] hover:text-white transition shadow-xs"
+                      >
+                        <FileText className="h-4 w-4" /> Download Mandate Document
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => setDossierListing(null)}
+                className="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-slate-300 text-slate-700 text-sm font-semibold hover:bg-slate-100 transition"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const target = dossierListing;
+                  setDossierListing(null);
+                  openContactForm(target);
+                }}
+                className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-[#e6bb00] hover:bg-[#d5ab00] text-slate-950 font-bold text-sm transition shadow-sm"
+              >
+                Contact Business Regarding this Asset
+              </button>
             </div>
           </div>
         </div>
