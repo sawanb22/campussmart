@@ -45,6 +45,7 @@ import adminRoutes from './routes/admin.routes';
 import contentRoutes from './routes/content.routes';
 import pagesRoutes from './routes/pages.routes';
 import mediaRoutes from './routes/media.routes';
+import chatbotRoutes from './routes/chatbot.routes';
 import { errorHandler } from './middleware/error.middleware';
 import { verifyTokenFromQueryOrHeader } from './middleware/auth.middleware';
 import { UPLOADS_DIR } from './lib/uploads-dir';
@@ -89,18 +90,33 @@ app.use(cors({
         if (!origin) return callback(null, true);
         // Allow all origins in local development and tunnels
         if (process.env.NODE_ENV !== 'production') return callback(null, true);
-        // Allow any vercel.app subdomain or Cloudflare/local tunnel
-        if (origin.endsWith('.vercel.app') || origin.endsWith('.trycloudflare.com') || origin.endsWith('.loca.lt')) return callback(null, true);
-        // Allow explicitly listed origins
+        // Allow explicitly listed origins in production
         if (allowedOrigins.includes(origin)) return callback(null, true);
         callback(new Error(`CORS: origin ${origin} not allowed`));
     },
     credentials: true,
 }));
 
-// Rate limiting
+// Global rate limiting
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 500 });
 app.use(limiter);
+
+// Dedicated rate limiters for authentication and sensitive flows
+export const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: { error: 'Too many authentication attempts. Please try again after 15 minutes.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+export const otpLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    message: { error: 'Too many OTP requests. Please try again after 15 minutes.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
 
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
@@ -147,6 +163,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/pages', pagesRoutes);
 app.use('/api/media', mediaRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 
 // Serve compiled frontend static assets for single-origin deployments/tunnels
 const DIST_DIR = path.resolve(__dirname, '../../dist');

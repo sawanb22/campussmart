@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { RESUMES_DIR, UPLOADS_DIR } from '../lib/uploads-dir';
 
-const ALLOWED_IMAGE_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg']);
+const ALLOWED_IMAGE_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif']);
 const ALLOWED_VIDEO_EXTS = new Set(['.mp4', '.webm', '.mov', '.mkv']);
 
 export const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB

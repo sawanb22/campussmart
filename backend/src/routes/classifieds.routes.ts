@@ -1,15 +1,17 @@
 import { Router, Request, Response } from 'express';
 import prisma from '../lib/prisma';
-import { verifyToken, requireAdmin, AuthRequest } from '../middleware/auth.middleware';
+import { verifyToken, requireAdmin, optionalAuth, AuthRequest } from '../middleware/auth.middleware';
 import { uploadImage } from '../middleware/upload.middleware';
 
 const router = Router();
 
 
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', optionalAuth, async (req: AuthRequest, res: Response) => {
     try {
-        const { status } = req.query;
-        const where = status ? { status: String(status) } : { status: 'approved' };
+        const isAdmin = req.user?.role === 'admin';
+        const requestedStatus = req.query.status ? String(req.query.status) : undefined;
+        const status = (isAdmin && requestedStatus) ? requestedStatus : 'approved';
+        const where = { status };
         const classifieds = await prisma.classified.findMany({
             where, include: { user: { select: { name: true, email: true } } }, orderBy: { createdAt: 'desc' }
         });

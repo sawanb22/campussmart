@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Save, RotateCcw, Plus, Trash2 } from 'lucide-react';
+import { Save, RotateCcw, Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 import api from '../api/client';
 import MediaImageField from '../components/MediaImageField';
 import { CATEGORY_ICONS, DEFAULT_CATEGORIES, type CategoryItem } from '@/components/sections/category-bar';
 import { useSiteContent } from '@/contexts/SiteContentContext';
 import { defaultServices } from '@/components/sections/service-cards';
+import { defaultFaqs, type FaqItem } from '@/components/sections/faq-section';
 import { broadcastCmsInvalidation } from '@/hooks/usePageData';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -55,6 +56,7 @@ export default function HomepageEditor() {
     const [tickerAnnouncements, setTickerAnnouncements] = useState<string[]>([]);
     const [collaborations, setCollaborations] = useState<any[]>([]);
     const [categories, setCategories] = useState<CategoryItem[]>(DEFAULT_CATEGORIES);
+    const [faqs, setFaqs] = useState<FaqItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
@@ -103,6 +105,14 @@ export default function HomepageEditor() {
                 { name: 'Princeton Science' },
                 { name: 'Columbia Design' },
             ]); } catch { /**/ }
+            try {
+                const parsedFaqs = data.home_faqs !== undefined && data.home_faqs !== null
+                    ? JSON.parse(data.home_faqs)
+                    : null;
+                setFaqs(Array.isArray(parsedFaqs) ? parsedFaqs : defaultFaqs);
+            } catch {
+                setFaqs(defaultFaqs);
+            }
         } catch (e) { console.error(e); }
         setLoading(false);
     };
@@ -122,6 +132,7 @@ export default function HomepageEditor() {
                 home_categories: JSON.stringify(categories),
                 ticker_announcements: JSON.stringify(tickerAnnouncements),
                 collaborations: JSON.stringify(collaborations),
+                home_faqs: JSON.stringify(faqs),
             });
             await refresh();
 
@@ -162,6 +173,28 @@ export default function HomepageEditor() {
     };
     const addListItem = (key: string, extra: any = {}) => setSidebarList(key, [...(sidebar[key] || []), { label: 'New Item', href: '/', ...extra }]);
     const delListItem = (key: string, i: number) => setSidebarList(key, (sidebar[key] || []).filter((_: any, idx: number) => idx !== i));
+
+    // FAQ helpers
+    const addFaq = () => setFaqs([...faqs, { question: 'New Frequently Asked Question?', answer: 'Provide an answer here.' }]);
+    const upFaq = (i: number, k: keyof FaqItem, v: string) => {
+        const a = [...faqs];
+        a[i] = { ...a[i], [k]: v };
+        setFaqs(a);
+    };
+    const delFaq = (i: number) => setFaqs(faqs.filter((_, idx) => idx !== i));
+    const moveFaq = (i: number, dir: 'up' | 'down') => {
+        const newIdx = dir === 'up' ? i - 1 : i + 1;
+        if (newIdx < 0 || newIdx >= faqs.length) return;
+        const a = [...faqs];
+        const [moved] = a.splice(i, 1);
+        a.splice(newIdx, 0, moved);
+        setFaqs(a);
+    };
+    const resetFaqsToDefault = () => {
+        if (window.confirm('Reset all FAQs to the standard 5 default questions? Unsaved changes will be replaced.')) {
+            setFaqs(defaultFaqs);
+        }
+    };
 
     if (loading) return <div className="flex items-center justify-center h-64"><p className="text-gray-400 text-sm">Loading editor…</p></div>;
 
@@ -439,6 +472,103 @@ export default function HomepageEditor() {
                     <button onClick={() => setCollaborations([...collaborations, { name: 'New Institution' }])} className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition-colors">
                         <Plus className="w-3.5 h-3.5" /> Add Institution
                     </button>
+                </div>
+            </Section>
+
+            <Section title={`❓ Frequently Asked Questions (FAQ) (${faqs.length})`}>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
+                    <p className="text-xs text-gray-500">
+                        Manage questions and answers displayed on the homepage FAQ accordion and the dedicated FAQ page.
+                    </p>
+                    <div className="flex items-center gap-2 shrink-0">
+                        <button
+                            onClick={resetFaqsToDefault}
+                            type="button"
+                            className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 text-gray-600 text-xs font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+                        >
+                            <RotateCcw className="w-3.5 h-3.5" /> Reset Defaults
+                        </button>
+                        <button
+                            onClick={addFaq}
+                            type="button"
+                            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-xs"
+                        >
+                            <Plus className="w-3.5 h-3.5" /> Add Question
+                        </button>
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    {faqs.length === 0 && (
+                        <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center text-gray-400 text-sm">
+                            <p className="font-semibold text-gray-600 mb-1">No FAQs configured</p>
+                            <p className="text-xs mb-4">Click "Add Question" to create one or "Reset Defaults" to restore the 5 standard questions.</p>
+                            <button
+                                onClick={resetFaqsToDefault}
+                                type="button"
+                                className="px-4 py-2 bg-blue-50 text-blue-600 font-bold text-xs rounded-lg hover:bg-blue-100 transition-colors"
+                            >
+                                Restore Standard 5 Questions
+                            </button>
+                        </div>
+                    )}
+
+                    {faqs.map((faq, i) => (
+                        <div key={i} className="border border-gray-200 rounded-xl p-4 bg-gray-50/50 hover:border-gray-300 transition-colors">
+                            <div className="flex items-center justify-between mb-3 border-b border-gray-200/60 pb-2.5">
+                                <span className="text-xs font-bold text-gray-700 uppercase tracking-wide flex items-center gap-2">
+                                    <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[10px] font-mono font-bold">
+                                        {i + 1}
+                                    </span>
+                                    <span>FAQ #{i + 1}</span>
+                                </span>
+                                <div className="flex items-center gap-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => moveFaq(i, 'up')}
+                                        disabled={i === 0}
+                                        title="Move Up"
+                                        className="p-1.5 text-gray-500 hover:bg-white rounded-lg disabled:opacity-30 disabled:hover:bg-transparent"
+                                    >
+                                        <ChevronUp className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => moveFaq(i, 'down')}
+                                        disabled={i === faqs.length - 1}
+                                        title="Move Down"
+                                        className="p-1.5 text-gray-500 hover:bg-white rounded-lg disabled:opacity-30 disabled:hover:bg-transparent"
+                                    >
+                                        <ChevronDown className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => delFaq(i)}
+                                        title="Remove FAQ"
+                                        className="flex items-center gap-1 px-2 py-1 text-red-500 hover:bg-red-50 rounded-lg text-xs font-semibold ml-1"
+                                    >
+                                        <Trash2 className="w-3.5 h-3.5" /> Remove
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                <Field
+                                    label="Question"
+                                    value={faq.question}
+                                    onChange={v => upFaq(i, 'question', v)}
+                                    placeholder="e.g. What turnkey infrastructure does CampusMart provide?"
+                                />
+                                <Field
+                                    label="Answer"
+                                    value={faq.answer}
+                                    onChange={v => upFaq(i, 'answer', v)}
+                                    multiline
+                                    placeholder="Provide a comprehensive and clear answer..."
+                                />
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </Section>
 

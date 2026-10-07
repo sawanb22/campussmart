@@ -61,6 +61,21 @@ router.put('/users/:id/role', verifyToken, requireAdmin, async (req: AuthRequest
             res.status(404).json({ error: 'User not found' });
             return;
         }
+
+        // Prevent self-demotion
+        if (req.user?.id === userId && role !== 'admin') {
+            res.status(400).json({ error: 'You cannot demote your own administrator account' });
+            return;
+        }
+
+        // Prevent demoting the last remaining administrator
+        if (role !== 'admin' && userExists.role === 'admin') {
+            const adminCount = await prisma.user.count({ where: { role: 'admin' } });
+            if (adminCount <= 1) {
+                res.status(400).json({ error: 'Cannot demote the last remaining administrator' });
+                return;
+            }
+        }
         
         const user = await prisma.user.update({ 
             where: { id: userId }, 
@@ -144,7 +159,11 @@ router.get('/wishlist-report', verifyToken, requireAdmin, async (_req: AuthReque
     }
 });
 
-const escapeCsvValue = (value: string) => `"${value.replace(/"/g, '""')}"`;
+const escapeCsvValue = (value: string) => {
+    const str = String(value ?? '');
+    const sanitized = /^[=+\-@\t\r]/.test(str) ? `'${str}` : str;
+    return `"${sanitized.replace(/"/g, '""')}"`;
+};
 
 // GET /api/admin/wishlist-report/export - same data as a downloadable CSV file.
 router.get('/wishlist-report/export', verifyToken, requireAdmin, async (_req: AuthRequest, res: Response) => {

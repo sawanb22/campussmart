@@ -4,6 +4,7 @@ import { ArrowLeft, BookOpen } from 'lucide-react';
 import api from '@/api/client';
 import { MediaImage } from '@/components/ui/media-image';
 import { resolveMediaUrl } from '@/lib/media-url';
+import DOMPurify from 'dompurify';
 
 const isVideoMedia = (url?: string) => Boolean(url && /\.(mp4|webm|mov|mkv|ogg)(\?.*)?$/i.test(url));
 
@@ -103,7 +104,7 @@ const CaseStudyDetail = () => {
             {study.description && <p className="text-lg text-gray-600 leading-relaxed border-l-4 border-cm-blue pl-5 mb-8">{study.description}</p>}
             {study.body && (
               bodyIsHtml ? (
-                <div className="prose prose-slate max-w-none [&_video]:w-full [&_video]:rounded-xl [&_video]:aspect-video [&_video]:bg-black" dangerouslySetInnerHTML={{ __html: study.body }} />
+                <div className="prose prose-slate max-w-none [&_video]:w-full [&_video]:rounded-xl [&_video]:aspect-video [&_video]:bg-black" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(study.body) }} />
               ) : (
                 <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">{study.body}</div>
               )

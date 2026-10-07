@@ -66,6 +66,7 @@ const Footer = () => {
     { label: 'About Us', href: '/about-us' },
     { label: 'Careers & Job Openings', href: '/job-openings' },
     { label: 'Contact Us', href: '/contact-us' },
+    { label: 'FAQs', href: '/faq' },
     { label: 'Report Issue', href: '/contact-us' },
     { label: 'Blog', href: '/blog' },
     { label: 'Delivery Locations', href: '/contact-us' },

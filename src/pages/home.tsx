@@ -8,6 +8,7 @@ import HeroBanner from '@/components/sections/hero-banner';
 import ServiceCards from '@/components/sections/service-cards';
 import FeatureCards from '@/components/sections/feature-cards';
 import Resources from '@/components/sections/resources';
+import FaqSection from '@/components/sections/faq-section';
 import PartnershipForm from '@/components/sections/partnership-form';
 import CollaborationsTicker from '@/components/sections/collaborations-ticker';
 
@@ -23,6 +24,7 @@ export default function Home() {
       <ServiceCards />
       <FeatureCards />
       <Resources />
+      <FaqSection />
       <PartnershipForm />
       <CollaborationsTicker />
       <Footer />

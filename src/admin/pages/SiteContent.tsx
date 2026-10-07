@@ -29,6 +29,7 @@ const HOMEPAGE_MANAGED_KEYS = new Set([
     'home_categories',
     'ticker_announcements',
     'collaborations',
+    'home_faqs',
 ]);
 
 export default function SiteContent() {

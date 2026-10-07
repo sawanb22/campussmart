@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, Tags } from 'lucide-react';
 import api from '@/api/client';
 import MediaImage from '@/components/ui/media-image';
+import DOMPurify from 'dompurify';
 
 interface Category { id: number; name: string; slug: string; }
 interface Post { title: string; body: string; excerpt: string; imageUrl?: string; category?: Category; blogcategory?: Category; }
@@ -39,7 +40,7 @@ const BlogPost = () => {
             <h1 className="text-3xl sm:text-5xl font-bold text-cm-blue-dark leading-tight mb-5">{post.title}</h1>
             {post.excerpt && <p className="text-lg text-gray-600 leading-relaxed border-l-4 border-cm-blue pl-5 mb-8">{post.excerpt}</p>}
             {bodyIsHtml ? (
-              <div className="prose prose-slate max-w-none" dangerouslySetInnerHTML={{ __html: post.body }} />
+              <div className="prose prose-slate max-w-none" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.body) }} />
             ) : (
               <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">{post.body}</div>
             )}

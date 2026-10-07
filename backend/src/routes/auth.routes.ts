@@ -5,6 +5,7 @@ import prisma from '../lib/prisma';
 import { sendOtpEmail, generateOtp } from '../lib/email';
 import { verifyToken, AuthRequest } from '../middleware/auth.middleware';
 import { isValidEmail, isValidPhone, isValidPincode } from '../lib/validation';
+import { authLimiter, otpLimiter } from '../index';
 
 const router = Router();
 
@@ -22,7 +23,7 @@ const generateTokens = (user: { id: number; email: string; role: string }) => {
 // ─── POST /api/auth/send-otp ──────────────────────────────────────────────────
 // Generates a 6-digit OTP and sends it to the given email address.
 // purpose: "verify" (for registration) | "login" (for sign in) | "reset" (forgot password)
-router.post('/send-otp', async (req: Request, res: Response) => {
+router.post('/send-otp', otpLimiter, async (req: Request, res: Response) => {
     try {
         const { email, purpose = 'verify' } = req.body;
         if (!email) { res.status(400).json({ error: 'Email is required' }); return; }
@@ -56,7 +57,7 @@ router.post('/send-otp', async (req: Request, res: Response) => {
 
 // ─── POST /api/auth/verify-otp ────────────────────────────────────────────────
 // Verifies a 6-digit OTP. Returns { valid: true } or error.
-router.post('/verify-otp', async (req: Request, res: Response) => {
+router.post('/verify-otp', otpLimiter, async (req: Request, res: Response) => {
     try {
         const { email, code, purpose = 'verify' } = req.body;
         if (!email || !code) { res.status(400).json({ error: 'Email and code are required' }); return; }
@@ -102,8 +103,8 @@ router.post('/register', async (req: Request, res: Response) => {
             res.status(400).json({ error: 'Please enter a valid email address' });
             return;
         }
-        if (password.length < 6) {
-            res.status(400).json({ error: 'Password must be at least 6 characters' });
+        if (password.length < 8) {
+            res.status(400).json({ error: 'Password must be at least 8 characters' });
             return;
         }
         if (phone && !isValidPhone(phone)) {
@@ -178,7 +179,7 @@ router.post('/register', async (req: Request, res: Response) => {
 });
 
 // ─── POST /api/auth/login ─────────────────────────────────────────────────────
-router.post('/login', async (req: Request, res: Response) => {
+router.post('/login', authLimiter, async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) { res.status(400).json({ error: 'Email and password required' }); return; }
@@ -237,12 +238,12 @@ router.post('/login', async (req: Request, res: Response) => {
 // ─── POST /api/auth/reset-password ────────────────────────────────────────────
 // Verifies the "reset" OTP and sets a new password in one step, so a stray
 // already-verified state is never persisted anywhere for someone else to reuse.
-router.post('/reset-password', async (req: Request, res: Response) => {
+router.post('/reset-password', authLimiter, async (req: Request, res: Response) => {
     try {
         const { email, code, newPassword } = req.body;
         if (!email || !code || !newPassword) { res.status(400).json({ error: 'Email, code and new password are required' }); return; }
         if (!isValidEmail(email)) { res.status(400).json({ error: 'Please enter a valid email address' }); return; }
-        if (newPassword.length < 6) { res.status(400).json({ error: 'Password must be at least 6 characters' }); return; }
+        if (newPassword.length < 8) { res.status(400).json({ error: 'Password must be at least 8 characters' }); return; }
 
         const normalizedEmail = normalizeEmail(email);
 
