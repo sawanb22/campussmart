@@ -1874,3 +1874,20 @@
 - **Validation**:
   - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 10.41s`).
   - Backend Build: `prisma generate && tsc` passed with exit code 0.
+
+---
+
+### [2026-10-07] Render Backend Boot Fix: Circular Dependency in Auth Routes & Rate Limiters
+- **Scope & Objectives**:
+  - Resolve Render production backend startup crash `TypeError: argument handler must be a function` at `router.post('/send-otp', otpLimiter, ...)`.
+- **Root Cause**:
+  - `backend/src/routes/auth.routes.ts` imported `{ authLimiter, otpLimiter }` from `../index`.
+  - Because `index.ts` imports `auth.routes.ts` before defining `authLimiter` and `otpLimiter`, Node CommonJS circular dependency caused `otpLimiter` to be `undefined` during route registration.
+- **Key Changes**:
+  - Created `backend/src/middleware/rate-limit.middleware.ts` isolating `globalLimiter`, `authLimiter`, and `otpLimiter`.
+  - Updated `backend/src/routes/auth.routes.ts` to import limiters from `../middleware/rate-limit.middleware`.
+  - Updated `backend/src/index.ts` to use `globalLimiter` and re-export `authLimiter` and `otpLimiter`.
+- **Validation**:
+  - Backend Build: `npm run build` (`prisma generate && tsc`) passed with exit code 0.
+  - Startup Test: `node dist/index.js` booted successfully on port 3001 with 0 errors.
+  - Seed Test: `node dist/runSeed.js` executed with exit code 0.

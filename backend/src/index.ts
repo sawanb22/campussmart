@@ -1,11 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import dns from 'dns';
+import { globalLimiter, authLimiter, otpLimiter } from './middleware/rate-limit.middleware';
+export { authLimiter, otpLimiter };
 
 // Enforce IPv4-first resolution across all Node sockets to eliminate ENETUNREACH on Render/Docker
 if (typeof dns.setDefaultResultOrder === 'function') {
@@ -98,25 +99,7 @@ app.use(cors({
 }));
 
 // Global rate limiting
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 500 });
-app.use(limiter);
-
-// Dedicated rate limiters for authentication and sensitive flows
-export const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 10,
-    message: { error: 'Too many authentication attempts. Please try again after 15 minutes.' },
-    standardHeaders: true,
-    legacyHeaders: false,
-});
-
-export const otpLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 5,
-    message: { error: 'Too many OTP requests. Please try again after 15 minutes.' },
-    standardHeaders: true,
-    legacyHeaders: false,
-});
+app.use(globalLimiter);
 
 // Body parsing
 app.use(express.json({ limit: '10mb' }));

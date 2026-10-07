@@ -5,7 +5,7 @@ import prisma from '../lib/prisma';
 import { sendOtpEmail, generateOtp } from '../lib/email';
 import { verifyToken, AuthRequest } from '../middleware/auth.middleware';
 import { isValidEmail, isValidPhone, isValidPincode } from '../lib/validation';
-import { authLimiter, otpLimiter } from '../index';
+import { authLimiter, otpLimiter } from '../middleware/rate-limit.middleware';
 
 const router = Router();
 
