@@ -63,39 +63,81 @@ app.use(helmet({
     contentSecurityPolicy: false 
 }));
 // Env vars may hold a single URL or a comma-separated list, sometimes with a
-// stray path or trailing slash; normalize everything down to bare origins
-// (scheme+host+port) so a formatting typo can't silently lock out real traffic.
-const toOrigin = (value: string): string | null => {
+// stray path, trailing slash, or missing protocol; normalize everything down to bare origins
+// (scheme+host+port) so formatting typos in Render/Vercel env vars don't break traffic.
+const normalizeOrigin = (raw: string): string | null => {
+    if (!raw) return null;
+    let trimmed = raw.trim();
+    if (!trimmed) return null;
+    // Auto-prepend https:// if scheme was omitted (e.g. "campussmart.vercel.app")
+    if (!/^https?:\/\//i.test(trimmed)) {
+        trimmed = `https://${trimmed}`;
+    }
     try {
-        return new URL(value.trim()).origin;
+        return new URL(trimmed).origin;
     } catch {
         return null;
     }
 };
 
-const allowedOrigins = [
+// Fully environment-variable driven CORS configuration
+const envOrigins = [
     process.env.FRONTEND_URL,
     process.env.ADMIN_URL,
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://localhost:3000',
+    process.env.ALLOWED_ORIGINS,
 ]
     .filter(Boolean)
     .flatMap((value) => (value as string).split(','))
-    .map(toOrigin)
+    .map(normalizeOrigin)
     .filter(Boolean) as string[];
+
+const devOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:3000',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:5174',
+    'http://127.0.0.1:3000',
+];
+
+const allowedOrigins = Array.from(new Set([
+    ...envOrigins,
+    ...(process.env.NODE_ENV !== 'production' ? devOrigins : []),
+]));
+
+console.log('🔒 CORS allowed origins:', allowedOrigins.length > 0 ? allowedOrigins : '(none configured - set FRONTEND_URL in environment)');
+
+const isOriginAllowed = (origin: string): boolean => {
+    if (allowedOrigins.includes(origin)) return true;
+
+    // Optional: allow Vercel preview branch deployments if enabled via env var
+    if (process.env.ALLOW_VERCEL_PREVIEWS === 'true') {
+        try {
+            const parsed = new URL(origin);
+            if (parsed.hostname.endsWith('.vercel.app')) return true;
+        } catch {
+            return false;
+        }
+    }
+
+    return false;
+};
 
 app.use(cors({
     origin: (origin, callback) => {
-        // Allow requests with no origin (mobile apps, curl, etc.)
+        // Allow requests with no origin (mobile apps, curl, server-to-server health checks)
         if (!origin) return callback(null, true);
         // Allow all origins in local development and tunnels
         if (process.env.NODE_ENV !== 'production') return callback(null, true);
-        // Allow explicitly listed origins in production
-        if (allowedOrigins.includes(origin)) return callback(null, true);
-        callback(new Error(`CORS: origin ${origin} not allowed`));
+        // Allow strictly permitted origins in production
+        if (isOriginAllowed(origin)) return callback(null, true);
+
+        console.warn(`[CORS Blocked] Origin "${origin}" not allowed. Add it to FRONTEND_URL in Render environment variables.`);
+        callback(null, false);
     },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
 }));
 
 // Global rate limiting

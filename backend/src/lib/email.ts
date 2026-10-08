@@ -11,6 +11,13 @@ const isSecure = process.env.EMAIL_SECURE === 'true';
 const port = parseInt(process.env.EMAIL_PORT || '587', 10);
 const host = process.env.EMAIL_HOST || 'smtp.gmail.com';
 
+// Enforce strict IPv4 resolution for Nodemailer to prevent IPv6 ENETUNREACH on Docker/Render
+const customLookup = (hostname: string, _options: any, callback: any) => {
+    dns.lookup(hostname, { family: 4 }, (err, address, family) => {
+        callback(err, address, family);
+    });
+};
+
 const transporter = nodemailer.createTransport({
     host,
     port,
@@ -19,7 +26,7 @@ const transporter = nodemailer.createTransport({
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
     },
-    family: 4, // Enforce IPv4 socket connection on Render/Docker
+    lookup: customLookup,
     connectionTimeout: 10_000,
     greetingTimeout: 10_000,
     socketTimeout: 10_000,
@@ -31,7 +38,7 @@ transporter.verify((err) => {
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
         console.warn('⚠️ EMAIL_USER or EMAIL_PASS not configured — OTP emails will not send. Codes will be logged to server logs.');
     } else if (err) {
-        console.error('⚠️ Email transporter verification failed — OTP emails will not send:', err.message);
+        console.warn('⚠️ Email transporter verification failed — OTP emails will not send (Note: Render free tier may block direct outbound SMTP ports 587/465). OTP codes are printed to server logs for verification:', err.message);
     } else {
         console.log(`✅ Email transporter ready (IPv4 via ${host}:${port})`);
     }
