@@ -8,6 +8,7 @@ interface ContentMap { [key: string]: string; }
 const CONTENT_LABELS: Record<string, string> = {
     about_text: 'About Text',
     contact_phone: 'Contact Phone',
+    contact_whatsapp: 'WhatsApp Business Number',
     contact_email: 'Contact Email',
     contact_address: 'Contact Address',
 };

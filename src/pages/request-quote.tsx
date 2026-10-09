@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Send, CheckCircle, Package, ArrowLeft } from 'lucide-react';
+import { Send, CheckCircle, Package, ArrowLeft, ShieldCheck, RefreshCw, X } from 'lucide-react';
 import api from '@/api/client';
 import { getUserSession } from '@/lib/auth-session';
 import { useWishlist } from '@/contexts/WishlistContext';
@@ -11,6 +11,14 @@ const RequestQuote = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [prefillNotice, setPrefillNotice] = useState('');
+
+  // OTP Verification States
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [otpError, setOtpError] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   const { items: wishlistItems } = useWishlist();
   const user = getUserSession();
@@ -89,8 +97,15 @@ const RequestQuote = () => {
     }
   }, [searchParams, wishlistItems]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  const executeQuoteSubmission = async (otp?: string) => {
     setSubmitting(true);
     setSubmitError('');
     try {
@@ -102,12 +117,69 @@ const RequestQuote = () => {
         pincode: formData.pincode,
         items: `Authorised Person: ${formData.authorisedPerson}\nPincode: ${formData.pincode}\nBudget: ${formData.budget || 'Not specified'}\nTimeline: ${formData.timeline || 'Not specified'}`,
         message: `Address: ${formData.address}\nRequirements:\n${formData.requirement}`,
+        otpCode: otp,
       });
       setSubmitted(true);
+      setShowOtpModal(false);
     } catch (err: any) {
-      setSubmitError(err.response?.data?.error || 'Failed to submit quote request. Please try again.');
+      const msg = err.response?.data?.error || 'Failed to submit quote request. Please try again.';
+      if (otp) {
+        setOtpError(msg);
+      } else {
+        setSubmitError(msg);
+      }
+      throw err;
     } finally {
       setSubmitting(false);
+      setOtpVerifying(false);
+    }
+  };
+
+  const triggerSendOtp = async () => {
+    setOtpSending(true);
+    setOtpError('');
+    try {
+      await api.post('/contact/send-quote-otp', { email: formData.email.trim() });
+      setResendCooldown(45);
+    } catch (err: any) {
+      setOtpError(err.response?.data?.error || 'Failed to send verification code. Please check your email.');
+    } finally {
+      setOtpSending(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitError('');
+
+    const isVerifiedUser = Boolean(
+      user && user.email && user.email.toLowerCase() === formData.email.trim().toLowerCase()
+    );
+
+    if (isVerifiedUser) {
+      // Logged-in verified user bypasses OTP requirement
+      await executeQuoteSubmission();
+      return;
+    }
+
+    // Unauthenticated guest user requires OTP verification
+    setShowOtpModal(true);
+    setOtpCode('');
+    await triggerSendOtp();
+  };
+
+  const handleVerifyOtpAndSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otpCode || otpCode.trim().length < 4) {
+      setOtpError('Please enter the 6-digit verification code.');
+      return;
+    }
+    setOtpVerifying(true);
+    setOtpError('');
+    try {
+      await executeQuoteSubmission(otpCode.trim());
+    } catch {
+      // Error handled in executeQuoteSubmission
     }
   };
 
@@ -313,6 +385,89 @@ const RequestQuote = () => {
           </form>
         </div>
       </div>
+
+      {/* Institutional Quote OTP Verification Modal */}
+      {showOtpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-2xl max-w-md w-full border border-slate-100 relative">
+            <button
+              type="button"
+              onClick={() => setShowOtpModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors"
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-12 h-12 rounded-2xl bg-blue-50 text-cm-blue flex items-center justify-center mx-auto mb-4 border border-blue-100">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+
+            <h3 className="text-xl font-bold text-slate-900 text-center mb-1">
+              Verify Official Email
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-500 text-center mb-6 leading-relaxed">
+              To verify and protect institutional requests, a 6-digit confirmation code has been sent to{' '}
+              <strong className="text-slate-800 break-all">{formData.email}</strong>
+            </p>
+
+            {otpError && (
+              <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs font-semibold text-center">
+                {otpError}
+              </div>
+            )}
+
+            <form onSubmit={handleVerifyOtpAndSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 text-center">
+                  Enter 6-Digit Code
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  autoFocus
+                  value={otpCode}
+                  onChange={(e) => {
+                    setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6));
+                    if (otpError) setOtpError('');
+                  }}
+                  className="w-full text-center text-2xl font-mono font-bold tracking-[0.4em] py-3 px-4 border border-slate-200 rounded-xl focus:border-cm-blue focus:ring-2 focus:ring-cm-blue/20 outline-none transition-all"
+                  placeholder="······"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={otpVerifying || otpCode.length < 4}
+                className="btn-primary w-full py-3 text-sm font-bold flex items-center justify-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50"
+              >
+                {otpVerifying ? 'Verifying Code & Submitting...' : 'Verify & Submit Quotation'}
+              </button>
+
+              <div className="flex items-center justify-between pt-2 text-xs">
+                <button
+                  type="button"
+                  disabled={resendCooldown > 0 || otpSending}
+                  onClick={triggerSendOtp}
+                  className="text-cm-blue hover:underline font-semibold disabled:text-slate-400 disabled:no-underline flex items-center gap-1.5"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${otpSending ? 'animate-spin' : ''}`} />
+                  {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : 'Resend code'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowOtpModal(false)}
+                  className="text-slate-500 hover:text-slate-700 font-semibold"
+                >
+                  Edit Email
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </main>
   );
 };

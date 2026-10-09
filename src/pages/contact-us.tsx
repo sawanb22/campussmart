@@ -3,6 +3,7 @@ import { Phone, Mail, Clock, Send, MessageCircle, type LucideIcon } from 'lucide
 import api from '@/api/client';
 import { usePageData } from '@/hooks/usePageData';
 import { useSiteContent } from '@/contexts/SiteContentContext';
+import { getWhatsAppUrl, sanitizePhone } from '@/lib/contact-actions';
 
 interface ContactInfoItem { title: string; content?: string; description?: string; icon: LucideIcon; }
 
@@ -99,8 +100,12 @@ const ContactUs = () => {
     content: item.description ?? item.content,
   }));
 
+  const whatsappNum = content.contact_whatsapp || content.contact_phone || '919966109191';
+  const whatsAppUrl = getWhatsAppUrl(whatsappNum, 'Hello CampusMart team, I have an enquiry regarding institutional solutions.');
+  const primaryPhone = sanitizePhone(content.contact_phone || '+91 9966109191');
+
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen relative pb-16">
       {/* Hero Section */}
       <section className="bg-cm-blue mx-3 sm:mx-6 lg:mx-8 rounded-[2rem] py-12 md:py-16 mt-4">
         <div className="w-full mx-auto px-2 sm:px-4 text-center">
@@ -260,43 +265,76 @@ const ContactUs = () => {
           </div>
 
           {/* Contact Info - Grid Below Form */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {contactInfo.map(({ icon: Icon, title, content }) => (
-              <div key={title} className="bg-white rounded-xl p-6 shadow-sm">
-                <div className="flex flex-col items-center gap-4 text-center">
-                  <div className="w-12 h-12 rounded-full bg-cm-blue/10 flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-6 h-6 text-cm-blue" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+            {contactInfo.map(({ icon: Icon, title, content: infoContent }) => {
+              const isPhone = title.toLowerCase().includes('phone');
+              return (
+                <div key={title} className="bg-white rounded-xl p-6 shadow-sm flex flex-col justify-between">
+                  <div className="flex flex-col items-center gap-4 text-center">
+                    <div className="w-12 h-12 rounded-full bg-cm-blue/10 flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-6 h-6 text-cm-blue" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-cm-blue-dark mb-2">{title}</h3>
+                      <p className="text-gray-600 whitespace-pre-line text-sm">{infoContent}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-cm-blue-dark mb-2">{title}</h3>
-                    <p className="text-gray-600 whitespace-pre-line">{content}</p>
-                  </div>
+                  {isPhone && (
+                    <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-center gap-3">
+                      <a
+                        href={`tel:${primaryPhone.dial}`}
+                        className="text-xs font-bold text-cm-blue hover:text-cm-blue-dark px-3 py-1.5 rounded-lg border border-cm-blue/20 hover:bg-cm-blue/5 transition-all inline-flex items-center gap-1.5"
+                      >
+                        <Phone className="w-3.5 h-3.5" /> Call
+                      </a>
+                      <a
+                        href={whatsAppUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs font-bold text-green-600 hover:text-green-700 px-3 py-1.5 rounded-lg border border-green-200 hover:bg-green-50 transition-all inline-flex items-center gap-1.5"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
+                      </a>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* WhatsApp CTA */}
-          <div className="bg-green-500 rounded-xl p-6 text-white max-w-2xl mx-auto w-full">
-            <div className="flex items-center gap-3 mb-4">
-              <MessageCircle className="w-8 h-8" />
-              <h3 className="text-xl font-bold">Chat on WhatsApp</h3>
+          <div className="bg-gradient-to-r from-emerald-500 to-green-600 rounded-2xl p-6 md:p-8 text-white max-w-2xl mx-auto w-full mt-10 shadow-lg text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="space-y-1">
+              <div className="flex items-center justify-center sm:justify-start gap-2.5">
+                <MessageCircle className="w-7 h-7" />
+                <h3 className="text-xl font-bold">Chat with us on WhatsApp</h3>
+              </div>
+              <p className="text-white/90 text-sm max-w-md">
+                Get direct support and immediate quotation guidance through WhatsApp with our team.
+              </p>
             </div>
-            <p className="text-white/90 mb-4">
-              Get instant support through WhatsApp. We're available during business hours.
-            </p>
             <a
-              href="https://wa.me/919966109191"
+              href={whatsAppUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block px-6 py-3 bg-white text-green-600 rounded-full font-semibold hover:bg-gray-100 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-white text-green-700 rounded-xl font-bold shadow-md hover:bg-gray-50 hover:shadow-lg transition-all shrink-0 text-sm"
             >
-              Start Chat
+              <MessageCircle className="w-4 h-4" /> Start WhatsApp Chat
             </a>
           </div>
         </div>
       </div>
 
+      {/* Floating WhatsApp Quick Action Button */}
+      <a
+        href={whatsAppUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Chat on WhatsApp"
+        className="fixed bottom-6 right-6 z-40 bg-[#25D366] text-white p-3.5 rounded-full shadow-2xl hover:bg-[#1EBE5D] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center group"
+      >
+        <MessageCircle className="w-6 h-6 fill-current" />
+      </a>
     </main>
   );
 };
