@@ -65,3 +65,20 @@
 - **Verification:**
   - `npm run build` passed cleanly with 0 errors (`✓ built in 13.16s`).
 
+---
+
+### Group 2: Services Layout Harmonization (`SERV-001`)
+- **Status:** Completed & Verified
+- **Original Feedback Addressed:**
+  - *"Campus master planning | Change to modern standard of other 3 pages in same category"*
+  - *"Services (Dropdown subpages) | All pages except first one are having different template"*
+  - User guidance: remove redundant filters from all service pages so all solutions are directly discoverable in a clean, unified modern template.
+- **Files Modified:**
+  - `src/pages/campus-master-planning.tsx` & `src/pages/campus-master-planning.data.ts`: Added category badges to defaults; modernized card styling with `MediaImage`, category badges, titles, descriptions, and "Learn More" links; added standardized bottom quote CTA banner.
+  - `src/pages/campus-design-execution.tsx`: Removed toolbar filters, colored dot classes (`DOT_COLORS`), and split 2-card layout; unified all 6 process steps into the 3-column card grid with step badges (`Step 01`...); added standardized bottom quote CTA banner.
+  - `src/pages/campus-furniture-design.tsx`: Removed horizontal filter chips and oversized amber split card; unified all 6 furniture ranges into the 3-column card grid; retained institutional trust badges (BIFMA/ISO, custom dimensions, ergonomic posture, turnkey installation); added standardized bottom quote CTA banner.
+  - `src/pages/ai-digital-design-supply.tsx`: Removed purple filter chips; unified all 4 digital solutions into the 3-column card grid with category badges and "Learn More" links; preserved detail route exports; added standardized bottom quote CTA banner.
+- **Verification:**
+  - `npm run build` passed cleanly with 0 errors (`✓ built in 14.38s`).
+
+

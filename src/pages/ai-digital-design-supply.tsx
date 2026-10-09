@@ -1,10 +1,8 @@
-import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
-import { getCardCover } from '@/lib/card-covers';
 import MediaImage from '@/components/ui/media-image';
-
+import { PageCardGridSkeleton } from '@/components/ui/page-skeleton';
 export interface AiDigitalSupplyCard {
   title: string;
   description?: string;
@@ -62,94 +60,107 @@ export const AI_DIGITAL_SUPPLY_DEFAULTS = {
 };
 
 const AIDigitalDesignSupply = () => {
-  const { data } = usePageData(AI_DIGITAL_SUPPLY_PAGE_SLUG);
-  const [activeCategory, setActiveCategory] = useState('All');
+  const { data, loading } = usePageData(AI_DIGITAL_SUPPLY_PAGE_SLUG);
 
+  const heroTitle = data.heroTitle ?? AI_DIGITAL_SUPPLY_DEFAULTS.heroTitle;
+  const heroSubtitle = data.heroSubtitle ?? AI_DIGITAL_SUPPLY_DEFAULTS.heroSubtitle;
   const section1Title = data.section1Title ?? AI_DIGITAL_SUPPLY_DEFAULTS.section1Title;
   const cards: AiDigitalSupplyCard[] = Array.isArray(data.cards) ? data.cards : AI_DIGITAL_SUPPLY_DEFAULTS.cards;
   const ctaTitle = data.ctaTitle ?? AI_DIGITAL_SUPPLY_DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? AI_DIGITAL_SUPPLY_DEFAULTS.ctaSubtitle;
 
-  const categoryOptions = useMemo(
-    () => Array.from(new Set(cards.flatMap((card) => card.categories ?? []).filter(Boolean))),
-    [cards],
-  );
-  const filteredCards = useMemo(
-    () => (activeCategory === 'All' ? cards : cards.filter((card) => (card.categories ?? []).includes(activeCategory))),
-    [cards, activeCategory],
-  );
+  const cardLink = (card: AiDigitalSupplyCard) =>
+    card.href?.trim() || `/${AI_DIGITAL_SUPPLY_PAGE_SLUG}/${slugifyAiDigitalSupplyTitle(card.title)}`;
 
-  const cardLink = (card: AiDigitalSupplyCard) => card.href?.trim() || `/${AI_DIGITAL_SUPPLY_PAGE_SLUG}/${slugifyAiDigitalSupplyTitle(card.title)}`;
+  if (loading && !data.cards) {
+    return <PageCardGridSkeleton cardCount={4} />;
+  }
 
   return (
     <main className="min-h-screen bg-white">
-      {/* Toolbar + grid */}
-      <section className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+      {/* Section Header */}
+      <section className="px-4 pt-8 pb-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          {/* Category filter chips */}
-          {categoryOptions.length > 0 && (
-            <div className="mb-4 flex flex-wrap items-center gap-2 border-b border-gray-100 pb-4">
-              {categoryOptions.map((category) => (
-                <button
-                  type="button"
-                  key={category}
-                  onClick={() => setActiveCategory(category)}
-                  className={`rounded-full border px-4 py-2 text-xs font-semibold transition-colors ${
-                    activeCategory === category ? 'border-cm-purple bg-cm-purple text-white' : 'border-gray-200 text-gray-600 hover:border-gray-400'
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-          )}
-
-          <h2 className="mb-4 text-2xl font-extrabold tracking-tight text-cm-blue-dark sm:text-3xl">{section1Title}</h2>
-
-          {filteredCards.length === 0 ? (
-            <div className="rounded-2xl border border-gray-100 bg-gray-50 py-20 text-center text-gray-500">No solutions match that category.</div>
-          ) : (
-            <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredCards.map((card, index) => {
-                const cover = getCardCover(index);
-                return (
-                  <Link
-                    key={card.title}
-                    to={cardLink(card)}
-                    className="group block min-w-0"
-                  >
-                    <div className="aspect-[4/3] w-full overflow-hidden rounded-xl" style={{ background: cover.background }}>
-                      {card.image && (
-                        <MediaImage src={card.image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                      )}
-                    </div>
-                    <span className="mt-3 block text-xs font-bold uppercase tracking-wide text-cm-purple">{card.categories?.[0] ?? 'Digital'}</span>
-                    <h3 className="mt-1 text-lg font-bold leading-snug text-cm-blue-dark group-hover:text-cm-blue">{card.title}</h3>
-                    {card.description && <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-gray-500">{card.description}</p>}
-                    <span className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-bold text-cm-blue">
-                      Learn more <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
+          <span className="text-xs font-bold uppercase tracking-widest text-cm-blue">
+            Smart Campus Technologies
+          </span>
+          <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-cm-blue-dark sm:text-4xl">
+            {heroTitle}
+          </h1>
+          <p className="mt-3 max-w-3xl text-base text-gray-600 leading-relaxed">
+            {heroSubtitle}
+          </p>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="px-4 pb-6 sm:px-6 lg:px-8">
-        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-2xl bg-cm-blue-dark p-8 text-center text-white sm:p-10 sm:text-left">
-          <div className="pointer-events-none absolute -right-14 -top-20 h-52 w-52 rounded-full border border-white/10" />
-          <div className="relative flex flex-col items-center justify-between gap-6 sm:flex-row">
-            <div>
-              <h2 className="text-2xl font-extrabold sm:text-3xl">{ctaTitle}</h2>
-              <p className="mt-2 max-w-md text-sm text-white/60">{ctaSubtitle}</p>
-            </div>
-            <Link to="/request-quote" className="shrink-0 rounded-full bg-cm-purple px-7 py-3 text-sm font-bold text-white transition-colors hover:bg-purple-700">
-              Get a Quote
-            </Link>
+      {/* Digital Solutions Grid */}
+      <section className="px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-6 flex items-center justify-between border-b border-gray-100 pb-4">
+            <h2 className="text-xl font-bold text-cm-blue-dark sm:text-2xl">
+              {section1Title}
+            </h2>
+            <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+              {cards.length} Digital Solutions
+            </span>
           </div>
+
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {cards.map((card) => {
+              const category = card.categories?.[0] ?? 'Digital';
+              return (
+                <Link
+                  key={card.title}
+                  to={cardLink(card)}
+                  className="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                >
+                  <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+                    {card.image && (
+                      <MediaImage
+                        src={card.image}
+                        alt={card.title}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    )}
+                  </div>
+                  <div className="flex flex-1 flex-col p-6">
+                    <span className="mb-2.5 inline-block w-fit rounded-full bg-blue-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-cm-blue">
+                      {category}
+                    </span>
+                    <h3 className="text-lg font-bold text-cm-blue-dark transition-colors group-hover:text-cm-blue">
+                      {card.title}
+                    </h3>
+                    {card.description && (
+                      <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-gray-600">
+                        {card.description}
+                      </p>
+                    )}
+                    <div className="mt-5 border-t border-gray-50 pt-3">
+                      <span className="inline-flex items-center gap-1.5 text-sm font-bold text-cm-blue transition-all group-hover:gap-2.5">
+                        Learn More <ArrowRight className="h-4 w-4" />
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Bottom CTA Banner */}
+      <section className="px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-8 rounded-[2rem] bg-gradient-to-br from-cm-blue-dark to-cm-blue px-8 py-8 text-center sm:flex-row sm:px-12 sm:text-left shadow-lg">
+          <div>
+            <h2 className="text-2xl font-bold text-white sm:text-3xl">{ctaTitle}</h2>
+            <p className="mt-2 max-w-xl text-sm text-white/85 sm:text-base">{ctaSubtitle}</p>
+          </div>
+          <Link
+            to="/request-quote"
+            className="btn-secondary inline-flex flex-shrink-0 items-center gap-2 px-8 py-3.5 text-sm font-bold shadow-md hover:scale-105 transition-all"
+          >
+            Get a Project Quote <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </section>
     </main>

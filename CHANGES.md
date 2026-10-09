@@ -66,6 +66,7 @@
 | `SHOP-003` | 2026-10-09 22:00 | Shop, Products & Wishlist Workflow | Removed product checkboxes & floating selection banner from /shop; retained clean "Add to Wishlist" / "✓ Wishlist" buttons; updated LoginPromptModal with institutional quotation copy; added canonical /Shop & /Furniture redirects with case-insensitive navbar & breadcrumb; enhanced /furniture with institutional trust badges (Group 3). | 6 files (frontend) | Completed |
 | `NAV-005` | 2026-10-09 23:20 | Navigation & Menus Streamlining | Removed redundant Solutions category from navbar; removed "All Services (Overview)" from Services dropdown; redirected /services and /solutions; cleaned up breadcrumb hierarchy under SOLID principles (Group 1). | 3 files (frontend) | Completed |
 | `CONT-001` | 2026-10-09 23:55 | Content & Article Pages | Corporate /about-us dynamic ecosystem and whyBullets highlights; Blog /blog refactored to match /ai-guide layout with dynamic API integration (Group 5). | 2 files (frontend) | Completed |
+| `SERV-001` | 2026-10-10 00:25 | Services Layout Harmonization | Harmonized all 4 Services subpages (/campus-master-planning, /campus-design-execution, /campus-furniture-design, /ai-digital-design-supply) into a unified modern 3-column card grid template without redundant filters (Group 2). | 4 files (frontend) | Completed |
 
 
 
@@ -1998,6 +1999,38 @@
 - **Validation**:
   - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 13.16s`).
   - Zero TypeScript, lint, or runtime errors.
+
+---
+
+### [2026-10-10] Group 2 – Services Layout Harmonization (SERV-001)
+- **Scope & Objectives**:
+  - Unify and harmonize all 4 subpages of the Services category (`/campus-master-planning`, `/campus-design-execution`, `/campus-furniture-design`, `/ai-digital-design-supply`).
+  - Address client feedback: *"Campus master planning | Change to modern standard of other 3 pages in same category"* and *"Services (Dropdown subpages) | All pages except first one are having different template"*.
+  - Per discussion and UX analysis, completely remove redundant category filter bars (which only isolated 1 card per filter) in favor of a clean, immediate, full-width presentation of all institutional services.
+  - Standardize all 4 pages to follow the same premium modern template: consistent section header, unified 3-column responsive card grid, and branded bottom CTA banner.
+- **Key Changes**:
+  - **`src/pages/campus-master-planning.tsx` & `.data.ts`**:
+    - Added categories to data defaults (`Feasibility`, `Master Plan`, `Zoning`, `Roadmaps`, `Infrastructure`, `Compliance`).
+    - Standardized card grid using `MediaImage`, category tag badge pills, bold titles, descriptions, and "Learn More" links.
+    - Added standard bottom quote CTA banner.
+  - **`src/pages/campus-design-execution.tsx`**:
+    - Removed filter toolbar, colored dot classes (`DOT_COLORS`), and fractured 2-featured + rest layout.
+    - Standardized into the unified 3-column card grid with sequential step indicators (`Step 01`, `Step 02`, etc.) and category badges.
+    - Standardized bottom quote CTA banner.
+  - **`src/pages/campus-furniture-design.tsx`**:
+    - Removed horizontal dark pill filters and oversized single amber split card.
+    - Retained institutional furniture trust badges (BIFMA/ISO, custom dimensions, ergonomic posture, turnkey installation) under the hero.
+    - Standardized all 6 furniture ranges into the unified 3-column card grid with "Explore Range" actions.
+    - Standardized bottom quote CTA banner.
+  - **`src/pages/ai-digital-design-supply.tsx`**:
+    - Removed horizontal purple filter buttons.
+    - Standardized all 4 digital solutions into the unified 3-column card grid with category badges and "Learn More" actions.
+    - Maintained full export compatibility for detail subroute resolution.
+    - Standardized bottom quote CTA banner.
+- **Validation**:
+  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 14.38s`).
+  - Zero TypeScript, lint, or runtime errors.
+
 
 
 
