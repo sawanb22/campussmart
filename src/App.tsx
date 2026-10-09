@@ -83,8 +83,6 @@ const PageTemplates: Record<string, any> = {
   'tech-infra': lazy(() => import('@/pages/tech-infra')),
   'terms-of-use': lazy(() => import('@/pages/terms-of-use')),
   'ugc-guidelines': lazy(() => import('@/pages/ugc-guidelines')),
-  'services': lazy(() => import('@/pages/services')),
-  'solutions': lazy(() => import('@/pages/solutions')),
   'smart-classrooms': SmartClassrooms,
   'home': Home,
 };
@@ -255,6 +253,8 @@ function App() {
               <Route path="/sports-infrastructure/:facilitySlug" element={<Navigate to="/sports-infra" replace />} />
               <Route path="/innovation-centers" element={<Navigate to="/innovation-centres" replace />} />
               <Route path="/innovation-centers/:spaceSlug" element={<Navigate to="/innovation-centres" replace />} />
+              <Route path="/services" element={<Navigate to="/campus-design-execution" replace />} />
+              <Route path="/solutions" element={<Navigate to="/labs" replace />} />
 
               {/* Static pages explicitly mapped so they always work */}
               {Object.keys(PageTemplates).map((path) => {

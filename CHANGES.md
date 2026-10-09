@@ -64,6 +64,7 @@
 | `CHUNK-001` | 2026-10-06 18:42 | Enterprise Deployment Resilience | Implemented automatic stale chunk recovery with lazyWithRetry, vite:preloadError global listener, ErrorBoundary self-healing, and Vercel Cache-Control headers to eliminate dynamic module import failures across production deployments. | 6 files (frontend & config) | Completed |
 | `FORMS-002` | 2026-10-09 20:45 | Forms & Verification Hardening | Email OTP verification on quotation requests (/request-quote) with rate limiter, email template, and logged-in user exemption; dynamic WhatsApp & actionable Phone cards on /contact-us bound to site content under SOLID principles (Group 4). | 6 files (backend, frontend, admin) | Completed |
 | `SHOP-003` | 2026-10-09 22:00 | Shop, Products & Wishlist Workflow | Removed product checkboxes & floating selection banner from /shop; retained clean "Add to Wishlist" / "✓ Wishlist" buttons; updated LoginPromptModal with institutional quotation copy; added canonical /Shop & /Furniture redirects with case-insensitive navbar & breadcrumb; enhanced /furniture with institutional trust badges (Group 3). | 6 files (frontend) | Completed |
+| `NAV-005` | 2026-10-09 23:20 | Navigation & Menus Streamlining | Removed redundant Solutions category from navbar; removed "All Services (Overview)" from Services dropdown; redirected /services and /solutions; cleaned up breadcrumb hierarchy under SOLID principles (Group 1). | 3 files (frontend) | Completed |
 
 
 
@@ -1950,4 +1951,29 @@
 - **Validation**:
   - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 10.35s`).
   - Automated tests and zero TypeScript/lint errors.
+
+---
+
+### [2026-10-09] Group 1 – Navigation & Menus Streamlining (NAV-005)
+- **Scope & Objectives**:
+  - Remove redundant "Solutions" category from top header navigation (individual categories already exist in CategoryBar).
+  - Remove "All Services (Overview)" item from Services dropdown; display only the 4 execution services.
+  - Make Services parent button cleanly toggle dropdown on click without linking to generic /services.
+  - Add canonical redirects: `/services` ➔ `/campus-design-execution` and `/solutions` ➔ `/labs`.
+  - Clean up breadcrumb metadata hierarchy, removing dead /solutions and /services parent links.
+- **Key Changes**:
+  - **`src/components/layout/header.tsx`**:
+    - Removed `Solutions` from `navItems`.
+    - Removed `All Services (Overview)` from `Services.dropdownItems`.
+    - Made `Services` parent button toggle dropdown (`href: null`).
+    - Added `isItemActive` helper highlighting parent when inside any child route.
+  - **`src/App.tsx`**:
+    - Removed `services` and `solutions` from `PageTemplates`.
+    - Added `<Route path="/services" element={<Navigate to="/campus-design-execution" replace />} />`.
+    - Added `<Route path="/solutions" element={<Navigate to="/labs" replace />} />`.
+  - **`src/components/layout/breadcrumb-bar.tsx`**:
+    - Removed legacy `parent: { label: 'Solutions', href: '/solutions' }` and `parent: { label: 'Services', href: '/services' }` across all child routes.
+- **Validation**:
+  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 10.18s`).
+
 

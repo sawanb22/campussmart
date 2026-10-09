@@ -37,3 +37,17 @@
   - `src/pages/furniture.tsx`: Added institutional trust badges (BIFMA/ISO, custom dimensions, ergonomic posture, turnkey installation) under the hero to distinctly present it as an educational furniture solutions showcase.
 - **Verification:**
   - `npm run build` passed cleanly with 0 errors (`✓ built in 27.63s`).
+
+---
+
+### Group 1: Navigation & Menus Streamlining (`NAV-005`)
+- **Status:** Completed & Verified
+- **Original Feedback Addressed:**
+  - *"Services | Remove all services"*
+  - *"Remive Solutions category totally"*
+- **Files Modified:**
+  - `src/components/layout/header.tsx`: Completely removed redundant "Solutions" dropdown; removed "All Services (Overview)" item from Services dropdown; made Services parent button cleanly toggle dropdown on click without linking to generic /services; added `isItemActive` helper to keep Services active on child service pages.
+  - `src/App.tsx`: Removed `services` and `solutions` from `PageTemplates`; added canonical redirects `/services` ➔ `/campus-design-execution` and `/solutions` ➔ `/labs`.
+  - `src/components/layout/breadcrumb-bar.tsx`: Removed legacy `parent: { label: 'Solutions', href: '/solutions' }` and `parent: { label: 'Services', href: '/services' }` parent pointers across all child routes.
+- **Verification:**
+  - `npm run build` passed cleanly with 0 errors (`✓ built in 10.18s`).

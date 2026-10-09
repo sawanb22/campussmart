@@ -68,27 +68,13 @@ const MainHeader = () => {
     },
     {
       label: 'Services',
-      href: '/services',
+      href: null,
       hasDropdown: true,
       dropdownItems: [
-        { label: 'All Services (Overview)', href: '/services' },
         { label: 'Campus Design & Execution', href: '/campus-design-execution' },
         { label: 'Furniture Design & Supply', href: '/furniture-design-supply' },
         { label: 'Sports Design & Execution', href: '/sports-design-execution' },
         { label: 'AI/Digital Solutions', href: '/ai-digital-design-supply' },
-      ]
-    },
-    {
-      label: 'Solutions',
-      href: '/solutions',
-      hasDropdown: true,
-      dropdownItems: [
-        { label: 'All Solutions (Overview)', href: '/solutions' },
-        { label: 'Laboratories', href: '/labs' },
-        { label: 'Libraries', href: '/libraries' },
-        { label: 'Innovation Centres', href: '/innovation-centres' },
-        { label: 'Learning Environments', href: '/new-environments' },
-        { label: 'AI Stations', href: '/ai-stations' },
       ]
     },
     { label: 'Catalogues', href: '/catalogues' },
@@ -105,6 +91,12 @@ const MainHeader = () => {
       return current === '/';
     }
     return current.startsWith(target);
+  };
+
+  const isItemActive = (item: NavItem) => {
+    if (item.href && isActive(item.href)) return true;
+    if (item.dropdownItems && item.dropdownItems.some((d) => isActive(d.href))) return true;
+    return false;
   };
 
   return (
@@ -137,14 +129,14 @@ const MainHeader = () => {
                       {item.href ? (
                         <Link
                           to={item.href}
-                          className={`nav-link flex items-center gap-1 ${isActive(item.href) ? 'bg-cm-blue text-white rounded-full' : ''}`}
+                          className={`nav-link flex items-center gap-1 ${isItemActive(item) ? 'bg-cm-blue text-white rounded-full' : ''}`}
                         >
                           {item.label}
                           <ChevronDown className={`w-4 h-4 transition-transform ${dropdownOpen === item.label ? 'rotate-180' : ''}`} />
                         </Link>
                       ) : (
                         <button
-                          className="nav-link flex items-center gap-1 cursor-pointer"
+                          className={`nav-link flex items-center gap-1 cursor-pointer ${isItemActive(item) ? 'bg-cm-blue text-white rounded-full' : ''}`}
                           onClick={() => setDropdownOpen(dropdownOpen === item.label ? null : item.label)}
                         >
                           {item.label}
@@ -203,7 +195,7 @@ const MainHeader = () => {
                   {item.hasDropdown ? (
                     <div>
                       <button
-                        className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs font-semibold uppercase transition-colors ${item.href && isActive(item.href) ? 'bg-cm-blue text-white' : 'text-gray-700 hover:bg-cm-blue hover:text-white'}`}
+                        className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs font-semibold uppercase transition-colors ${isItemActive(item) ? 'bg-cm-blue text-white' : 'text-gray-700 hover:bg-cm-blue hover:text-white'}`}
                         onClick={() => setDropdownOpen(dropdownOpen === item.label ? null : item.label)}
                       >
                         {item.label}
