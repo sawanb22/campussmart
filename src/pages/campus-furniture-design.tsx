@@ -13,9 +13,13 @@ import {
 const CampusFurnitureDesign = () => {
   const { data, loading } = usePageData(FURNITURE_DESIGN_PAGE_SLUG);
 
+  const heroLabel = data.heroLabel ?? 'Educational Infrastructure';
   const heroTitle = data.heroTitle ?? FURNITURE_DESIGN_DEFAULTS.heroTitle;
   const heroSubtitle = data.heroSubtitle ?? FURNITURE_DESIGN_DEFAULTS.heroSubtitle;
+  const sectionTitle = data.section1Title ?? data.sectionTitle ?? 'Curated Furniture Collections';
   const cards: FurnitureDesignCard[] = Array.isArray(data.cards) ? data.cards : FURNITURE_DESIGN_DEFAULTS.cards;
+  const ctaTitle = data.ctaTitle ?? 'Ready to Furnish Your Campus?';
+  const ctaSubtitle = data.ctaSubtitle ?? 'Tell us about your room layouts, student strength, and timelines — our design team will recommend the right ergonomic furniture mix.';
 
   const cardLink = (card: FurnitureDesignCard) =>
     card.href?.trim() || `/${FURNITURE_DESIGN_PAGE_SLUG}/${slugifyFurnitureDesignTitle(card.title)}`;
@@ -30,7 +34,7 @@ const CampusFurnitureDesign = () => {
       <section className="px-4 pt-8 pb-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <span className="text-xs font-bold uppercase tracking-widest text-cm-blue">
-            Educational Infrastructure
+            {heroLabel}
           </span>
           <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-cm-blue-dark sm:text-4xl">
             {heroTitle}
@@ -80,13 +84,10 @@ const CampusFurnitureDesign = () => {
       {/* Furniture Ranges Grid */}
       <section className="px-4 py-6 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-6 flex items-center justify-between border-b border-gray-100 pb-4">
+          <div className="mb-6 border-b border-gray-100 pb-4">
             <h2 className="text-xl font-bold text-cm-blue-dark sm:text-2xl">
-              Curated Furniture Collections
+              {sectionTitle}
             </h2>
-            <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-              {cards.length} Specialized Ranges
-            </span>
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -137,10 +138,10 @@ const CampusFurnitureDesign = () => {
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-8 rounded-[2rem] bg-gradient-to-br from-cm-blue-dark to-cm-blue px-8 py-8 text-center sm:flex-row sm:px-12 sm:text-left shadow-lg">
           <div>
             <h2 className="text-2xl font-bold text-white sm:text-3xl">
-              Ready to Furnish Your Campus?
+              {ctaTitle}
             </h2>
             <p className="mt-2 max-w-xl text-sm text-white/85 sm:text-base">
-              Tell us about your room layouts, student strength, and timelines — our design team will recommend the right ergonomic furniture mix.
+              {ctaSubtitle}
             </p>
           </div>
           <Link

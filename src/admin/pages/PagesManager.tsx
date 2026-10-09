@@ -88,6 +88,7 @@ const CATEGORY_SLUGS = new Set([
     'library-management', 'new-environments', 'setup-college',
     'innovation-centres', 'science-tech-labs', 'ai-guide',
     'campus-master-planning', 'ar-vr-experiences', 'campus-furniture-design',
+    'campus-design-execution', 'ai-digital-design-supply',
 ]);
 
 type Group = { label: string; badge: string; badgeColor: string; pages: Page[] };

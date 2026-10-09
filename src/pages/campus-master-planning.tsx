@@ -13,9 +13,10 @@ import {
 const CampusMasterPlanning = () => {
   const { data, loading } = usePageData(MASTER_PLANNING_PAGE_SLUG);
 
+  const heroLabel = data.heroLabel ?? 'Master Planning Services';
   const heroTitle = data.heroTitle ?? MASTER_PLANNING_DEFAULTS.heroTitle;
   const heroSubtitle = data.heroSubtitle ?? MASTER_PLANNING_DEFAULTS.heroSubtitle;
-  const section2Title = data.section2Title ?? MASTER_PLANNING_DEFAULTS.section2Title;
+  const section2Title = data.section1Title ?? data.sectionTitle ?? data.section2Title ?? MASTER_PLANNING_DEFAULTS.section2Title;
   const cards: MasterPlanningCard[] = Array.isArray(data.cards) ? data.cards : MASTER_PLANNING_DEFAULTS.cards;
   const ctaTitle = data.ctaTitle ?? MASTER_PLANNING_DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? MASTER_PLANNING_DEFAULTS.ctaSubtitle;
@@ -33,7 +34,7 @@ const CampusMasterPlanning = () => {
       <section className="px-4 pt-8 pb-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <span className="text-xs font-bold uppercase tracking-widest text-cm-blue">
-            Master Planning Services
+            {heroLabel}
           </span>
           <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-cm-blue-dark sm:text-4xl">
             {heroTitle}
@@ -47,13 +48,10 @@ const CampusMasterPlanning = () => {
       {/* Services Grid */}
       <section id="planning-services" className="px-4 py-6 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-6 flex items-center justify-between border-b border-gray-100 pb-4">
+          <div className="mb-6 border-b border-gray-100 pb-4">
             <h2 className="text-xl font-bold text-cm-blue-dark sm:text-2xl">
               {section2Title}
             </h2>
-            <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-              {cards.length} Core Services
-            </span>
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">

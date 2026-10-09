@@ -62,9 +62,10 @@ export const AI_DIGITAL_SUPPLY_DEFAULTS = {
 const AIDigitalDesignSupply = () => {
   const { data, loading } = usePageData(AI_DIGITAL_SUPPLY_PAGE_SLUG);
 
+  const heroLabel = data.heroLabel ?? 'Smart Campus Technologies';
   const heroTitle = data.heroTitle ?? AI_DIGITAL_SUPPLY_DEFAULTS.heroTitle;
   const heroSubtitle = data.heroSubtitle ?? AI_DIGITAL_SUPPLY_DEFAULTS.heroSubtitle;
-  const section1Title = data.section1Title ?? AI_DIGITAL_SUPPLY_DEFAULTS.section1Title;
+  const section1Title = data.section1Title ?? data.sectionTitle ?? AI_DIGITAL_SUPPLY_DEFAULTS.section1Title;
   const cards: AiDigitalSupplyCard[] = Array.isArray(data.cards) ? data.cards : AI_DIGITAL_SUPPLY_DEFAULTS.cards;
   const ctaTitle = data.ctaTitle ?? AI_DIGITAL_SUPPLY_DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? AI_DIGITAL_SUPPLY_DEFAULTS.ctaSubtitle;
@@ -82,7 +83,7 @@ const AIDigitalDesignSupply = () => {
       <section className="px-4 pt-8 pb-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <span className="text-xs font-bold uppercase tracking-widest text-cm-blue">
-            Smart Campus Technologies
+            {heroLabel}
           </span>
           <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-cm-blue-dark sm:text-4xl">
             {heroTitle}
@@ -96,13 +97,10 @@ const AIDigitalDesignSupply = () => {
       {/* Digital Solutions Grid */}
       <section className="px-4 py-6 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-6 flex items-center justify-between border-b border-gray-100 pb-4">
+          <div className="mb-6 border-b border-gray-100 pb-4">
             <h2 className="text-xl font-bold text-cm-blue-dark sm:text-2xl">
               {section1Title}
             </h2>
-            <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-              {cards.length} Digital Solutions
-            </span>
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
