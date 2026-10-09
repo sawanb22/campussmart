@@ -1,7 +1,7 @@
 import { type ComponentType, lazy } from 'react';
 
 const CHUNK_RELOAD_KEY = 'cm_chunk_reload_ts';
-const RELOAD_DEBOUNCE_MS = 10000; // 10-second guard to prevent infinite reload loops if offline
+const RELOAD_DEBOUNCE_MS = 3000; // 3-second guard to prevent infinite reload loops if offline
 
 /**
  * Enterprise-grade lazy loader with automatic deployment recovery (SOLID: Single Responsibility & Liskov Substitution).

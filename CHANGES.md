@@ -67,6 +67,7 @@
 | `NAV-005` | 2026-10-09 23:20 | Navigation & Menus Streamlining | Removed redundant Solutions category from navbar; removed "All Services (Overview)" from Services dropdown; redirected /services and /solutions; cleaned up breadcrumb hierarchy under SOLID principles (Group 1). | 3 files (frontend) | Completed |
 | `CONT-001` | 2026-10-09 23:55 | Content & Article Pages | Corporate /about-us dynamic ecosystem and whyBullets highlights; Blog /blog refactored to match /ai-guide layout with dynamic API integration (Group 5). | 2 files (frontend) | Completed |
 | `SERV-001` | 2026-10-10 00:25 | Services Layout Harmonization | Harmonized all 4 Services subpages (/campus-master-planning, /campus-design-execution, /campus-furniture-design, /ai-digital-design-supply) into a unified modern 3-column card grid template without redundant filters (Group 2). | 4 files (frontend) | Completed |
+| `CHUNK-002` | 2026-10-10 00:55 | Production & Deployment Resilience | Eradicated blocking 'Updating CampusMart...' modal prompt, streamlined auto-reload with silent background refresh and tightened debounce to 3s under SOLID principles. | 3 files (frontend) | Completed |
 
 
 
@@ -2030,6 +2031,27 @@
 - **Validation**:
   - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 14.38s`).
   - Zero TypeScript, lint, or runtime errors.
+
+---
+
+### [2026-10-10] Production & Deployment Resilience (CHUNK-002)
+- **Scope & Objectives**:
+  - Eradicate the disruptive, full-screen blocking modal prompt (*"Updating CampusMart... A new version has been deployed. Refreshing your application to load the latest updates. [Refresh Now]"*).
+  - Streamline automatic deployment recovery so stale chunk mismatches (which occur when a client has a tab open across new deployments) refresh silently and transparently in the background.
+  - Tighten debounce threshold from 10 seconds to 3 seconds to avoid UI lockups while preserving offline loop guards.
+- **Key Changes**:
+  - **`src/components/ErrorBoundary.tsx`**:
+    - Removed the disruptive full-screen modal card and "Refresh Now" prompt.
+    - Updated `render()` to execute a silent `window.location.reload()` while showing only the standard neutral spinner.
+    - Tightened `RELOAD_DEBOUNCE_MS` to 3000ms.
+  - **`src/lib/lazy-with-retry.ts`**:
+    - Tightened `RELOAD_DEBOUNCE_MS` to 3000ms to allow immediate transparent recovery on subsequent navigation.
+  - **`src/main.tsx`**:
+    - Tightened `vite:preloadError` debounce to 3000ms.
+- **Validation**:
+  - Frontend Build: `npm run build` passed with exit code 0 (`✓ built in 9.80s`).
+  - Zero TypeScript or lint errors.
+
 
 
 

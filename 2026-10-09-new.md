@@ -81,4 +81,18 @@
 - **Verification:**
   - `npm run build` passed cleanly with 0 errors (`✓ built in 14.38s`).
 
+---
+
+### Deployment Resilience: Eradicate Chunk Modal (`CHUNK-002`)
+- **Status:** Completed & Verified
+- **Issue Addressed:**
+  - Removed disruptive full-screen modal prompt (*"Updating CampusMart... A new version has been deployed. Refreshing your application to load the latest updates. [Refresh Now]"*).
+- **Files Modified:**
+  - `src/components/ErrorBoundary.tsx`: Replaced blocking modal UI with silent auto-reload and neutral loading spinner; tightened reload debounce to 3s.
+  - `src/lib/lazy-with-retry.ts`: Reduced reload debounce to 3s to allow instant recovery across rapid navigation.
+  - `src/main.tsx`: Reduced Vite preload error debounce to 3s.
+- **Verification:**
+  - `npm run build` passed cleanly with 0 errors (`✓ built in 9.80s`).
+
+
 
