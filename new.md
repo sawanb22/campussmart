@@ -31,7 +31,7 @@
 - **Files Modified:**
   - `src/pages/shop.tsx`: Removed `selectedProducts` state, `toggleProductSelection`, `addSelectedToWishlist`, the floating selection banner, and the "Select" checkbox on product cards. Retained clean, accessible "Add to Wishlist" and "✓ Wishlist" buttons adhering to SOLID SRP.
   - `src/components/login-prompt-modal.tsx`: Replaced e-commerce "cart" and "continue shopping" terminology with institutional quotation wishlist messaging.
-  - `src/App.tsx`: Added canonical redirects for `/Shop` and `/Furniture` to normalize URL casing.
+  - `src/App.tsx`: Added universal lowercase URL normalization in `Layout` to safely normalize paths like `/Shop` or `/Furniture` without route-matching redirect loops.
   - `src/components/layout/header.tsx`: Made `isActive` route matching case-insensitive.
   - `src/components/layout/breadcrumb-bar.tsx`: Normalized `/shop` title to `'Shop'` and made `basePath` lookup case-insensitive.
   - `src/pages/furniture.tsx`: Added institutional trust badges (BIFMA/ISO, custom dimensions, ergonomic posture, turnkey installation) under the hero to distinctly present it as an educational furniture solutions showcase.

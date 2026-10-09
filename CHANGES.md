@@ -1939,7 +1939,7 @@
     - Updated default `description` to: *"Sign in to build your institutional wishlist, track quotation requests, and receive official pricing for your campus."*.
     - Updated default `eyebrow` to: *"Quotation Wishlist"*.
   - **`src/App.tsx`**:
-    - Added canonical redirects: `<Route path="/Shop" element={<Navigate to="/shop" replace />} />` and `<Route path="/Furniture" element={<Navigate to="/furniture" replace />} />`.
+    - Replaced duplicate route matches with safe, universal lowercase normalization in `Layout` (`location.pathname !== location.pathname.toLowerCase()`), avoiding React Router v6 case-insensitive route matching loops on `/shop` and `/furniture`.
   - **`src/components/layout/header.tsx`**:
     - Made `isActive` route matching case-insensitive via `location.pathname.toLowerCase()`.
   - **`src/components/layout/breadcrumb-bar.tsx`**:
@@ -1948,6 +1948,6 @@
   - **`src/pages/furniture.tsx`**:
     - Added institutional furniture trust badges and standards grid (BIFMA/ISO, Custom Dimensions, Ergonomic Posture, Turnkey Installation) under the hero to distinctly present it as a curated educational furniture showroom.
 - **Validation**:
-  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 27.63s`).
+  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 10.35s`).
   - Automated tests and zero TypeScript/lint errors.
 
