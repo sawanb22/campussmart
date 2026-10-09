@@ -51,3 +51,17 @@
   - `src/components/layout/breadcrumb-bar.tsx`: Removed legacy `parent: { label: 'Solutions', href: '/solutions' }` and `parent: { label: 'Services', href: '/services' }` parent pointers across all child routes.
 - **Verification:**
   - `npm run build` passed cleanly with 0 errors (`✓ built in 10.18s`).
+
+---
+
+### Group 5: Content & Article Pages (`CONT-001`)
+- **Status:** Completed & Verified
+- **Original Feedback Addressed:**
+  - *"ABOUT US | HW TO REMOVE GLOBAL ECOSYSTEM TEXT OR MODIFY WHY SIGN UP BULLETS NOT VISIBLE ON PAGE"*
+  - *"Blogs | Copy this page here /same"* (hyperlinked in client feedback to `https://campussmart.vercel.app/ai-guide`)
+- **Files Modified:**
+  - `src/pages/corporate.tsx`: Rendered institutional highlights checklist (`whyBullets`) inside Mission section using `CheckCircle2` indicators; bound heading & subheading to dynamic `ecosystemTitle` / `ecosystemSubtitle`; wrapped `#partners` (Global Ecosystem) in `{data.hideEcosystem !== true && (...)}` to allow toggling/hiding or modifying.
+  - `src/pages/blog.tsx`: Replaced 2-column sidebar layout with the modern `/ai-guide` editorial layout; added horizontal category filter pills (`All` + dynamic categories from database) with URL query synchronization; split hero featured article card; 3-column responsive article card grid with image zoom hover, category tags, excerpts, and date/read time; dynamic search bar; and newsletter subscription banner.
+- **Verification:**
+  - `npm run build` passed cleanly with 0 errors (`✓ built in 13.16s`).
+

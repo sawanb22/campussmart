@@ -65,6 +65,7 @@
 | `FORMS-002` | 2026-10-09 20:45 | Forms & Verification Hardening | Email OTP verification on quotation requests (/request-quote) with rate limiter, email template, and logged-in user exemption; dynamic WhatsApp & actionable Phone cards on /contact-us bound to site content under SOLID principles (Group 4). | 6 files (backend, frontend, admin) | Completed |
 | `SHOP-003` | 2026-10-09 22:00 | Shop, Products & Wishlist Workflow | Removed product checkboxes & floating selection banner from /shop; retained clean "Add to Wishlist" / "✓ Wishlist" buttons; updated LoginPromptModal with institutional quotation copy; added canonical /Shop & /Furniture redirects with case-insensitive navbar & breadcrumb; enhanced /furniture with institutional trust badges (Group 3). | 6 files (frontend) | Completed |
 | `NAV-005` | 2026-10-09 23:20 | Navigation & Menus Streamlining | Removed redundant Solutions category from navbar; removed "All Services (Overview)" from Services dropdown; redirected /services and /solutions; cleaned up breadcrumb hierarchy under SOLID principles (Group 1). | 3 files (frontend) | Completed |
+| `CONT-001` | 2026-10-09 23:55 | Content & Article Pages | Corporate /about-us dynamic ecosystem and whyBullets highlights; Blog /blog refactored to match /ai-guide layout with dynamic API integration (Group 5). | 2 files (frontend) | Completed |
 
 
 
@@ -1975,5 +1976,28 @@
     - Removed legacy `parent: { label: 'Solutions', href: '/solutions' }` and `parent: { label: 'Services', href: '/services' }` across all child routes.
 - **Validation**:
   - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 10.18s`).
+
+---
+
+### [2026-10-09] Group 5 – Content & Article Pages (CONT-001)
+- **Scope & Objectives**:
+  - Item 5.1 (About Us - `/about-us`): Render institutional highlights checklist (`whyBullets`) on the About Us page, and allow the Global Ecosystem section to be dynamically customized or hidden via CMS (`data.hideEcosystem !== true`).
+  - Item 5.2 (Blog Page - `/blog`): Redesign the Blog index to mirror the `/ai-guide` editorial layout ("Blogs | Copy this page here /same"), featuring horizontal category filter pills, search bar, split hero featured article banner, 3-column responsive card grid, and newsletter subscription banner, all wired to live `/api/blog` and `/api/blog/categories` endpoints.
+- **Key Changes**:
+  - **`src/pages/corporate.tsx`**:
+    - Added `ecosystemTitle` and `ecosystemSubtitle` to defaults.
+    - Rendered `whyBullets` checklist block inside Mission section with `CheckCircle2` indicators.
+    - Wrapped `#partners` (Global Ecosystem) section in `{data.hideEcosystem !== true && (...)}` and bound heading/subheading to dynamic CMS `ecosystemTitle` and `ecosystemSubtitle`.
+  - **`src/pages/blog.tsx`**:
+    - Re-architected layout from 2-column sidebar into the `/ai-guide` editorial template adhering to SOLID Single Responsibility Principle.
+    - Added horizontal category filter pills (`All` + dynamic categories from database) with active state management and URL query sync.
+    - Built split hero featured article card displaying the first post with high-resolution media cover, category pill, and "Read article →" action.
+    - Built 3-column responsive article card grid for remaining posts with cover image, category tag, excerpt, and publication date / reading time estimation.
+    - Integrated clean search bar filtering through live articles seamlessly.
+    - Added interactive newsletter subscription block matching the `/ai-guide` aesthetic.
+- **Validation**:
+  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 13.16s`).
+  - Zero TypeScript, lint, or runtime errors.
+
 
 

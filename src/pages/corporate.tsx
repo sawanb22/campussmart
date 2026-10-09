@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Building2, Users, Target, Award, Handshake, TrendingUp } from 'lucide-react';
+import { Building2, Users, Target, Award, Handshake, TrendingUp, CheckCircle2 } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import MediaImage from '@/components/ui/media-image';
 
@@ -17,6 +17,8 @@ const DEFAULTS = {
   missionBody1: 'To transform educational infrastructure across India by providing comprehensive campus solutions that blend physical spaces with cutting-edge digital technology. We aim to create learning environments that inspire, engage, and empower students and educators alike.',
   missionBody2: 'As the first company in Asia to bring curriculum-mapped innovations to the campus industry, we continue to lead the way in educational transformation.',
   missionImage: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=80',
+  ecosystemTitle: 'Global Ecosystem',
+  ecosystemSubtitle: 'Our strength lies in our network of global partners who bring the best of edtech and infrastructure to Indian soil.',
   whyBullets: [
     "India's leading Consortium for Campus Infrastructure",
     "Bespoke Design to Delivery across 100+ categories",
@@ -183,7 +185,19 @@ const Corporate = () => {
                  {data.missionBody2 ?? DEFAULTS.missionBody2}
               </p>
               
-              <div className="mt-16 flex items-center gap-6">
+              <div className="mt-8 space-y-3">
+                <h4 className="text-xs font-bold uppercase tracking-widest text-cm-blue">Institutional Highlights</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {(Array.isArray(data.whyBullets) ? data.whyBullets : DEFAULTS.whyBullets).map((bullet: string) => (
+                    <div key={bullet} className="flex items-start gap-2.5 text-xs text-slate-700 font-medium">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <span>{bullet}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="mt-12 flex items-center gap-6">
                 <div className="w-12 h-1 bg-cm-blue" />
                 <span className="text-cm-blue-dark font-bold uppercase tracking-widest text-sm">Designing Tomorrow</span>
               </div>
@@ -251,26 +265,30 @@ const Corporate = () => {
       </section>
 
       {/* Partner Network */}
-      <section id="partners" className="py-12 md:py-16 bg-cm-gray/20 border-t border-cm-gray">
-        <div className="w-full mx-auto px-4 sm:px-8">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-cm-blue-dark tracking-tighter mb-4">Global Ecosystem</h2>
-            <p className="text-gray-500 max-w-2xl mx-auto">
-              Our strength lies in our network of global partners who bring the best of edtech and infrastructure to Indian soil.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-            {(Array.isArray(data.partners) ? data.partners : DEFAULTS.partners).map((partner: string) => (
-              <div key={partner} className="bg-white border border-cm-gray rounded-[2rem] p-6 flex flex-col items-center justify-center aspect-video shadow-sm hover:shadow-xl hover:border-cm-blue transition-all duration-500 group">
-                <div className="w-10 h-10 bg-cm-gray/30 rounded-full flex items-center justify-center mb-4 border border-gray-100 group-hover:bg-cm-blue group-hover:scale-110 transition-all">
-                  <Handshake className="w-5 h-5 text-gray-400 group-hover:text-white" />
+      {data.hideEcosystem !== true && (
+        <section id="partners" className="py-12 md:py-16 bg-cm-gray/20 border-t border-cm-gray">
+          <div className="w-full mx-auto px-4 sm:px-8">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-cm-blue-dark tracking-tighter mb-4">
+                {data.ecosystemTitle ?? DEFAULTS.ecosystemTitle}
+              </h2>
+              <p className="text-gray-500 max-w-2xl mx-auto">
+                {data.ecosystemSubtitle ?? DEFAULTS.ecosystemSubtitle}
+              </p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+              {(Array.isArray(data.partners) ? data.partners : DEFAULTS.partners).map((partner: string) => (
+                <div key={partner} className="bg-white border border-cm-gray rounded-[2rem] p-6 flex flex-col items-center justify-center aspect-video shadow-sm hover:shadow-xl hover:border-cm-blue transition-all duration-500 group">
+                  <div className="w-10 h-10 bg-cm-gray/30 rounded-full flex items-center justify-center mb-4 border border-gray-100 group-hover:bg-cm-blue group-hover:scale-110 transition-all">
+                    <Handshake className="w-5 h-5 text-gray-400 group-hover:text-white" />
+                  </div>
+                  <span className="text-xs font-bold text-cm-blue-dark text-center uppercase tracking-tight leading-none">{partner}</span>
                 </div>
-                <span className="text-xs font-bold text-cm-blue-dark text-center uppercase tracking-tight leading-none">{partner}</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
     </main>
   );
