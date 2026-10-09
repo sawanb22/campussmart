@@ -81,19 +81,4 @@
 - **Verification:**
   - `npm run build` passed cleanly with 0 errors (`✓ built in 14.38s`).
 
----
-
-### Group 2 Follow-Up: Services Header Badges & CMS Editability (`SERV-002`)
-- **Status:** Completed & Verified
-- **Original Feedback Addressed:**
-  - *"remove this also in these see 4 solution can we see if there is similar likeht is on other solution pages remove that also formthere rigth also all these pages should be editable"*
-- **Files Modified:**
-  - `src/pages/ai-digital-design-supply.tsx`: Removed static `"4 DIGITAL SOLUTIONS"` badge; dynamically bound `heroLabel`, `heroTitle`, `heroSubtitle`, `section1Title`, `cards`, `ctaTitle`, `ctaSubtitle` to CMS `usePageData`.
-  - `src/pages/campus-master-planning.tsx`: Removed static count badge `"{cards.length} Core Services"`; dynamically bound `heroLabel`, `heroTitle`, `heroSubtitle`, `sectionTitle`, `cards`, `ctaTitle`, `ctaSubtitle` to CMS `usePageData`.
-  - `src/pages/campus-design-execution.tsx`: Removed static count badge `"{cards.length} Sequential Steps"`; dynamically bound `heroLabel`, `heroTitle`, `heroSubtitle`, `sectionTitle`, `cards`, `ctaTitle`, `ctaSubtitle` to CMS `usePageData`.
-  - `src/pages/campus-furniture-design.tsx`: Removed static count badge `"{cards.length} Specialized Ranges"`; dynamically bound `heroLabel`, `heroTitle`, `heroSubtitle`, `sectionTitle`, `cards`, `ctaTitle`, `ctaSubtitle` to CMS `usePageData`.
-  - `src/admin/pages/PagesManager.tsx`: Added `'campus-design-execution'` and `'ai-digital-design-supply'` to `CATEGORY_SLUGS` for centralized admin accessibility under "Category / Solution Pages".
-- **Verification:**
-  - `npm run build` passed cleanly with 0 errors (`✓ built in 13.28s`).
-
 
