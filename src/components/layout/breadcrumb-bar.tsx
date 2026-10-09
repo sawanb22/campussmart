@@ -66,7 +66,7 @@ const ROUTE_METADATA: Record<string, RouteMeta> = {
   '/ugc-guidelines': { title: 'UGC Guidelines for Digital Campus' },
 
   // E-Commerce, Careers & Contact
-  '/shop': { title: 'Shop & Equipment' },
+  '/shop': { title: 'Shop' },
   '/job-openings': { title: 'Careers & Job Openings' },
   '/contact-us': { title: 'Contact Us' },
   '/request-quote': { title: 'Request a Quote' },
@@ -119,7 +119,7 @@ export const BreadcrumbBar: React.FC = () => {
   const segments = pathname.split('/').filter(Boolean);
   if (segments.length === 0) return null;
 
-  const basePath = `/${segments[0]}`;
+  const basePath = `/${segments[0].toLowerCase()}`;
   const baseMeta = ROUTE_METADATA[basePath];
 
   // Build the breadcrumb trail adhering to SRP

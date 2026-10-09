@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { Link } from 'react-router-dom';
+import { ShieldCheck, Truck, Ruler, Sparkles } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import MediaImage from '@/components/ui/media-image';
 import Shop from '@/pages/shop';
@@ -49,6 +50,48 @@ const Furniture = () => {
           </div>
           <div className="lg:w-1/2 relative">
             <MediaImage src={heroImage} alt={heroTitle} className="rounded-2xl shadow-xl w-full h-[260px] object-cover border-2 border-cm-blue-dark relative z-10" />
+          </div>
+        </div>
+      </section>
+
+      {/* Furniture Highlights & Key Institutional Standards */}
+      <section className="max-w-6xl mx-auto px-4 mt-6 mb-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+            <div className="w-10 h-10 rounded-lg bg-blue-100/70 text-cm-blue flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-800">BIFMA / ISO Certified</h4>
+              <p className="text-[11px] text-slate-500">Institutional durability grade</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+            <div className="w-10 h-10 rounded-lg bg-blue-100/70 text-cm-blue flex items-center justify-center shrink-0">
+              <Ruler className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-800">Custom Dimensions</h4>
+              <p className="text-[11px] text-slate-500">Tailored to room layouts</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+            <div className="w-10 h-10 rounded-lg bg-blue-100/70 text-cm-blue flex items-center justify-center shrink-0">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-800">Ergonomic Posture</h4>
+              <p className="text-[11px] text-slate-500">Optimized student comfort</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+            <div className="w-10 h-10 rounded-lg bg-blue-100/70 text-cm-blue flex items-center justify-center shrink-0">
+              <Truck className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-800">Turnkey Installation</h4>
+              <p className="text-[11px] text-slate-500">Pan-India delivery & assembly</p>
+            </div>
           </div>
         </div>
       </section>

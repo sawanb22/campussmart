@@ -62,6 +62,8 @@
 | `HERO-001` | 2026-10-06 17:40 | Homepage Hero Banner | Replaced floating blurred dark card container with seamless left-to-right deep blue gradient overlay matching design reference. | `src/components/sections/hero-banner.tsx` | Completed |
 | `FINAL-001` | 2026-10-06 18:35 | UI Polish & Admin Search / Guidance | Replaced homepage masonry black gradients with deep blue/white gradients (Issue #2), added interactive category guidance banner and 1-click live page test links in Admin Categories (Issue #8), and implemented subpage & card deep search with hierarchy filter chips in Admin Pages Manager (Issue #9). | 3 files (frontend & admin) | Completed |
 | `CHUNK-001` | 2026-10-06 18:42 | Enterprise Deployment Resilience | Implemented automatic stale chunk recovery with lazyWithRetry, vite:preloadError global listener, ErrorBoundary self-healing, and Vercel Cache-Control headers to eliminate dynamic module import failures across production deployments. | 6 files (frontend & config) | Completed |
+| `FORMS-002` | 2026-10-09 20:45 | Forms & Verification Hardening | Email OTP verification on quotation requests (/request-quote) with rate limiter, email template, and logged-in user exemption; dynamic WhatsApp & actionable Phone cards on /contact-us bound to site content under SOLID principles (Group 4). | 6 files (backend, frontend, admin) | Completed |
+| `SHOP-003` | 2026-10-09 22:00 | Shop, Products & Wishlist Workflow | Removed product checkboxes & floating selection banner from /shop; retained clean "Add to Wishlist" / "✓ Wishlist" buttons; updated LoginPromptModal with institutional quotation copy; added canonical /Shop & /Furniture redirects with case-insensitive navbar & breadcrumb; enhanced /furniture with institutional trust badges (Group 3). | 6 files (frontend) | Completed |
 
 
 
@@ -1891,3 +1893,61 @@
   - Backend Build: `npm run build` (`prisma generate && tsc`) passed with exit code 0.
   - Startup Test: `node dist/index.js` booted successfully on port 3001 with 0 errors.
   - Seed Test: `node dist/runSeed.js` executed with exit code 0.
+
+---
+
+### [2026-10-09] Group 4 – Forms & Verification Hardening (FORMS-002)
+- **Scope & Objectives**:
+  - Add email OTP verification on quotation requests (`/request-quote`) to prevent bot submissions and ensure genuine institution leads.
+  - Rate-limit OTP requests and exempt logged-in verified users for friction-free quotation submission.
+  - Add a dedicated branded HTML quotation email template in `backend/src/lib/email.ts`.
+  - Connect `/contact-us` phone and WhatsApp channels dynamically to Site Content, including actionable Phone card (direct call + WhatsApp buttons) and dynamic floating launcher.
+- **Key Changes**:
+  - **`backend/src/routes/contact.routes.ts`**:
+    - Added `POST /api/contact/send-quote-otp` protected by `otpLimiter`.
+    - Updated `POST /api/contact/quote` with OTP verification guard, skipping verification for logged-in verified users.
+  - **`backend/src/lib/email.ts`**:
+    - Created dedicated `'quote'` OTP email template with institutional quotation branding.
+  - **`src/pages/request-quote.tsx`**:
+    - Integrated OTP state machine, 60s resend cooldown, automated verification modal, and seamless quote submission.
+  - **`src/pages/contact-us.tsx`**:
+    - Dynamically bound WhatsApp links to `content.contact_whatsapp` with fallback to `content.contact_phone`.
+    - Replaced static phone card with actionable dual-button card (Direct Call & WhatsApp).
+  - **`src/admin/pages/SiteContent.tsx`**:
+    - Added `contact_whatsapp` to `CONTENT_LABELS` for easy admin customization.
+- **Validation**:
+  - Backend Build: clean TypeScript compilation.
+  - Frontend Build: `npm run build` passed with exit code 0 (`✓ built in 25.86s`).
+  - Tested OTP flow with pre-verified test user and guest sessions.
+
+---
+
+### [2026-10-09] Group 3 – Shop, Products & Wishlist Workflow (SHOP-003)
+- **Scope & Objectives**:
+  - Remove confusing product checkboxes and floating selection banner from `/shop`.
+  - Enforce the institutional quotation wishlist model: single clean "Add to Wishlist" / "✓ Wishlist" action per card.
+  - Eliminate e-commerce "cart" and "continue shopping" terminology from `LoginPromptModal`, replacing with quotation wishlist messaging.
+  - Fix URL case-sensitivity mismatch (`/Shop` vs `/shop`): add canonical router redirects and make header and breadcrumb matching case-insensitive.
+  - Differentiate `/furniture` from `/shop` by introducing institutional trust badges (BIFMA/ISO, custom dimensions, ergonomic posture, turnkey installation).
+- **Key Changes**:
+  - **`src/pages/shop.tsx`**:
+    - Removed `selectedProducts` state, `toggleProductSelection`, and `addSelectedToWishlist` adhering strictly to Single Responsibility Principle (SRP).
+    - Removed card selection checkbox `<input type="checkbox" />` and the floating `X products selected` bar.
+    - Retained clean, accessible "Add to Wishlist" and "✓ Wishlist" buttons with immediate visual feedback.
+  - **`src/components/login-prompt-modal.tsx`**:
+    - Updated default `title` to: *"Login to save items to your quotation wishlist"*.
+    - Updated default `description` to: *"Sign in to build your institutional wishlist, track quotation requests, and receive official pricing for your campus."*.
+    - Updated default `eyebrow` to: *"Quotation Wishlist"*.
+  - **`src/App.tsx`**:
+    - Added canonical redirects: `<Route path="/Shop" element={<Navigate to="/shop" replace />} />` and `<Route path="/Furniture" element={<Navigate to="/furniture" replace />} />`.
+  - **`src/components/layout/header.tsx`**:
+    - Made `isActive` route matching case-insensitive via `location.pathname.toLowerCase()`.
+  - **`src/components/layout/breadcrumb-bar.tsx`**:
+    - Normalized `/shop` title in `ROUTE_METADATA` to `'Shop'` matching header navigation.
+    - Made `basePath` resolution case-insensitive (`segments[0].toLowerCase()`).
+  - **`src/pages/furniture.tsx`**:
+    - Added institutional furniture trust badges and standards grid (BIFMA/ISO, Custom Dimensions, Ergonomic Posture, Turnkey Installation) under the hero to distinctly present it as a curated educational furniture showroom.
+- **Validation**:
+  - Frontend Build: `npm run build` (`tsc -b && vite build`) passed with exit code 0 (`✓ built in 27.63s`).
+  - Automated tests and zero TypeScript/lint errors.
+

@@ -237,6 +237,8 @@ function App() {
               <Route path="/ugc-guidelines/:articleSlug" element={<Layout><UGCGuidelineArticle /></Layout>} />
               <Route path="/ar-vr-learning" element={<Navigate to="/ar-vr-experiences" replace />} />
               <Route path="/admin/*" element={<AdminRoutes />} />
+              <Route path="/Shop" element={<Navigate to="/shop" replace />} />
+              <Route path="/Furniture" element={<Navigate to="/furniture" replace />} />
               <Route path="/wishlist" element={<Navigate to="/my-account?tab=wishlist" replace />} />
               <Route path="/cart" element={<Navigate to="/my-account?tab=wishlist" replace />} />
               <Route path="/corporate" element={<Navigate to="/about-us" replace />} />

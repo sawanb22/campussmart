@@ -99,10 +99,12 @@ const MainHeader = () => {
 
   const isActive = (path?: string | null) => {
     if (!path) return false;
-    if (path === '/') {
-      return location.pathname === '/';
+    const current = location.pathname.toLowerCase();
+    const target = path.toLowerCase();
+    if (target === '/') {
+      return current === '/';
     }
-    return location.pathname.startsWith(path);
+    return current.startsWith(target);
   };
 
   return (

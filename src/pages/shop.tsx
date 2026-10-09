@@ -66,7 +66,6 @@ const Shop = ({
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesLoaded, setCategoriesLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set());
   const [actionMessage, setActionMessage] = useState('');
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
@@ -134,44 +133,6 @@ const Shop = ({
       setActionMessage(`${product.name} removed from wishlist.`);
     } else {
       setActionMessage(res.error || 'Failed to remove from wishlist.');
-    }
-  };
-
-  const toggleProductSelection = (productId: number) => {
-    setSelectedProducts((prev) => {
-      const next = new Set(prev);
-      if (next.has(productId)) next.delete(productId);
-      else next.add(productId);
-      return next;
-    });
-  };
-
-  const addSelectedToWishlist = async () => {
-    const selected = products.filter((product) => selectedProducts.has(product.id));
-    if (!selected.length) return;
-    const productsToAdd = selected.filter((product) => !isInWishlist(product.id));
-    if (!productsToAdd.length) {
-      setActionMessage('All selected products are already in your wishlist.');
-      return;
-    }
-    setActionMessage(`Adding ${productsToAdd.length} product${productsToAdd.length === 1 ? '' : 's'} to wishlist...`);
-
-    let addedCount = 0;
-    let authRequired = false;
-    for (const prod of productsToAdd) {
-      const res = await addProduct(prod.id);
-      if (res.unauthenticated) {
-        authRequired = true;
-        break;
-      }
-      if (res.success) addedCount++;
-    }
-
-    if (authRequired) {
-      setShowLoginPrompt(true);
-    } else {
-      setActionMessage(`${addedCount} product${addedCount === 1 ? '' : 's'} added to wishlist.`);
-      setSelectedProducts(new Set());
     }
   };
 
@@ -424,18 +385,6 @@ const Shop = ({
               </div>
             )}
 
-            {selectedProducts.size > 0 && (
-              <div className="mb-4 flex items-center justify-between rounded-xl bg-cm-blue px-4 py-3 text-sm text-white shadow-md">
-                <span>{selectedProducts.size} product{selectedProducts.size === 1 ? '' : 's'} selected</span>
-                <button
-                  onClick={addSelectedToWishlist}
-                  className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 font-bold text-xs text-cm-blue hover:bg-slate-50 transition-colors"
-                >
-                  <Heart className="h-3.5 w-3.5" /> Add Selected to Wishlist
-                </button>
-              </div>
-            )}
-
             {loading ? (
               <div className="flex justify-center py-16">
                 <div className="w-10 h-10 border-4 border-cm-blue border-t-transparent rounded-full animate-spin" />
@@ -468,16 +417,6 @@ const Shop = ({
                       key={product.id}
                       className="relative bg-white rounded-2xl overflow-hidden border border-slate-100/80 shadow-sm hover:shadow-md hover:border-slate-200/60 transition-all duration-300 hover:-translate-y-1 flex flex-col group/card"
                     >
-                      <label className="absolute z-10 m-3 flex cursor-pointer items-center gap-1.5 rounded-lg bg-white/90 px-2 py-1 text-xs shadow-sm font-medium">
-                        <input
-                          type="checkbox"
-                          checked={selectedProducts.has(product.id)}
-                          onChange={() => toggleProductSelection(product.id)}
-                          className="accent-cm-blue"
-                        />
-                        <span>Select</span>
-                      </label>
-
                       <Link to={`/product/${product.slug}`} className="cursor-pointer">
                         <div className="aspect-[4/3] overflow-hidden bg-white flex items-center justify-center p-3 group-hover/card:bg-slate-50/50 transition-colors">
                           <img

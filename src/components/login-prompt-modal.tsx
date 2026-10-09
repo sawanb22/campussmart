@@ -14,9 +14,9 @@ const LoginPromptModal = ({
   open,
   onClose,
   icon: Icon = Heart,
-  eyebrow = 'Your picks are waiting',
-  title = 'Login to add products to your cart',
-  description = 'Sign in to save products, manage your wishlist, and continue shopping without losing your selections.',
+  eyebrow = 'Quotation Wishlist',
+  title = 'Login to save items to your quotation wishlist',
+  description = 'Sign in to build your institutional wishlist, track quotation requests, and receive official pricing for your campus.',
 }: LoginPromptModalProps) => {
   if (!open) return null;
 
