@@ -266,7 +266,6 @@ export default function CollegesUniversitiesForSale() {
                   <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={data.filterLabel ?? 'cbse schools'} className="w-40 bg-transparent outline-none placeholder:text-slate-500" />
                   {search && <button type="button" onClick={() => setSearch('')} aria-label="Clear search">×</button>}
                 </label>
-                <span className="text-sm text-slate-500">Showing {filteredListings.length} listings</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="flex overflow-hidden rounded border border-slate-300 bg-white">

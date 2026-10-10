@@ -139,10 +139,21 @@ const SportsInfra = ({ slug = 'sports-infra' }: { slug?: string }) => {
   const ctaButtonLabel = data.ctaButtonLabel ?? SPORTS_INFRA_DEFAULTS.ctaButtonLabel;
   const ctaHref = data.ctaHref ?? SPORTS_INFRA_DEFAULTS.ctaHref;
   const allCards = Array.isArray(data.cards) ? data.cards : SPORTS_INFRA_DEFAULTS.cards;
-  const cards = allCards.map((card: any) => ({
-    ...card,
-    categories: card.categories?.length ? card.categories : [],
-  }));
+  const cards = allCards.map((card: any) => {
+    const defaultCard = SPORTS_INFRA_DEFAULTS.cards.find((c) => c.title === card.title);
+    let cats: string[] = [];
+    if (Array.isArray(card.categories) && card.categories.length > 0) {
+      cats = card.categories;
+    } else if (card.category && typeof card.category === 'string') {
+      cats = [card.category];
+    } else if (defaultCard?.categories?.length) {
+      cats = defaultCard.categories;
+    }
+    return {
+      ...card,
+      categories: cats,
+    };
+  });
   const categoryOptions: string[] = Array.from(new Set<string>(cards.flatMap((card: { categories?: string[] }) => card.categories ?? []))).filter((option) => Boolean(option) && option !== 'All');
   const activeCategory = selectedCategory && categoryOptions.includes(selectedCategory) ? selectedCategory : (categoryOptions[0] || '');
   const filteredCards = activeCategory
@@ -200,12 +211,6 @@ const SportsInfra = ({ slug = 'sports-infra' }: { slug?: string }) => {
                     {option}
                   </button>
                 ))}
-              </div>
-
-              <div className="mt-8 rounded-3xl bg-cm-blue-dark/5 p-4">
-                <p className="text-sm font-semibold text-cm-blue-dark mb-3">Showing</p>
-                <p className="text-4xl font-black text-cm-blue-dark">{filteredCards.length}</p>
-                <p className="text-sm text-slate-500 mt-2">{activeCategory ? `${activeCategory} activities` : 'Facility types'}</p>
               </div>
             </aside>
 

@@ -49,13 +49,13 @@ const Shop = ({
   categoryPage,
   hideCategorySidebar = false,
   embedded = false,
-  hideAllCategoriesOption = false,
+  hideAllCategoriesOption = true,
   defaultCategorySlug,
 }: ShopProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const urlCategory = searchParams.get('category');
-  const initialSelectedCategory = categorySlug || (urlCategory && urlCategory !== 'all' ? urlCategory : (hideAllCategoriesOption ? (defaultCategorySlug || '') : 'all'));
+  const initialSelectedCategory = categorySlug || (urlCategory && urlCategory !== 'all' ? urlCategory : (defaultCategorySlug || ''));
   const [selectedCategory, setSelectedCategory] = useState(initialSelectedCategory);
   const [sort, setSort] = useState(searchParams.get('sort') || 'newest');
   const [inStockOnly, setInStockOnly] = useState(searchParams.get('inStock') === 'true');
@@ -89,23 +89,19 @@ const Shop = ({
     const cat = searchParams.get('category');
     if (cat && cat !== 'all') {
       setSelectedCategory(cat);
-    } else if (cat === 'all' && !hideAllCategoriesOption) {
-      setSelectedCategory('all');
     }
-  }, [categorySlug, searchParams, hideAllCategoriesOption]);
+  }, [categorySlug, searchParams]);
 
   useEffect(() => {
     if (!categoriesLoaded || categories.length === 0) return;
-    if (hideAllCategoriesOption) {
-      const isCurrentValid = categories.some((c) => c.slug.toLowerCase() === selectedCategory.toLowerCase());
-      if (!isCurrentValid || selectedCategory === 'all') {
-        const preferred = defaultCategorySlug && categories.some((c) => c.slug.toLowerCase() === defaultCategorySlug.toLowerCase())
-          ? defaultCategorySlug
-          : categories[0].slug;
-        setSelectedCategory(preferred);
-      }
+    const isCurrentValid = categories.some((c) => c.slug.toLowerCase() === selectedCategory.toLowerCase());
+    if (!isCurrentValid || selectedCategory === 'all' || !selectedCategory) {
+      const preferred = defaultCategorySlug && categories.some((c) => c.slug.toLowerCase() === defaultCategorySlug.toLowerCase())
+        ? defaultCategorySlug
+        : categories[0].slug;
+      setSelectedCategory(preferred);
     }
-  }, [categoriesLoaded, categories, hideAllCategoriesOption, selectedCategory, defaultCategorySlug]);
+  }, [categoriesLoaded, categories, selectedCategory, defaultCategorySlug]);
 
   const handleToggleWishlist = async (product: Product) => {
     if (isInWishlist(product.id)) {
@@ -305,10 +301,7 @@ const Shop = ({
                             selectedCategory.toLowerCase() === cat.slug.toLowerCase() ? 'bg-cm-blue text-white font-bold' : 'hover:bg-gray-100 text-gray-700'
                           }`}
                         >
-                          <span className="truncate mr-2">{cat.name}</span>
-                          {cat._count?.products !== undefined && (
-                            <span className="text-xs opacity-75 shrink-0">({cat._count.products})</span>
-                          )}
+                          <span className="truncate">{cat.name}</span>
                         </button>
                       )}
                     </li>
@@ -340,11 +333,8 @@ const Shop = ({
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold text-cm-blue-dark">
-                  {categories.find((c) => c.slug.toLowerCase() === selectedCategory.toLowerCase())?.name || 'All Products'}
+                  {categories.find((c) => c.slug.toLowerCase() === selectedCategory.toLowerCase())?.name || 'Products'}
                 </h1>
-                <span className="text-xs font-semibold text-slate-400">
-                  ({totalProducts} item{totalProducts === 1 ? '' : 's'})
-                </span>
                 {hideCategorySidebar && categories.some((c) => c.slug.toLowerCase() === selectedCategory.toLowerCase()) && (
                   <button
                     onClick={() => {
@@ -493,10 +483,7 @@ const Shop = ({
 
             {/* Pagination Controls */}
             {!loading && totalPages > 1 && (
-              <div className="mt-8 flex items-center justify-between border-t border-slate-200 pt-4 px-2">
-                <div className="text-xs text-slate-500 font-medium">
-                  Showing {(page - 1) * PAGE_SIZE + 1} to {Math.min(page * PAGE_SIZE, totalProducts)} of {totalProducts} products
-                </div>
+              <div className="mt-8 flex items-center justify-center border-t border-slate-200 pt-6 px-2">
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => {

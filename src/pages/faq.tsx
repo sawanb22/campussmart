@@ -74,16 +74,13 @@ export default function FaqPage() {
       {/* Main Content Area */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6">
         <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-gray-200/80">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
-            <div className="text-xs sm:text-sm font-bold text-gray-500 uppercase tracking-wider">
-              Showing {filteredFaqs.length} of {faqs.length} Questions
-            </div>
-            {searchQuery && (
+          {searchQuery && (
+            <div className="flex items-center justify-start border-b border-gray-100 pb-4 mb-6">
               <span className="text-xs text-blue-600 font-semibold bg-blue-50 px-2.5 py-1 rounded-full">
                 Filtered by: "{searchQuery}"
               </span>
-            )}
-          </div>
+            </div>
+          )}
 
           {filteredFaqs.length === 0 ? (
             <div className="py-12 text-center">

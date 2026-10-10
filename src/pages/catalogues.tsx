@@ -295,17 +295,8 @@ const Catalogues = () => {
         </div>
       </section>
 
-      {/* Toolbar */}
-      <section className="px-4 pt-4 sm:px-6 lg:px-8">
-        <div className="mx-auto flex max-w-6xl flex-col gap-2 border-b border-gray-100 pb-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs font-semibold text-gray-500">
-            {loading ? 'Loading catalogue library...' : `Showing ${catalogues.length} catalogues`}
-          </p>
-        </div>
-      </section>
-
       {/* Catalogues Grid */}
-      <section className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+      <section className="px-4 py-8 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           {loading ? (
             <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">

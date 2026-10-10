@@ -68,8 +68,8 @@
 | `CONT-001` | 2026-10-09 23:55 | Content & Article Pages | Corporate /about-us dynamic ecosystem and whyBullets highlights; Blog /blog refactored to match /ai-guide layout with dynamic API integration (Group 5). | 2 files (frontend) | Completed |
 | `SERV-001` | 2026-10-10 00:25 | Services Layout Harmonization | Harmonized all 4 Services subpages (/campus-master-planning, /campus-design-execution, /campus-furniture-design, /ai-digital-design-supply) into a unified modern 3-column card grid template without redundant filters (Group 2). | 4 files (frontend) | Completed |
 | `CHUNK-002` | 2026-10-10 00:55 | Production & Deployment Resilience | Eradicated blocking 'Updating CampusMart...' modal prompt, streamlined auto-reload with silent background refresh and tightened debounce to 3s under SOLID principles. | 3 files (frontend) | Completed |
-
-
+| `CMS-005` | 2026-10-10 02:45 | Admin CMS & Contact Channels | Unified Contact Us Page Editor and Site Content synchronization; multi-number dialer hardening; active-window zero-F5 cache invalidation under SOLID principles (Group 6). | 8 files (frontend, admin, backend) | Completed |
+| `UI-006` | 2026-10-10 03:30 | Global UI Polish & Category Refinements | Removed redundant count elements and grey sidebar counter boxes across all pages; restored Sports Infra categories; native Volleyball category icon; removed All Products in Shop (Group 7). | 10 files (frontend) | Completed |
 
 ---
 
@@ -2086,6 +2086,50 @@
   - Dual build passed cleanly: frontend `npm run build` (`✓ built in 9.08s`), backend `npm run build` (`tsc` + prisma passed with exit code 0).
   - Sanitizer unit test suite passed across single, dual, comma-separated, and newline numbers with 100% dial/WhatsApp validity.
   - Zero TypeScript, lint, or runtime errors.
+
+---
+
+### [2026-10-10] Group 7 – Global UI Polish, Sidebar Counter Removal & Category Refinements (UI-006)
+- **Scope & Objectives**:
+  - Address verbatim client feedback:
+    - *"Showing 1 product ,,etc boxes in all pages remove"*
+    - *"Flat icons"*
+  - User directives & preferences:
+    - Eliminate all redundant counter boxes across the application, specifically the prominent grey sidebar counter cards (`Showing [X] ... highlights / types / solutions`) identified in user screenshots on `/tech-infra`, `/sports-infra`, `/labs`, and `/libraries`.
+    - Fix the empty `CATEGORIES` sidebar on `/sports-infra` so real categories matching the cards (`Indoor`, `Outdoor`, `Training`, `Kids`) appear as clickable filter buttons.
+    - Implement official native Lucide `Volleyball` icon for Sports Infra in `CategoryBar` (Option B), matching the 2px outline aesthetic of other category icons instead of generic circle or trophy.
+    - In `/shop`: remove "All Products" option completely; auto-select and start on the first real category; remove count labels `({totalProducts} item{s})` and `({count})` across title, sidebar, and pagination; cleanly center pagination controls.
+    - Remove redundant count text across `/catalogues` (empty toolbar strip), `/colleges-universities-for-sale`, `/faq`, and `/blog`.
+- **Key Changes**:
+  - **`src/components/sections/category-bar.tsx`**:
+    - Replaced placeholder `Circle` icon with official native Lucide `Volleyball` icon in `CATEGORY_ICONS` map and `DEFAULT_CATEGORIES` list for Sports Infra.
+  - **`src/pages/sports-infra.tsx`**:
+    - Implemented category extraction falling back to `card.category` and defaults (`SPORTS_INFRA_DEFAULTS.cards`), rendering real clickable filter buttons (`Indoor`, `Outdoor`, `Training`, `Kids`).
+    - Removed grey sidebar counter box (`Showing {filteredCards.length} Facility types`).
+  - **`src/pages/tech-infra.tsx`**:
+    - Removed grey sidebar counter box (`Showing {filteredCards.length} Classroom Tech highlights`).
+  - **`src/pages/labs.tsx`**:
+    - Removed grey sidebar counter box (`Showing {filteredCards.length} Science & Tech solutions`).
+  - **`src/pages/libraries.tsx`**:
+    - Removed grey sidebar counter box (`Showing {filteredCards.length} Library highlights`).
+  - **`src/pages/shop.tsx`**:
+    - Changed `hideAllCategoriesOption` default to `true` and removed "All Products" button from category sidebar.
+    - Updated auto-selection effect to select `categories[0].slug` immediately when `selectedCategory` is empty or `'all'`.
+    - Removed `({totalProducts} item{s})` from page title and `({cat._count.products})` from category sidebar items.
+    - Removed `"Showing ${(page - 1) * PAGE_SIZE + 1} to ..."` from pagination strip and centered pagination buttons.
+  - **`src/pages/catalogues.tsx`**:
+    - Removed empty toolbar section containing `<p>Showing {catalogues.length} catalogues</p>` and normalized vertical spacing.
+  - **`src/pages/colleges-universities-for-sale.tsx`**:
+    - Removed `<span className="text-sm text-slate-500">Showing {filteredListings.length} listings</span>`.
+  - **`src/pages/faq.tsx`**:
+    - Removed `Showing {filteredFaqs.length} of {faqs.length} Questions` header while preserving outer card styling and search filter badge.
+  - **`src/pages/blog.tsx`**:
+    - Removed `<span className="ai-guide-view-all">Showing {gridPosts.length + (featuredPost ? 1 : 0)} of {filteredPosts.length}</span>` from Latest Articles heading.
+- **Validation**:
+  - `npm run build` frontend passed with exit code 0 (`✓ built in 13.50s`).
+  - `npm run build --prefix backend` passed with exit code 0 (Prisma generated and `tsc` compiled with 0 errors).
+  - Clean git diff with zero unintended regressions.
+
 
 
 

@@ -152,12 +152,6 @@ const TechInfra = () => {
                   </button>
                 ))}
               </div>
-
-              <div className="mt-8 rounded-3xl bg-cm-blue-dark/5 p-4">
-                <p className="text-sm font-semibold text-cm-blue-dark mb-3">Showing</p>
-                <p className="text-4xl font-black text-cm-blue-dark">{filteredCards.length}</p>
-                <p className="text-sm text-slate-500 mt-2">{activeCategory ? `${activeCategory} highlights` : 'Infrastructure highlights'}</p>
-              </div>
             </aside>
 
             <div className="min-w-0">

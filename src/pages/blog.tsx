@@ -641,9 +641,6 @@ const Blog = () => {
             {gridPosts.length > 0 && (
               <div className="ai-guide-articles-heading">
                 <h3>Latest Articles</h3>
-                <span className="ai-guide-view-all">
-                  Showing {gridPosts.length + (featuredPost ? 1 : 0)} of {filteredPosts.length}
-                </span>
               </div>
             )}
 

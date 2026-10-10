@@ -22,6 +22,7 @@ import {
   Layers,
   Trophy,
   Palette,
+  Volleyball,
   type LucideIcon,
 } from 'lucide-react';
 import { useSiteContent } from '@/contexts/SiteContentContext';
@@ -47,6 +48,7 @@ export const CATEGORY_ICONS: Record<string, LucideIcon> = {
   Layers,
   Trophy,
   Palette,
+  Volleyball,
 };
 
 export interface CategoryItem {
@@ -58,7 +60,7 @@ export interface CategoryItem {
 export const DEFAULT_CATEGORIES: CategoryItem[] = [
   { icon: 'Ruler', label: 'Campus Design', href: '/campus-design' },
   { icon: 'Armchair', label: 'Furniture', href: '/furniture' },
-  { icon: 'Circle', label: 'Sports Infra', href: '/sports-infra' },
+  { icon: 'Volleyball', label: 'Sports Infra', href: '/sports-infra' },
   { icon: 'Brain', label: 'AI/ML', href: '/ai-ml' },
   { icon: 'Monitor', label: 'Tech Infra', href: '/tech-infra' },
   { icon: 'Building2', label: 'Libraries', href: '/libraries' },
