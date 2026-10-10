@@ -317,6 +317,34 @@ export const pageDefaults: Record<string, any> = {
     heroTitle: 'Job Openings',
     heroSubtitle: 'Tell us about your experience and the opportunity you would like to pursue.',
   },
+  'contact-us': {
+    heroTitle: 'Contact Us',
+    heroSubtitle: "Have a question or need assistance? We're here to help. Reach out to us through any of the channels below.",
+    contact_phone: '+91 9966109191',
+    contact_phone_alt: '+91 9866091111',
+    contact_email: 'info@campusmart.in',
+    contact_email_alt: 'support@campusmart.in',
+    contact_whatsapp: '919966109191',
+    contact_hours: 'Monday - Friday: 9:00 AM - 6:00 PM\nSaturday: 10:00 AM - 4:00 PM',
+    contact_address: 'Campus Mart Head Office\nHyderabad, Telangana, India',
+    whatsappCtaTitle: 'Chat with us on WhatsApp',
+    whatsappCtaSubtitle: 'Get direct support and immediate quotation guidance through WhatsApp with our team.',
+    whatsappCtaButton: 'Start WhatsApp Chat',
+    cards: [
+      {
+        title: 'Phone',
+        description: '+91 9966109191\n+91 9866091111',
+      },
+      {
+        title: 'Email',
+        description: 'info@campusmart.in\nsupport@campusmart.in',
+      },
+      {
+        title: 'Working Hours',
+        description: 'Monday - Friday: 9:00 AM - 6:00 PM\nSaturday: 10:00 AM - 4:00 PM',
+      },
+    ],
+  },
   'collaboration': {
   heroTitle: 'Spaces built for working together',
   heroSubtitle: "Flexible rooms, pods and studios that turn group work, discussion and presentation into a normal part of campus life.",

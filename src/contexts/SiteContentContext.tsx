@@ -48,21 +48,42 @@ export const SiteContentProvider: React.FC<{ children: React.ReactNode }> = ({ c
     useEffect(() => {
         refresh();
 
+        const handleInvalidate = (payload: any) => {
+            if (payload?.type === 'INVALIDATE_ALL') {
+                refresh();
+            }
+        };
+
+        const onCustomEvent = ((e: CustomEvent) => {
+            handleInvalidate(e.detail);
+        }) as EventListener;
+
+        if (typeof window !== 'undefined') {
+            window.addEventListener('cm_cms_channel', onCustomEvent);
+        }
+
+        let channel: BroadcastChannel | null = null;
         if (typeof window !== 'undefined' && typeof BroadcastChannel !== 'undefined') {
             try {
-                const channel = new BroadcastChannel('cm_cms_channel');
-                channel.onmessage = (e) => {
-                    if (e.data?.type === 'INVALIDATE_ALL') {
-                        refresh();
-                    }
-                };
-                return () => {
-                    channel.close();
-                };
+                channel = new BroadcastChannel('cm_cms_channel');
+                channel.onmessage = (e) => handleInvalidate(e.data);
             } catch {
                 // Ignore BroadcastChannel errors
             }
         }
+
+        return () => {
+            if (typeof window !== 'undefined') {
+                window.removeEventListener('cm_cms_channel', onCustomEvent);
+            }
+            if (channel) {
+                try {
+                    channel.close();
+                } catch {
+                    // Ignore channel closure errors
+                }
+            }
+        };
     }, []);
 
     return (

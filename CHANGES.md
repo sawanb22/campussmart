@@ -2052,6 +2052,42 @@
   - Frontend Build: `npm run build` passed with exit code 0 (`✓ built in 9.80s`).
   - Zero TypeScript or lint errors.
 
+---
+
+### [2026-10-10] Group 6 – Admin CMS Contact Us Page Editor, Site Settings & Phone Number Synchronization (CMS-005)
+- **Scope & Objectives**:
+  - Address verbatim client feedback: *"ADMIN: CANNOT EDIT PAGE ON PHONE NUMBER ADDITION SHOWS SAVE BUT NOT SAVED CHECK PROPERLY ALL FIELDS SAVED OR NOT"*.
+  - Resolve the disconnect between Admin Pages Manager (`/admin/pages` ➔ Contact Us) and Site Content (`/admin/site-content`).
+  - Implement a Single Source of Truth architecture: entering contact details (Primary Phone, Alternate Phone, WhatsApp, Primary Email, Support Email, Working Hours, Address) in either editor syncs both live and immediately updates the TopBar, Footer, and Contact Us page cards.
+  - Harden phone number sanitization to support secondary/alternate numbers without concatenating digits into broken 20+ digit dialer strings.
+  - Guarantee active-window cache invalidation without requiring manual hard page refresh (F5).
+- **Key Changes**:
+  - **`src/pages/contact-us.tsx`**:
+    - Exported canonical `DEFAULTS` object matching project standard (ensuring full compatibility with `scripts/generateDefaults.ts`).
+    - Bound phone display (`phone2 ? `${phone1}\n${phone2}` : phone1`), email display (`email2 ? `${email1}\n${email2}` : email1`), working hours, and WhatsApp CTA to dynamic CMS channels with graceful default fallbacks.
+    - Wired "Call" direct action strictly to `sanitizePhone(phone1)` and WhatsApp button to sanitized WhatsApp URL.
+  - **`src/admin/pageDefaults.ts`**:
+    - Registered `'contact-us': DEFAULTS` ensuring card and section editing is enabled in `UnifiedPageEditor`.
+  - **`src/admin/components/UnifiedPageEditor.tsx`**:
+    - Added `isContactUs` detection; hydrated contact channels on mount from `/api/content` to guarantee live DB values.
+    - Rendered dedicated "Global Contact Channels (Live Synchronized)" editor section with inputs for Primary Phone, Alternate Phone, WhatsApp, Primary Email, Support Email, Working Hours (multiline), and Office Address (multiline).
+    - Synchronized save with `/api/content` and cache invalidation dispatches.
+  - **`src/admin/pages/SiteContent.tsx`**:
+    - Added clean segregated labels for `contact_phone_alt`, `contact_email_alt`, `contact_hours`; rendered hours and address as textareas; added direct bridge notice linking to Contact Us page editor.
+  - **`src/lib/contact-actions.ts`**:
+    - Hardened `sanitizePhone` to isolate the first number segment before extracting digits, preserving valid `tel:` and `wa.me` links when multiple numbers are entered. Formatted Indian numbers cleanly (`+91 XXXXX XXXXX`).
+  - **`src/components/layout/topbar.tsx`**:
+    - Dynamically bound click-to-call tooltip title to `contactPhone`.
+  - **`src/contexts/SiteContentContext.tsx` & `src/hooks/usePageData.ts`**:
+    - Added active-window `CustomEvent('cm_cms_channel')` dispatch alongside `BroadcastChannel`, eliminating stale cache in active window without requiring hard F5 refresh.
+  - **`backend/src/routes/pages.routes.ts`**:
+    - Added `await ensureSimplePage('contact-us', 'Contact Us')` guaranteeing the page is always present in Admin Pages Manager.
+- **Validation**:
+  - Dual build passed cleanly: frontend `npm run build` (`✓ built in 9.08s`), backend `npm run build` (`tsc` + prisma passed with exit code 0).
+  - Sanitizer unit test suite passed across single, dual, comma-separated, and newline numbers with 100% dial/WhatsApp validity.
+  - Zero TypeScript, lint, or runtime errors.
+
+
 
 
 

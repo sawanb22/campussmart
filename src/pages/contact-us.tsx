@@ -23,6 +23,35 @@ const subCategories: Record<string, string[]> = {
   sportsTurfs: ['Football', 'Volley Ball', 'Cricket', 'Badminton', 'Tennis'],
 };
 
+export const DEFAULTS = {
+  heroTitle: 'Contact Us',
+  heroSubtitle: "Have a question or need assistance? We're here to help. Reach out to us through any of the channels below.",
+  contact_phone: '+91 9966109191',
+  contact_phone_alt: '+91 9866091111',
+  contact_email: 'info@campusmart.in',
+  contact_email_alt: 'support@campusmart.in',
+  contact_whatsapp: '919966109191',
+  contact_hours: 'Monday - Friday: 9:00 AM - 6:00 PM\nSaturday: 10:00 AM - 4:00 PM',
+  contact_address: 'Campus Mart Head Office\nHyderabad, Telangana, India',
+  whatsappCtaTitle: 'Chat with us on WhatsApp',
+  whatsappCtaSubtitle: 'Get direct support and immediate quotation guidance through WhatsApp with our team.',
+  whatsappCtaButton: 'Start WhatsApp Chat',
+  cards: [
+    {
+      title: 'Phone',
+      description: '+91 9966109191\n+91 9866091111',
+    },
+    {
+      title: 'Email',
+      description: 'info@campusmart.in\nsupport@campusmart.in',
+    },
+    {
+      title: 'Working Hours',
+      description: 'Monday - Friday: 9:00 AM - 6:00 PM\nSaturday: 10:00 AM - 4:00 PM',
+    },
+  ],
+};
+
 const ContactUs = () => {
   const { data } = usePageData('contact-us');
   const { content } = useSiteContent();
@@ -74,35 +103,61 @@ const ContactUs = () => {
     }
   };
 
-  const phoneVal = content.contact_phone || '+91 9966109191\n+91 9866091111';
-  const emailVal = content.contact_email || 'info@campusmart.in\nsupport@campusmart.in';
+  const phone1 = content.contact_phone || data.contact_phone || DEFAULTS.contact_phone;
+  const phone2 = content.contact_phone_alt || data.contact_phone_alt || DEFAULTS.contact_phone_alt;
+  const phoneDisplay = phone2 ? `${phone1}\n${phone2}` : phone1;
+
+  const email1 = content.contact_email || data.contact_email || DEFAULTS.contact_email;
+  const email2 = content.contact_email_alt || data.contact_email_alt || DEFAULTS.contact_email_alt;
+  const emailDisplay = email2 ? `${email1}\n${email2}` : email1;
+
+  const hoursDisplay = content.contact_hours || data.contact_hours || DEFAULTS.contact_hours;
 
   const defaultContactInfo: ContactInfoItem[] = [
     {
       icon: Phone,
       title: 'Phone',
-      content: phoneVal,
+      content: phoneDisplay,
     },
     {
       icon: Mail,
       title: 'Email',
-      content: emailVal,
+      content: emailDisplay,
     },
     {
       icon: Clock,
       title: 'Working Hours',
-      content: 'Monday - Friday: 9:00 AM - 6:00 PM\nSaturday: 10:00 AM - 4:00 PM',
+      content: hoursDisplay,
     },
   ];
-  const contactInfo: ContactInfoItem[] = (Array.isArray(data.cards) ? data.cards : defaultContactInfo).map((item: any, index: number) => ({
-    ...item,
-    icon: [Phone, Mail, Clock][index % 3],
-    content: item.description ?? item.content,
-  }));
 
-  const whatsappNum = content.contact_whatsapp || content.contact_phone || '919966109191';
+  const contactInfo: ContactInfoItem[] = (Array.isArray(data.cards) && data.cards.length > 0 ? data.cards : defaultContactInfo).map((item: any, index: number) => {
+    const titleLower = (item.title || '').toLowerCase();
+    const icon = titleLower.includes('phone') ? Phone : titleLower.includes('email') ? Mail : titleLower.includes('hour') || titleLower.includes('time') ? Clock : [Phone, Mail, Clock][index % 3];
+
+    let contentText = item.description ?? item.content;
+    if (!contentText || (titleLower.includes('phone') && (contentText === DEFAULTS.cards[0].description || !item.description))) {
+      contentText = phoneDisplay;
+    } else if (titleLower.includes('email') && (contentText === DEFAULTS.cards[1].description || !item.description)) {
+      contentText = emailDisplay;
+    } else if ((titleLower.includes('hour') || titleLower.includes('working')) && (contentText === DEFAULTS.cards[2].description || !item.description)) {
+      contentText = hoursDisplay;
+    }
+
+    return {
+      ...item,
+      icon,
+      content: contentText,
+    };
+  });
+
+  const whatsappNum = content.contact_whatsapp || data.contact_whatsapp || phone1;
   const whatsAppUrl = getWhatsAppUrl(whatsappNum, 'Hello CampusMart team, I have an enquiry regarding institutional solutions.');
-  const primaryPhone = sanitizePhone(content.contact_phone || '+91 9966109191');
+  const primaryPhone = sanitizePhone(phone1);
+
+  const whatsappCtaTitle = data.whatsappCtaTitle ?? DEFAULTS.whatsappCtaTitle;
+  const whatsappCtaSubtitle = data.whatsappCtaSubtitle ?? DEFAULTS.whatsappCtaSubtitle;
+  const whatsappCtaButton = data.whatsappCtaButton ?? DEFAULTS.whatsappCtaButton;
 
   return (
     <main className="min-h-screen relative pb-16">
@@ -110,10 +165,10 @@ const ContactUs = () => {
       <section className="bg-cm-blue mx-3 sm:mx-6 lg:mx-8 rounded-[2rem] py-12 md:py-16 mt-4">
         <div className="w-full mx-auto px-2 sm:px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            {data.heroTitle ?? 'Contact Us'}
+            {data.heroTitle ?? DEFAULTS.heroTitle}
           </h1>
           <p className="text-xl text-white/80 max-w-3xl mx-auto">
-            {data.heroSubtitle ?? "Have a question or need assistance? We're here to help. Reach out to us through any of the channels below."}
+            {data.heroSubtitle ?? DEFAULTS.heroSubtitle}
           </p>
         </div>
       </section>
@@ -307,10 +362,10 @@ const ContactUs = () => {
             <div className="space-y-1">
               <div className="flex items-center justify-center sm:justify-start gap-2.5">
                 <MessageCircle className="w-7 h-7" />
-                <h3 className="text-xl font-bold">Chat with us on WhatsApp</h3>
+                <h3 className="text-xl font-bold">{whatsappCtaTitle}</h3>
               </div>
               <p className="text-white/90 text-sm max-w-md">
-                Get direct support and immediate quotation guidance through WhatsApp with our team.
+                {whatsappCtaSubtitle}
               </p>
             </div>
             <a
@@ -319,7 +374,7 @@ const ContactUs = () => {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-6 py-3 bg-white text-green-700 rounded-xl font-bold shadow-md hover:bg-gray-50 hover:shadow-lg transition-all shrink-0 text-sm"
             >
-              <MessageCircle className="w-4 h-4" /> Start WhatsApp Chat
+              <MessageCircle className="w-4 h-4" /> {whatsappCtaButton}
             </a>
           </div>
         </div>

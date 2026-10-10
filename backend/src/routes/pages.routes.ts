@@ -104,6 +104,7 @@ router.get('/', verifyToken, requireAdmin, async (_req: AuthRequest, res: Respon
         await ensureSimplePage('ar-vr-experiences', 'AR / VR Learning');
         await ensureSimplePage('campus-furniture-design', 'Campus Furniture Design');
         await ensureSimplePage('collaboration-spaces', 'Collaboration Spaces');
+        await ensureSimplePage('contact-us', 'Contact Us');
         const pages = await prisma.page.findMany({
             orderBy: { title: 'asc' }
         });

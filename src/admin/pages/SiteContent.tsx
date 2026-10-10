@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Save, RotateCcw, Facebook, Twitter, Youtube, Instagram, Linkedin, Link2 } from 'lucide-react';
 import api from '../api/client';
 import { broadcastCmsInvalidation } from '@/hooks/usePageData';
@@ -7,9 +8,12 @@ interface ContentMap { [key: string]: string; }
 
 const CONTENT_LABELS: Record<string, string> = {
     about_text: 'About Text',
-    contact_phone: 'Contact Phone',
+    contact_phone: 'Primary Contact Phone',
+    contact_phone_alt: 'Alternate Contact Phone',
+    contact_email: 'Primary Contact Email',
+    contact_email_alt: 'Secondary / Support Email',
     contact_whatsapp: 'WhatsApp Business Number',
-    contact_email: 'Contact Email',
+    contact_hours: 'Working Hours',
     contact_address: 'Contact Address',
 };
 
@@ -121,25 +125,28 @@ export default function SiteContent() {
                         </h2>
                     </div>
                     <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {Object.entries(CONTENT_LABELS).map(([key, label]) => (
-                            <div key={key} className={key.includes('subtitle') || key.includes('text') || key.includes('address') ? "col-span-full space-y-1.5" : "space-y-1.5"}>
-                                <label className="block text-sm font-bold text-gray-700">{label}</label>
-                                {key.includes('subtitle') || key.includes('text') || key.includes('address') ? (
-                                    <textarea
-                                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none shadow-sm"
-                                        rows={3}
-                                        value={content[key] || ''}
-                                        onChange={(e) => setContent({ ...content, [key]: e.target.value })}
-                                    />
-                                ) : (
-                                    <input
-                                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
-                                        value={content[key] || ''}
-                                        onChange={(e) => setContent({ ...content, [key]: e.target.value })}
-                                    />
-                                )}
-                            </div>
-                        ))}
+                        {Object.entries(CONTENT_LABELS).map(([key, label]) => {
+                            const isMultiline = key.includes('subtitle') || key.includes('text') || key.includes('address') || key.includes('hours');
+                            return (
+                                <div key={key} className={isMultiline ? "col-span-full space-y-1.5" : "space-y-1.5"}>
+                                    <label className="block text-sm font-bold text-gray-700">{label}</label>
+                                    {isMultiline ? (
+                                        <textarea
+                                            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none shadow-sm"
+                                            rows={3}
+                                            value={content[key] || ''}
+                                            onChange={(e) => setContent({ ...content, [key]: e.target.value })}
+                                        />
+                                    ) : (
+                                        <input
+                                            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                                            value={content[key] || ''}
+                                            onChange={(e) => setContent({ ...content, [key]: e.target.value })}
+                                        />
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
 
@@ -185,6 +192,27 @@ export default function SiteContent() {
                         >
                             Open Homepage Editor →
                         </a>
+                    </div>
+                </div>
+
+                {/* Contact Us Page Editor Notice */}
+                <div className="bg-amber-50/70 rounded-2xl border border-amber-200 p-6 flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 mt-0.5 text-lg">
+                        📞
+                    </div>
+                    <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h3 className="font-bold text-amber-950 text-sm">Managing Contact Channels &amp; Page?</h3>
+                            <p className="text-xs text-amber-800 mt-1 leading-relaxed">
+                                Phone, WhatsApp, email, hours, and address set here synchronize live with the TopBar, Footer, and Contact Us page. To manage cards or page banners, use the Contact Us page editor.
+                            </p>
+                        </div>
+                        <Link
+                            to="/admin/pages"
+                            className="shrink-0 inline-flex items-center gap-1.5 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 px-3.5 py-2 rounded-xl shadow-xs transition"
+                        >
+                            Open Contact Us Editor →
+                        </Link>
                     </div>
                 </div>
 

@@ -115,7 +115,7 @@ const TopBar = () => {
               type="button"
               onClick={() => triggerPhone(contactPhone, 'Call Campus Mart Support')}
               className="flex items-center gap-1.5 text-white/90 hover:text-cm-yellow transition-colors duration-200 sm:gap-2 cursor-pointer text-left bg-transparent border-0 p-0"
-              title="Click to call +91 9966109191"
+              title={`Click to call ${contactPhone}`}
             >
               <Phone className="w-3.5 h-3.5 shrink-0 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">{contactPhone}</span>

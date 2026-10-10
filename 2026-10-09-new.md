@@ -94,5 +94,24 @@
 - **Verification:**
   - `npm run build` passed cleanly with 0 errors (`✓ built in 9.80s`).
 
+---
+
+### [2026-10-10] Group 6: Admin CMS Contact Us Page Editor, Site Settings & Phone Number Synchronization (`CMS-005`)
+- **Status:** Completed & Verified
+- **Original Feedback Addressed:**
+  - *"ADMIN: CANNOT EDIT PAGE ON PHONE NUMBER ADDITION SHOWS SAVE BUT NOT SAVED CHECK PROPERLY ALL FIELDS SAVED OR NOT"*
+- **Files Modified:**
+  - `src/pages/contact-us.tsx`: Exported canonical `DEFAULTS` object matching project standard (for automated generator compatibility); bound phone, email, hours, and WhatsApp CTA to dynamic CMS channels (`content` / `data`) with clean fallback.
+  - `src/admin/pageDefaults.ts`: Registered `'contact-us': DEFAULTS` ensuring card and section editing is enabled in `UnifiedPageEditor`.
+  - `src/admin/components/UnifiedPageEditor.tsx`: Added `isContactUs` detection; hydrated contact channels on mount from `/api/content`; rendered dedicated "Global Contact Channels (Live Synchronized)" editor section with fields for Primary Phone, Alternate Phone, WhatsApp, Primary Email, Support Email, Working Hours, and Address; synchronized save with `/api/content` and cache invalidation.
+  - `src/admin/pages/SiteContent.tsx`: Added segregated labels for `contact_phone_alt`, `contact_email_alt`, `contact_hours`; rendered hours and address as textareas; added direct bridge banner to Contact Us page editor.
+  - `src/lib/contact-actions.ts`: Hardened `sanitizePhone` to split multi-number inputs and dial only the primary number without concatenating multiple numbers into invalid digits.
+  - `src/components/layout/topbar.tsx`: Dynamically bound click-to-call tooltip title to `contactPhone`.
+  - `src/contexts/SiteContentContext.tsx` & `src/hooks/usePageData.ts`: Enhanced cache invalidation with active-window `CustomEvent('cm_cms_channel')` dispatch alongside `BroadcastChannel`, eliminating stale cache in active window without requiring hard F5 refresh.
+  - `backend/src/routes/pages.routes.ts`: Added `ensureSimplePage('contact-us', 'Contact Us')` guaranteeing the page is always present in Admin Pages Manager.
+- **Verification:**
+  - Dual build passed cleanly: frontend `npm run build` (`✓ built in 9.08s`), backend `npm run build` (`tsc` + prisma passed with exit code 0).
+  - Sanitizer test suite passed (single, dual, comma-separated, and newline numbers handled with 100% dial/WhatsApp validity).
+
 
 

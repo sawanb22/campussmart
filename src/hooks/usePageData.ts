@@ -5,19 +5,31 @@ import api from '@/api/client';
 const pageDataCache = new Map<string, any>();
 const pageDataInflight = new Map<string, Promise<any | null>>();
 
-// Module-level BroadcastChannel listener for cross-tab cache invalidation
-if (typeof window !== 'undefined' && typeof BroadcastChannel !== 'undefined') {
+// Module-level listener for cross-tab (BroadcastChannel) and active-tab (CustomEvent) cache invalidation
+if (typeof window !== 'undefined') {
+    const handleInvalidate = (data: any) => {
+        if (data?.type === 'INVALIDATE_PAGE' && data?.slug) {
+            clearPageDataCache(data.slug);
+        } else if (data?.type === 'INVALIDATE_ALL') {
+            clearPageDataCache();
+        }
+    };
+
+    if (typeof BroadcastChannel !== 'undefined') {
+        try {
+            const globalChannel = new BroadcastChannel('cm_cms_channel');
+            globalChannel.onmessage = (e) => handleInvalidate(e.data);
+        } catch {
+            // BroadcastChannel might not be supported in some environments
+        }
+    }
+
     try {
-        const globalChannel = new BroadcastChannel('cm_cms_channel');
-        globalChannel.onmessage = (e) => {
-            if (e.data?.type === 'INVALIDATE_PAGE' && e.data?.slug) {
-                clearPageDataCache(e.data.slug);
-            } else if (e.data?.type === 'INVALIDATE_ALL') {
-                clearPageDataCache();
-            }
-        };
+        window.addEventListener('cm_cms_channel', ((e: CustomEvent) => {
+            handleInvalidate(e.detail);
+        }) as EventListener);
     } catch {
-        // BroadcastChannel might not be supported in some environments
+        // Ignore CustomEvent errors
     }
 }
 
@@ -35,22 +47,31 @@ export function clearPageDataCache(slug?: string) {
 }
 
 /**
- * Broadcast CMS cache invalidation across all open browser tabs.
+ * Broadcast CMS cache invalidation across all open browser tabs and the active window.
  */
 export function broadcastCmsInvalidation(payload: { type: 'INVALIDATE_PAGE' | 'INVALIDATE_ALL'; slug?: string }) {
-    if (typeof window !== 'undefined' && typeof BroadcastChannel !== 'undefined') {
+    if (typeof window !== 'undefined') {
+        // Dispatch local window CustomEvent so active tab/window receives it immediately
         try {
-            const channel = new BroadcastChannel('cm_cms_channel');
-            channel.postMessage(payload);
-            setTimeout(() => {
-                try {
-                    channel.close();
-                } catch {
-                    // Ignore channel closure errors
-                }
-            }, 200);
+            window.dispatchEvent(new CustomEvent('cm_cms_channel', { detail: payload }));
         } catch {
-            // Ignore BroadcastChannel errors
+            // Ignore CustomEvent errors
+        }
+
+        if (typeof BroadcastChannel !== 'undefined') {
+            try {
+                const channel = new BroadcastChannel('cm_cms_channel');
+                channel.postMessage(payload);
+                setTimeout(() => {
+                    try {
+                        channel.close();
+                    } catch {
+                        // Ignore channel closure errors
+                    }
+                }, 200);
+            } catch {
+                // Ignore BroadcastChannel errors
+            }
         }
     }
 }
@@ -71,27 +92,46 @@ export function usePageData<T = Record<string, any>>(slug: string): {
     const [loading, setLoading] = useState(!cached);
     const [version, setVersion] = useState(0);
 
-    // Cross-tab real-time sync via BroadcastChannel
+    // Cross-tab (BroadcastChannel) & Active-tab (CustomEvent) real-time sync
     useEffect(() => {
-        if (typeof window !== 'undefined' && typeof BroadcastChannel !== 'undefined') {
+        if (typeof window === 'undefined') return;
+
+        const handleUpdate = (payload: any) => {
+            if (payload?.type === 'INVALIDATE_PAGE' && payload?.slug === slug) {
+                clearPageDataCache(slug);
+                setVersion(v => v + 1);
+            } else if (payload?.type === 'INVALIDATE_ALL') {
+                clearPageDataCache();
+                setVersion(v => v + 1);
+            }
+        };
+
+        const onCustomEvent = ((e: CustomEvent) => {
+            handleUpdate(e.detail);
+        }) as EventListener;
+
+        window.addEventListener('cm_cms_channel', onCustomEvent);
+
+        let channel: BroadcastChannel | null = null;
+        if (typeof BroadcastChannel !== 'undefined') {
             try {
-                const channel = new BroadcastChannel('cm_cms_channel');
-                channel.onmessage = (e) => {
-                    if (e.data?.type === 'INVALIDATE_PAGE' && e.data?.slug === slug) {
-                        clearPageDataCache(slug);
-                        setVersion(v => v + 1);
-                    } else if (e.data?.type === 'INVALIDATE_ALL') {
-                        clearPageDataCache();
-                        setVersion(v => v + 1);
-                    }
-                };
-                return () => {
-                    channel.close();
-                };
+                channel = new BroadcastChannel('cm_cms_channel');
+                channel.onmessage = (e) => handleUpdate(e.data);
             } catch {
                 // Ignore BroadcastChannel errors
             }
         }
+
+        return () => {
+            window.removeEventListener('cm_cms_channel', onCustomEvent);
+            if (channel) {
+                try {
+                    channel.close();
+                } catch {
+                    // Ignore channel closure errors
+                }
+            }
+        };
     }, [slug]);
 
     useEffect(() => {

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Save, Plus, Trash2, Link as LinkIcon, X, ArrowLeft, FileText } from 'lucide-react';
 import api from '../api/client';
@@ -251,6 +251,7 @@ export default function UnifiedPageEditor({
     isStandalone?: boolean;
 }) {
     const isAboutUs = page.slug === 'about-us' || page.slug === 'corporate';
+    const isContactUs = page.slug === 'contact-us';
 
     const [title, setTitle] = useState(page.title);
     const [published, setPublished] = useState(page.published);
@@ -321,6 +322,66 @@ export default function UnifiedPageEditor({
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
+ 
+    // Live synchronization: hydrate contact channels from /api/content when editing contact-us
+    useEffect(() => {
+        if (isContactUs) {
+            api.get('/content')
+                .then(({ data: siteContent }) => {
+                    if (!siteContent || typeof siteContent !== 'object') return;
+                    setData((prev) => {
+                        const next = { ...prev };
+                        if (siteContent.contact_phone !== undefined) next.contact_phone = siteContent.contact_phone;
+                        if (siteContent.contact_phone_alt !== undefined) next.contact_phone_alt = siteContent.contact_phone_alt;
+                        if (siteContent.contact_email !== undefined) next.contact_email = siteContent.contact_email;
+                        if (siteContent.contact_email_alt !== undefined) next.contact_email_alt = siteContent.contact_email_alt;
+                        if (siteContent.contact_whatsapp !== undefined) next.contact_whatsapp = siteContent.contact_whatsapp;
+                        if (siteContent.contact_hours !== undefined) next.contact_hours = siteContent.contact_hours;
+                        if (siteContent.contact_address !== undefined) next.contact_address = siteContent.contact_address;
+                        return next;
+                    });
+                })
+                .catch((err) => {
+                    console.warn('[UnifiedPageEditor] Failed to hydrate contact channels from /api/content:', err);
+                });
+        }
+    }, [isContactUs]);
+
+    const updateContactChannel = (key: string, value: string) => {
+        setData((prev) => {
+            const next = { ...prev, [key]: value };
+            if (Array.isArray(next.cards) && next.cards.length > 0) {
+                const nextCards = [...next.cards];
+                const p1 = key === 'contact_phone' ? value : (next.contact_phone || '');
+                const p2 = key === 'contact_phone_alt' ? value : (next.contact_phone_alt || '');
+                const pDisp = p2 ? `${p1}\n${p2}` : p1;
+
+                const e1 = key === 'contact_email' ? value : (next.contact_email || '');
+                const e2 = key === 'contact_email_alt' ? value : (next.contact_email_alt || '');
+                const eDisp = e2 ? `${e1}\n${e2}` : e1;
+
+                const hDisp = key === 'contact_hours' ? value : (next.contact_hours || '');
+
+                const pIdx = nextCards.findIndex(c => (c?.title || '').toLowerCase().includes('phone'));
+                if (pIdx !== -1 && (key === 'contact_phone' || key === 'contact_phone_alt')) {
+                    nextCards[pIdx] = { ...nextCards[pIdx], description: pDisp };
+                }
+
+                const eIdx = nextCards.findIndex(c => (c?.title || '').toLowerCase().includes('email'));
+                if (eIdx !== -1 && (key === 'contact_email' || key === 'contact_email_alt')) {
+                    nextCards[eIdx] = { ...nextCards[eIdx], description: eDisp };
+                }
+
+                const hIdx = nextCards.findIndex(c => (c?.title || '').toLowerCase().includes('hour') || (c?.title || '').toLowerCase().includes('working'));
+                if (hIdx !== -1 && key === 'contact_hours') {
+                    nextCards[hIdx] = { ...nextCards[hIdx], description: hDisp };
+                }
+
+                next.cards = nextCards;
+            }
+            return next;
+        });
+    };
 
     // Starter Template Modal state
     const [showTemplateModal, setShowTemplateModal] = useState(false);
@@ -574,6 +635,20 @@ export default function UnifiedPageEditor({
         setSaving(true);
         setSaveError(null);
         try {
+            // Live synchronization: also update global content channels for contact-us
+            if (isContactUs) {
+                const contentPayload: Record<string, string> = {
+                    contact_phone: data.contact_phone ?? '',
+                    contact_phone_alt: data.contact_phone_alt ?? '',
+                    contact_email: data.contact_email ?? '',
+                    contact_email_alt: data.contact_email_alt ?? '',
+                    contact_whatsapp: data.contact_whatsapp ?? '',
+                    contact_hours: data.contact_hours ?? '',
+                    contact_address: data.contact_address ?? '',
+                };
+                await api.put('/content', contentPayload);
+            }
+
             const { data: updated } = await api.put(`/pages/${page.id}`, {
                 title,
                 published,
@@ -913,6 +988,113 @@ export default function UnifiedPageEditor({
                                     )}
                                 </div>
                             </section>
+                        )}
+
+                        {isContactUs && (
+                            <>
+                                <section className="space-y-6 rounded-2xl border-2 border-blue-500/20 bg-blue-50/30 p-6 sm:p-7 shadow-xs">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-blue-100 gap-2">
+                                        <div>
+                                            <h4 className="text-xs font-black text-blue-900 uppercase tracking-[0.2em] flex items-center gap-2">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse"></span>
+                                                Global Contact Channels (Live Synchronized)
+                                            </h4>
+                                            <p className="text-xs text-blue-700 mt-1 font-medium">
+                                                ⚡ Synced across TopBar, Footer, and Contact Us page.
+                                            </p>
+                                        </div>
+                                        <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-800 px-3 py-1 rounded-full border border-blue-200 self-start sm:self-auto">
+                                            Live Channels
+                                        </span>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <Field
+                                            label="Primary Phone Number *"
+                                            value={data.contact_phone ?? ''}
+                                            onChange={(v) => updateContactChannel('contact_phone', v)}
+                                            placeholder="+91 9966109191"
+                                            hint="Required · TopBar & Contact Us"
+                                        />
+                                        <Field
+                                            label="Alternate Phone Number"
+                                            value={data.contact_phone_alt ?? ''}
+                                            onChange={(v) => updateContactChannel('contact_phone_alt', v)}
+                                            placeholder="+91 9866091111"
+                                            hint="Optional · Contact Us page"
+                                        />
+                                        <Field
+                                            label="WhatsApp Business Number"
+                                            value={data.contact_whatsapp ?? ''}
+                                            onChange={(v) => set('contact_whatsapp', v)}
+                                            placeholder="919966109191"
+                                            hint="WhatsApp button & quick action"
+                                        />
+                                        <Field
+                                            label="Primary Email Address"
+                                            value={data.contact_email ?? ''}
+                                            onChange={(v) => updateContactChannel('contact_email', v)}
+                                            placeholder="info@campusmart.in"
+                                            hint="TopBar & Contact Us"
+                                        />
+                                        <Field
+                                            label="Secondary / Support Email"
+                                            value={data.contact_email_alt ?? ''}
+                                            onChange={(v) => updateContactChannel('contact_email_alt', v)}
+                                            placeholder="support@campusmart.in"
+                                            hint="Optional · Contact Us page"
+                                        />
+                                        <div className="md:col-span-2">
+                                            <Field
+                                                label="Working Hours"
+                                                value={data.contact_hours ?? ''}
+                                                onChange={(v) => updateContactChannel('contact_hours', v)}
+                                                multiline
+                                                placeholder="Monday - Friday: 9:00 AM - 6:00 PM&#10;Saturday: 10:00 AM - 4:00 PM"
+                                                hint="Hours card on Contact Us"
+                                            />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <Field
+                                                label="Office Address"
+                                                value={data.contact_address ?? ''}
+                                                onChange={(v) => set('contact_address', v)}
+                                                multiline
+                                                placeholder="Campus Mart Head Office&#10;Hyderabad, Telangana, India"
+                                                hint="Global site address"
+                                            />
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section className="space-y-6">
+                                    <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">WhatsApp CTA Banner</h4>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <Field
+                                            label="CTA Heading"
+                                            value={data.whatsappCtaTitle ?? ''}
+                                            onChange={(v) => set('whatsappCtaTitle', v)}
+                                            placeholder="Chat with us on WhatsApp"
+                                        />
+                                        <Field
+                                            label="CTA Button Label"
+                                            value={data.whatsappCtaButton ?? ''}
+                                            onChange={(v) => set('whatsappCtaButton', v)}
+                                            placeholder="Start WhatsApp Chat"
+                                        />
+                                        <div className="md:col-span-2">
+                                            <Field
+                                                label="CTA Subtitle"
+                                                value={data.whatsappCtaSubtitle ?? ''}
+                                                onChange={(v) => set('whatsappCtaSubtitle', v)}
+                                                multiline
+                                                placeholder="Get direct support and immediate quotation guidance through WhatsApp with our team."
+                                            />
+                                        </div>
+                                    </div>
+                                </section>
+                            </>
                         )}
 
                         {page.slug === 'ai-guide' && (

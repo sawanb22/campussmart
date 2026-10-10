@@ -42,22 +42,39 @@ export function sanitizePhone(raw?: string | null): SanitizedPhone {
   if (!raw || typeof raw !== 'string') {
     return { display: DEFAULT_PHONE, dial: '+919966109191', whatsapp: '919966109191', isValid: true };
   }
-  const stripped = raw.replace(/^tel:/i, '').trim();
-  const hasPlus = stripped.startsWith('+');
-  const digits = stripped.replace(/\D/g, '');
+  let firstSegment = raw.replace(/^tel:/i, '').trim();
+  if (/[,;\n\r]/.test(firstSegment)) {
+    const parts = firstSegment.split(/[,;\n\r]+/).map(p => p.trim()).filter(Boolean);
+    if (parts.length > 0) {
+      firstSegment = parts[0];
+    }
+  }
+
+  const hasPlus = firstSegment.startsWith('+');
+  const digits = firstSegment.replace(/\D/g, '');
 
   if (!digits || digits.length < 8) {
     return { display: DEFAULT_PHONE, dial: '+919966109191', whatsapp: '919966109191', isValid: false };
   }
 
-  // Handle standard 10-digit Indian numbers without country code
   let formattedDial: string;
   let formattedWhatsApp: string;
   let formattedDisplay: string;
+
   if (digits.length === 10) {
     formattedDisplay = `+91 ${digits.slice(0, 5)} ${digits.slice(5)}`;
     formattedDial = `+91${digits}`;
     formattedWhatsApp = `91${digits}`;
+  } else if (digits.length === 12 && digits.startsWith('91')) {
+    const local = digits.slice(2);
+    formattedDisplay = `+91 ${local.slice(0, 5)} ${local.slice(5)}`;
+    formattedDial = `+${digits}`;
+    formattedWhatsApp = digits;
+  } else if (digits.length === 11 && digits.startsWith('0')) {
+    const local = digits.slice(1);
+    formattedDisplay = `+91 ${local.slice(0, 5)} ${local.slice(5)}`;
+    formattedDial = `+91${local}`;
+    formattedWhatsApp = `91${local}`;
   } else if (hasPlus) {
     formattedDisplay = `+${digits}`;
     formattedDial = `+${digits}`;
