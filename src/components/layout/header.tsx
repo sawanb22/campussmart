@@ -72,7 +72,7 @@ const MainHeader = () => {
       hasDropdown: true,
       dropdownItems: [
         { label: 'Campus Design & Execution', href: '/campus-design-execution' },
-        { label: 'Furniture Design & Supply', href: '/furniture-design-supply' },
+        { label: 'Campus Furniture Design', href: '/campus-furniture-design' },
         { label: 'Sports Design & Execution', href: '/sports-design-execution' },
         { label: 'AI/Digital Solutions', href: '/ai-digital-design-supply' },
       ]

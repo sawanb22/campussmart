@@ -72,6 +72,7 @@
 | `UI-006` | 2026-10-10 03:30 | Global UI Polish & Category Refinements | Removed redundant count elements and grey sidebar counter boxes across all pages; restored Sports Infra categories; native Volleyball category icon; removed All Products in Shop (Group 7). | 10 files (frontend) | Completed |
 | `CMS-006` | 2026-10-10 13:40 | Admin CMS & Subpage Organization | Grouped Campus Design & Execution Suite in Pages Manager with 1-click linked subpages drawer and filter chip; clarified PDF Catalogues vs Case Studies & Projects distinction with top tab switchers (Group 8). | 5 files (frontend & admin) | Completed |
 | `CMS-007` | 2026-10-10 21:15 | Group 1 Live vs. Admin Editable Content & Dynamic Sync Resolution | Made Resources (/resources) dynamic and registered in CMS; added Show FAQs toggle and empty-array preservation to Homepage; enriched Job Openings with full roles and fields in Admin & Live; synchronized Catalogues and Case Studies with backend API endpoints; harmonized Furniture Design sub-slug resolution; converted Footer links to dedicated article pages (/how-it-works, /brand-help, /sell-on-campusmart); and made FAQ page layout vertically concise under SOLID principles (Group 1). | 11 files (frontend, admin, backend) | Completed |
+| `UI-007` | 2026-10-11 02:50 | Fast Front-End Fixes & Navigation Alignments | Removed Homepage FAQs; removed AR/VR card icons; vertically compressed FAQ page; updated Campus Furniture Design dropdown link & canonical alias; harmonized Sports Design & Execution to modern 3-column turnkey phase grid matching Campus Design & Execution (Group 9). | 10 files (frontend) | Completed |
 
 ---
 
@@ -2225,6 +2226,33 @@
   - Frontend Build: `npm run build` passed with exit code 0 (`✓ built in 15.59s`).
   - Backend Build: `npm --prefix backend run build` passed with exit code 0 (Prisma client generated and `tsc` compiled cleanly).
   - Git hygiene verified with zero unintended changes.
+
+---
+
+### [2026-10-11] Group 9: Fast Front-End Fixes & Navigation Alignments (UI-007)
+- **Scope & Objectives**:
+  - Implement all 5 fast front-end and navigation tasks identified from the updated client feedback document under Group 9:
+    - **Homepage FAQs Removal (Row 31)**: *"IN HOEM PAGE ABOVE FOOTER | REMOVE FAQS"* — removed `<FaqSection />` component and import from `src/pages/home.tsx`.
+    - **AR/VR Card Icons Removal (Row 29)**: *"AR VR | THERE ARE SOME FLAT ICOSN THERE . REMOVE ICONS FOR ALL CARDS"* — removed the circular icon wrapper and unused Lucide icon imports from `src/pages/ar-vr-experiences.tsx`.
+    - **FAQ Vertical Compression (Row 33)**: *"FAQ | OCCIPIED TOO MUCH VERTTICAL SPACE.. NEED TO CONCISE THOS"* — compressed hero header, container padding, accordion trigger heights, margins, and direct assistance box with dynamic contact phone/email in `src/pages/faq.tsx`.
+    - **Campus Furniture Design Navigation & Alias Fix (Row 27)**: *"Campus furniture design | Page not working"* — updated Services dropdown in `src/components/layout/header.tsx` to link to `/campus-furniture-design` (the 3-col turnkey template created in Group 2), updated default services card in `src/components/sections/service-cards.tsx` and `src/admin/pageDefaults.ts`, and added canonical alias redirect `/furniture-design-supply` ➔ `/campus-furniture-design` in `src/App.tsx`.
+    - **Sports Design & Execution Layout Harmonization (Row 6)**: *"Sports design and execution | page layout should be same as campus design and execution"* — converted `src/pages/sports-design-execution.tsx` from raw `<SportsInfra />` re-render into modern 3-column turnkey sequential execution phases matching `campus-design-execution.tsx`, created `src/pages/sports-design-execution.data.ts` and `src/pages/sports-design-execution-detail.tsx`, registered route `/sports-design-execution/:stepSlug` in `src/App.tsx`, and registered defaults in `src/admin/pageDefaults.ts`.
+- **Files Modified / Created**:
+  - `[MODIFY] src/pages/home.tsx`
+  - `[MODIFY] src/pages/ar-vr-experiences.tsx`
+  - `[MODIFY] src/pages/faq.tsx`
+  - `[MODIFY] src/components/layout/header.tsx`
+  - `[MODIFY] src/components/sections/service-cards.tsx`
+  - `[MODIFY] src/admin/pageDefaults.ts`
+  - `[MODIFY] src/App.tsx`
+  - `[MODIFY] src/pages/sports-design-execution.tsx`
+  - `[NEW] src/pages/sports-design-execution.data.ts`
+  - `[NEW] src/pages/sports-design-execution-detail.tsx`
+- **Validation**:
+  - Frontend production build: `npm run build` completed with 0 errors (`✓ built in 28.79s`).
+  - Backend production build: `npm run build --prefix backend` completed with 0 errors (Prisma client generated and `tsc` compiled cleanly).
+  - Public UI behaviour preserved with zero backend/database complexity.
+
 
 
 

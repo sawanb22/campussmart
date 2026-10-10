@@ -155,3 +155,28 @@
 - **Verification:**
 - Dual build passed cleanly: frontend `npm run build` (`✓ built in 27.38s`), backend `npm run build` (`tsc` + prisma passed with exit code 0).
 
+---
+
+### [2026-10-11] Group 9: Fast Front-End Fixes & Navigation Alignments (`UI-007`)
+- **Status:** Completed & Verified
+- **Original Feedback Addressed:**
+  - *"IN HOEM PAGE ABOVE FOOTER | REMOVE FAQS"* (Row 31)
+  - *"AR VR | THERE ARE SOME FLAT ICOSN THERE . REMOVE ICONS FOR ALL CARDS"* (Row 29)
+  - *"FAQ | OCCIPIED TOO MUCH VERTTICAL SPACE.. NEED TO CONCISE THOS"* (Row 33)
+  - *"Campus furniture design | Page not working"* (Row 27)
+  - *"Sports design and execution | page layout should be same as campus design and execution"* (Row 6)
+- **Files Modified / Created:**
+  - `src/pages/home.tsx`: Removed `<FaqSection />` component and import from the homepage above the footer.
+  - `src/pages/ar-vr-experiences.tsx`: Removed circular flat icon wrappers and unused Lucide icon imports from AR/VR cards.
+  - `src/pages/faq.tsx`: Vertically compressed hero header, container padding, accordion trigger heights, margins, and direct assistance box with dynamic contact details.
+  - `src/components/layout/header.tsx`: Updated Services dropdown link to `/campus-furniture-design` (the 3-col turnkey template created in Group 2).
+  - `src/components/sections/service-cards.tsx`: Updated default services card for Furniture to link to `/campus-furniture-design`.
+  - `src/admin/pageDefaults.ts`: Updated services cards default to `/campus-furniture-design` and registered default sequential phase cards for `sports-design-execution`.
+  - `src/App.tsx`: Added canonical alias redirect `/furniture-design-supply` ➔ `/campus-furniture-design` and registered step detail route `/sports-design-execution/:stepSlug`.
+  - `src/pages/sports-design-execution.tsx`: Replaced raw `<SportsInfra />` re-render with modern 3-column turnkey sequential execution phases matching `campus-design-execution.tsx`.
+  - `src/pages/sports-design-execution.data.ts`: Created data file with defaults, categories, Unsplash imagery, and step slug generator for Sports Design & Execution.
+  - `src/pages/sports-design-execution-detail.tsx`: Created dedicated step detail view matching `campus-design-execution-detail.tsx`.
+- **Verification:**
+  - Dual build passed cleanly: frontend `npm run build` (`✓ built in 28.79s`), backend `npm run build` (`tsc` + prisma passed with exit code 0).
+
+

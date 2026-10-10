@@ -182,6 +182,7 @@ const ArVrExperiencesDetail = lazy(() => import('@/pages/ar-vr-experiences-detai
 const CampusFurnitureDesignDetail = lazy(() => import('@/pages/campus-furniture-design-detail'));
 const FurnitureDesignSupplyDetail = lazy(() => import('@/pages/furniture-design-supply-detail'));
 const CampusDesignExecutionDetail = lazy(() => import('@/pages/campus-design-execution-detail'));
+const SportsDesignExecutionDetail = lazy(() => import('@/pages/sports-design-execution-detail'));
 const AiDigitalDesignSupplyDetail = lazy(() => import('@/pages/ai-digital-design-supply-detail'));
 const CollaborationSpacesDetail = lazy(() => import('@/pages/collaboration-spaces-detail'));
 const AiStationsDetail = lazy(() => import('@/pages/ai-stations-detail'));
@@ -211,6 +212,7 @@ function App() {
               <Route path="/case-studies/:slug" element={<Layout><CaseStudyDetail /></Layout>} />
               <Route path="/partner-with-colleges/:modelSlug" element={<Layout><PartnershipModelDetail /></Layout>} />
               <Route path="/campus-design-execution/:stepSlug" element={<Layout><CampusDesignExecutionDetail /></Layout>} />
+              <Route path="/sports-design-execution/:stepSlug" element={<Layout><SportsDesignExecutionDetail /></Layout>} />
               <Route path="/collaboration/:itemSlug" element={<Layout><CollaborationDetail /></Layout>} />
               <Route path="/innovation/:trackSlug" element={<Layout><InnovationDetail /></Layout>} />
               <Route path="/ai-ml/:moduleSlug" element={<Layout><AiMlDetail /></Layout>} />
@@ -237,6 +239,7 @@ function App() {
               <Route path="/setup-college/:articleSlug" element={<Layout><SetupCollegeArticle /></Layout>} />
               <Route path="/ugc-guidelines/:articleSlug" element={<Layout><UGCGuidelineArticle /></Layout>} />
               <Route path="/ar-vr-learning" element={<Navigate to="/ar-vr-experiences" replace />} />
+              <Route path="/furniture-design-supply" element={<Navigate to="/campus-furniture-design" replace />} />
               <Route path="/admin/*" element={<AdminRoutes />} />
               <Route path="/wishlist" element={<Navigate to="/my-account?tab=wishlist" replace />} />
               <Route path="/cart" element={<Navigate to="/my-account?tab=wishlist" replace />} />
