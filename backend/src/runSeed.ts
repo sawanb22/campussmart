@@ -5,6 +5,7 @@
  */
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { pageDefaults } from './pageDefaults.data';
 
 const prisma = new PrismaClient();
 
@@ -598,53 +599,46 @@ async function seed() {
     }
 
     // ── Hero banner ───────────────────────────────────────────────────────
-    await prisma.siteContent.upsert({
-        where: { key: 'home_hero' },
-        update: {
-            value: JSON.stringify({
-                title: 'Your Complete Guide to Campus Infrastructure',
-                subtitle: 'Physical + Digital',
-                image: 'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
-            }),
-        },
-        create: {
-            key: 'home_hero',
-            value: JSON.stringify({
-                title: 'Your Complete Guide to Campus Infrastructure',
-                subtitle: 'Physical + Digital',
-                image: 'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
-            }),
-        },
-    });
+    const existingHero = await prisma.siteContent.findUnique({ where: { key: 'home_hero' } });
+    if (!existingHero) {
+        await prisma.siteContent.create({
+            data: {
+                key: 'home_hero',
+                value: JSON.stringify({
+                    title: 'Your Complete Guide to Campus Infrastructure',
+                    subtitle: 'Physical + Digital',
+                    image: 'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
+                }),
+            },
+        });
+    }
 
     // ── Service cards ─────────────────────────────────────────────────────
-    await prisma.siteContent.upsert({
-        where: { key: 'home_services' },
-        update: {
-            value: JSON.stringify([
-                { title: 'Furniture Design+ Supply', bgColor: '#ef4444', textColor: '#ffffff', href: '/furniture-design-supply' },
-                { title: 'Campus Design+ Execution', bgColor: '#a3e635', textColor: '#000000', href: '/campus-design-execution' },
-                { title: 'Sports Design+ Execution', bgColor: '#06b6d4', textColor: '#ffffff', href: '/sports-design-execution' },
-                { title: 'AI/Digital Design+ Supply', bgColor: '#a855f7', textColor: '#ffffff', href: '/ai-digital-design-supply' },
-            ]),
-        },
-        create: {
-            key: 'home_services',
-            value: JSON.stringify([
-                { title: 'Furniture Design+ Supply', bgColor: '#ef4444', textColor: '#ffffff', href: '/furniture-design-supply' },
-                { title: 'Campus Design+ Execution', bgColor: '#a3e635', textColor: '#000000', href: '/campus-design-execution' },
-                { title: 'Sports Design+ Execution', bgColor: '#06b6d4', textColor: '#ffffff', href: '/sports-design-execution' },
-                { title: 'AI/Digital Design+ Supply', bgColor: '#a855f7', textColor: '#ffffff', href: '/ai-digital-design-supply' },
-            ]),
-        },
-    });
+    const existingServices = await prisma.siteContent.findUnique({ where: { key: 'home_services' } });
+    if (!existingServices) {
+        await prisma.siteContent.create({
+            data: {
+                key: 'home_services',
+                value: JSON.stringify([
+                    { title: 'Furniture Design+ Supply', bgColor: '#ef4444', textColor: '#ffffff', href: '/furniture-design-supply' },
+                    { title: 'Campus Design+ Execution', bgColor: '#a3e635', textColor: '#000000', href: '/campus-design-execution' },
+                    { title: 'Sports Design+ Execution', bgColor: '#06b6d4', textColor: '#ffffff', href: '/sports-design-execution' },
+                    { title: 'AI/Digital Design+ Supply', bgColor: '#a855f7', textColor: '#ffffff', href: '/ai-digital-design-supply' },
+                ]),
+            },
+        });
+    }
 
     // ── Masonry feature cards ─────────────────────────────────────────────
-    await prisma.siteContent.upsert({
-        where: { key: 'home_features' },
-        update: { value: JSON.stringify(HOME_FEATURES) },
-        create: { key: 'home_features', value: JSON.stringify(HOME_FEATURES) },
-    });
+    const existingFeatures = await prisma.siteContent.findUnique({ where: { key: 'home_features' } });
+    if (!existingFeatures) {
+        await prisma.siteContent.create({
+            data: {
+                key: 'home_features',
+                value: JSON.stringify(HOME_FEATURES),
+            },
+        });
+    }
 
     // ── Sidebar ───────────────────────────────────────────────────────────
     const existingSidebar = await prisma.siteContent.findUnique({ where: { key: 'home_sidebar' } });
@@ -775,22 +769,13 @@ async function seed() {
     ];
 
     for (const page of corePages) {
-        const pageData = PAGE_DATA[page.slug];
-        const existingPage = await prisma.page.findUnique({ where: { slug: page.slug } });
-        let existingPageHasCards = false;
-        try {
-            const existingCards = existingPage?.pageData ? JSON.parse(existingPage.pageData).cards : undefined;
-            existingPageHasCards = Array.isArray(existingCards) && existingCards.length > 0;
-        } catch {
-            existingPageHasCards = false;
-        }
-        const shouldSeedNewPageData = page.slug === 'colleges-universities-for-sale' && !existingPageHasCards;
+        const initialPageData = PAGE_DATA[page.slug] || pageDefaults[page.slug] || {};
         await prisma.page.upsert({
             where: { slug: page.slug },
             update: {
                 template: page.template,
                 published: true,
-                ...(shouldSeedNewPageData && pageData ? { pageData: JSON.stringify(pageData) } : {}),
+                // Zero-clobber guarantee: Never overwrite pageData if page already exists in DB
             },
             create: {
                 title: page.title,
@@ -798,7 +783,7 @@ async function seed() {
                 template: page.template,
                 published: true,
                 content: '',
-                pageData: pageData ? JSON.stringify(pageData) : '{}',
+                pageData: JSON.stringify(initialPageData),
             },
         });
     }

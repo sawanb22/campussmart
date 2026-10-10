@@ -96,7 +96,9 @@ const MAIN_SLUGS = new Set([
     'solutions', 'corporate', 'catalogues', 'classifieds', 'login',
     'registration', 'my-account', 'request-quote', 'not-found',
     'privacy-policy', 'terms-of-use', 'payment-policy', 'replacement-return',
-    'order-rejection', 'partnership', 'job-openings', 'partner-with-colleges', 'lookbook', 'ugc-guidelines',
+    'order-rejection', 'partnership', 'job-openings', 'partner-with-colleges',
+    'lookbook', 'ugc-guidelines', 'resources', 'how-it-works', 'brand-help',
+    'sell-on-campusmart', 'faq',
 ]);
 
 // Primary category / solution pages

@@ -76,6 +76,8 @@ const ServiceCards = () => {
         ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
         : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4';
 
+  if (services.length === 0) return null;
+
   return (
     <div ref={containerRef} className="w-full bg-white border-b border-gray-100">
       <div ref={cardsRef} className={`grid ${colClass}`}>

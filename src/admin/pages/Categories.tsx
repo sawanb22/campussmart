@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Plus, Pencil, Trash2, Search, X, Tag, ExternalLink, HelpCircle } from 'lucide-react';
 import api from '../api/client';
+import AdminStateContainer from '../components/AdminStateContainer';
 import { clearPageCategoriesCache } from '@/hooks/usePageCategories';
 
 interface Category {
@@ -39,13 +40,18 @@ export default function Categories() {
     const [showGuide, setShowGuide] = useState(true);
     const [editing, setEditing] = useState<Partial<Category>>(EMPTY);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
 
     const fetchCategories = async () => {
         setLoading(true);
+        setError(null);
         try {
             const { data } = await api.get('/products/categories');
-            setCategories(data);
+            setCategories(Array.isArray(data) ? data : []);
+        } catch (err: any) {
+            console.error('Failed to load categories:', err);
+            setError(err.response?.data?.error || 'Failed to load categories. Please retry.');
         } finally {
             setLoading(false);
         }
@@ -228,52 +234,58 @@ export default function Categories() {
             </div>
 
             {/* Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {loading ? (
-                    <div className="col-span-full py-20 text-center font-bold text-slate-400 uppercase tracking-widest text-xs">Loading Categories...</div>
-                ) : filtered.length === 0 ? (
-                    <div className="col-span-full py-20 text-center text-slate-400">No categories found{activePage !== 'all' ? ` for ${PAGE_OPTIONS.find((p) => p.value === activePage)?.label}` : ''}.</div>
-                ) : filtered.map((cat) => (
-                    <div key={cat.id} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
-                                <Tag className="w-6 h-6" />
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-slate-900">{cat.name}</h3>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{cat.slug}</p>
-                                <div className="flex items-center gap-2 mt-1">
-                                    <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">{PAGE_OPTIONS.find((page) => page.value === cat.page)?.label || cat.page}</p>
-                                    <span className="text-[10px] font-bold text-slate-400">&middot; {cat._count?.products ?? 0} product{cat._count?.products === 1 ? '' : 's'}</span>
-                                    <a
-                                        href={`${PAGE_ROUTE_MAP[cat.page]?.href || '/shop'}?category=${cat.slug}`}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded-md transition-colors ml-1"
-                                        title="View live storefront filtered by this category"
-                                    >
-                                        <span>Open Store</span>
-                                        <ExternalLink className="w-2.5 h-2.5" />
-                                    </a>
+            <AdminStateContainer
+                loading={loading}
+                error={error}
+                onRetry={fetchCategories}
+                cachePrefix="/products/categories"
+                loadingMessage="Loading categories..."
+            >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {filtered.length === 0 ? (
+                        <div className="col-span-full py-20 text-center text-slate-400">No categories found{activePage !== 'all' ? ` for ${PAGE_OPTIONS.find((p) => p.value === activePage)?.label}` : ''}.</div>
+                    ) : filtered.map((cat) => (
+                        <div key={cat.id} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                                    <Tag className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-slate-900">{cat.name}</h3>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{cat.slug}</p>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">{PAGE_OPTIONS.find((page) => page.value === cat.page)?.label || cat.page}</p>
+                                        <span className="text-[10px] font-bold text-slate-400">&middot; {cat._count?.products ?? 0} product{cat._count?.products === 1 ? '' : 's'}</span>
+                                        <a
+                                            href={`${PAGE_ROUTE_MAP[cat.page]?.href || '/shop'}?category=${cat.slug}`}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded-md transition-colors ml-1"
+                                            title="View live storefront filtered by this category"
+                                        >
+                                            <span>Open Store</span>
+                                            <ExternalLink className="w-2.5 h-2.5" />
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
+                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <a
+                                    href={`${PAGE_ROUTE_MAP[cat.page]?.href || '/shop'}?category=${cat.slug}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="p-2 text-slate-500 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all border border-gray-100"
+                                    title="View in new tab"
+                                >
+                                    <ExternalLink className="w-4 h-4" />
+                                </a>
+                                <button onClick={() => openEdit(cat)} className="p-2 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg transition-all border border-blue-100 hover:border-blue-600" title="Edit"><Pencil className="w-4 h-4" /></button>
+                                <button onClick={() => deleteCategory(cat.id)} className="p-2 text-red-600 hover:bg-red-600 hover:text-white rounded-lg transition-all border border-red-100 hover:border-red-600" title="Delete"><Trash2 className="w-4 h-4" /></button>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <a
-                                href={`${PAGE_ROUTE_MAP[cat.page]?.href || '/shop'}?category=${cat.slug}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="p-2 text-slate-500 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all border border-gray-100"
-                                title="View in new tab"
-                            >
-                                <ExternalLink className="w-4 h-4" />
-                            </a>
-                            <button onClick={() => openEdit(cat)} className="p-2 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg transition-all border border-blue-100 hover:border-blue-600" title="Edit"><Pencil className="w-4 h-4" /></button>
-                            <button onClick={() => deleteCategory(cat.id)} className="p-2 text-red-600 hover:bg-red-600 hover:text-white rounded-lg transition-all border border-red-100 hover:border-red-600" title="Delete"><Trash2 className="w-4 h-4" /></button>
-                        </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            </AdminStateContainer>
 
             {/* Modal */}
             {showModal && (

@@ -77,7 +77,11 @@ const getCanonicalProjectHref = (label: string): string => {
 
 const FeatureCards = () => {
   const { content } = useSiteContent();
-  const features = ((Array.isArray(content.home_features) ? content.home_features : null) || defaultFeatures).map((feature: any) => ({
+  const rawFeatures = content.home_features;
+  const featuresList: any[] = Array.isArray(rawFeatures)
+    ? rawFeatures
+    : (rawFeatures === undefined ? defaultFeatures : []);
+  const features = featuresList.map((feature: any) => ({
     ...feature,
     href: (feature.href && feature.href !== '/')
       ? feature.href

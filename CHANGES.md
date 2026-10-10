@@ -71,6 +71,7 @@
 | `CMS-005` | 2026-10-10 02:45 | Admin CMS & Contact Channels | Unified Contact Us Page Editor and Site Content synchronization; multi-number dialer hardening; active-window zero-F5 cache invalidation under SOLID principles (Group 6). | 8 files (frontend, admin, backend) | Completed |
 | `UI-006` | 2026-10-10 03:30 | Global UI Polish & Category Refinements | Removed redundant count elements and grey sidebar counter boxes across all pages; restored Sports Infra categories; native Volleyball category icon; removed All Products in Shop (Group 7). | 10 files (frontend) | Completed |
 | `CMS-006` | 2026-10-10 13:40 | Admin CMS & Subpage Organization | Grouped Campus Design & Execution Suite in Pages Manager with 1-click linked subpages drawer and filter chip; clarified PDF Catalogues vs Case Studies & Projects distinction with top tab switchers (Group 8). | 5 files (frontend & admin) | Completed |
+| `CMS-007` | 2026-10-10 21:15 | Group 1 Live vs. Admin Editable Content & Dynamic Sync Resolution | Made Resources (/resources) dynamic and registered in CMS; added Show FAQs toggle and empty-array preservation to Homepage; enriched Job Openings with full roles and fields in Admin & Live; synchronized Catalogues and Case Studies with backend API endpoints; harmonized Furniture Design sub-slug resolution; converted Footer links to dedicated article pages (/how-it-works, /brand-help, /sell-on-campusmart); and made FAQ page layout vertically concise under SOLID principles (Group 1). | 11 files (frontend, admin, backend) | Completed |
 
 ---
 
@@ -2169,6 +2170,62 @@
   - Frontend Build: `npm run build` passed with exit code 0 (`✓ built in 27.38s`).
   - Backend Build: `npm run build --prefix backend` passed with exit code 0.
   - Zero TypeScript, lint, or runtime errors.
+
+---
+
+### [2026-10-10] Group 1 – Live vs. Admin Editable Content & Dynamic Sync Resolution (CMS-007)
+- **Scope & Objectives**:
+  - Resolve content discrepancies, missing editable sections, and disconnected data synchronizations identified in Group 1 of the audit and client feedback DOCX:
+    - *"Main navigations | There is no resources page in admin page it is there in home page and also not updating when I add text in admin page it is showing in admin view live but not in home page"*
+    - *"Inner and sub pages | Added text beside and added a new card but not showing in homepage for every category"*
+    - *"JOB OPENIGN S IN FOOTER | PAGE IS NOT PROPER IN ADMIN . LOAD SOME CONTENT AND SEE"*
+    - *"Campus furniture design | Page not working"*
+    - *"Catalogues PDF & digital catalogues Case Studies Projects showcased on Catalogues page | These page not working in admin dashboard"*
+    - *"How it works Brand Help Sell on campusmart | All these pages to have to be blogo r article page"*
+    - *"IN HOEM PAGE ABOVE FOOTER | REMOVE FAQS"* & *"FAQ | OCCIPIED TOO MUCH VERTTICAL SPACE.. NEED TO CONCISE THOS"*
+  - Adhere strictly to SOLID principles:
+    - Single Responsibility Principle (SRP): Decouple data fetching, schema defaults, and presentation components.
+    - Open/Closed Principle (OCP): Allow dynamic CMS content to override defaults without breaking existing static fallback contracts.
+    - Liskov Substitution Principle (LSP): Retain identical component interfaces and data shapes so consumers require no modifications.
+    - Interface Segregation Principle (ISP): Provide specialized field controls in UnifiedPageEditor for Job Openings rather than overloading generic text inputs.
+    - Dependency Inversion Principle (DIP): Depend on standard hooks (`usePageData`, `useSiteContent`) rather than hardcoded in-memory arrays.
+- **Key Changes**:
+  - **`src/pages/resources.tsx`**:
+    - Connected `usePageData('resources')` with dynamic `heroTitle`, `heroSubtitle`, and `cards` mapping.
+    - Provided smart icon resolver based on category/title while preserving GSAP entrance animation and visual cards design.
+  - **`src/admin/pageDefaults.ts`**:
+    - Added default configurations for `'resources'`, `'how-it-works'`, `'brand-help'`, `'sell-on-campusmart'`, and `'faq'`.
+    - Fully expanded `'job-openings'` defaults with all 5 core role items (Campus Infrastructure Architect, Institutional Sales Lead, STEM & Lab Equipment Specialist, Educational Furniture Designer, Procurement & Supply Chain Manager) including title, department, location, type, experience, description, and requirements.
+  - **`src/admin/pages/PagesManager.tsx`**:
+    - Added `'resources'`, `'how-it-works'`, `'brand-help'`, `'sell-on-campusmart'`, and `'faq'` to `MAIN_SLUGS` for immediate visibility and management under "Main Pages".
+  - **`backend/src/routes/pages.routes.ts`**:
+    - Added `ensureSimplePage` for `resources`, `how-it-works`, `brand-help`, `sell-on-campusmart`, and `faq` in `GET /api/pages` so rows are bootstrapped in the PostgreSQL database automatically.
+  - **`src/components/sections/faq-section.tsx`**:
+    - Supported clean hiding of the homepage FAQ section when `content.show_home_faqs === false` or when `content.home_faqs` is explicitly saved as an empty array `[]` (preventing unwanted fallback to `defaultFaqs`).
+  - **`src/admin/pages/HomepageEditor.tsx`**:
+    - Added a direct `"Show FAQs on Homepage"` checkbox toggle to the FAQ section toolbar.
+    - Included `show_home_faqs` in `fetchContent` and `saveContent` payload to `/api/content`.
+  - **`src/admin/components/UnifiedPageEditor.tsx`**:
+    - Added specialized fields for `page.slug === 'job-openings'`: Department, Location, Job Type, Experience Required, and Requirements list.
+  - **`src/pages/job-openings.tsx`**:
+    - Connected `usePageData('job-openings')` to render dynamic `heroTitle`, `heroSubtitle`, and `openings` array with fallback to `DEFAULT_OPENINGS`.
+    - Synchronized application form role selector with dynamic openings list.
+  - **`src/pages/campus-furniture-design.tsx` & `src/pages/campus-furniture-design-detail.tsx`**:
+    - Ensured robust slug matching and non-empty fallback guards for furniture ranges so detail pages (`/campus-furniture-design/:rangeSlug`) load without 404 or hanging spinners.
+  - **`src/pages/catalogues.tsx`**:
+    - Connected to `/api/catalogues` and `/api/case-studies` endpoints so PDF brochures uploaded in `/admin/catalogues` and Case Studies created in `/admin/case-studies` immediately display on the live Catalogues page with fallback to `usePageData` and defaults.
+  - **`src/components/layout/footer.tsx`**:
+    - Updated `aboutLinks` to link to dedicated article routes: `/how-it-works`, `/brand-help`, and `/sell-on-campusmart`.
+  - **`src/App.tsx`**:
+    - Imported `pageDefaults` and merged with `parsedPageData` in `DynamicPageRoute` so CMS pages rendered via `GenericPageRenderer` inherit rich default article sections out-of-the-box.
+  - **`src/pages/faq.tsx`**:
+    - Optimized vertical height: reduced hero padding (`py-8 sm:py-12`), concise title/subtitle scale, compact search bar, and tightened accordion padding (`p-5 sm:p-7`, `py-3 sm:py-3.5`) to eliminate excessive scrolling.
+    - Connected `usePageData('faq')` for dynamic CMS headline/subtitle management.
+- **Validation**:
+  - Frontend Build: `npm run build` passed with exit code 0 (`✓ built in 15.59s`).
+  - Backend Build: `npm --prefix backend run build` passed with exit code 0 (Prisma client generated and `tsc` compiled cleanly).
+  - Git hygiene verified with zero unintended changes.
+
 
 
 

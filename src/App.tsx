@@ -30,6 +30,7 @@ const AIGuideArticle = lazy(() => import('@/pages/ai-guide-article'));
 const SetupCollegeArticle = lazy(() => import('@/pages/setup-college-article'));
 const UGCGuidelineArticle = lazy(() => import('@/pages/ugc-guideline-article'));
 const GenericPageRenderer = lazy(() => import('@/components/cms/GenericPageRenderer'));
+import { pageDefaults } from '@/admin/pageDefaults';
 
 // Existing page templates map
 const PageTemplates: Record<string, any> = {
@@ -159,14 +160,17 @@ const DynamicPageRoute = () => {
   }
 
   // Gracefully render dynamic CMS page content using GenericPageRenderer (SOLID SRP fallback)
-  let parsedPageData = {};
+  let parsedPageData: any = {};
   try {
     parsedPageData = pageRecord?.pageData ? JSON.parse(pageRecord.pageData) : {};
   } catch {
     parsedPageData = {};
   }
 
-  return <GenericPageRenderer page={pageRecord} pageData={parsedPageData} />;
+  const defaultData = (slug && pageDefaults[slug]) ? pageDefaults[slug] : {};
+  const effectivePageData = { ...defaultData, ...parsedPageData };
+
+  return <GenericPageRenderer page={pageRecord} pageData={effectivePageData} />;
 };
 
 const ProductDetail = lazy(() => import('@/pages/product-detail'));

@@ -69,15 +69,15 @@ const TechInfra = () => {
   const heroSubtitle = data.heroSubtitle ?? TECH_INFRA_DEFAULTS.heroSubtitle;
   const heroImage = data.heroImage ?? TECH_INFRA_DEFAULTS.heroImage;
   const section1Title = data.section1Title ?? TECH_INFRA_DEFAULTS.section1Title;
-  const allCards: CardItem[] = Array.isArray(data.cards) ? data.cards : TECH_INFRA_DEFAULTS.cards;
-  const cards = allCards.map((card, i) => {
-    const defaultCard = TECH_INFRA_DEFAULTS.cards.find((c) => c.title === card.title) || TECH_INFRA_DEFAULTS.cards[i % TECH_INFRA_DEFAULTS.cards.length];
+  const allCards: CardItem[] = Array.isArray(data.cards)
+    ? data.cards
+    : (data.cards === undefined ? TECH_INFRA_DEFAULTS.cards : []);
+  const cards = allCards.map((card) => {
     const rawCats = card.categories?.filter(Boolean) || [];
-    const categories = rawCats.length > 0 ? rawCats : (defaultCard.categories || ['Classroom Tech']);
     return {
       ...card,
-      categories,
-      image: card.image || defaultCard.image,
+      categories: rawCats,
+      image: card.image,
     };
   });
 

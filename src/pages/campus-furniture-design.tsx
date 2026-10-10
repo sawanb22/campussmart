@@ -15,7 +15,7 @@ const CampusFurnitureDesign = () => {
 
   const heroTitle = data.heroTitle ?? FURNITURE_DESIGN_DEFAULTS.heroTitle;
   const heroSubtitle = data.heroSubtitle ?? FURNITURE_DESIGN_DEFAULTS.heroSubtitle;
-  const cards: FurnitureDesignCard[] = Array.isArray(data.cards) ? data.cards : FURNITURE_DESIGN_DEFAULTS.cards;
+  const cards: FurnitureDesignCard[] = Array.isArray(data.cards) && data.cards.length > 0 ? data.cards : FURNITURE_DESIGN_DEFAULTS.cards;
 
   const cardLink = (card: FurnitureDesignCard) =>
     card.href?.trim() || `/${FURNITURE_DESIGN_PAGE_SLUG}/${slugifyFurnitureDesignTitle(card.title)}`;

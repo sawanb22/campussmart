@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Download, Mail, Phone, Building2, Search, Heart } from 'lucide-react';
 import api from '../api/client';
+import AdminStateContainer from '../components/AdminStateContainer';
 import { resolveMediaUrl } from '../../lib/media-url';
 
 interface WishlistItem {
@@ -25,15 +26,26 @@ export default function WishlistReports() {
     const [search, setSearch] = useState('');
     const [exporting, setExporting] = useState(false);
 
+    const fetchReport = async () => {
+        setLoading(true);
+        setLoadError('');
+        try {
+            const { data } = await api.get('/admin/wishlist-report');
+            setItems(Array.isArray(data) ? data : []);
+        } catch (err: any) {
+            setLoadError(err.response?.data?.error || 'Failed to load wishlist report. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        api.get('/admin/wishlist-report')
-            .then(({ data }) => setItems(data))
-            .catch((err) => setLoadError(err.response?.data?.error || 'Failed to load wishlist report. Please try again.'))
-            .finally(() => setLoading(false));
+        fetchReport();
     }, []);
 
     const groups: UserGroup[] = useMemo(() => {
         const byUser = new Map<number, UserGroup>();
+        if (!Array.isArray(items)) return [];
         for (const item of items) {
             const title = item.product?.name ?? item.designTitle ?? 'Untitled item';
             const category = item.product?.category?.name ?? item.pageSlug ?? '—';
@@ -102,11 +114,13 @@ export default function WishlistReports() {
                 />
             </div>
 
-            {loading ? (
-                <div className="text-gray-400">Loading...</div>
-            ) : loadError ? (
-                <div className="card border-red-200 bg-red-50 text-center text-red-700 py-8">{loadError}</div>
-            ) : (
+            <AdminStateContainer
+                loading={loading}
+                error={loadError}
+                onRetry={fetchReport}
+                cachePrefix="/admin/wishlist-report"
+                loadingMessage="Loading wishlist reports..."
+            >
                 <div className="space-y-4">
                     {filteredGroups.map((group) => (
                         <div key={group.user.id} className="card">
@@ -147,7 +161,7 @@ export default function WishlistReports() {
                         <div className="card text-center text-gray-400 py-8">No wishlist activity yet.</div>
                     )}
                 </div>
-            )}
+            </AdminStateContainer>
         </div>
     );
 }

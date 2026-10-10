@@ -35,9 +35,8 @@ const PARTNER_SLUG = 'partner-with-colleges';
 const JOB_OPENINGS_SLUG = 'job-openings';
 
 // Makes sure the "Partner With Running Colleges" page (linked from the Classifieds
-// "Partnership Opportunities" card) always has a DB row so it shows up in the admin
-// Pages Manager. Its full default content lives in the React component / pageDefaults.ts
-// and is used as a fallback for any field this row doesn't override.
+// "Partnership Opportunities" card) has a DB row on initial deployment so it shows
+// up in the admin Pages Manager. Any admin customizations or deletions are preserved.
 async function ensurePartnerPage() {
     const existing = await prisma.page.findUnique({ where: { slug: PARTNER_SLUG } });
     if (existing) return existing;
@@ -80,10 +79,9 @@ async function restorePartnershipIdentity() {
     });
 }
 
-// Makes sure a page with default (empty) content exists for the given slug/title
-// so it shows up in the admin Pages Manager. Its full default content lives in the
-// React component / pageDefaults.ts and is used as a fallback for any field this
-// row doesn't override.
+// Makes sure a page exists on initial deployment for the given slug/title so it shows
+// up in the admin Pages Manager. If the row already exists, it is returned untouched,
+// guaranteeing that admin deletions and edits are never overwritten.
 async function ensureSimplePage(slug: string, title: string) {
     const existing = await prisma.page.findUnique({ where: { slug } });
     if (existing) return existing;
@@ -105,6 +103,11 @@ router.get('/', verifyToken, requireAdmin, async (_req: AuthRequest, res: Respon
         await ensureSimplePage('campus-furniture-design', 'Campus Furniture Design');
         await ensureSimplePage('collaboration-spaces', 'Collaboration Spaces');
         await ensureSimplePage('contact-us', 'Contact Us');
+        await ensureSimplePage('resources', 'Resources & Guides');
+        await ensureSimplePage('how-it-works', 'How CampusMart Works');
+        await ensureSimplePage('brand-help', 'Brand & Partner Help');
+        await ensureSimplePage('sell-on-campusmart', 'Sell on CampusMart');
+        await ensureSimplePage('faq', 'Frequently Asked Questions');
         const pages = await prisma.page.findMany({
             orderBy: { title: 'asc' }
         });

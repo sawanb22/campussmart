@@ -15,7 +15,9 @@ const CampusDesignExecution = () => {
 
   const heroTitle = data.heroTitle ?? CDE_DEFAULTS.heroTitle;
   const heroSubtitle = data.heroSubtitle ?? CDE_DEFAULTS.heroSubtitle;
-  const cards: CampusDesignExecutionCard[] = Array.isArray(data.cards) ? data.cards : CDE_DEFAULTS.cards;
+  const cards: CampusDesignExecutionCard[] = Array.isArray(data.cards)
+    ? data.cards
+    : (data.cards === undefined ? CDE_DEFAULTS.cards : []);
 
   const cardLink = (card: CampusDesignExecutionCard) =>
     card.href?.trim() || `/${CDE_PAGE_SLUG}/${slugifyStepTitle(card.title)}`;

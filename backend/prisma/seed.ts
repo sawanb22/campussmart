@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import 'dotenv/config';
 import bcrypt from 'bcryptjs';
+import { pageDefaults } from '../src/pageDefaults.data';
 
 const prisma = new PrismaClient();
 
@@ -222,18 +223,20 @@ async function main() {
     ];
 
     for (const page of pages) {
+        const initialPageData = pageDefaults[page.slug] || {};
         await withRetry(() => prisma.page.upsert({
             where: { slug: page.slug },
             update: {
                 title: page.title,
                 template: page.slug,
                 published: true,
+                // Zero-clobber guarantee: Never overwrite pageData if page already exists in DB
             },
             create: {
                 title: page.title,
                 slug: page.slug,
                 template: page.slug,
-                pageData: '{}',
+                pageData: JSON.stringify(initialPageData),
                 published: true,
             },
         }));

@@ -7,7 +7,9 @@ import { LABS_PAGE_SLUG, LABS_DEFAULTS, slugifyLabTitle } from './labs';
 const LabsDetail = () => {
   const { labSlug } = useParams();
   const { data, loading } = usePageData(LABS_PAGE_SLUG);
-  const cards = Array.isArray(data.cards) ? data.cards : LABS_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards)
+    ? data.cards
+    : (data.cards === undefined ? LABS_DEFAULTS.cards : []);
   const card = cards.find((item: any) => slugifyLabTitle(item.title) === labSlug);
 
   if (loading && !card) {
@@ -28,7 +30,7 @@ const LabsDetail = () => {
   }
 
   const defaultCard = LABS_DEFAULTS.cards.find((c) => slugifyLabTitle(c.title) === labSlug);
-  const fallbackImage = defaultCard?.image || 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80';
+  const fallbackImage = defaultCard?.image || 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=800&q=80';
   const image = resolveMediaUrl(card.image) || fallbackImage;
 
   return (
