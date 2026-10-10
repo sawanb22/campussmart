@@ -1459,17 +1459,25 @@ export default function UnifiedPageEditor({
                             <section className="space-y-4 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-6">
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                     <div>
-                                        <h4 className="text-sm font-bold text-emerald-900">Downloadable Catalogues &amp; Custom Solutions</h4>
+                                        <h4 className="text-sm font-bold text-emerald-900">Downloadable Catalogues &amp; Case Studies Ecosystem</h4>
                                         <p className="text-xs text-emerald-700 mt-1 max-w-xl">
-                                            Edit the catalogue cards below directly or click "Load Starter Template" to load default cards. Uploaded PDFs allow visitors to download directly; cards without uploaded files automatically display "Request Catalogue".
+                                            Edit the catalogue cards below directly or manage uploaded PDF files in the PDF Manager. You can also manage institutional project stories in the Case Studies manager.
                                         </p>
                                     </div>
-                                    <Link
-                                        to="/admin/catalogues"
-                                        className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition-colors"
-                                    >
-                                        Open PDF Manager &rarr;
-                                    </Link>
+                                    <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                                        <Link
+                                            to="/admin/catalogues"
+                                            className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition-colors"
+                                        >
+                                            PDF Manager &rarr;
+                                        </Link>
+                                        <Link
+                                            to="/admin/case-studies"
+                                            className="inline-flex items-center gap-2 rounded-xl bg-white border border-emerald-300 px-3.5 py-2 text-xs font-bold text-emerald-800 shadow-sm hover:bg-emerald-50 transition-colors"
+                                        >
+                                            Case Studies &rarr;
+                                        </Link>
+                                    </div>
                                 </div>
                             </section>
                         )}

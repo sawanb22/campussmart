@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Plus, Trash2, Pencil, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Plus, Trash2, Pencil, X, BookMarked, Layers, ArrowRight } from 'lucide-react';
 import api from '../api/client';
 import MediaImageField from '../components/MediaImageField';
 import { resolveMediaUrl } from '../../lib/media-url';
@@ -91,10 +92,42 @@ export default function CaseStudies() {
 
     return (
         <div className="p-8">
+            {/* Top Ecosystem Tab Switcher */}
+            <div className="flex flex-wrap items-center gap-2 border-b border-gray-200 pb-3 mb-6">
+                <Link
+                    to="/admin/catalogues"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                    <BookMarked className="w-4 h-4 text-gray-500" />
+                    PDF Catalogues (Downloads)
+                </Link>
+                <Link
+                    to="/admin/case-studies"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-sm"
+                >
+                    <Layers className="w-4 h-4" />
+                    Case Studies &amp; Projects (Showcase)
+                </Link>
+            </div>
+
+            {/* Contextual Guidance Notice */}
+            <div className="mb-6 rounded-2xl border border-blue-200 bg-blue-50/70 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="text-xs text-blue-900">
+                    <strong className="font-bold">Project Case Studies:</strong> These articles appear on the public <code className="bg-blue-100/80 px-1 py-0.5 rounded text-blue-950 font-mono">/catalogues</code> page under "Proven Transformations · Campus Case Studies" and at <code className="bg-blue-100/80 px-1 py-0.5 rounded text-blue-950 font-mono">/case-studies/:slug</code>.
+                </div>
+                <Link
+                    to="/admin/catalogues"
+                    className="shrink-0 inline-flex items-center gap-1.5 text-xs font-bold text-blue-700 hover:text-blue-900 hover:underline"
+                >
+                    <span>Upload PDF Catalogues</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+            </div>
+
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Case Studies</h1>
-                    <p className="text-gray-500 text-sm mt-1">Shown in the "Case Studies & Projects" section of the Catalogues page</p>
+                    <h1 className="text-2xl font-bold text-gray-900">Case Studies &amp; Projects</h1>
+                    <p className="text-gray-500 text-sm mt-1">Institutional project stories showcased on the public Catalogues page</p>
                 </div>
 
                 <button onClick={openAdd} className="btn-primary flex items-center gap-2">

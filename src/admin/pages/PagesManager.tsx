@@ -70,6 +70,26 @@ function getSubpageMatch(page: Page, query: string): string | null {
 }
 
 // ─── Page hierarchy classification ───────────────────────────────────────────
+// Dedicated Campus Design & Turnkey Execution Suite
+export const CAMPUS_DESIGN_SLUGS = new Set([
+    'campus-design',
+    'campus-design-execution',
+    'campus-master-planning',
+    'campus-furniture-design',
+    'ai-digital-design-supply',
+    'campus-design-service',
+    'furniture-design-supply',
+    'sports-design-execution',
+]);
+
+export const CAMPUS_DESIGN_CHILD_SUBPAGES = [
+    { slug: 'campus-master-planning', label: 'Master Planning' },
+    { slug: 'campus-design-execution', label: 'Turnkey Execution' },
+    { slug: 'campus-furniture-design', label: 'Furniture Design' },
+    { slug: 'ai-digital-design-supply', label: 'AI/Digital Supply' },
+    { slug: 'campus-design-service', label: 'Service Details' },
+];
+
 // Main top-level pages that appear in primary navigation
 const MAIN_SLUGS = new Set([
     'home', 'about-us', 'contact-us', 'blog', 'shop', 'services',
@@ -93,16 +113,21 @@ const CATEGORY_SLUGS = new Set([
 type Group = { label: string; badge: string; badgeColor: string; pages: Page[] };
 
 function classifyPages(pages: Page[]): Group[] {
+    const campusDesign: Page[] = [];
     const main: Page[] = [];
     const category: Page[] = [];
     const inner: Page[] = [];
+
     pages.forEach(p => {
-        if (MAIN_SLUGS.has(p.slug)) main.push(p);
+        if (CAMPUS_DESIGN_SLUGS.has(p.slug)) campusDesign.push(p);
+        else if (MAIN_SLUGS.has(p.slug)) main.push(p);
         else if (CATEGORY_SLUGS.has(p.slug)) category.push(p);
         else inner.push(p);
     });
+
     const sort = (arr: Page[]) => arr.sort((a, b) => a.title.localeCompare(b.title));
     return [
+        { label: 'Campus Design & Execution Suite', badge: 'Master Planning, Turnkey Execution & Spatial Design', badgeColor: 'bg-teal-100 text-teal-800', pages: sort(campusDesign) },
         { label: 'Main Pages', badge: 'Primary navigation & utility pages', badgeColor: 'bg-blue-100 text-blue-700', pages: sort(main) },
         { label: 'Category / Solution Pages', badge: 'Top-level category landing pages', badgeColor: 'bg-violet-100 text-violet-700', pages: sort(category) },
         { label: 'Inner & Sub-Pages', badge: 'Detailed inner pages under categories', badgeColor: 'bg-amber-100 text-amber-700', pages: sort(inner) },
@@ -110,12 +135,14 @@ function classifyPages(pages: Page[]): Group[] {
 }
 
 // ─── Page Card ────────────────────────────────────────────────────────────────
-function PageCard({ page, isEditing, onToggleEdit, onTogglePublish, onDelete, matchedSubpage }: {
+function PageCard({ page, allPages, isEditing, onToggleEdit, onTogglePublish, onDelete, onSelectPage, matchedSubpage }: {
     page: Page;
+    allPages?: Page[];
     isEditing: boolean;
     onToggleEdit: () => void;
     onTogglePublish: () => void;
     onDelete: () => void;
+    onSelectPage?: (page: Page) => void;
     matchedSubpage?: string | null;
 }) {
     return (
@@ -152,13 +179,22 @@ function PageCard({ page, isEditing, onToggleEdit, onTogglePublish, onDelete, ma
                                 </Link>
                             )}
                             {page.slug === 'catalogues' && (
-                                <Link
-                                    to="/admin/catalogues"
-                                    className="text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-2 py-0.5 rounded-md transition-colors"
-                                    title="Open PDF Catalogues Manager"
-                                >
-                                    PDF Manager ↗
-                                </Link>
+                                <>
+                                    <Link
+                                        to="/admin/catalogues"
+                                        className="text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-2 py-0.5 rounded-md transition-colors"
+                                        title="Open PDF Catalogues Manager"
+                                    >
+                                        PDF Manager ↗
+                                    </Link>
+                                    <Link
+                                        to="/admin/case-studies"
+                                        className="text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 hover:bg-blue-100 px-2 py-0.5 rounded-md transition-colors"
+                                        title="Open Case Studies & Projects Manager"
+                                    >
+                                        Case Studies ↗
+                                    </Link>
+                                </>
                             )}
                         </div>
 
@@ -189,6 +225,37 @@ function PageCard({ page, isEditing, onToggleEdit, onTogglePublish, onDelete, ma
                     <p className="text-xs text-gray-400 font-mono truncate" title={`/${page.slug}`}>
                         /{page.slug}
                     </p>
+
+                    {/* Campus Design Subpages Drawer (Group 8) */}
+                    {(page.slug === 'campus-design' || page.slug === 'campus-design-execution') && allPages && (
+                        <div className="mt-3 pt-3 border-t border-gray-100">
+                            <div className="text-[10px] font-bold text-teal-800 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span>Linked Subpages &amp; Steps</span>
+                                <span className="text-teal-600 font-semibold">{CAMPUS_DESIGN_CHILD_SUBPAGES.length} pages</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                                {CAMPUS_DESIGN_CHILD_SUBPAGES.map(child => {
+                                    const childPage = allPages.find(p => p.slug === child.slug);
+                                    return (
+                                        <button
+                                            key={child.slug}
+                                            type="button"
+                                            onClick={() => {
+                                                if (childPage && onSelectPage) {
+                                                    onSelectPage(childPage);
+                                                }
+                                            }}
+                                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-teal-50 text-teal-700 hover:bg-teal-100 border border-teal-200/60 transition-colors cursor-pointer"
+                                            title={`Quick Edit /${child.slug}`}
+                                        >
+                                            <Pencil className="w-2.5 h-2.5 text-teal-600" />
+                                            <span>{child.label}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Subpage / Deep Card Match Indicator (Issue #9) */}
                     {matchedSubpage && (
@@ -241,7 +308,7 @@ export default function PagesManager() {
     const [loading, setLoading] = useState(true);
     const [editingPage, setEditingPage] = useState<Page | null>(null);
     const [search, setSearch] = useState('');
-    const [activeFilter, setActiveFilter] = useState<'all' | 'main' | 'category' | 'inner'>('all');
+    const [activeFilter, setActiveFilter] = useState<'all' | 'campus-design' | 'main' | 'category' | 'inner'>('all');
     const [creating, setCreating] = useState(false);
     const [newTitle, setNewTitle] = useState('');
     const [newSlug, setNewSlug] = useState('');
@@ -353,9 +420,10 @@ export default function PagesManager() {
 
     const filtered = pages.filter(p => {
         if (!searchMatches.has(p.id)) return false;
-        if (activeFilter === 'main') return MAIN_SLUGS.has(p.slug);
-        if (activeFilter === 'category') return CATEGORY_SLUGS.has(p.slug);
-        if (activeFilter === 'inner') return !MAIN_SLUGS.has(p.slug) && !CATEGORY_SLUGS.has(p.slug);
+        if (activeFilter === 'campus-design') return CAMPUS_DESIGN_SLUGS.has(p.slug);
+        if (activeFilter === 'main') return MAIN_SLUGS.has(p.slug) && !CAMPUS_DESIGN_SLUGS.has(p.slug);
+        if (activeFilter === 'category') return CATEGORY_SLUGS.has(p.slug) && !CAMPUS_DESIGN_SLUGS.has(p.slug);
+        if (activeFilter === 'inner') return !MAIN_SLUGS.has(p.slug) && !CATEGORY_SLUGS.has(p.slug) && !CAMPUS_DESIGN_SLUGS.has(p.slug);
         return true;
     });
 
@@ -417,6 +485,16 @@ export default function PagesManager() {
                         }`}
                     >
                         All Pages ({pages.length})
+                    </button>
+                    <button
+                        onClick={() => setActiveFilter('campus-design')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            activeFilter === 'campus-design'
+                                ? 'bg-teal-700 text-white shadow-sm'
+                                : 'bg-teal-50 border border-teal-200 text-teal-800 hover:bg-teal-100'
+                        }`}
+                    >
+                        Campus Design Suite ({pages.filter(p => CAMPUS_DESIGN_SLUGS.has(p.slug)).length})
                     </button>
                     <button
                         onClick={() => setActiveFilter('main')}
@@ -511,11 +589,13 @@ export default function PagesManager() {
                             <PageCard
                                 key={page.id}
                                 page={page}
+                                allPages={pages}
                                 matchedSubpage={searchMatches.get(page.id)}
                                 isEditing={editingPage?.id === page.id}
                                 onToggleEdit={() => setEditingPage(editingPage?.id === page.id ? null : page)}
                                 onTogglePublish={() => togglePublish(page.id, page.published)}
                                 onDelete={() => deletePage(page.id)}
+                                onSelectPage={(p) => setEditingPage(p)}
                             />
                         ))}
                     </div>

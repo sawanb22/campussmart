@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
-import { Plus, Trash2, ExternalLink, X, Pencil, Upload, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Plus, Trash2, ExternalLink, X, Pencil, Upload, Loader2, BookMarked, Layers, ArrowRight } from 'lucide-react';
 import api from '../api/client';
 import MediaImageField from '../components/MediaImageField';
 import { resolveMediaUrl } from '../../lib/media-url';
@@ -135,11 +136,44 @@ export default function Catalogues() {
 
     return (
         <div className="p-8">
+            {/* Top Ecosystem Tab Switcher */}
+            <div className="flex flex-wrap items-center gap-2 border-b border-gray-200 pb-3 mb-6">
+                <Link
+                    to="/admin/catalogues"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-sm"
+                >
+                    <BookMarked className="w-4 h-4" />
+                    PDF Catalogues (Downloads)
+                </Link>
+                <Link
+                    to="/admin/case-studies"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                    <Layers className="w-4 h-4 text-gray-500" />
+                    Case Studies &amp; Projects (Showcase)
+                </Link>
+            </div>
+
+            {/* Contextual Guidance Notice */}
+            <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="text-xs text-emerald-800">
+                    <strong className="font-bold">PDF Catalogues Management:</strong> Upload digital brochures and specification sheets for the public <code className="bg-emerald-100/80 px-1 py-0.5 rounded text-emerald-900 font-mono">/catalogues</code> page. Visitors can download active PDFs directly.
+                </div>
+                <Link
+                    to="/admin/case-studies"
+                    className="shrink-0 inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-900 hover:underline"
+                >
+                    <span>Manage Case Studies &amp; Projects</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+            </div>
+
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">
-                        Catalogues
+                        PDF Catalogues
                     </h1>
+                    <p className="text-gray-500 text-sm mt-1">Downloadable institutional PDF brochures and technical guides</p>
                 </div>
 
                 <button

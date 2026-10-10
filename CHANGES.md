@@ -70,6 +70,7 @@
 | `CHUNK-002` | 2026-10-10 00:55 | Production & Deployment Resilience | Eradicated blocking 'Updating CampusMart...' modal prompt, streamlined auto-reload with silent background refresh and tightened debounce to 3s under SOLID principles. | 3 files (frontend) | Completed |
 | `CMS-005` | 2026-10-10 02:45 | Admin CMS & Contact Channels | Unified Contact Us Page Editor and Site Content synchronization; multi-number dialer hardening; active-window zero-F5 cache invalidation under SOLID principles (Group 6). | 8 files (frontend, admin, backend) | Completed |
 | `UI-006` | 2026-10-10 03:30 | Global UI Polish & Category Refinements | Removed redundant count elements and grey sidebar counter boxes across all pages; restored Sports Infra categories; native Volleyball category icon; removed All Products in Shop (Group 7). | 10 files (frontend) | Completed |
+| `CMS-006` | 2026-10-10 13:40 | Admin CMS & Subpage Organization | Grouped Campus Design & Execution Suite in Pages Manager with 1-click linked subpages drawer and filter chip; clarified PDF Catalogues vs Case Studies & Projects distinction with top tab switchers (Group 8). | 5 files (frontend & admin) | Completed |
 
 ---
 
@@ -2129,6 +2130,46 @@
   - `npm run build` frontend passed with exit code 0 (`✓ built in 13.50s`).
   - `npm run build --prefix backend` passed with exit code 0 (Prisma generated and `tsc` compiled with 0 errors).
   - Clean git diff with zero unintended regressions.
+
+---
+
+### [2026-10-10] Group 8 – Admin CMS Subpage Grouping & Catalogue Clarity (CMS-006)
+- **Scope & Objectives**:
+  - Address verbatim client feedback:
+    - *"CAMPUS DESIGN | ... When clik on learn more . inner page admin is not found .. sub pages admin too shud be in same admin module.. content gusy get confused"*
+    - *"Catalogues downlads | Is ok / CASE STUDIES / PROJECTS (1) In admin is little confusing , need to test this"*
+  - Adhere to the user's explicit directive:
+    - Keep it purely a UI reorganization/reshuffle without introducing backend, database, or API complexity.
+  - Group all Campus Design & Execution pages into one single obvious module in Pages Manager (`/admin/pages`).
+  - Add an interactive "Linked Subpages & Steps" tray directly onto `Campus Design` and `Campus Design & Execution` cards with 1-click Quick Edit buttons so content editors never get lost looking for child subpages.
+  - Add a dedicated "Campus Design Suite" filter chip in the Pages Manager toolbar.
+  - Clarify the separation between Downloadable PDF Catalogues (`/admin/catalogues`) and Project Case Studies (`/admin/case-studies`) with top dual-tab ecosystem switchers and contextual guidance notices in the admin layout, pages, and UnifiedPageEditor.
+- **Key Changes**:
+  - **`src/admin/components/Layout.tsx`**:
+    - Renamed navigation items under "Products & Catalogue":
+      - `Catalogues` ➔ `PDF Catalogues` (*"Downloadable PDF brochures"*).
+      - `Case Studies` ➔ `Case Studies & Projects` (*"Showcase projects on Catalogues page"*).
+  - **`src/admin/pages/Catalogues.tsx`**:
+    - Added top dual-tab ecosystem switcher (`[📁 PDF Catalogues (Downloads)]` | `[🏆 Case Studies & Projects (Showcase)]`).
+    - Added an informational notice explaining that this page manages downloadable PDFs for `/catalogues`, with a direct 1-click link to Case Studies & Projects.
+    - Updated heading and description to `PDF Catalogues` (*"Downloadable institutional PDF brochures and technical guides"*).
+  - **`src/admin/pages/CaseStudies.tsx`**:
+    - Added matching top dual-tab ecosystem switcher (`[📁 PDF Catalogues (Downloads)]` | `[🏆 Case Studies & Projects (Showcase)]`).
+    - Added an informational notice explaining that project case studies appear under "Proven Transformations" on `/catalogues` and at `/case-studies/:slug`, with a direct shortcut to PDF Catalogues.
+    - Updated heading and description to `Case Studies & Projects` (*"Institutional project stories showcased on the public Catalogues page"*).
+  - **`src/admin/components/UnifiedPageEditor.tsx`**:
+    - Upgraded the `/catalogues` editor banner to provide dual shortcut buttons: `PDF Manager ↗` and `Case Studies ↗`.
+  - **`src/admin/pages/PagesManager.tsx`**:
+    - Defined `CAMPUS_DESIGN_SLUGS` and `CAMPUS_DESIGN_CHILD_SUBPAGES` grouping all 8 related pages (`campus-design`, `campus-design-execution`, `campus-master-planning`, `campus-furniture-design`, `ai-digital-design-supply`, `campus-design-service`, `furniture-design-supply`, `sports-design-execution`).
+    - Updated `classifyPages` to create a dedicated group: **"Campus Design & Execution Suite"** (Badge: *"Master Planning, Turnkey Execution & Spatial Design"*, Color: `bg-teal-100 text-teal-800`).
+    - Added an interactive "Linked Subpages & Steps" tray directly onto `Campus Design` and `Campus Design & Execution` cards with 1-click Quick Edit buttons for each child subpage (`Master Planning`, `Turnkey Execution`, `Furniture Design`, `AI/Digital Supply`, `Service Details`).
+    - Added a dedicated `Campus Design Suite` filter chip to the toolbar for 1-click isolation.
+    - Added dual shortcut badges (`PDF Manager ↗` and `Case Studies ↗`) on the `/catalogues` page card.
+- **Validation**:
+  - Frontend Build: `npm run build` passed with exit code 0 (`✓ built in 27.38s`).
+  - Backend Build: `npm run build --prefix backend` passed with exit code 0.
+  - Zero TypeScript, lint, or runtime errors.
+
 
 
 
