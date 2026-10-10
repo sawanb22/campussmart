@@ -2,12 +2,23 @@ import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowRight } from 'lucide-react';
+import {
+  FlaskConical,
+  Bone,
+  Globe2,
+  Landmark,
+  Boxes,
+  Languages,
+  ArrowRight,
+  type LucideIcon,
+} from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { resolveMediaUrl } from '@/lib/media-url';
 import { AR_VR_PAGE_SLUG, AR_VR_DEFAULTS, slugifyArVrTitle } from './ar-vr-experiences.data';
 
 gsap.registerPlugin(ScrollTrigger);
+
+const CARD_ICONS: LucideIcon[] = [FlaskConical, Bone, Globe2, Landmark, Boxes, Languages];
 
 const ArVrExperiences = () => {
   const cardsRef = useRef<HTMLDivElement>(null);
@@ -42,7 +53,8 @@ const ArVrExperiences = () => {
             <p className="mt-3 text-sm text-gray-500">A growing library of immersive modules across every major subject.</p>
           </div>
           <div ref={cardsRef} className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {cards.map((card) => {
+            {cards.map((card, index) => {
+              const Icon = CARD_ICONS[index % CARD_ICONS.length];
               const image = resolveMediaUrl(card.image);
               const detailHref = card.href || `/${AR_VR_PAGE_SLUG}/${slugifyArVrTitle(card.title)}`;
               return (
@@ -57,6 +69,9 @@ const ArVrExperiences = () => {
                     </div>
                   )}
                   <div className="p-6">
+                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-cm-blue/10">
+                      <Icon className="h-6 w-6 text-cm-blue" />
+                    </div>
                     <h3 className="mb-2 text-lg font-bold text-cm-blue-dark">{card.title}</h3>
                     <p className="text-sm leading-relaxed text-gray-600">{card.description}</p>
                     <span className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-cm-blue transition-all group-hover:gap-3">

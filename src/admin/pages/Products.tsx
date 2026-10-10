@@ -1,6 +1,6 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
 import { Plus, Pencil, Trash2, Search, X, RotateCcw } from 'lucide-react';
-import api, { clearAdminCache } from '../api/client';
+import api from '../api/client';
 import MediaImageField from '../components/MediaImageField';
 import MediaImageListField from '../components/MediaImageListField';
 import { resolveMediaUrl } from '../../lib/media-url';
@@ -22,14 +22,11 @@ export default function Products() {
     const [loadError, setLoadError] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
 
-    const fetchProducts = async (skipCache = false) => {
+    const fetchProducts = async () => {
         setLoading(true);
         setLoadError(null);
-        if (skipCache) clearAdminCache('/products');
         try {
-            const { data } = await api.get('/products?limit=250&active=all', {
-                headers: skipCache ? { 'x-skip-cache': 'true' } : undefined,
-            });
+            const { data } = await api.get('/products?limit=250&active=all');
             const list = Array.isArray(data?.products)
                 ? data.products
                 : Array.isArray(data)
@@ -359,7 +356,7 @@ export default function Products() {
                                         <div className="text-red-500 font-bold text-sm mb-3">{loadError}</div>
                                         <button
                                             type="button"
-                                            onClick={() => fetchProducts(true)}
+                                            onClick={fetchProducts}
                                             className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-sm"
                                         >
                                             <RotateCcw className="w-3.5 h-3.5" /> Retry Loading

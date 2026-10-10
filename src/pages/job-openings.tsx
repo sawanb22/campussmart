@@ -1,7 +1,6 @@
-import { useState, useRef, useMemo, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { CheckCircle, Send, Briefcase, MapPin, Clock, ArrowRight, Upload, FileText, Check, Sparkles } from 'lucide-react';
 import api from '@/api/client';
-import { usePageData } from '@/hooks/usePageData';
 
 export interface JobOpening {
   id: string;
@@ -68,50 +67,15 @@ const DEFAULT_OPENINGS: JobOpening[] = [
 ];
 
 const JobOpenings = () => {
-  const { data } = usePageData('job-openings');
-  const heroTitle = data.heroTitle || 'Build Future-Ready Campuses With Us';
-  const heroSubtitle = data.heroSubtitle || "Join India's premier educational infrastructure team. Select an open position on the left, or submit your resume directly using the application form.";
-
-  const openings: JobOpening[] = useMemo(() => {
-    const raw = Array.isArray(data.cards) && data.cards.length > 0 ? data.cards : DEFAULT_OPENINGS;
-    return raw.map((c: any, index: number) => ({
-      id: c.id || `job-${index}`,
-      title: c.title || 'Career Opportunity',
-      department: c.department || c.category || 'Operations',
-      location: c.location || 'India / Hybrid',
-      type: c.type || 'Full-time',
-      experience: c.experience || '2+ years',
-      description: c.description || '',
-      requirements: Array.isArray(c.requirements)
-        ? c.requirements
-        : typeof c.requirements === 'string'
-          ? c.requirements.split('\n').map((s: string) => s.trim()).filter(Boolean)
-          : ['Relevant domain experience', 'Strong team communication', 'Commitment to excellence'],
-    }));
-  }, [data.cards]);
-
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    role: openings[0]?.title || DEFAULT_OPENINGS[0].title,
-    experience: openings[0]?.experience || DEFAULT_OPENINGS[0].experience,
+    role: DEFAULT_OPENINGS[0].title,
+    experience: DEFAULT_OPENINGS[0].experience,
     message: '',
   });
-  const [selectedJobId, setSelectedJobId] = useState<string>(openings[0]?.id || DEFAULT_OPENINGS[0].id);
-
-  // Sync selected job if openings list loads/changes
-  useEffect(() => {
-    if (openings.length > 0 && !openings.some(j => j.id === selectedJobId)) {
-      setSelectedJobId(openings[0].id);
-      setFormData(prev => ({
-        ...prev,
-        role: openings[0].title,
-        experience: prev.experience || openings[0].experience,
-      }));
-    }
-  }, [openings, selectedJobId]);
-
+  const [selectedJobId, setSelectedJobId] = useState<string>(DEFAULT_OPENINGS[0].id);
   const [resume, setResume] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -201,10 +165,10 @@ const JobOpenings = () => {
             Careers at CampusMart
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-cm-blue-dark tracking-tight">
-            {heroTitle}
+            Build Future-Ready Campuses With Us
           </h1>
           <p className="mt-3 text-slate-600 text-sm sm:text-base leading-relaxed">
-            {heroSubtitle}
+            Join India's premier educational infrastructure team. Select an open position on the left, or submit your resume directly using the application form.
           </p>
         </div>
 
@@ -215,13 +179,13 @@ const JobOpenings = () => {
             <div className="flex items-center justify-between pb-2 border-b border-slate-200">
               <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
                 <Briefcase className="w-5 h-5 text-cm-blue" />
-                Current Openings ({openings.length})
+                Current Openings ({DEFAULT_OPENINGS.length})
               </h2>
               <span className="text-xs text-slate-500 font-semibold">Select a role to apply</span>
             </div>
 
             <div className="space-y-4">
-              {openings.map((job) => {
+              {DEFAULT_OPENINGS.map((job) => {
                 const isSelected = selectedJobId === job.id;
                 return (
                   <div

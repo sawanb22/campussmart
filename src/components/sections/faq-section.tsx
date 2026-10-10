@@ -47,15 +47,7 @@ export default function FaqSection() {
   const accordionRef = useRef<HTMLDivElement>(null);
 
   // Consume dynamic CMS FAQs if configured, otherwise fall back to defaults
-  // Honor toggle and explicit empty array so admins can remove FAQs
-  const showFaqs = content.show_home_faqs !== false && content.show_home_faqs !== 'false';
   const rawFaqs = content.home_faqs;
-  const isExplicitlyEmpty = Array.isArray(rawFaqs) && rawFaqs.length === 0;
-
-  if (!showFaqs || isExplicitlyEmpty) {
-    return null;
-  }
-
   const faqs: FaqItem[] = Array.isArray(rawFaqs) && rawFaqs.length > 0
     ? rawFaqs
     : defaultFaqs;

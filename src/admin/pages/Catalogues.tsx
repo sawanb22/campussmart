@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { Plus, Trash2, ExternalLink, X, Pencil, Upload, Loader2, BookMarked, Layers, ArrowRight } from 'lucide-react';
 import api from '../api/client';
 import MediaImageField from '../components/MediaImageField';
-import AdminStateContainer from '../components/AdminStateContainer';
 import { resolveMediaUrl } from '../../lib/media-url';
 import { getAdminToken } from '../lib/auth';
 
@@ -45,18 +44,12 @@ export default function Catalogues() {
     const [pdfFile, setPdfFile] = useState<File | null>(null);
     const pdfInputRef = useRef<HTMLInputElement>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
 
     const fetch = async () => {
-        setLoading(true);
-        setError(null);
         try {
             const { data } = await api.get('/catalogues');
-            setCatalogues(Array.isArray(data) ? data : []);
-        } catch (err: any) {
-            console.error('Failed to load catalogues:', err);
-            setError(err.response?.data?.error || 'Failed to load catalogues. Please retry.');
+            setCatalogues(data);
         } finally {
             setLoading(false);
         }
@@ -192,13 +185,11 @@ export default function Catalogues() {
                 </button>
             </div>
 
-            <AdminStateContainer
-                loading={loading}
-                error={error}
-                onRetry={fetch}
-                cachePrefix="/catalogues"
-                loadingMessage="Loading catalogues..."
-            >
+            {loading ? (
+                <div className="text-gray-400">
+                    Loading...
+                </div>
+            ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {catalogues.map((c) => (
                         <div
@@ -262,7 +253,7 @@ export default function Catalogues() {
                         </div>
                     )}
                 </div>
-            </AdminStateContainer>
+            )}
 
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">

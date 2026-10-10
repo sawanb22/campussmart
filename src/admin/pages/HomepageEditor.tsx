@@ -57,7 +57,6 @@ export default function HomepageEditor() {
     const [collaborations, setCollaborations] = useState<any[]>([]);
     const [categories, setCategories] = useState<CategoryItem[]>(DEFAULT_CATEGORIES);
     const [faqs, setFaqs] = useState<FaqItem[]>([]);
-    const [showFaqs, setShowFaqs] = useState<boolean>(true);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
@@ -114,9 +113,6 @@ export default function HomepageEditor() {
             } catch {
                 setFaqs(defaultFaqs);
             }
-            if (data.show_home_faqs !== undefined) {
-                setShowFaqs(data.show_home_faqs !== 'false' && data.show_home_faqs !== false);
-            }
         } catch (e) { console.error(e); }
         setLoading(false);
     };
@@ -137,7 +133,6 @@ export default function HomepageEditor() {
                 ticker_announcements: JSON.stringify(tickerAnnouncements),
                 collaborations: JSON.stringify(collaborations),
                 home_faqs: JSON.stringify(faqs),
-                show_home_faqs: showFaqs ? 'true' : 'false',
             });
             await refresh();
 
@@ -485,16 +480,7 @@ export default function HomepageEditor() {
                     <p className="text-xs text-gray-500">
                         Manage questions and answers displayed on the homepage FAQ accordion and the dedicated FAQ page.
                     </p>
-                    <div className="flex items-center gap-2 shrink-0 flex-wrap">
-                        <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-gray-700 bg-white border border-gray-200 px-3 py-1.5 rounded-lg shadow-xs hover:border-gray-300 select-none">
-                            <input
-                                type="checkbox"
-                                checked={showFaqs}
-                                onChange={e => setShowFaqs(e.target.checked)}
-                                className="w-3.5 h-3.5 text-blue-600 rounded focus:ring-blue-500"
-                            />
-                            <span>Show FAQs on Homepage</span>
-                        </label>
+                    <div className="flex items-center gap-2 shrink-0">
                         <button
                             onClick={resetFaqsToDefault}
                             type="button"

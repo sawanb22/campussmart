@@ -74,18 +74,17 @@ const Labs = () => {
   const heroSubtitle = data.heroSubtitle ?? LABS_DEFAULTS.heroSubtitle;
   const heroImage = data.heroImage ?? LABS_DEFAULTS.heroImage;
   const section1Title = data.section1Title ?? LABS_DEFAULTS.section1Title;
-  const allCards: Card[] = Array.isArray(data.cards)
-    ? data.cards
-    : (data.cards === undefined ? LABS_DEFAULTS.cards : []);
-  const cards = allCards.map((card) => {
+  const allCards: Card[] = Array.isArray(data.cards) ? data.cards : LABS_DEFAULTS.cards;
+  const cards = allCards.map((card, i) => {
+    const defaultCard = LABS_DEFAULTS.cards.find((c) => c.title === card.title) || LABS_DEFAULTS.cards[i % LABS_DEFAULTS.cards.length];
     const rawCats = card.categories?.filter(Boolean) || [];
     const categories = (rawCats.length > 0 && !(rawCats.length === 1 && rawCats[0] === 'Lab Products'))
       ? rawCats
-      : (rawCats.length > 0 ? rawCats : ['Science Labs']);
+      : (defaultCard.categories || ['Science Labs']);
     return {
       ...card,
       categories,
-      image: card.image,
+      image: card.image || defaultCard.image,
     };
   });
 

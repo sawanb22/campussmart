@@ -7,9 +7,7 @@ import { AI_ML_PAGE_SLUG, AI_ML_DEFAULTS, slugifyAiMlTitle } from './ai-ml.data'
 const AiMlDetail = () => {
   const { moduleSlug } = useParams();
   const { data, loading } = usePageData(AI_ML_PAGE_SLUG);
-  const cards = Array.isArray(data.cards)
-    ? data.cards
-    : (data.cards === undefined ? AI_ML_DEFAULTS.cards : []);
+  const cards = Array.isArray(data.cards) ? data.cards : AI_ML_DEFAULTS.cards;
   const card = cards.find((item: any) => slugifyAiMlTitle(item.title) === moduleSlug);
 
   if (loading && !card) {
@@ -30,7 +28,7 @@ const AiMlDetail = () => {
   }
 
   const defaultCard = AI_ML_DEFAULTS.cards.find((c) => slugifyAiMlTitle(c.title) === moduleSlug);
-  const fallbackImage = defaultCard?.image || 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=800&q=80';
+  const fallbackImage = defaultCard?.image || '/uploads/media/1788160868601-107085202.jpg';
   const image = resolveMediaUrl(card.image) || fallbackImage;
 
   return (

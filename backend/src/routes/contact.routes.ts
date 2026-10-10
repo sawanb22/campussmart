@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import prisma from '../lib/prisma';
 import { syncToSpreadsheet } from '../services/spreadsheet.service';
-import { isValidEmail, isValidPhone, isValidPincode, normalizePhone } from '../lib/validation';
+import { isValidEmail, isValidPhone, isValidPincode } from '../lib/validation';
 import { uploadResume } from '../middleware/upload.middleware';
 import { sendOtpEmail, generateOtp } from '../lib/email';
 import { otpLimiter } from '../middleware/rate-limit.middleware';
@@ -36,10 +36,9 @@ router.post('/', uploadResume.single('resume'), async (req: Request, res: Respon
             return;
         }
         if (!isValidPhone(phone)) {
-            res.status(400).json({ error: 'Please enter a valid phone number (e.g. +91 98765 43210 or international)' });
+            res.status(400).json({ error: 'Please enter a valid 10-digit Indian phone number' });
             return;
         }
-        const normalizedPhone = normalizePhone(phone);
         const isJobApplication = typeof subject === 'string' && subject.startsWith('Job Application:');
         if (isJobApplication && (!role || !req.file)) {
             res.status(400).json({ error: 'Role and resume are required for job applications' });
@@ -50,12 +49,7 @@ router.post('/', uploadResume.single('resume'), async (req: Request, res: Respon
             : message;
         const enquiry = await prisma.contactEnquiry.create({
             data: {
-                name: String(name).trim(),
-                email: String(email).trim().toLowerCase(),
-                phone: normalizedPhone,
-                subject,
-                role,
-                message: storedMessage,
+                name, email, phone, subject, role, message: storedMessage,
                 resumeFilename: req.file?.filename,
                 resumeOriginalName: req.file?.originalname,
                 resumeMimeType: req.file?.mimetype,
@@ -63,12 +57,11 @@ router.post('/', uploadResume.single('resume'), async (req: Request, res: Respon
             },
         });
         // Non-blocking sync: external spreadsheet errors should never fail customer enquiry persistence
-        syncToSpreadsheet({ type: 'Contact Enquiry', id: enquiry.id, name, email, phone: normalizedPhone, institution, subject, role, message, resumeOriginalName: req.file?.originalname, createdAt: enquiry.createdAt })
+        syncToSpreadsheet({ type: 'Contact Enquiry', id: enquiry.id, name, email, phone, institution, subject, role, message, resumeOriginalName: req.file?.originalname, createdAt: enquiry.createdAt })
             .catch((sheetErr) => console.error('Spreadsheet sync error (non-fatal):', sheetErr));
         res.status(201).json({ message: 'Enquiry submitted successfully', id: enquiry.id });
-    } catch (err) {
-        console.error('Failed to submit enquiry in POST /api/contact:', err);
-        res.status(500).json({ error: 'Failed to submit enquiry. Please try again.' });
+    } catch {
+        res.status(500).json({ error: 'Failed to submit enquiry' });
     }
 });
 
@@ -122,7 +115,7 @@ router.post('/quote', async (req: Request, res: Response) => {
             return;
         }
         if (!isValidPhone(phone)) {
-            res.status(400).json({ error: 'Please enter a valid phone number (e.g. +91 98765 43210 or international)' });
+            res.status(400).json({ error: 'Please enter a valid 10-digit Indian phone number' });
             return;
         }
         if (!isValidPincode(pincode)) {

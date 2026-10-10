@@ -7,9 +7,7 @@ import { SPORTS_INFRA_PAGE_SLUG, SPORTS_INFRA_DEFAULTS, slugifySportsInfraTitle 
 const SportsInfraDetail = () => {
   const { facilitySlug } = useParams();
   const { data, loading } = usePageData(SPORTS_INFRA_PAGE_SLUG);
-  const cards = Array.isArray(data.cards)
-    ? data.cards
-    : (data.cards === undefined ? SPORTS_INFRA_DEFAULTS.cards : []);
+  const cards = Array.isArray(data.cards) ? data.cards : SPORTS_INFRA_DEFAULTS.cards;
   const card = cards.find((item: any) => slugifySportsInfraTitle(item.title) === facilitySlug);
 
   if (loading && !card) {
@@ -30,7 +28,7 @@ const SportsInfraDetail = () => {
   }
 
   const defaultCard = SPORTS_INFRA_DEFAULTS.cards.find((c) => slugifySportsInfraTitle(c.title) === facilitySlug);
-  const fallbackImage = defaultCard?.image || 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=80';
+  const fallbackImage = defaultCard?.image || 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&q=80';
   const image = resolveMediaUrl(card.image) || fallbackImage;
 
   return (

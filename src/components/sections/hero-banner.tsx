@@ -12,11 +12,11 @@ const HeroBanner = () => {
   const { content } = useSiteContent();
   const rawHero = content.home_hero || {};
   const heroData = {
-    eyebrow: rawHero.eyebrow !== undefined ? rawHero.eyebrow : 'Future-ready campus infrastructure',
-    title: rawHero.title ?? content.hero_title ?? 'Design. Build.\nDigitize. Operate.\nFuture-Ready Campuses.',
-    subtitle: rawHero.subtitle ?? content.hero_subtitle ?? 'Physical + Digital',
-    ctaLabel: rawHero.ctaLabel ?? 'Schedule Campus Audit →',
-    ctaHref: rawHero.ctaHref ?? '/contact-us',
+    eyebrow: rawHero.eyebrow || 'Future-ready campus infrastructure',
+    title: rawHero.title || content.hero_title || 'Design. Build.\nDigitize. Operate.\nFuture-Ready Campuses.',
+    subtitle: rawHero.subtitle || content.hero_subtitle || 'Physical + Digital',
+    ctaLabel: rawHero.ctaLabel || 'Schedule Campus Audit →',
+    ctaHref: rawHero.ctaHref || '/contact-us',
     image: rawHero.image || DEFAULT_HERO_IMAGE
   };
 

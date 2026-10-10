@@ -79,9 +79,7 @@ export default function CollegesUniversitiesForSale() {
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [sort, setSort] = useState<'relevance' | 'newest' | 'price'>('relevance');
   const [selectedRegion, setSelectedRegion] = useState<Region | 'All'>('All');
-  const listings: Listing[] = Array.isArray(data.cards)
-    ? data.cards
-    : (data.cards === undefined ? DEFAULTS.cards : []);
+  const listings: Listing[] = Array.isArray(data.cards) ? data.cards : DEFAULTS.cards;
   const [contactListing, setContactListing] = useState<Listing | null>(null);
   const [dossierListing, setDossierListing] = useState<Listing | null>(null);
   const [formData, setFormData] = useState(EMPTY_FORM);
@@ -148,20 +146,16 @@ export default function CollegesUniversitiesForSale() {
     setFormError('');
     try {
       await api.post('/contact', {
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        phone: formData.phone.trim(),
-        institution: formData.institution?.trim() || undefined,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        institution: formData.institution,
         subject: `Business enquiry: ${contactListing.title}`,
-        message: formData.message.trim(),
+        message: formData.message,
       });
       setSubmitted(true);
     } catch (err: any) {
-      const serverMsg = err.response?.data?.error;
-      const networkMsg = err.code === 'ECONNABORTED'
-        ? 'Request timed out. Please check your connection and try again.'
-        : 'Failed to send your enquiry. Please try again.';
-      setFormError(serverMsg || networkMsg);
+      setFormError(err.response?.data?.error || 'Failed to send your enquiry. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -414,7 +408,7 @@ export default function CollegesUniversitiesForSale() {
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                       <label className="form-label">Phone *</label>
-                      <input type="tel" className="form-input" required value={formData.phone} onChange={(event) => setFormData({ ...formData, phone: event.target.value })} placeholder="+91 98765 43210" />
+                      <input type="tel" pattern="(?:\+91[ -]?)?[6-9][0-9]{9}" className="form-input" required value={formData.phone} onChange={(event) => setFormData({ ...formData, phone: event.target.value })} placeholder="+91 98765 43210" />
                     </div>
                     <div>
                       <label className="form-label">Institution / Company</label>

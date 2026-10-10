@@ -73,18 +73,17 @@ const Libraries = () => {
   const heroSubtitle = data.heroSubtitle ?? LIBRARIES_DEFAULTS.heroSubtitle;
   const heroImage = data.heroImage ?? LIBRARIES_DEFAULTS.heroImage;
   const section1Title = data.section1Title ?? LIBRARIES_DEFAULTS.section1Title;
-  const allCards: CardItem[] = Array.isArray(data.cards)
-    ? data.cards
-    : (data.cards === undefined ? LIBRARIES_DEFAULTS.cards : []);
-  const cards = allCards.map((card) => {
+  const allCards: CardItem[] = Array.isArray(data.cards) ? data.cards : LIBRARIES_DEFAULTS.cards;
+  const cards = allCards.map((card, i) => {
+    const defaultCard = LIBRARIES_DEFAULTS.cards.find((c) => c.title === card.title) || LIBRARIES_DEFAULTS.cards[i % LIBRARIES_DEFAULTS.cards.length];
     const rawCats = card.categories?.filter(Boolean) || [];
     const categories = (rawCats.length > 0 && !(rawCats.length === 1 && (rawCats[0] === 'Libraries' || rawCats[0] === 'Library Furniture')))
       ? rawCats
-      : (rawCats.length > 0 ? rawCats : ['Reading & Study']);
+      : (defaultCard.categories || ['Reading & Study']);
     return {
       ...card,
       categories,
-      image: card.image,
+      image: card.image || defaultCard.image,
     };
   });
 

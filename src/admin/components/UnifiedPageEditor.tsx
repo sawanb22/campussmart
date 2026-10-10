@@ -311,19 +311,12 @@ export default function UnifiedPageEditor({
     const genericDefaults = pageDefaults[page.slug] || pageDefaults[page.template || ''] || {};
     const effectiveDefaults = isAboutUs ? defaultAboutUs : genericDefaults;
 
-    // Deletion-integrity: If the page already has saved data in the database,
-    // load parsedData directly without backfilling deleted fields or cards from defaults.
-    // Defaults are only used as initial scaffolding if pageData is completely empty/uninitialized.
-    const hasSavedData = Boolean(
-        page.pageData &&
-        page.pageData.trim() !== '' &&
-        page.pageData.trim() !== '{}' &&
-        Object.keys(parsedData).length > 0
-    );
-
-    const initialData: PageData = hasSavedData
-        ? { ...parsedData }
-        : { ...effectiveDefaults };
+    const initialData = { ...effectiveDefaults };
+    Object.entries(parsedData).forEach(([k, v]) => {
+        if (v !== undefined && v !== null) {
+            (initialData as any)[k] = v;
+        }
+    });
 
     const [data, setData] = useState<PageData>(initialData);
     const [saving, setSaving] = useState(false);
@@ -1527,21 +1520,6 @@ export default function UnifiedPageEditor({
                                                         <>
                                                             <Field label="Article Category" value={card.category ?? ''} onChange={(v) => setCard(i, 'category', v)} placeholder="Strategy" />
                                                             <Field label="Read Time" value={card.readTime ?? ''} onChange={(v) => setCard(i, 'readTime', v)} placeholder="5 min read" />
-                                                        </>
-                                                    )}
-                                                    {page.slug === 'job-openings' && (
-                                                        <>
-                                                            <Field label="Department" value={card.department ?? ''} onChange={(v) => setCard(i, 'department', v)} placeholder="Design & Architecture" />
-                                                            <Field label="Location" value={card.location ?? ''} onChange={(v) => setCard(i, 'location', v)} placeholder="Bengaluru / Hybrid" />
-                                                            <Field label="Job Type" value={card.type ?? ''} onChange={(v) => setCard(i, 'type', v)} placeholder="Full-time" />
-                                                            <Field label="Experience Required" value={card.experience ?? ''} onChange={(v) => setCard(i, 'experience', v)} placeholder="4-8 years" />
-                                                            <Field
-                                                                label="Requirements (one per line)"
-                                                                value={Array.isArray(card.requirements) ? card.requirements.join('\n') : (card.requirements ?? '')}
-                                                                onChange={(v) => setCard(i, 'requirements', v.split('\n').map((s: string) => s.trim()).filter(Boolean))}
-                                                                multiline
-                                                                placeholder="Degree in Architecture&#10;Proficiency in CAD/Revit&#10;Institutional portfolio"
-                                                            />
                                                         </>
                                                     )}
                                                     <MediaImageField label="Image (Optional)" value={card.image ?? ''} onChange={(v) => setCard(i, 'image', v)} previewClassName="h-24" />

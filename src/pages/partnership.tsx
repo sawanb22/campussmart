@@ -52,11 +52,7 @@ const Partnership = () => {
       setSubmitted(true);
       setFormData({ name: '', email: '', phone: '', institution: '', message: '' });
     } catch (err: any) {
-      const serverMsg = err.response?.data?.error;
-      const networkMsg = err.code === 'ECONNABORTED'
-        ? 'Request timed out. Please check your connection and try again.'
-        : 'Failed to submit your enquiry. Please try again.';
-      setSubmitError(serverMsg || networkMsg);
+      setSubmitError(err.response?.data?.error || 'Failed to submit your enquiry. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -151,6 +147,9 @@ const Partnership = () => {
                 <input
                   id="partner-phone"
                   type="tel"
+                  pattern="(?:\+91[ -]?)?[6-9][0-9]{9}"
+                  minLength={10}
+                  maxLength={14}
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   className="form-input"

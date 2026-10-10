@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { Plus, Trash2, Pencil, X, BookMarked, Layers, ArrowRight } from 'lucide-react';
 import api from '../api/client';
 import MediaImageField from '../components/MediaImageField';
-import AdminStateContainer from '../components/AdminStateContainer';
 import { resolveMediaUrl } from '../../lib/media-url';
 
 interface CaseStudy {
@@ -29,18 +28,12 @@ export default function CaseStudies() {
     const [showModal, setShowModal] = useState(false);
     const [editing, setEditing] = useState<Partial<CaseStudy>>(EMPTY);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
 
     const fetchAll = async () => {
-        setLoading(true);
-        setError(null);
         try {
             const { data } = await api.get('/case-studies');
-            setCaseStudies(Array.isArray(data) ? data : []);
-        } catch (err: any) {
-            console.error('Failed to load case studies:', err);
-            setError(err.response?.data?.error || 'Failed to load case studies. Please retry.');
+            setCaseStudies(data);
         } finally {
             setLoading(false);
         }
@@ -143,13 +136,9 @@ export default function CaseStudies() {
                 </button>
             </div>
 
-            <AdminStateContainer
-                loading={loading}
-                error={error}
-                onRetry={fetchAll}
-                cachePrefix="/case-studies"
-                loadingMessage="Loading case studies..."
-            >
+            {loading ? (
+                <div className="text-gray-400">Loading...</div>
+            ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {caseStudies.map((c) => (
                         <div key={c.id} className="card flex flex-col">
@@ -193,7 +182,7 @@ export default function CaseStudies() {
                         </div>
                     )}
                 </div>
-            </AdminStateContainer>
+            )}
 
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">

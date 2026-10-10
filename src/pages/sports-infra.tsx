@@ -138,15 +138,16 @@ const SportsInfra = ({ slug = 'sports-infra' }: { slug?: string }) => {
   const ctaTitle = data.ctaTitle ?? SPORTS_INFRA_DEFAULTS.ctaTitle;
   const ctaButtonLabel = data.ctaButtonLabel ?? SPORTS_INFRA_DEFAULTS.ctaButtonLabel;
   const ctaHref = data.ctaHref ?? SPORTS_INFRA_DEFAULTS.ctaHref;
-  const allCards = Array.isArray(data.cards)
-    ? data.cards
-    : (data.cards === undefined ? SPORTS_INFRA_DEFAULTS.cards : []);
+  const allCards = Array.isArray(data.cards) ? data.cards : SPORTS_INFRA_DEFAULTS.cards;
   const cards = allCards.map((card: any) => {
+    const defaultCard = SPORTS_INFRA_DEFAULTS.cards.find((c) => c.title === card.title);
     let cats: string[] = [];
     if (Array.isArray(card.categories) && card.categories.length > 0) {
-      cats = card.categories.filter(Boolean);
+      cats = card.categories;
     } else if (card.category && typeof card.category === 'string') {
       cats = [card.category];
+    } else if (defaultCard?.categories?.length) {
+      cats = defaultCard.categories;
     }
     return {
       ...card,

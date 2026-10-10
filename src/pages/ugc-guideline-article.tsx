@@ -9,15 +9,16 @@ const slugify = (title: string) => title.toLowerCase().trim().replace(/[^a-z0-9]
 const UGCGuidelineArticle = () => {
   const { articleSlug } = useParams();
   const { data, loading } = usePageData<any>('ugc-guidelines');
-  const cards = Array.isArray(data.cards) ? data.cards : (data.cards === undefined ? DEFAULTS.cards : []);
-  const moreCards = Array.isArray(data.moreCards) ? data.moreCards : (data.moreCards === undefined ? DEFAULTS.moreCards : []);
+  const cards = Array.isArray(data.cards) ? data.cards : DEFAULTS.cards;
+  const moreCards = Array.isArray(data.moreCards) ? data.moreCards : DEFAULTS.moreCards;
   const allArticles = [...cards, ...moreCards];
   const article = allArticles.find(item => slugify(item.title) === articleSlug);
 
   if (loading) return <main className="min-h-[60vh] flex items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-cm-blue border-t-transparent" aria-label="Loading article" /></main>;
   if (!article) return <main className="min-h-[60vh] flex flex-col items-center justify-center gap-5 px-4"><h1 className="text-3xl font-bold text-cm-blue-dark">Guidance not found</h1><Link to="/ugc-guidelines" className="btn-primary">Back to UGC Guidelines</Link></main>;
 
-  const image = article.image;
+  const fallback = DEFAULTS.cards.find(card => card.title === article.title) || DEFAULTS.moreCards.find(card => card.title === article.title);
+  const image = article.image || fallback?.image;
 
   return (
     <main className="min-h-screen bg-[#f5f4ef] py-6 sm:py-10 font-opensans">

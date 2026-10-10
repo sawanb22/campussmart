@@ -57,9 +57,9 @@ const Footer = () => {
   }, []);
 
   const aboutLinks = [
-    { label: 'How it works', href: '/how-it-works' },
-    { label: 'Brand Help', href: '/brand-help' },
-    { label: 'Sell on campusmart', href: '/sell-on-campusmart' },
+    { label: 'How it works', href: '/corporate' },
+    { label: 'Brand Help', href: '/corporate' },
+    { label: 'Sell on campusmart', href: '/partnership' },
   ];
 
   const businessLinks = [

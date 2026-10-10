@@ -38,7 +38,6 @@ backend/test_extract/
 
 # Logs and debug files
 *.log
-*.url
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

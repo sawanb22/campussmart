@@ -1,4 +1,4 @@
-import { useState, useEffect, type MouseEvent } from 'react';
+import { useState, type MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { FileText, Eye, Lock, Send, X, CheckCircle } from 'lucide-react';
 import api from '@/api/client';
@@ -230,42 +230,11 @@ const Catalogues = () => {
     }
   };
 
-  const [dbCatalogues, setDbCatalogues] = useState<any[]>([]);
-  const [dbCaseStudies, setDbCaseStudies] = useState<any[]>([]);
-
-  useEffect(() => {
-    api.get('/catalogues')
-      .then(res => {
-        if (Array.isArray(res.data) && res.data.length > 0) {
-          setDbCatalogues(res.data.map((item: any) => ({
-            title: item.title,
-            description: item.description || '',
-            image: item.thumbnailUrl || 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-            downloadLink: item.fileUrl,
-            size: 'PDF',
-          })));
-        }
-      })
-      .catch(() => {});
-
-    api.get('/case-studies')
-      .then(res => {
-        if (Array.isArray(res.data) && res.data.length > 0) {
-          setDbCaseStudies(res.data.map((item: any) => ({
-            title: item.title,
-            description: item.description || '',
-            image: item.imageUrl || 'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-            slug: item.slug || slugify(item.title),
-          })));
-        }
-      })
-      .catch(() => {});
-  }, []);
-
-  // Multi-source sync: 1. DB Catalogues (from /admin/catalogues), 2. CMS pageData, 3. DEFAULTS
-  const catalogues = dbCatalogues.length > 0
-    ? dbCatalogues
-    : (Array.isArray(data.cards) && data.cards.length > 0)
+  // Pure database-driven binding to usePageData('catalogues')
+  // Do NOT resurrect DEFAULTS when database provides an empty array []
+  const catalogues = loading
+    ? []
+    : Array.isArray(data.cards)
       ? data.cards.map((c: any) => ({
           ...c,
           title: (c.title || '').replace(/SCHOOLMART/g, 'CAMPUSMART'),
@@ -273,16 +242,16 @@ const Catalogues = () => {
           image: c.image || '',
           downloadLink: c.downloadLink ?? c.fileUrl ?? '',
         }))
-      : (loading ? [] : DEFAULTS.cards);
+      : DEFAULTS.cards;
 
-  const caseStudies = dbCaseStudies.length > 0
-    ? dbCaseStudies
-    : (Array.isArray(data.caseStudies) && data.caseStudies.length > 0)
+  const caseStudies = loading
+    ? []
+    : Array.isArray(data.caseStudies)
       ? data.caseStudies.map((cs: any) => ({
           ...cs,
           slug: cs.slug || slugify(cs.title),
         }))
-      : (loading ? [] : DEFAULTS.caseStudies);
+      : DEFAULTS.caseStudies;
 
   const visibleCatalogues = catalogues.slice(0, visibleCount);
   const hasMore = visibleCount < catalogues.length;
