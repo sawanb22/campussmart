@@ -65,3 +65,13 @@ Thumbs.db
 *.sln
 *.sw?
 .claude/
+
+# Documents, office files, and temporary scratch
+*.docx
+*.doc
+*.xlsx
+*.xls
+*.csv
+*.tmp
+*.bak
+*.orig

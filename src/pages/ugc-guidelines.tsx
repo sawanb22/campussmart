@@ -3,15 +3,15 @@ import { Link } from 'react-router-dom';
 import { usePageData } from '@/hooks/usePageData';
 import MediaImage from '@/components/ui/media-image';
 
-type Article = { title: string; description?: string; category: string; readTime: string; image: string; href?: string; author?: string; authorImage?: string };
-type MoreCard = { title: string; category: string; href?: string; image?: string; description?: string };
+export type Article = { title: string; description?: string; category: string; readTime: string; image: string; href?: string; author?: string; authorImage?: string };
+export type MoreCard = { title: string; category: string; href?: string; image?: string; description?: string };
 
 const slugify = (text: string) => text.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 export const DEFAULTS = {
   brandName: 'CampusMart Journal',
   headerActionLabel: 'Explore Campus Solutions',
-  headerActionHref: '/solutions',
+  headerActionHref: '/campus-design-execution',
   navLinks: ['Guidelines', 'Campus Planning', 'Technology', 'Resources'],
   pageTitle: 'Campus Digital Journal',
   categories: ['All guidance', 'Digital Campus', 'Governance', 'Technology', 'Student Experience', 'UGC'],
@@ -25,7 +25,7 @@ export const DEFAULTS = {
   },
   cards: [
     { category: 'Digital Campus', readTime: '5 min read', title: 'What a connected campus needs before launch', description: 'A clear checklist for infrastructure, systems and teams preparing for a more connected institution.', image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80', author: 'CampusMart Team', authorImage: '', href: '/tech-infra' },
-    { category: 'Governance', readTime: '6 min read', title: 'Make student data privacy part of the design', description: 'Build trust into campus technology with practical privacy and access decisions from day one.', image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=900&q=85', author: 'CampusMart Team', authorImage: '', href: '/services' },
+    { category: 'Governance', readTime: '6 min read', title: 'Make student data privacy part of the design', description: 'Build trust into campus technology with practical privacy and access decisions from day one.', image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=900&q=85', author: 'CampusMart Team', authorImage: '', href: '/campus-automation' },
     { category: 'Student Experience', readTime: '4 min read', title: 'Digital services that keep students moving', description: 'Thoughtful digital touchpoints can make everyday campus journeys simpler and more inclusive.', image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=900&q=85', author: 'CampusMart Team', authorImage: '', href: '/campus-automation' },
   ] as Article[],
   moreTitle: 'More campus resources',

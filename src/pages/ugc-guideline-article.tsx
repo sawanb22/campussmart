@@ -2,47 +2,95 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import MediaImage from '@/components/ui/media-image';
-import { DEFAULTS } from './ugc-guidelines';
+import { DEFAULTS, type Article, type MoreCard } from './ugc-guidelines';
 
 const slugify = (title: string) => title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 const UGCGuidelineArticle = () => {
   const { articleSlug } = useParams();
   const { data, loading } = usePageData<any>('ugc-guidelines');
-  const cards = Array.isArray(data.cards) ? data.cards : DEFAULTS.cards;
-  const moreCards = Array.isArray(data.moreCards) ? data.moreCards : DEFAULTS.moreCards;
-  const allArticles = [...cards, ...moreCards];
-  const article = allArticles.find(item => slugify(item.title) === articleSlug);
+  const cards: Article[] = Array.isArray(data.cards) ? data.cards : DEFAULTS.cards;
+  const moreCards: MoreCard[] = Array.isArray(data.moreCards) ? data.moreCards : DEFAULTS.moreCards;
+  const rawFeatured = { ...DEFAULTS.featured, ...(data.featured ?? {}) };
 
-  if (loading) return <main className="min-h-[60vh] flex items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-cm-blue border-t-transparent" aria-label="Loading article" /></main>;
-  if (!article) return <main className="min-h-[60vh] flex flex-col items-center justify-center gap-5 px-4"><h1 className="text-3xl font-bold text-cm-blue-dark">Guidance not found</h1><Link to="/ugc-guidelines" className="btn-primary">Back to UGC Guidelines</Link></main>;
+  const featuredArticle: Article = {
+    title: rawFeatured.title,
+    description: rawFeatured.description,
+    category: rawFeatured.eyebrow || 'Featured Guidance',
+    readTime: '6 min read',
+    image: rawFeatured.image,
+  };
 
-  const fallback = DEFAULTS.cards.find(card => card.title === article.title) || DEFAULTS.moreCards.find(card => card.title === article.title);
-  const image = article.image || fallback?.image;
+  const moreArticles: Article[] = moreCards.map((card) => ({
+    title: card.title,
+    description: card.description || `Practical guidance for education teams working on ${card.category.toLowerCase()} across a modern campus.`,
+    category: card.category,
+    readTime: '4 min read',
+    image: card.image || '',
+  }));
+
+  const allArticles: Article[] = [featuredArticle, ...cards, ...moreArticles];
+  const article = allArticles.find((item) => slugify(item.title) === articleSlug);
+
+  if (loading) {
+    return (
+      <main className="min-h-[60vh] flex items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-cm-blue border-t-transparent" aria-label="Loading article" />
+      </main>
+    );
+  }
+
+  if (!article) {
+    return (
+      <main className="min-h-[60vh] flex flex-col items-center justify-center gap-5 px-4">
+        <h1 className="text-3xl font-bold text-cm-blue-dark">Guidance not found</h1>
+        <Link to="/ugc-guidelines" className="btn-primary">Back to UGC Guidelines</Link>
+      </main>
+    );
+  }
+
+  const fallback = DEFAULTS.cards.find((c) => c.title === article.title) || DEFAULTS.moreCards.find((c) => c.title === article.title);
+  const image = article.image || fallback?.image || DEFAULTS.featured.image;
 
   return (
-    <main className="min-h-screen bg-[#f5f4ef] py-6 sm:py-10 font-opensans">
-      <article className="mx-auto max-w-4xl px-4 sm:px-8">
-        <Link to="/ugc-guidelines" className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-[#155b51]">
+    <main className="ugc-guideline-article-page min-h-screen bg-[#faf8f0] py-10 sm:py-16">
+      <article className="mx-auto max-w-4xl px-5 sm:px-8">
+        <Link
+          to="/ugc-guidelines"
+          className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-[#3d718f] hover:text-[#3c2f26]"
+        >
           <ArrowLeft size={16} /> Back to UGC Guidelines
         </Link>
-        <div className="overflow-hidden rounded-[20px] bg-[#f8f8f4] shadow-sm border border-[#e5ebe7]">
+        <div className="overflow-hidden rounded-lg bg-[#fffdf8] shadow-sm">
           {image && (
-            <MediaImage src={image} alt={article.title} className="h-64 w-full object-cover sm:h-[400px]" />
+            <MediaImage
+              src={image}
+              alt={article.title}
+              className="h-64 w-full object-cover sm:h-[440px]"
+            />
           )}
-          <div className="px-6 py-6 sm:px-10 sm:py-9">
-            <div className="mb-3 text-xs font-bold uppercase tracking-[0.12em] text-[#f47b20]">
-              {article.category}{article.readTime ? ` · ${article.readTime}` : ''}
+          <div className="px-6 py-8 sm:px-12 sm:py-12">
+            <div className="mb-4 text-[10px] font-bold uppercase tracking-[0.14em] text-[#ed9816]">
+              {article.category}
             </div>
-            <h1 className="mb-5 font-poppins text-3xl font-bold leading-tight tracking-tight text-[#155b51] sm:text-5xl">
+            <h1 className="mb-6 font-serif text-4xl font-medium leading-tight tracking-tight text-[#3c2f26] sm:text-6xl">
               {article.title}
             </h1>
-            <p className="max-w-2xl border-l-2 border-[#f47b20] pl-5 text-base leading-relaxed text-[#173e39] sm:text-lg">
+            <p className="max-w-2xl border-l-2 border-[#ed9816] pl-5 text-base leading-8 text-[#695e56] sm:text-lg">
               {article.description || `Practical guidance for education teams working on ${article.category.toLowerCase()} across a modern campus.`}
             </p>
+            {article.readTime && (
+              <div className="mt-8 flex items-center justify-between border-t border-[#3c2f26]/10 pt-5 text-xs uppercase tracking-[0.12em] text-[#89614d]">
+                <span>{article.category}</span>
+                <span>{article.readTime}</span>
+              </div>
+            )}
           </div>
         </div>
-        <Link to="/ugc-guidelines" className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-[#155b51]">
+        <Link
+          to="/ugc-guidelines"
+          className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-[#3c2f26]"
+        >
           Explore more guidance <ArrowRight size={15} />
         </Link>
       </article>

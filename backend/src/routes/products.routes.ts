@@ -249,7 +249,7 @@ router.post('/bulk', verifyToken, requireAdmin, async (req: AuthRequest, res: Re
                     specifications: formattedSpecs,
                     rating: Number(p.rating) || 0,
                     reviewCount: Number(p.reviewCount) || 0,
-                    stock: Number(p.stock) || 100,
+                    stock: p.stock !== undefined && p.stock !== '' && !isNaN(Number(p.stock)) ? Math.max(0, parseInt(String(p.stock), 10)) : 0,
                     active: p.active !== 'false' && p.active !== false,
                     featured: p.featured === 'true' || p.featured === true
                 },
@@ -265,7 +265,7 @@ router.post('/bulk', verifyToken, requireAdmin, async (req: AuthRequest, res: Re
                     specifications: formattedSpecs,
                     rating: Number(p.rating) || 0,
                     reviewCount: Number(p.reviewCount) || 0,
-                    stock: Number(p.stock) || 100,
+                    stock: p.stock !== undefined && p.stock !== '' && !isNaN(Number(p.stock)) ? Math.max(0, parseInt(String(p.stock), 10)) : 0,
                     active: p.active !== 'false' && p.active !== false,
                     featured: p.featured === 'true' || p.featured === true
                 }
@@ -300,15 +300,35 @@ router.get('/:id', optionalAuth, async (req: AuthRequest, res: Response) => {
 router.post('/', verifyToken, requireAdmin, uploadImage.single('image'), async (req: AuthRequest, res: Response) => {
     try {
         const { name, description, price, categoryId, rating, reviewCount, stock, active, featured, sku, images, specifications } = req.body;
+        
+        // Strict production validation
+        if (!name || !String(name).trim()) {
+            res.status(400).json({ error: 'Product name is required' });
+            return;
+        }
+        if (!categoryId || isNaN(Number(categoryId))) {
+            res.status(400).json({ error: 'Valid category selection is required' });
+            return;
+        }
+        if (price === undefined || price === null || price === '' || isNaN(Number(price)) || Number(price) <= 0) {
+            res.status(400).json({ error: 'Listing price must be a valid number greater than 0' });
+            return;
+        }
+        if (stock === undefined || stock === null || stock === '' || isNaN(Number(stock)) || Number(stock) < 0) {
+            res.status(400).json({ error: 'Units in stock must be specified (0 or greater)' });
+            return;
+        }
+
+        const numericStock = Math.max(0, parseInt(String(stock), 10));
         const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
         const finalSku = sku && sku.trim() !== '' ? sku.trim() : slug.toUpperCase();
         const imageUrl = req.file ? `/uploads/images/${req.file.filename}` : req.body.imageUrl;
         const product = await prisma.product.create({
             data: {
-                name, slug, sku: finalSku, description, price: Number(price), categoryId: Number(categoryId),
-                imageUrl, images: images || null, specifications: specifications || null,
+                name: name.trim(), slug, sku: finalSku, description: description || null, price: Number(price), categoryId: Number(categoryId),
+                imageUrl: imageUrl || null, images: images || null, specifications: specifications || null,
                 rating: Number(rating) || 0, reviewCount: Number(reviewCount) || 0,
-                stock: Number(stock) || 100, active: active !== 'false' && active !== false, featured: featured === 'true' || featured === true,
+                stock: numericStock, active: active !== 'false' && active !== false, featured: featured === 'true' || featured === true,
             },
             include: { category: true },
         });
@@ -327,18 +347,44 @@ router.post('/', verifyToken, requireAdmin, uploadImage.single('image'), async (
 router.put('/:id', verifyToken, requireAdmin, uploadImage.single('image'), async (req: AuthRequest, res: Response) => {
     try {
         const { name, description, price, categoryId, rating, reviewCount, stock, active, featured, imageUrl: bodyImageUrl, sku, images, specifications } = req.body;
+        
+        // Strict validation on fields when provided
+        if (name !== undefined && !String(name).trim()) {
+            res.status(400).json({ error: 'Product name cannot be empty' });
+            return;
+        }
+        if (price !== undefined && price !== '' && (isNaN(Number(price)) || Number(price) <= 0)) {
+            res.status(400).json({ error: 'Listing price must be greater than 0' });
+            return;
+        }
+        if (stock !== undefined && stock !== '' && (isNaN(Number(stock)) || Number(stock) < 0)) {
+            res.status(400).json({ error: 'Units in stock must be 0 or greater' });
+            return;
+        }
+        if (categoryId !== undefined && categoryId !== '' && (isNaN(Number(categoryId)) || Number(categoryId) <= 0)) {
+            res.status(400).json({ error: 'Valid category selection is required' });
+            return;
+        }
+
         const imageUrl = req.file ? `/uploads/images/${req.file.filename}` : bodyImageUrl;
-        const updateData: Record<string, unknown> = {
-            description, price: Number(price), categoryId: Number(categoryId),
-            rating: Number(rating), reviewCount: Number(reviewCount),
-            stock: Number(stock), active: active !== 'false' && active !== false, featured: featured === 'true' || featured === true,
-        };
+        const updateData: Record<string, unknown> = {};
+
+        if (description !== undefined) updateData.description = description || null;
+        if (price !== undefined && price !== '') updateData.price = Number(price);
+        if (categoryId !== undefined && categoryId !== '') updateData.categoryId = Number(categoryId);
+        if (rating !== undefined && rating !== '') updateData.rating = Number(rating);
+        if (reviewCount !== undefined && reviewCount !== '') updateData.reviewCount = Number(reviewCount);
+        if (stock !== undefined && stock !== '' && !isNaN(Number(stock))) {
+            updateData.stock = Math.max(0, parseInt(String(stock), 10));
+        }
+        if (active !== undefined) updateData.active = active !== 'false' && active !== false;
+        if (featured !== undefined) updateData.featured = featured === 'true' || featured === true;
         if (sku !== undefined) updateData.sku = sku || null;
         if (images !== undefined) updateData.images = images || null;
         if (specifications !== undefined) updateData.specifications = specifications || null;
         
         if (name) {
-            updateData.name = name;
+            updateData.name = name.trim();
             updateData.slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
         }
         if (imageUrl) updateData.imageUrl = imageUrl;

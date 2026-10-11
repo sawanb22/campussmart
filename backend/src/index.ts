@@ -48,7 +48,6 @@ import pagesRoutes from './routes/pages.routes';
 import mediaRoutes from './routes/media.routes';
 import chatbotRoutes from './routes/chatbot.routes';
 import { errorHandler } from './middleware/error.middleware';
-import { verifyTokenFromQueryOrHeader } from './middleware/auth.middleware';
 import { UPLOADS_DIR } from './lib/uploads-dir';
 
 const app = express();
@@ -147,13 +146,12 @@ app.use(globalLimiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Static files (uploaded images/PDFs/videos). Catalogue PDFs are restricted to logged-in
-// users, so that mount is gated and registered before the general public one.
+// Static files (uploaded images/PDFs/videos/documents).
 const staticOptions = {
     maxAge: '7d',
     immutable: true,
 };
-app.use('/uploads/catalogues', verifyTokenFromQueryOrHeader, express.static(path.join(UPLOADS_DIR, 'catalogues')));
+app.use('/uploads/catalogues', express.static(path.join(UPLOADS_DIR, 'catalogues'), staticOptions));
 app.use('/uploads', express.static(UPLOADS_DIR, staticOptions));
 const rootUploadsFallback = path.resolve(UPLOADS_DIR, '../../uploads');
 if (fs.existsSync(rootUploadsFallback) && rootUploadsFallback !== UPLOADS_DIR) {

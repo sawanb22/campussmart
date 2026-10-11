@@ -13,8 +13,6 @@ const Orders = lazy(() => import('./pages/Orders'));
 const Users = lazy(() => import('./pages/Users'));
 const Enquiries = lazy(() => import('./pages/Enquiries'));
 const Classifieds = lazy(() => import('./pages/Classifieds'));
-const Catalogues = lazy(() => import('./pages/Catalogues'));
-const CaseStudies = lazy(() => import('./pages/CaseStudies'));
 const SiteContent = lazy(() => import('./pages/SiteContent'));
 const HomepageEditor = lazy(() => import('./pages/HomepageEditor'));
 const PagesManager = lazy(() => import('./pages/PagesManager'));
@@ -116,8 +114,8 @@ function AdminRoutes() {
         <Route path="enquiries" element={<Suspense fallback={<Loader />}><Enquiries /></Suspense>} />
         <Route path="wishlist-report" element={<Suspense fallback={<Loader />}><WishlistReports /></Suspense>} />
         <Route path="classifieds" element={<Suspense fallback={<Loader />}><Classifieds /></Suspense>} />
-        <Route path="catalogues" element={<Suspense fallback={<Loader />}><Catalogues /></Suspense>} />
-        <Route path="case-studies" element={<Suspense fallback={<Loader />}><CaseStudies /></Suspense>} />
+        <Route path="catalogues" element={<Suspense fallback={<Loader />}><PageEditor slugOverride="catalogues" /></Suspense>} />
+        <Route path="case-studies" element={<Navigate to="/admin/pages" replace />} />
         <Route path="site-content" element={<Suspense fallback={<Loader />}><SiteContent /></Suspense>} />
         <Route path="homepage-editor" element={<Suspense fallback={<Loader />}><HomepageEditor /></Suspense>} />
         <Route path="pages" element={<Suspense fallback={<Loader />}><PagesManager /></Suspense>} />

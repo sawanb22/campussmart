@@ -3,8 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/client';
 import UnifiedPageEditor, { type Page } from '../components/UnifiedPageEditor';
 
-export default function PageEditor() {
-    const { id } = useParams<{ id: string }>();
+export default function PageEditor({ slugOverride }: { slugOverride?: string }) {
+    const params = useParams<{ id: string }>();
+    const id = slugOverride || params.id;
     const navigate = useNavigate();
 
     const [page, setPage] = useState<Page | null>(null);
@@ -13,6 +14,7 @@ export default function PageEditor() {
 
     useEffect(() => {
         const load = async () => {
+            if (!id) return;
             try {
                 const { data: p } = await api.get(`/pages/${id}`);
                 setPage(p);

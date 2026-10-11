@@ -1454,29 +1454,20 @@ export default function UnifiedPageEditor({
                             </section>
                         )}
 
-                        {/* Catalogues shortcut banner */}
+                        {/* Catalogues unified info banner */}
                         {page.slug === 'catalogues' && (
                             <section className="space-y-4 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-6">
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                     <div>
-                                        <h4 className="text-sm font-bold text-emerald-900">Downloadable Catalogues &amp; Case Studies Ecosystem</h4>
-                                        <p className="text-xs text-emerald-700 mt-1 max-w-xl">
-                                            Edit the catalogue cards below directly or manage uploaded PDF files in the PDF Manager. You can also manage institutional project stories in the Case Studies manager.
+                                        <h4 className="text-sm font-bold text-emerald-900">Downloadable Catalogues &amp; Case Studies</h4>
+                                        <p className="text-xs text-emerald-700 mt-1 max-w-2xl">
+                                            Manage your brochure cards and case studies directly in this page editor. Use the <strong>Upload PDF</strong> button on each card to save documents natively to server disk for 1-click visitor downloads.
                                         </p>
                                     </div>
-                                    <div className="flex items-center gap-2 shrink-0 flex-wrap">
-                                        <Link
-                                            to="/admin/catalogues"
-                                            className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition-colors"
-                                        >
-                                            PDF Manager &rarr;
-                                        </Link>
-                                        <Link
-                                            to="/admin/case-studies"
-                                            className="inline-flex items-center gap-2 rounded-xl bg-white border border-emerald-300 px-3.5 py-2 text-xs font-bold text-emerald-800 shadow-sm hover:bg-emerald-50 transition-colors"
-                                        >
-                                            Case Studies &rarr;
-                                        </Link>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        <span className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-100 text-emerald-800 px-3 py-1.5 text-xs font-bold border border-emerald-200">
+                                            ⚡ Live Database Driven
+                                        </span>
                                     </div>
                                 </div>
                             </section>
@@ -1726,7 +1717,7 @@ export default function UnifiedPageEditor({
                         )}
 
                         {/* Optional Case Studies block */}
-                        {('caseStudies' in effectiveDefaults) && (
+                        {('caseStudies' in effectiveDefaults || page.slug === 'catalogues') && (
                             <section className="space-y-6">
                                 <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                                     <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">

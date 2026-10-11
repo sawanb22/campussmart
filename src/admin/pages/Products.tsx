@@ -8,7 +8,7 @@ import { resolveMediaUrl } from '../../lib/media-url';
 interface Category { id: number; name: string; slug: string; }
 interface Product { id: number; name: string; price: number; stock: number; active: boolean; featured: boolean; rating: number; reviewCount: number; imageUrl?: string; description?: string; categoryId: number; category?: Category; sku?: string; images?: string; specifications?: string; }
 
-const EMPTY: Partial<Product> = { name: '', price: 0, stock: 100, active: true, featured: false, rating: 0, reviewCount: 0, description: '', imageUrl: '', sku: '', images: '', specifications: '' };
+const EMPTY: Partial<Product> = { name: '', price: '' as any, stock: '' as any, active: true, featured: false, rating: 0, reviewCount: 0, description: '', imageUrl: '', sku: '', images: '', specifications: '' };
 
 export default function Products() {
     const [products, setProducts] = useState<Product[]>([]);
@@ -18,6 +18,7 @@ export default function Products() {
     const [categoryFilter, setCategoryFilter] = useState<string>('all');
     const [showModal, setShowModal] = useState(false);
     const [editing, setEditing] = useState<Partial<Product>>(EMPTY);
+    const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
@@ -50,7 +51,16 @@ export default function Products() {
             .catch((err) => console.error('Failed to load categories:', err));
     }, []);
 
-    const openAdd = () => { setEditing({ ...EMPTY, categoryId: categories[0]?.id }); setShowModal(true); };
+    const openAdd = () => {
+        setEditing({
+            ...EMPTY,
+            categoryId: categories[0]?.id,
+            price: '' as any,
+            stock: '' as any,
+        });
+        setFormErrors({});
+        setShowModal(true);
+    };
     
     const openEdit = (p: Product) => { 
         // Convert JSON back to user-friendly text for editing
@@ -65,15 +75,50 @@ export default function Products() {
               specsText = Object.entries(obj).map(([k,v]) => `${k}: ${v}`).join('\n');
            } catch {}
         }
-        setEditing({ ...p, images: imagesText, specifications: specsText }); 
+        setEditing({
+            ...p,
+            stock: p.stock ?? 0,
+            price: p.price ?? 0,
+            sku: p.sku || '',
+            images: imagesText,
+            specifications: specsText,
+        }); 
+        setFormErrors({});
         setShowModal(true); 
     };
 
     const save = async () => {
+        const errors: Record<string, string> = {};
+        if (!editing.name || !editing.name.trim()) {
+            errors.name = 'Product name is required.';
+        }
+        if (!editing.categoryId) {
+            errors.categoryId = 'Please select a valid category.';
+        }
+        if (editing.price === undefined || editing.price === null || editing.price === ('' as any) || isNaN(Number(editing.price)) || Number(editing.price) <= 0) {
+            errors.price = 'Listing price must be a valid number greater than ₹0.';
+        }
+        if (editing.stock === undefined || editing.stock === null || editing.stock === ('' as any) || isNaN(Number(editing.stock)) || Number(editing.stock) < 0) {
+            errors.stock = 'Units in stock is required (enter 0 or greater).';
+        }
+
+        if (Object.keys(errors).length > 0) {
+            setFormErrors(errors);
+            return;
+        }
+
+        setFormErrors({});
         setSaving(true);
         try {
             const fd = new FormData();
-            Object.entries(editing).forEach(([k, v]) => { 
+            const payload: Record<string, any> = {
+                ...editing,
+                name: editing.name?.trim(),
+                price: Number(editing.price),
+                stock: Math.max(0, parseInt(String(editing.stock), 10)),
+            };
+
+            Object.entries(payload).forEach(([k, v]) => { 
                 if (v !== undefined && k !== 'category') {
                     let val = v;
                     // Intercept and convert back to JSON for backend
@@ -100,9 +145,17 @@ export default function Products() {
                 await api.put(`/products/${editing.id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
             } else {
                 await api.post('/products', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+                // If creating a product in a different category than currently filtered, switch to show it
+                if (categoryFilter !== 'all' && categoryFilter !== String(editing.categoryId)) {
+                    setCategoryFilter(String(editing.categoryId));
+                }
+                setSearch('');
             }
             await fetchProducts();
             setShowModal(false);
+        } catch (err: any) {
+            const errorMsg = err.response?.data?.error || 'Failed to save product. Please review the details and try again.';
+            setFormErrors({ general: errorMsg });
         } finally {
             setSaving(false);
         }
@@ -510,24 +563,98 @@ export default function Products() {
                         </div>
 
                         <div className="p-8 grid grid-cols-2 gap-6 overflow-y-auto">
+                            {formErrors.general && (
+                                <div className="col-span-2 p-4 bg-red-50 border border-red-200 rounded-2xl text-xs font-bold text-red-700 flex items-center justify-between animate-in fade-in">
+                                    <span>{formErrors.general}</span>
+                                    <button type="button" onClick={() => setFormErrors((prev) => { const next = { ...prev }; delete next.general; return next; })}>
+                                        <X className="w-4 h-4 text-red-400 hover:text-red-700 transition-colors" />
+                                    </button>
+                                </div>
+                            )}
+
                             <div className="col-span-2 space-y-1.5">
                                 <label className="text-sm font-bold text-slate-700 uppercase tracking-widest text-[10px]">Product Name *</label>
-                                <input className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium" value={editing.name || ''} onChange={(e) => setEditing({ ...editing, name: e.target.value })} />
+                                <input
+                                    className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 transition-all font-medium ${formErrors.name ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20 bg-red-50/20' : 'border-gray-200 focus:border-blue-500 focus:ring-blue-500/20'}`}
+                                    value={editing.name || ''}
+                                    onChange={(e) => {
+                                        setEditing({ ...editing, name: e.target.value });
+                                        if (formErrors.name) setFormErrors(prev => ({ ...prev, name: '' }));
+                                    }}
+                                    placeholder="e.g. Ergonomic Teacher Chair"
+                                />
+                                {formErrors.name && <p className="text-[11px] font-bold text-red-500">{formErrors.name}</p>}
                             </div>
+
                             <div className="col-span-2 space-y-1.5">
                                 <label className="text-sm font-bold text-slate-700 uppercase tracking-widest text-[10px]">Product Narrative</label>
-                                <textarea className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none h-24 font-medium" value={editing.description || ''} onChange={(e) => setEditing({ ...editing, description: e.target.value })} />
+                                <textarea
+                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none h-24 font-medium"
+                                    value={editing.description || ''}
+                                    onChange={(e) => setEditing({ ...editing, description: e.target.value })}
+                                    placeholder="Product description and features..."
+                                />
                             </div>
+
                             <div className="space-y-1.5">
                                 <label className="text-sm font-bold text-slate-700 uppercase tracking-widest text-[10px]">Listing Price (₹) *</label>
-                                <input type="number" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-black text-blue-600" value={editing.price || ''} onChange={(e) => setEditing({ ...editing, price: Number(e.target.value) })} />
+                                <input
+                                    type="number"
+                                    min="1"
+                                    className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 transition-all font-black text-blue-600 ${formErrors.price ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20 bg-red-50/20' : 'border-gray-200 focus:border-blue-500 focus:ring-blue-500/20'}`}
+                                    value={editing.price ?? ''}
+                                    onChange={(e) => {
+                                        setEditing({ ...editing, price: e.target.value === '' ? ('' as any) : Number(e.target.value) });
+                                        if (formErrors.price) setFormErrors(prev => ({ ...prev, price: '' }));
+                                    }}
+                                    placeholder="e.g. 5500"
+                                />
+                                {formErrors.price && <p className="text-[11px] font-bold text-red-500">{formErrors.price}</p>}
                             </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-bold text-slate-700 uppercase tracking-widest text-[10px]">Units in Stock / Inventory *</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 transition-all font-black text-slate-900 ${formErrors.stock ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20 bg-red-50/20' : 'border-gray-200 focus:border-blue-500 focus:ring-blue-500/20'}`}
+                                    value={editing.stock ?? ''}
+                                    onChange={(e) => {
+                                        setEditing({ ...editing, stock: e.target.value === '' ? ('' as any) : Number(e.target.value) });
+                                        if (formErrors.stock) setFormErrors(prev => ({ ...prev, stock: '' }));
+                                    }}
+                                    placeholder="e.g. 25 (enter 0 if out of stock)"
+                                />
+                                {formErrors.stock && <p className="text-[11px] font-bold text-red-500">{formErrors.stock}</p>}
+                            </div>
+
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Category Classification *</label>
-                                <select className="w-full border border-gray-300 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all bg-white font-bold text-slate-800" value={editing.categoryId || ''} onChange={(e) => setEditing({ ...editing, categoryId: Number(e.target.value) })}>
+                                <select
+                                    className={`w-full border rounded-xl px-4 py-3.5 text-base focus:outline-none focus:ring-2 transition-all bg-white font-bold text-slate-800 ${formErrors.categoryId ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20' : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500/30'}`}
+                                    value={editing.categoryId || ''}
+                                    onChange={(e) => {
+                                        setEditing({ ...editing, categoryId: Number(e.target.value) });
+                                        if (formErrors.categoryId) setFormErrors(prev => ({ ...prev, categoryId: '' }));
+                                    }}
+                                >
+                                    <option value="">Select a Category</option>
                                     {categories.map((c) => <option key={c.id} value={c.id} className="py-1 text-sm font-semibold">{c.name}</option>)}
                                 </select>
+                                {formErrors.categoryId && <p className="text-[11px] font-bold text-red-500">{formErrors.categoryId}</p>}
                             </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-sm font-bold text-slate-700 uppercase tracking-widest text-[10px]">SKU / Product Code (Optional)</label>
+                                <input
+                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono uppercase"
+                                    value={editing.sku || ''}
+                                    onChange={(e) => setEditing({ ...editing, sku: e.target.value })}
+                                    placeholder="Auto-generated if blank (e.g. CM-SEAT-01)"
+                                />
+                                <p className="text-[10px] text-slate-400">Leave blank to auto-generate from name.</p>
+                            </div>
+
                             <MediaImageField label="Cover Image" value={editing.imageUrl || ''} onChange={value => setEditing({ ...editing, imageUrl: value })} previewClassName="h-32 rounded-xl" />
 
                             <MediaImageListField label="Gallery Images" value={editing.images || ''} onChange={value => setEditing({ ...editing, images: value })} />

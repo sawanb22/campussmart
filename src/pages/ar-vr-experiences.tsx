@@ -4,14 +4,15 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
-import { resolveMediaUrl } from '@/lib/media-url';
+import MediaImage from '@/components/ui/media-image';
+import { PageCardGridSkeleton } from '@/components/ui/page-skeleton';
 import { AR_VR_PAGE_SLUG, AR_VR_DEFAULTS, slugifyArVrTitle } from './ar-vr-experiences.data';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const ArVrExperiences = () => {
   const cardsRef = useRef<HTMLDivElement>(null);
-  const { data } = usePageData(AR_VR_PAGE_SLUG);
+  const { data, loading } = usePageData(AR_VR_PAGE_SLUG);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -32,6 +33,10 @@ const ArVrExperiences = () => {
   const ctaTitle = data.ctaTitle ?? AR_VR_DEFAULTS.ctaTitle;
   const ctaSubtitle = data.ctaSubtitle ?? AR_VR_DEFAULTS.ctaSubtitle;
 
+  if (loading && !data.cards) {
+    return <PageCardGridSkeleton cardCount={6} />;
+  }
+
   return (
     <main className="min-h-screen bg-white">
       {/* Experiences */}
@@ -43,7 +48,6 @@ const ArVrExperiences = () => {
           </div>
           <div ref={cardsRef} className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {cards.map((card) => {
-              const image = resolveMediaUrl(card.image);
               const detailHref = card.href || `/${AR_VR_PAGE_SLUG}/${slugifyArVrTitle(card.title)}`;
               return (
                 <Link
@@ -51,11 +55,13 @@ const ArVrExperiences = () => {
                   to={detailHref}
                   className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
                 >
-                  {image && (
-                    <div className="h-40 w-full overflow-hidden">
-                      <img src={image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    </div>
-                  )}
+                  <div className="h-40 w-full overflow-hidden bg-gray-50">
+                    <MediaImage
+                      src={card.image}
+                      alt={card.title}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
                   <div className="p-6">
                     <h3 className="mb-2 text-lg font-bold text-cm-blue-dark">{card.title}</h3>
                     <p className="text-sm leading-relaxed text-gray-600">{card.description}</p>

@@ -1,13 +1,12 @@
 import { useState, type MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, Eye, Lock, Send, X, CheckCircle } from 'lucide-react';
+import { FileText, Send, X, CheckCircle } from 'lucide-react';
 import api from '@/api/client';
 import { usePageData } from '@/hooks/usePageData';
-import LoginPromptModal from '@/components/login-prompt-modal';
 import { resolveMediaUrl } from '@/lib/media-url';
 import { MediaImage } from '@/components/ui/media-image';
 import { getCardCover } from '@/lib/card-covers';
-import { getUserSession, getUserToken } from '@/lib/auth-session';
+import { getUserSession } from '@/lib/auth-session';
 
 const hasValidPdf = (url?: string): boolean => {
   if (!url) return false;
@@ -21,13 +20,6 @@ const hasValidPdf = (url?: string): boolean => {
     trimmed.toLowerCase() === 'n/a' ||
     trimmed.toLowerCase() === 'none' ||
     trimmed.toLowerCase().startsWith('javascript:')
-  ) {
-    return false;
-  }
-  if (
-    trimmed.includes('furniture-2025.pdf') ||
-    trimmed.includes('lab-equipment.pdf') ||
-    trimmed.includes('technology.pdf')
   ) {
     return false;
   }
@@ -54,79 +46,8 @@ const DEFAULTS = {
   heroSubtitle:
     'Every CampusMart product range, brief and design guide in one library — download the PDFs your team needs to plan and spec a campus.',
   heroImage: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80',
-  cards: [
-    {
-      title: 'NEP READY CLASSROOM FURNITURE',
-      description:
-        'Furniture solutions specifically designed to align with New Education Policy guidelines for modern classrooms.',
-      image:
-        'https://images.unsplash.com/photo-1524758631624-e2822e304c36?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      downloadLink: '/uploads/catalogues/1788258517755-838164996.pdf',
-      size: '411 KB',
-    },
-    {
-      title: 'CAMPUSMART BRIEF PROFILE [PDF]',
-      description:
-        "An overview of CampusMart's mission, services, and extensive experience in educational infrastructure.",
-      image:
-        'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      downloadLink: '/uploads/catalogues/1788784785158-777852239.pdf',
-      size: '96 MB',
-    },
-    {
-      title: 'SCHOOL DESIGN [PDF]',
-      description:
-        'Comprehensive guide on architectural and ergonomic principles for modern school environments.',
-      image:
-        'https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      downloadLink: '/uploads/catalogues/1788259430344-947630598.pdf',
-      size: '411 KB',
-    },
-    {
-      title: 'CLASSROOM CONFIGURATION IDEAS [PDF]',
-      description:
-        'Creative and functional layout samples for various classroom sizes and learning objectives.',
-      image:
-        'https://images.unsplash.com/photo-1588072432836-e10032774350?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      downloadLink: '/uploads/catalogues/1788258554866-942654994.pdf',
-      size: '170 KB',
-    },
-    {
-      title: 'MASTER CATALOGUE',
-      description:
-        'Our full range of products including Labs, Libraries, Sports, and AI Stations.',
-      image:
-        'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      downloadLink: '/uploads/catalogues/1790872959601-232430012.pdf',
-      size: '23 MB',
-    },
-  ],
-  caseStudies: [
-    {
-      title: 'Campus Master Planning',
-      description:
-        'Complete campus transformation for a leading university in Bangalore.',
-      image:
-        'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-      slug: 'campus-master-planning',
-    },
-    {
-      title: '20 Stunning College Buildings',
-      description:
-        'Showcase of our most innovative campus architecture projects.',
-      image:
-        'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-      slug: '20-stunning-college-buildings',
-    },
-    {
-      title: 'STEM Lab Implementation',
-      description:
-        'State-of-the-art STEM lab setup for a prestigious school chain.',
-      image:
-        'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-      slug: 'stem-lab-implementation',
-    },
-  ],
+  cards: [] as any[],
+  caseStudies: [] as any[],
   ctaTitle: 'Need a Custom Solution?',
   ctaSubtitle:
     'Our team can create customized catalogues based on your specific requirements.',
@@ -145,10 +66,7 @@ const Catalogues = () => {
   const ctaSubtitle = data.ctaSubtitle ?? DEFAULTS.ctaSubtitle;
   const ctaButtonLabel = data.ctaButtonLabel ?? DEFAULTS.ctaButtonLabel;
 
-  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const token = getUserToken();
-  const isLoggedIn = Boolean(token);
 
   // Request Catalogue Modal state
   const [requestTarget, setRequestTarget] = useState<any | null>(null);
@@ -205,28 +123,12 @@ const Catalogues = () => {
     }
   };
 
-  const handleDownloadClick = async (e: MouseEvent, catalogue: any) => {
-    e.preventDefault();
-    if (!isLoggedIn) {
-      setShowLoginPrompt(true);
-      return;
-    }
-
+  const handleDownloadClick = (e: MouseEvent, catalogue: any) => {
     const downloadUrl = catalogue.downloadLink;
     if (!hasValidPdf(downloadUrl)) {
+      e.preventDefault();
       openRequestModal(catalogue);
       return;
-    }
-
-    const resolvedUrl = resolveMediaUrl(downloadUrl);
-    const targetUrl = token
-      ? `${resolvedUrl}${resolvedUrl.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}`
-      : resolvedUrl;
-
-    try {
-      window.open(targetUrl, '_blank', 'noopener,noreferrer');
-    } catch {
-      openRequestModal(catalogue);
     }
   };
 
@@ -242,7 +144,7 @@ const Catalogues = () => {
           image: c.image || '',
           downloadLink: c.downloadLink ?? c.fileUrl ?? '',
         }))
-      : DEFAULTS.cards;
+      : [];
 
   const caseStudies = loading
     ? []
@@ -251,22 +153,13 @@ const Catalogues = () => {
           ...cs,
           slug: cs.slug || slugify(cs.title),
         }))
-      : DEFAULTS.caseStudies;
+      : [];
 
   const visibleCatalogues = catalogues.slice(0, visibleCount);
   const hasMore = visibleCount < catalogues.length;
 
   return (
     <main className="min-h-screen bg-white">
-      <LoginPromptModal
-        open={showLoginPrompt}
-        onClose={() => setShowLoginPrompt(false)}
-        icon={Lock}
-        eyebrow="Registered users only"
-        title="Register to view catalogues"
-        description="Create a free account to view our product catalogues and case study PDFs."
-      />
-
       {/* Hero Section */}
       <section className="bg-cm-blue mx-3 sm:mx-6 lg:mx-8 rounded-[2rem] py-6 md:py-8 overflow-hidden relative shadow-inner mt-4 mb-2">
         <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 relative z-10 px-4">
@@ -311,8 +204,14 @@ const Catalogues = () => {
               ))}
             </div>
           ) : visibleCatalogues.length === 0 ? (
-            <div className="rounded-2xl border border-gray-100 bg-gray-50 py-20 text-center text-gray-500">
-              No catalogues found.
+            <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 py-16 text-center px-4">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-cm-blue flex items-center justify-center mx-auto mb-3 shadow-sm">
+                <FileText className="w-6 h-6" />
+              </div>
+              <h3 className="text-base font-bold text-gray-800">No Catalogues Published Yet</h3>
+              <p className="text-xs text-gray-500 mt-1 max-w-md mx-auto leading-relaxed">
+                Product catalogues, brochures, and specification sheets configured in the Page Editor will appear here.
+              </p>
             </div>
           ) : (
             <>
@@ -346,18 +245,14 @@ const Catalogues = () => {
                       <div className="pt-4">
                         {hasPdf ? (
                           <a
-                            href={
-                              token
-                                ? `${resolveMediaUrl(catalogue.downloadLink)}${catalogue.downloadLink.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}`
-                                : resolveMediaUrl(catalogue.downloadLink)
-                            }
+                            href={resolveMediaUrl(catalogue.downloadLink)}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => handleDownloadClick(e, catalogue)}
-                            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-cm-blue px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-cm-blue-dark"
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-cm-blue px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-cm-blue-dark shadow-sm"
                           >
-                            {isLoggedIn ? <Eye className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-                            View PDF
+                            <FileText className="h-4 w-4" />
+                            Download PDF
                           </a>
                         ) : (
                           <button

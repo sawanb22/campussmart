@@ -105,6 +105,7 @@ router.get('/', verifyToken, requireAdmin, async (_req: AuthRequest, res: Respon
         await ensureSimplePage('campus-furniture-design', 'Campus Furniture Design');
         await ensureSimplePage('collaboration-spaces', 'Collaboration Spaces');
         await ensureSimplePage('contact-us', 'Contact Us');
+        await ensureSimplePage('catalogues', 'Catalogues & Downloads');
         const pages = await prisma.page.findMany({
             orderBy: { title: 'asc' }
         });
@@ -137,6 +138,9 @@ router.get('/:idOrSlug', async (req: Request, res: Response) => {
 
         if (!isNumeric && param === COLLEGE_SALE_SLUG) {
             return res.json(await ensureCollegeSalePage());
+        }
+        if (!isNumeric && param === 'catalogues') {
+            return res.json(await ensureSimplePage('catalogues', 'Catalogues & Downloads'));
         }
 
         const page = isNumeric

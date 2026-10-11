@@ -73,6 +73,12 @@
 | `CMS-006` | 2026-10-10 13:40 | Admin CMS & Subpage Organization | Grouped Campus Design & Execution Suite in Pages Manager with 1-click linked subpages drawer and filter chip; clarified PDF Catalogues vs Case Studies & Projects distinction with top tab switchers (Group 8). | 5 files (frontend & admin) | Completed |
 | `CMS-007` | 2026-10-10 21:15 | Group 1 Live vs. Admin Editable Content & Dynamic Sync Resolution | Made Resources (/resources) dynamic and registered in CMS; added Show FAQs toggle and empty-array preservation to Homepage; enriched Job Openings with full roles and fields in Admin & Live; synchronized Catalogues and Case Studies with backend API endpoints; harmonized Furniture Design sub-slug resolution; converted Footer links to dedicated article pages (/how-it-works, /brand-help, /sell-on-campusmart); and made FAQ page layout vertically concise under SOLID principles (Group 1). | 11 files (frontend, admin, backend) | Completed |
 | `UI-007` | 2026-10-11 02:50 | Fast Front-End Fixes & Navigation Alignments | Removed Homepage FAQs; removed AR/VR card icons; vertically compressed FAQ page; updated Campus Furniture Design dropdown link & canonical alias; harmonized Sports Design & Execution to modern 3-column turnkey phase grid matching Campus Design & Execution (Group 9). | 10 files (frontend) | Completed |
+| `PAGE-001` | 2026-10-11 03:05 | UGC Guidelines Reader Harmonization | Harmonized UGC Guidelines article detail view (/ugc-guidelines/:articleSlug) to match editorial styling of AI Guide reader; added AR/VR Experiences to Services dropdown. | 3 files (frontend) | Completed |
+| `PAGE-002` | 2026-10-11 03:15 | Setup College Article Reader Harmonization | Harmonized Setup College in India article detail view (/setup-college/:articleSlug) to match editorial styling of AI Guide reader. | 1 file (frontend) | Completed |
+| `PAGE-003` | 2026-10-11 03:30 | Classifieds Layout Harmonization & Modal Alert | Harmonized Classifieds page typography, eliminated mobile title collision, implemented accessible post & inquiry alert modal, and standardized form styling. | 1 file (frontend) | Completed |
+| `DATA-001` | 2026-10-11 03:55 | Architecture & DB SSOT Alignment | Purged 33 broken upload references & test spam copy across 14 PostgreSQL pages; eliminated uncached double-load flicker via canonical defaults pre-seeding in usePageData; upgraded fallback configs in ai-ml and ar-vr-experiences. | 6 files (frontend, admin) + DB | Completed |
+| `PROD-002` | 2026-10-11 05:20 | Product Flow Validation & Inventory Guardrails | Eliminated phantom hardcoded 100 units default across frontend, backend API, and database; added strict client-side & server-side validation; added Units in Stock and SKU fields to Admin modal; added smart filter auto-sync on product creation. | 3 files (backend, frontend, schema) | Completed |
+| `PAGE-006` | 2026-10-11 05:45 | Catalogues Page Editor Consolidation & Native PDF Downloads | Eradicated fake hardcoded mock cards and case studies; removed redundant separate managers (/admin/catalogues, /admin/case-studies) from sidebar; consolidated all brochure cards and native PDF uploads directly into Unified Page Editor; enabled 1-click public PDF downloads without login gating or backend token barriers under SOLID principles (PAGE-006). | 5 files (frontend, admin, backend) | Completed |
 
 ---
 
@@ -2252,6 +2258,206 @@
   - Frontend production build: `npm run build` completed with 0 errors (`✓ built in 28.79s`).
   - Backend production build: `npm run build --prefix backend` completed with 0 errors (Prisma client generated and `tsc` compiled cleanly).
   - Public UI behaviour preserved with zero backend/database complexity.
+
+---
+
+### [2026-10-11] Page Group 1: UGC Guidelines Layout Harmonization (PAGE-001)
+- **Scope & Objectives**:
+  - Address client feedback Row 8: *"UGC guidelines | when click on each card detail page is going on other layout so check how it look and make it same like other articles like in AI guide"*
+  - Harmonize `src/pages/ugc-guideline-article.tsx` to match the editorial layout of `src/pages/ai-guide-article.tsx`:
+    - Replaced mismatched font and hardcoded green styling with warm academic paper theme (`bg-[#faf8f0]`, `bg-[#fffdf8]`).
+    - Styled category kicker, serif headline (`font-serif sm:text-6xl text-[#3c2f26]`), left-bordered lead block (`border-[#ed9816]`), and meta footer (`readTime` + `category`).
+    - Added featured hero article and more campus resources to article resolution so clicking any card on `/ugc-guidelines` (including the top featured hero card) resolves properly without "Guidance not found".
+    - Exported `Article` and `MoreCard` types from `src/pages/ugc-guidelines.tsx`.
+  - Added `AR / VR Experiences` to the Services dropdown in `src/components/layout/header.tsx` per user request.
+- **Files Modified**:
+  - `[MODIFY] src/pages/ugc-guideline-article.tsx`
+  - `[MODIFY] src/pages/ugc-guidelines.tsx`
+  - `[MODIFY] src/components/layout/header.tsx`
+- **Validation**:
+  - Frontend production build: `npm run build` passed with exit code 0 (`✓ built in 12.62s`).
+  - Zero backend or schema impact.
+  - Changes kept strictly local without git push.
+
+---
+
+### [2026-10-11] Page Group 2: Setup College in India Article Reader Harmonization (PAGE-002)
+- **Scope & Objectives**:
+  - Address client feedback Row 16: *"Setup college in india | when click on each card detail page is going on other layout so check how it look and make it same like other articles like in AI guide"*
+  - Harmonize `src/pages/setup-college-article.tsx` to match the editorial layout and typography of `src/pages/ai-guide-article.tsx`:
+    - Replaced greenish background (`bg-[#f5f8e8]`), green border (`border-[#d9f68b]`), and sans-serif heading with warm cream reader styling (`bg-[#faf8f0]`, `bg-[#fffdf8]`).
+    - Styled category kicker in uppercase amber tracking (`text-[#ed9816]`), serif headline (`font-serif text-[#3c2f26] sm:text-6xl`), warm left-bordered lead block (`border-[#ed9816]`), and meta footer bar (`category` + `readTime`).
+    - Aggregated `cards`, `featured`, and `smallFeature` articles so all guides on `/setup-college` resolve cleanly to their article view without "Guide not found".
+    - Connected `MediaImage` for robust image resolution and fallbacks.
+- **Files Modified**:
+  - `[MODIFY] src/pages/setup-college-article.tsx`
+- **Validation**:
+  - Frontend production build: `npm run build` passed with exit code 0 (`✓ built in 10.77s`).
+  - Zero backend or database impact.
+  - Changes kept strictly local without git push.
+
+---
+
+### [2026-10-11] Page Group 3: Classifieds Layout Harmonization, Alert Modal & Mobile Polish (PAGE-003)
+- **Scope & Objectives**:
+  - Address client feedback Rows 17, 18, 19, and 20:
+    - Row 17: *"Classifieds | check layout"*
+    - Row 18: *"When clicks on post classified form appears but form is not opening as alert"*
+    - Row 19: *"Form layout should look same as other forms across website"*
+    - Row 20: *"On mobile this page looks ugly and text is getting collapsed"*
+  - In `src/pages/classifieds.tsx`:
+    - Eliminated rigid clamped negative tracking (`letter-spacing: -3px; line-height: .93`) and cramped margins that previously caused text collision and collapsed overlapping titles on mobile.
+    - Added responsive typography, clean category filter pills, smooth featured banner, and polished 3-column card grid with hover effects and `MediaImage`.
+    - Added prominent "Post a Classified" action buttons in the top header action area and bottom CTA banner.
+    - Implemented accessible alert modal dialog (`fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm`) for both posting classifieds and making direct listing inquiries.
+    - Harmonized form layout matching site standard: clean input fields (Full Name, Work Email, Indian Phone with regex validation, Institution, Category dropdown, Title, Details textarea), loading spinner, and success alert banner.
+- **Files Modified**:
+  - `[MODIFY] src/pages/classifieds.tsx`
+- **Validation**:
+  - Frontend production build: `npm run build` passed with exit code 0 (`✓ built in 14.54s`).
+  - Zero backend or database impact.
+  - Changes kept strictly local without git push.
+
+---
+
+### [2026-10-11] Architecture & DB Integrity: Elimination of Double-Load Shift & PostgreSQL SSOT Alignment (DATA-001)
+- **Scope & Objectives**:
+  - Address client issue: Pages (e.g. `/ar-vr-experiences`) loading one set of data on mount, and then flashing/shifting after 1 second to different or broken data.
+  - Root Cause Analysis:
+    1. Uncached `usePageData` hook initially initialized with empty object `{}`, causing components to render hardcoded local fallback defaults on first frame.
+    2. 500ms–1s later, `api.get('/pages/:slug')` resolved with PostgreSQL data containing 33 broken missing `/uploads/media/...` paths and test/spam copy across 14 pages (e.g. repetitive `https://campussmart.vercel.app/ai-guide` strings, "tablett", "chair 123", "DESign 1", "newwwwwwww", "ifp", "testing bullet", "dfdfgsdfg").
+    3. The post-fetch state update abruptly replaced clean default images with gray broken fallback boxes and corrupted text.
+    4. In `src/pages/ai-ml.data.ts`, `ai-ml.tsx`, and `ai-ml-detail.tsx`, dead `/uploads/media/...` paths were hardcoded directly in fallback configurations.
+  - Architectural Solutions Implemented:
+    1. **PostgreSQL Database Normalization (`backend/scripts/normalize-db-page-data.cjs`)**:
+       - Audited all 55 database pages.
+       - Reconciled all 14 affected pages (`about-us`, `ai-ml`, `ai-stations`, `ar-vr-experiences`, `campus-automation`, `campus-design`, `campus-design-execution`, `campus-furniture-design`, `catalogues`, `digital-transformation`, `furniture`, `furniture-design-supply`, `innovation-centres`, `smart-classrooms`).
+       - Purged all 33 broken upload references, replacing them with high-resolution Unsplash photography from canonical defaults.
+       - Cleaned spam/test copy and removed junk test cards.
+       - Verification via `backend/scripts/audit-db-integrity.cjs` confirmed **0 missing uploads** and **0 spam strings** remaining across all 55 pages.
+    2. **Canonical Defaults Pre-seeding & Re-render Elimination in `usePageData.ts`**:
+       - Imported `pageDefaults` and implemented `resolveBaselineData(slug)`.
+       - Initialized hook state directly with canonical baseline defaults (`useState(() => resolveBaselineData(slug))`).
+       - With the PostgreSQL database normalized to match canonical defaults, post-fetch `JSON.stringify(prev) === JSON.stringify(parsed)` evaluates to `true`, completely suppressing secondary re-renders and eliminating the 1-second flash.
+       - Added canonical route aliases (`about-us` -> `corporate`, `furniture-design-supply` -> `campus-furniture-design`, `ar-vr-learning` -> `ar-vr-experiences`, `collaboration` -> `collaboration-spaces`, `innovation-centers` -> `innovation-centres`, `sports-infrastructure` -> `sports-infra`) in `src/admin/pageDefaults.ts`.
+    3. **Hardened Code Fallbacks**:
+       - Updated `src/pages/ai-ml.data.ts`, `src/pages/ai-ml.tsx`, and `src/pages/ai-ml-detail.tsx` with active Unsplash images for all 6 cards and heroes.
+       - Updated `src/pages/ar-vr-experiences.tsx` with `<MediaImage>` and `PageCardGridSkeleton` loading guard.
+- **Files Modified**:
+  - `[MODIFY] src/hooks/usePageData.ts`
+  - `[MODIFY] src/admin/pageDefaults.ts`
+  - `[MODIFY] src/pages/ar-vr-experiences.tsx`
+  - `[MODIFY] src/pages/ai-ml.data.ts`
+  - `[MODIFY] src/pages/ai-ml.tsx`
+  - `[MODIFY] src/pages/ai-ml-detail.tsx`
+  - `[DATABASE] 14 PostgreSQL Page records normalized to Single Source of Truth`
+  - `[NEW] backend/scripts/audit-db-integrity.cjs`
+  - `[NEW] backend/scripts/audit-all-db-anomalies.ts`
+  - `[NEW] backend/scripts/normalize-db-page-data.cjs`
+- **Validation**:
+  - Database audit: `node backend/scripts/audit-db-integrity.cjs` -> 0 missing uploads, 0 spam strings across all 55 DB pages.
+  - Frontend production build: `npm run build` passed with exit code 0 (`✓ built in 9.55s`).
+  - Backend TypeScript: `npx --prefix backend tsc --noEmit` passed with exit code 0.
+
+---
+
+### [2026-10-11] Page Group 4: Partner with Running Colleges Layout, Alert Modal & Responsive Polish (PAGE-004)
+- **Scope & Objectives**:
+  - Address client feedback Rows 12, 13, and 14:
+    - Row 12: *"Partner with running colleges | click on partner now alert modal should open to fill form"*
+    - Row 13: *"Text should come left and image on right"*
+    - Row 14: *"On mobile text getting collapsed"*
+  - In `src/pages/partner-with-colleges.tsx`:
+    - Structured the Hero on desktop so textual copy is positioned on the left (`lg:col-span-7`) and the institutional campus image is placed on the right (`lg:col-span-5`).
+    - Unveiled the hero image on mobile screens (`aspect-[16/10] sm:aspect-[4/3]`) instead of hiding it (`hidden lg:block`), with rounded corners and partnership badge.
+    - Fixed mobile text collapsing by sizing typography responsibly (`text-2xl sm:text-4xl lg:text-5xl`), preventing letter overlap and awkward breaks.
+    - Added dedicated **"Partner Now"** buttons to the Hero, each partnership model card, and the bottom CTA banner.
+    - Implemented accessible alert modal dialog (`fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm`) to fill out partnership requirements directly on page.
+    - Harmonized form layout (Full Name, Official Email, Indian Phone with regex validation, College / Institution Name, Partnership Model dropdown, Collaboration Goals textarea, loading spinner, and success alert banner).
+  - In `src/pages/partnership-model-detail.tsx`:
+    - Added direct "Partner Now" alert modal prefilled with the model's title for seamless consultation submission.
+- **Files Modified**:
+  - `[MODIFY] src/pages/partner-with-colleges.tsx`
+  - `[MODIFY] src/pages/partnership-model-detail.tsx`
+- **Validation**:
+  - Frontend production build: `npm run build` passed with exit code 0 (`✓ built in 11.72s`).
+  - Zero backend or database impact.
+  - Changes kept strictly local without git push.
+
+---
+
+### [2026-10-11] Page Group 5: Colleges / Universities for Sale Filter Polish (PAGE-005)
+- **Scope & Objectives**:
+  - Address client feedback Row 22: *"Colleges / universities for sale | button ‘all’ is selected check how it look and change it"*
+  - In `src/pages/colleges-universities-for-sale.tsx`:
+    - Added explicit `'All'` option to the `REGIONS` array (`['All', 'North', 'South', 'East', 'West']`).
+    - Rendered dedicated **"All Regions"** button at the top of the Region sidebar filter.
+    - Added clean active styling (`bg-[#087ea4] text-white shadow-xs font-semibold`) and dynamic count badge (`regionCounts['All']`) so visitors can immediately see that all institutions are displayed and easily toggle between specific regions and the full catalog.
+- **Files Modified**:
+  - `[MODIFY] src/pages/colleges-universities-for-sale.tsx`
+---
+
+### [2026-10-11] Product Flow Validation & Inventory Guardrails (PROD-002)
+- **Scope & Objectives**:
+  - Eliminated phantom hardcoded `100` units default across frontend, backend API, and database schema.
+  - Implemented strict production-grade client-side and server-side validation for Product creation and editing.
+  - Added missing **"Units in Stock / Available Inventory *"** and **"SKU / Product Code"** fields in the Admin Product Onboarding & Edit modal.
+  - Added smart filter synchronization: when creating a product under a category different from the active table filter, the filter automatically synchronizes to display the new item immediately.
+- **Files Modified**:
+  - `[MODIFY] backend/prisma/schema.prisma`: Changed `stock Int @default(100)` to `stock Int @default(0)`.
+  - `[MODIFY] backend/src/routes/products.routes.ts`:
+    - Added strict validation in `POST /api/products` (requires name, categoryId, price > 0, stock >= 0).
+    - Removed `stock: Number(stock) || 100` override; now persists exact integer entered by admin.
+    - Added strict validation in `PUT /api/products/:id` with sanitized partial updates.
+    - Updated `POST /api/products/bulk` to avoid forcing 0 stock to 100.
+  - `[MODIFY] src/admin/pages/Products.tsx`:
+    - Replaced `stock: 100` in initial state with empty input requiring explicit admin entry.
+    - Added inline field validation with error messages for Name, Price, Category, and Stock.
+    - Added general server error banner in modal to catch and surface duplicate SKU/slug or database rejections.
+    - Added dedicated numeric input for `Units in Stock / Available Inventory *` (min: 0).
+    - Added text input for `SKU / Product Code (Optional)`.
+    - Auto-synced category filter upon new product creation so items appear immediately.
+- **Validation**:
+  - Frontend production build (`npm run build`): Passed with exit code 0 (`✓ built in 9.76s`).
+  - Backend type checking (`npx tsc --noEmit`): Passed with exit code 0.
+  - Zero regression on existing products or intentional category page designs.
+
+---
+
+### [PAGE-006] 2026-10-11 05:45 IST - Catalogues Page Editor Consolidation & Native PDF Downloads
+- **Scope & Objectives**:
+  - Resolve dead PDF downloads on `/catalogues` caused by non-existent filenames on server disk and backend auth-token gating on static assets.
+  - Eradicate all fake hardcoded mock cards and case studies from `src/pages/catalogues.tsx` and `src/admin/pageDefaults.ts` so the page strictly trusts and renders only database records.
+  - Consolidate all editing and brochure document uploads directly into the Unified Page Editor (`/admin/pages` ➔ `Catalogues`), removing redundant standalone managers (`/admin/catalogues` and `/admin/case-studies`) from the admin navigation.
+  - Store PDFs natively on deployment machine disk (`/uploads/documents/`) via `DocumentUploadField` and allow 1-click public downloads without login prompt barriers.
+- **Files Modified**:
+  - `[MODIFY] backend/src/index.ts`: Removed `verifyTokenFromQueryOrHeader` from `/uploads/catalogues` static mount so PDF files can be served publicly and downloaded directly by browsers.
+  - `[MODIFY] backend/src/routes/pages.routes.ts`: Added `ensureSimplePage('catalogues', 'Catalogues & Downloads')` to `GET /` and `GET /:idOrSlug` to guarantee the Catalogues page row exists in `prisma.page`.
+  - `[MODIFY] src/pages/catalogues.tsx`:
+    - Cleared hardcoded mock cards from `DEFAULTS.cards` and `DEFAULTS.caseStudies` (`[]`).
+    - Bound `catalogues` and `caseStudies` strictly to `data.cards` and `data.caseStudies`.
+    - Added clean empty state when no catalogues are published yet.
+    - Removed `LoginPromptModal` and token query param from PDF download links.
+    - Enabled direct 1-click downloads via `<a href={resolveMediaUrl(...)} target="_blank" download>` with `<FileText className="h-4 w-4" /> Download PDF`.
+    - Preserved inquiry modal ("Request Catalogue") for cards where no PDF has been uploaded yet.
+  - `[MODIFY] src/admin/pageDefaults.ts`: Set `cards: []` and `caseStudies: []` for `'catalogues'`.
+  - `[MODIFY] src/admin/components/UnifiedPageEditor.tsx`:
+    - Updated the Catalogues section info banner to guide admins to edit cards and upload PDFs directly in the page editor.
+    - Added `|| page.slug === 'catalogues'` guard for the `caseStudies` block editor.
+  - `[MODIFY] src/admin/pages/PageEditor.tsx`: Added `slugOverride` prop to `PageEditor` enabling direct route binding by page slug.
+  - `[MODIFY] src/admin/components/Layout.tsx`: Added direct **"Catalogue Page"** shortcut under **Products & Catalogue** (`/admin/catalogues`) with `BookMarked` icon, so admins can navigate directly into the Catalogues page editor in 1 click right beside Products, Categories, and Classifieds.
+  - `[MODIFY] src/admin/AdminRoutes.tsx`: Routed `/admin/catalogues` to `<PageEditor slugOverride="catalogues" />`, loading the Catalogues page directly in Unified Page Editor. Redirected legacy `/admin/case-studies` to `/admin/pages`.
+- **Validation**:
+  - Full production build (`npm run build`): Passed cleanly with exit code 0 (`✓ built in 16.52s`).
+  - Zero TypeScript compiler errors.
+  - Preserved git hygiene: strictly local changes, zero unprompted `git push`.
+
+
+
+
+
+
+
 
 
 

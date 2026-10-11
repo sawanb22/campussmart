@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '@/api/client';
+import { pageDefaults } from '@/admin/pageDefaults';
 
 // In-memory module-level cache for pageData to eliminate flicker on repeated navigation
 const pageDataCache = new Map<string, any>();
@@ -76,19 +77,28 @@ export function broadcastCmsInvalidation(payload: { type: 'INVALIDATE_PAGE' | 'I
     }
 }
 
+function resolveBaselineData<T>(slug: string): T {
+    if (pageDataCache.has(slug)) {
+        return pageDataCache.get(slug);
+    }
+    if (pageDefaults && pageDefaults[slug]) {
+        return pageDefaults[slug] as T;
+    }
+    return {} as T;
+}
+
 /**
  * Hook that fetches `pageData` JSON for a given slug.
  * Employs in-memory caching and request deduplication to prevent layout jumps/flicker.
  * Retains existing state on error (never poisons cache with {}).
- * Components use this with a default fallback pattern:
- *   data.heroTitle ?? 'Hardcoded default'
+ * Pre-seeds initial state with canonical page defaults to eliminate initial hydration flash.
  */
 export function usePageData<T = Record<string, any>>(slug: string): {
     data: T;
     loading: boolean;
 } {
     const cached = pageDataCache.get(slug);
-    const [data, setData] = useState<T>((cached || {}) as T);
+    const [data, setData] = useState<T>(() => resolveBaselineData<T>(slug));
     const [loading, setLoading] = useState(!cached);
     const [version, setVersion] = useState(0);
 
@@ -141,6 +151,11 @@ export function usePageData<T = Record<string, any>>(slug: string): {
             const currentCache = pageDataCache.get(slug);
             setData(currentCache);
             setLoading(false);
+        } else {
+            const baseline = resolveBaselineData<T>(slug);
+            if (baseline && Object.keys(baseline as object).length > 0) {
+                setData(baseline);
+            }
         }
 
         let fetchPromise = pageDataInflight.get(slug);

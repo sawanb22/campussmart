@@ -85,7 +85,7 @@ const AIML = () => {
               <MediaImage
                 src={heroImage}
                 alt={heroTitle}
-                fallbackSrc="/uploads/media/1788160868601-107085202.jpg"
+                fallbackSrc="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=700&q=85"
                 className="h-full w-full object-cover"
               />
             </div>
@@ -121,7 +121,7 @@ const AIML = () => {
                   <MediaImage
                     src={featured.image}
                     alt={featured.title}
-                    fallbackSrc="/uploads/media/1788162454440-418400010.png"
+                    fallbackSrc="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=85"
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
@@ -148,7 +148,7 @@ const AIML = () => {
                             <MediaImage
                               src={card.image}
                               alt={card.title}
-                              fallbackSrc="/uploads/media/1788162604444-713305043.jpg"
+                              fallbackSrc="https://images.unsplash.com/photo-1555255707-c07966088b7b?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=85"
                               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                             />
                           </div>

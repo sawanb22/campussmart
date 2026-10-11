@@ -23,7 +23,7 @@ type Listing = {
   mandateUrl?: string;
 };
 
-const REGIONS: Region[] = ['North', 'South', 'East', 'West'];
+const REGIONS: (Region | 'All')[] = ['All', 'North', 'South', 'East', 'West'];
 
 const resolveImage = (value?: string) => resolveMediaUrl(value);
 
@@ -237,20 +237,28 @@ export default function CollegesUniversitiesForSale() {
               <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-slate-700">
                 <MapPin className="h-4 w-4 text-[#087ea4]" /> Region
               </h3>
-              <ul className="space-y-1">
+              <ul className="space-y-1.5">
                 {REGIONS.map((region) => (
                   <li key={region}>
                     <button
                       type="button"
                       onClick={() => setSelectedRegion(region)}
-                      className={`flex w-full items-center justify-between rounded px-3 py-2 text-sm font-medium transition-colors ${
+                      className={`flex w-full items-center justify-between rounded-lg px-3.5 py-2.5 text-sm font-medium transition-all ${
                         selectedRegion === region
-                          ? 'bg-[#087ea4] text-white'
+                          ? 'bg-[#087ea4] text-white shadow-xs font-semibold'
                           : 'text-slate-600 hover:bg-slate-100'
                       }`}
                     >
-                      <span>{region + ' India'}</span>
-                      <span className={`text-xs ${selectedRegion === region ? 'text-white/80' : 'text-slate-400'}`}>{regionCounts[region]}</span>
+                      <span>{region === 'All' ? 'All Regions' : `${region} India`}</span>
+                      <span
+                        className={`text-xs rounded-full px-2 py-0.5 font-semibold ${
+                          selectedRegion === region
+                            ? 'bg-white/20 text-white'
+                            : 'bg-slate-100 text-slate-500'
+                        }`}
+                      >
+                        {regionCounts[region]}
+                      </span>
                     </button>
                   </li>
                 ))}

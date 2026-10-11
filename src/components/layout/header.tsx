@@ -75,6 +75,7 @@ const MainHeader = () => {
         { label: 'Campus Furniture Design', href: '/campus-furniture-design' },
         { label: 'Sports Design & Execution', href: '/sports-design-execution' },
         { label: 'AI/Digital Solutions', href: '/ai-digital-design-supply' },
+        { label: 'AR / VR Experiences', href: '/ar-vr-experiences' },
       ]
     },
     { label: 'Catalogues', href: '/catalogues' },

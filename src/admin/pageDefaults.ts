@@ -234,60 +234,8 @@ export const pageDefaults: Record<string, any> = {
   heroTitle: 'Catalogues & Downloads',
   heroSubtitle: 'Every CampusMart product range, brief and design guide in one library — download the PDFs your team needs to plan and spec a campus.',
   heroImage: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80',
-  cards: [
-    {
-      title: 'NEP READY CLASSROOM FURNITURE',
-      description: 'Furniture solutions specifically designed to align with New Education Policy guidelines for modern classrooms.',
-      image: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      downloadLink: '/uploads/catalogues/1788258517755-838164996.pdf',
-      size: '411 KB',
-    },
-    {
-      title: 'CAMPUSMART BRIEF PROFILE [PDF]',
-      description: "An overview of CampusMart's mission, services, and extensive experience in educational infrastructure.",
-      image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      downloadLink: '/uploads/catalogues/1788784785158-777852239.pdf',
-      size: '96 MB',
-    },
-    {
-      title: 'SCHOOL DESIGN [PDF]',
-      description: 'Comprehensive guide on architectural and ergonomic principles for modern school environments.',
-      image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      downloadLink: '/uploads/catalogues/1788259430344-947630598.pdf',
-      size: '411 KB',
-    },
-    {
-      title: 'CLASSROOM CONFIGURATION IDEAS [PDF]',
-      description: 'Creative and functional layout samples for various classroom sizes and learning objectives.',
-      image: 'https://images.unsplash.com/photo-1588072432836-e10032774350?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      downloadLink: '/uploads/catalogues/1788258554866-942654994.pdf',
-      size: '170 KB',
-    },
-    {
-      title: 'MASTER CATALOGUE',
-      description: 'Our full range of products including Labs, Libraries, Sports, and AI Stations.',
-      image: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-      downloadLink: '/uploads/catalogues/1790872959601-232430012.pdf',
-      size: '23 MB',
-    },
-  ],
-  caseStudies: [
-    {
-      title: 'Campus Master Planning',
-      description: 'Complete campus transformation for a leading university in Bangalore.',
-      image: 'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-    },
-    {
-      title: '20 Stunning College Buildings',
-      description: 'Showcase of our most innovative campus architecture projects.',
-      image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-    },
-    {
-      title: 'STEM Lab Implementation',
-      description: 'State-of-the-art STEM lab setup for a prestigious school chain.',
-      image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-    },
-  ],
+  cards: [],
+  caseStudies: [],
   ctaTitle: 'Need a Custom Solution?',
   ctaSubtitle: 'Our team can create customized catalogues based on your specific requirements.',
   ctaButtonLabel: 'Request Custom Catalogue',
@@ -994,3 +942,12 @@ export const pageDefaults: Record<string, any> = {
   copyright: '© 2026 CampusMart. All rights reserved.'
 },
 };
+
+// Canonical Route & Template Aliases for instant SSOT fallback resolution
+pageDefaults['about-us'] = pageDefaults['corporate'];
+pageDefaults['furniture-design-supply'] = pageDefaults['campus-furniture-design'];
+pageDefaults['ar-vr-learning'] = pageDefaults['ar-vr-experiences'];
+pageDefaults['collaboration'] = pageDefaults['collaboration-spaces'];
+pageDefaults['innovation-centers'] = pageDefaults['innovation-centres'];
+pageDefaults['sports-infrastructure'] = pageDefaults['sports-infra'];
+
