@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search, Filter, Heart, Check, Trash2, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '@/api/client';
@@ -34,11 +34,78 @@ interface ShopProps {
   categoryPage?: string;
   hideCategorySidebar?: boolean;
   embedded?: boolean;
-  hideAllCategoriesOption?: boolean;
   defaultCategorySlug?: string;
 }
 
-const PAGE_SIZE = 24;
+const PAGE_SIZE = 12;
+const CACHE_TTL_MS = 60 * 1000; // 60 seconds
+
+// In-memory cache for category lists
+const categoriesMemoryCache = new Map<string, Category[]>();
+
+function getCachedCategories(categoryPage?: string): Category[] {
+  const cacheKey = categoryPage || '__all__';
+  if (categoriesMemoryCache.has(cacheKey)) {
+    return categoriesMemoryCache.get(cacheKey)!;
+  }
+  try {
+    const raw = sessionStorage.getItem(`cm_cats_${cacheKey}`);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        categoriesMemoryCache.set(cacheKey, parsed);
+        return parsed;
+      }
+    }
+  } catch {
+    // Ignore storage errors
+  }
+  return [];
+}
+
+function setCachedCategories(categoryPage: string | undefined, list: Category[]) {
+  const cacheKey = categoryPage || '__all__';
+  categoriesMemoryCache.set(cacheKey, list);
+  try {
+    sessionStorage.setItem(`cm_cats_${cacheKey}`, JSON.stringify(list));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+// In-memory cache for product listings with short TTL (session SWR)
+interface CachedProductData {
+  products: Product[];
+  total: number;
+  timestamp: number;
+}
+const productsMemoryCache = new Map<string, CachedProductData>();
+
+// Shimmer Skeleton Grid matching 12-item card layout
+const ProductGridSkeleton = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+    {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+      <div
+        key={i}
+        className="relative bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm p-3.5 flex flex-col justify-between animate-pulse"
+      >
+        <div>
+          <div className="aspect-[4/3] bg-slate-100 rounded-xl mb-3" />
+          <div className="flex justify-between items-center mb-2">
+            <div className="h-3 bg-slate-100 rounded w-1/4" />
+            <div className="h-3 bg-slate-100 rounded w-1/5" />
+          </div>
+          <div className="h-4 bg-slate-100 rounded w-4/5 mb-1.5" />
+          <div className="h-4 bg-slate-100 rounded w-2/3" />
+        </div>
+        <div className="mt-4 pt-2 border-t border-slate-50 flex items-center justify-between">
+          <div className="h-5 bg-slate-100 rounded w-1/4" />
+          <div className="h-8 bg-slate-100 rounded-lg w-28" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
 
 const Shop = ({
   categorySlug,
@@ -49,38 +116,91 @@ const Shop = ({
   categoryPage,
   hideCategorySidebar = false,
   embedded = false,
-  hideAllCategoriesOption = true,
   defaultCategorySlug,
 }: ShopProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+
+  // Categories synchronous bootstrap
+  const [categories, setCategories] = useState<Category[]>(() => getCachedCategories(categoryPage));
+  const [categoriesLoaded, setCategoriesLoaded] = useState(() => categories.length > 0);
+
+  // Synchronous initial category resolution
   const urlCategory = searchParams.get('category');
-  const initialSelectedCategory = categorySlug || (urlCategory && urlCategory !== 'all' ? urlCategory : (defaultCategorySlug || ''));
-  const [selectedCategory, setSelectedCategory] = useState(initialSelectedCategory);
+  const computeInitialCategory = () => {
+    if (categorySlug) return categorySlug;
+    if (urlCategory && urlCategory !== 'all') return urlCategory;
+    if (defaultCategorySlug) return defaultCategorySlug;
+    if (categories.length > 0) {
+      const withProducts = categories.find((c) => (c._count?.products ?? 0) > 0);
+      return withProducts?.slug || categories[0].slug;
+    }
+    return '';
+  };
+
+  const [selectedCategory, setSelectedCategory] = useState<string>(computeInitialCategory);
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+  const [debouncedSearch, setDebouncedSearch] = useState(searchParams.get('search') || '');
   const [sort, setSort] = useState(searchParams.get('sort') || 'newest');
   const [inStockOnly, setInStockOnly] = useState(searchParams.get('inStock') === 'true');
   const [page, setPage] = useState(Number(searchParams.get('page')) || 1);
   const [totalProducts, setTotalProducts] = useState(0);
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [actionMessage, setActionMessage] = useState('');
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const requestIdRef = useRef(0);
+
   const { isInWishlist, addProduct, removeProduct, count: wishlistCount } = useWishlist();
-  const categorySlugKey = categorySlugs?.join(',') || '';
-  const excludedCategorySlugKey = excludedCategorySlugs.join(',');
 
+  // Debounce search input without debouncing category clicks
   useEffect(() => {
-    setCategoriesLoaded(false);
-    api.get('/products/categories', { params: categoryPage ? { page: categoryPage } : undefined })
-      .then(({ data }) => setCategories(Array.isArray(data) ? data : []))
-      .catch(() => setCategories([]))
-      .finally(() => setCategoriesLoaded(true));
-  }, [categoryPage]);
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(searchQuery.trim());
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [searchQuery]);
 
+  // Load and cache categories
+  useEffect(() => {
+    let isMounted = true;
+    api.get('/products/categories', { params: categoryPage ? { page: categoryPage } : undefined })
+      .then(({ data }) => {
+        if (!isMounted) return;
+        const list = Array.isArray(data) ? data : [];
+        setCategories(list);
+        setCachedCategories(categoryPage, list);
+        setCategoriesLoaded(true);
+
+        // Normalize selectedCategory if empty or invalid
+        setSelectedCategory((prev) => {
+          if (categorySlug) return categorySlug;
+          const targetUrlCat = searchParams.get('category');
+          if (targetUrlCat && targetUrlCat !== 'all' && list.some((c) => c.slug.toLowerCase() === targetUrlCat.toLowerCase())) {
+            return targetUrlCat;
+          }
+          if (prev && list.some((c) => c.slug.toLowerCase() === prev.toLowerCase())) {
+            return prev;
+          }
+          if (defaultCategorySlug && list.some((c) => c.slug.toLowerCase() === defaultCategorySlug.toLowerCase())) {
+            return defaultCategorySlug;
+          }
+          const withProds = list.find((c) => (c._count?.products ?? 0) > 0);
+          return withProds?.slug || list[0]?.slug || '';
+        });
+      })
+      .catch(() => {
+        if (isMounted) setCategoriesLoaded(true);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [categoryPage, categorySlug, defaultCategorySlug, searchParams]);
+
+  // Handle URL category changes (browser back/forward navigation)
   useEffect(() => {
     if (categorySlug) {
       setSelectedCategory(categorySlug);
@@ -92,16 +212,134 @@ const Shop = ({
     }
   }, [categorySlug, searchParams]);
 
+  // Compute available categories for sidebar
+  const availableCategories = useMemo(() => {
+    return excludedCategorySlugs.length
+      ? categories.filter((c) => !excludedCategorySlugs.some((ex) => ex.toLowerCase() === c.slug.toLowerCase()))
+      : categories;
+  }, [categories, excludedCategorySlugs]);
+
+  const scopedCategorySlugs = useMemo(() => {
+    return showAllCategories
+      ? []
+      : categorySlugs?.length ? categorySlugs : categorySlug ? [categorySlug] : [];
+  }, [showAllCategories, categorySlugs, categorySlug]);
+
+  const shopCategories = useMemo(() => {
+    return scopedCategorySlugs.length
+      ? availableCategories.filter((c) => scopedCategorySlugs.includes(c.slug))
+      : availableCategories;
+  }, [scopedCategorySlugs, availableCategories]);
+
+  // Ensure selected category is valid within shopCategories
   useEffect(() => {
-    if (!categoriesLoaded || categories.length === 0) return;
-    const isCurrentValid = categories.some((c) => c.slug.toLowerCase() === selectedCategory.toLowerCase());
-    if (!isCurrentValid || selectedCategory === 'all' || !selectedCategory) {
-      const preferred = defaultCategorySlug && categories.some((c) => c.slug.toLowerCase() === defaultCategorySlug.toLowerCase())
-        ? defaultCategorySlug
-        : categories[0].slug;
-      setSelectedCategory(preferred);
+    if (!categoriesLoaded || shopCategories.length === 0) return;
+    const isCurrentValid = shopCategories.some((c) => c.slug.toLowerCase() === selectedCategory.toLowerCase());
+    if (!isCurrentValid) {
+      const fallback = (defaultCategorySlug && shopCategories.find((c) => c.slug.toLowerCase() === defaultCategorySlug.toLowerCase())?.slug)
+        || shopCategories.find((c) => (c._count?.products ?? 0) > 0)?.slug
+        || shopCategories[0]?.slug;
+      if (fallback && fallback !== selectedCategory) {
+        setSelectedCategory(fallback);
+      }
     }
-  }, [categoriesLoaded, categories, selectedCategory, defaultCategorySlug]);
+  }, [categoriesLoaded, shopCategories, selectedCategory, defaultCategorySlug]);
+
+  // Products Click-to-Fetch with In-Flight Cancellation & SWR Session Cache
+  useEffect(() => {
+    // Wait until category is resolved
+    if (!selectedCategory && shopCategories.length > 0) return;
+    if ((categoryPage || excludedCategorySlugs.length > 0) && !categoriesLoaded) return;
+
+    const activeCat = selectedCategory || (shopCategories[0]?.slug ?? '');
+    if (!activeCat && !categoryPage) return;
+
+    const cacheKey = `${activeCat}_p${page}_${sort}_${inStockOnly}_${debouncedSearch}`;
+    const cachedEntry = productsMemoryCache.get(cacheKey);
+    const isFresh = cachedEntry && (Date.now() - cachedEntry.timestamp < CACHE_TTL_MS);
+
+    // Synchronize URL query params
+    const newUrlParams: Record<string, string> = {
+      category: activeCat,
+      sort,
+      page: String(page),
+      ...(debouncedSearch ? { search: debouncedSearch } : {}),
+      ...(inStockOnly ? { inStock: 'true' } : {}),
+    };
+    setSearchParams(newUrlParams, { replace: true });
+
+    // 0ms instant render from memory cache
+    if (isFresh) {
+      setProducts(cachedEntry.products);
+      setTotalProducts(cachedEntry.total);
+      setLoading(false);
+      return;
+    }
+
+    // Cancel any previous pending request (prevents race conditions)
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    const currentRequestId = ++requestIdRef.current;
+
+    setLoading(true);
+
+    const params: Record<string, string> = {
+      limit: String(PAGE_SIZE),
+      page: String(page),
+      sort,
+      category: activeCat,
+    };
+
+    if (inStockOnly) params.inStock = 'true';
+    if (debouncedSearch) params.search = debouncedSearch;
+
+    api.get('/products', { params, signal: controller.signal })
+      .then(({ data }) => {
+        if (currentRequestId !== requestIdRef.current) return;
+        const prods = data.products || [];
+        const total = data.total || 0;
+        setProducts(prods);
+        setTotalProducts(total);
+        productsMemoryCache.set(cacheKey, { products: prods, total, timestamp: Date.now() });
+      })
+      .catch((err) => {
+        if (err?.name === 'CanceledError' || err?.code === 'ERR_CANCELED') return;
+        if (currentRequestId === requestIdRef.current) {
+          setProducts([]);
+          setTotalProducts(0);
+        }
+      })
+      .finally(() => {
+        if (currentRequestId === requestIdRef.current) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      controller.abort();
+    };
+  }, [
+    selectedCategory,
+    shopCategories,
+    page,
+    sort,
+    inStockOnly,
+    debouncedSearch,
+    categoryPage,
+    categoriesLoaded,
+    excludedCategorySlugs.length,
+    setSearchParams,
+  ]);
+
+  const handleCategoryClick = (slug: string) => {
+    if (selectedCategory.toLowerCase() === slug.toLowerCase()) return;
+    setSelectedCategory(slug);
+    setPage(1);
+    setSearchQuery('');
+  };
 
   const handleToggleWishlist = async (product: Product) => {
     if (isInWishlist(product.id)) {
@@ -132,86 +370,18 @@ const Shop = ({
     }
   };
 
-  useEffect(() => {
-    if ((categoryPage || excludedCategorySlugs.length > 0) && !categoriesLoaded) return;
-    setLoading(true);
-
-    const params: Record<string, string> = {
-      limit: String(PAGE_SIZE),
-      page: String(page),
-      sort,
-    };
-
-    if (inStockOnly) params.inStock = 'true';
-
-    const activeCategory = categoryPage && selectedCategory !== 'all' && !categories.some((c) => c.slug.toLowerCase() === selectedCategory.toLowerCase())
-      ? (hideAllCategoriesOption && categories.length > 0 ? categories[0].slug : 'all')
-      : selectedCategory;
-
-    if (categorySlug) params.category = categorySlug;
-    else if (activeCategory !== 'all') params.category = activeCategory;
-    else if (categorySlugs?.length) params.category = categorySlugs.join(',');
-    else if (categoryPage) params.category = categories.map((c) => c.slug).join(',') || '__none__';
-    else if (excludedCategorySlugs.length > 0) {
-      const availableSlugs = categories
-        .map((c) => c.slug)
-        .filter((slug) => !excludedCategorySlugs.includes(slug));
-      params.category = availableSlugs.join(',');
-    }
-
-    const searchTimer = window.setTimeout(() => {
-      if (searchQuery.trim()) params.search = searchQuery.trim();
-
-      const newUrlParams: Record<string, string> = {
-        ...(activeCategory !== 'all' ? { category: activeCategory } : {}),
-        ...(searchQuery.trim() ? { search: searchQuery.trim() } : {}),
-        ...(inStockOnly ? { inStock: 'true' } : {}),
-        sort,
-        page: String(page),
-      };
-      setSearchParams(newUrlParams, { replace: true });
-
-      api.get('/products', { params })
-        .then(({ data }) => {
-          setProducts(data.products || []);
-          setTotalProducts(data.total || 0);
-        })
-        .finally(() => setLoading(false));
-    }, 250);
-
-    return () => window.clearTimeout(searchTimer);
-  }, [categoryPage, categoriesLoaded, categorySlug, categorySlugKey, categories, excludedCategorySlugKey, selectedCategory, searchQuery, sort, inStockOnly, page, setSearchParams]);
-
   const formatPrice = (price: number) =>
     new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(price || 0);
 
-  const availableCategories = excludedCategorySlugs.length
-    ? categories.filter((c) => !excludedCategorySlugs.some((ex) => ex.toLowerCase() === c.slug.toLowerCase()))
-    : categories;
-
-  const scopedCategorySlugs = showAllCategories
-    ? []
-    : categorySlugs?.length ? categorySlugs : categorySlug ? [categorySlug] : [];
-  const shopCategories = scopedCategorySlugs.length
-    ? availableCategories.filter((c) => scopedCategorySlugs.includes(c.slug))
-    : availableCategories;
-
-  useEffect(() => {
-    if (hideAllCategoriesOption && categoriesLoaded && shopCategories.length > 0) {
-      const urlCat = searchParams.get('category');
-      const isSelectedValid = shopCategories.some((c) => c.slug.toLowerCase() === selectedCategory.toLowerCase());
-      if (!urlCat || urlCat === 'all' || !isSelectedValid) {
-        const preferred = (defaultCategorySlug && shopCategories.find((c) => c.slug.toLowerCase() === defaultCategorySlug.toLowerCase())?.slug)
-          || shopCategories[0]?.slug;
-        if (preferred && selectedCategory !== preferred) {
-          setSelectedCategory(preferred);
-        }
-      }
-    }
-  }, [hideAllCategoriesOption, categoriesLoaded, shopCategories, defaultCategorySlug, searchParams, selectedCategory]);
-
   const totalPages = Math.ceil(totalProducts / PAGE_SIZE) || 1;
   const Root: 'div' | 'main' = embedded ? 'div' : 'main';
+
+  const activeCategoryTitle = useMemo(() => {
+    const match = categories.find((c) => c.slug.toLowerCase() === selectedCategory.toLowerCase());
+    if (match) return match.name;
+    if (debouncedSearch) return `Search: "${debouncedSearch}"`;
+    return 'Products';
+  }, [categories, selectedCategory, debouncedSearch]);
 
   return (
     <Root className={embedded ? undefined : 'min-h-screen bg-cm-gray'}>
@@ -266,22 +436,6 @@ const Shop = ({
                   <h3 className="font-bold text-cm-blue-dark text-base">Categories</h3>
                 </div>
                 <ul className="space-y-1.5 text-sm">
-                  {!hideAllCategoriesOption && (
-                    <li>
-                      <button
-                        onClick={() => {
-                          setSelectedCategory('all');
-                          setPage(1);
-                        }}
-                        className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center justify-between ${
-                          selectedCategory === 'all' ? 'bg-cm-blue text-white font-bold' : 'hover:bg-gray-100 text-gray-700'
-                        }`}
-                      >
-                        <span>All Products</span>
-                        <span className="text-xs opacity-80">{totalProducts}</span>
-                      </button>
-                    </li>
-                  )}
                   {shopCategories.map((cat) => (
                     <li key={cat.id}>
                       {categoryRoutes[cat.slug] ? (
@@ -293,12 +447,11 @@ const Shop = ({
                         </Link>
                       ) : (
                         <button
-                          onClick={() => {
-                            setSelectedCategory(cat.slug);
-                            setPage(1);
-                          }}
+                          onClick={() => handleCategoryClick(cat.slug)}
                           className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center justify-between ${
-                            selectedCategory.toLowerCase() === cat.slug.toLowerCase() ? 'bg-cm-blue text-white font-bold' : 'hover:bg-gray-100 text-gray-700'
+                            selectedCategory.toLowerCase() === cat.slug.toLowerCase()
+                              ? 'bg-cm-blue text-white font-bold'
+                              : 'hover:bg-gray-100 text-gray-700'
                           }`}
                         >
                           <span className="truncate">{cat.name}</span>
@@ -333,19 +486,8 @@ const Shop = ({
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold text-cm-blue-dark">
-                  {categories.find((c) => c.slug.toLowerCase() === selectedCategory.toLowerCase())?.name || 'Products'}
+                  {activeCategoryTitle}
                 </h1>
-                {hideCategorySidebar && categories.some((c) => c.slug.toLowerCase() === selectedCategory.toLowerCase()) && (
-                  <button
-                    onClick={() => {
-                      setSelectedCategory('all');
-                      setPage(1);
-                    }}
-                    className="text-xs font-semibold uppercase tracking-widest text-cm-blue hover:underline"
-                  >
-                    Show all
-                  </button>
-                )}
               </div>
 
               <div className="flex items-center gap-3">
@@ -376,23 +518,20 @@ const Shop = ({
             )}
 
             {loading ? (
-              <div className="flex justify-center py-16">
-                <div className="w-10 h-10 border-4 border-cm-blue border-t-transparent rounded-full animate-spin" />
-              </div>
+              <ProductGridSkeleton />
             ) : products.length === 0 ? (
               <div className="text-center py-16 bg-white rounded-2xl border border-slate-100 p-8">
                 <p className="text-gray-600 text-lg font-medium">No products found matching your criteria.</p>
                 <p className="text-gray-400 text-sm mt-1">Try clearing your search query or picking another category.</p>
-                {(searchQuery || selectedCategory !== 'all') && (
+                {searchQuery && (
                   <button
                     onClick={() => {
                       setSearchQuery('');
-                      setSelectedCategory('all');
                       setPage(1);
                     }}
                     className="mt-4 px-4 py-2 bg-cm-blue text-white text-xs font-bold rounded-lg hover:bg-cm-blue-dark transition-colors"
                   >
-                    Reset Filters
+                    Reset Search
                   </button>
                 )}
               </div>

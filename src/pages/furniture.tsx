@@ -99,7 +99,6 @@ const Furniture = () => {
       <Shop
         showAllCategories
         categoryPage="furniture"
-        hideAllCategoriesOption
         defaultCategorySlug="chairs"
         excludedCategorySlugs={['uncategorized']}
       />

@@ -80,7 +80,12 @@ const CategoryBar = () => {
     ? content.home_categories
     : DEFAULT_CATEGORIES;
 
+  const hasAnimatedRef = useRef(false);
+
   useEffect(() => {
+    if (hasAnimatedRef.current) return;
+    hasAnimatedRef.current = true;
+
     const ctx = gsap.context(() => {
       gsap.fromTo(
         containerRef.current,
@@ -94,7 +99,7 @@ const CategoryBar = () => {
       );
     });
     return () => ctx.revert();
-  }, [categories]);
+  }, []);
 
   return (
     <div

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Check, Share2, Award, Truck, ShieldCheck, Heart, ArrowLeft, Send } from 'lucide-react';
 import api from '@/api/client';
 import LoginPromptModal from '@/components/login-prompt-modal';
@@ -24,6 +24,7 @@ interface Product {
 
 const ProductDetail = () => {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [mainImage, setMainImage] = useState<string>('');
@@ -146,13 +147,25 @@ const ProductDetail = () => {
       {/* Breadcrumb & Back Action */}
       <div className="bg-white border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-2 text-sm text-slate-500 font-medium">
-          <Link to="/shop" className="flex items-center gap-1 text-cm-blue font-black text-xs mr-1 bg-cm-blue/5 px-2.5 py-1.5 rounded-lg hover:bg-cm-blue/10 transition-all">
+          <button
+            type="button"
+            onClick={() => {
+              if (window.history.length > 1) {
+                navigate(-1);
+              } else {
+                navigate('/shop');
+              }
+            }}
+            className="flex items-center gap-1 text-cm-blue font-black text-xs mr-1 bg-cm-blue/5 px-2.5 py-1.5 rounded-lg hover:bg-cm-blue/10 transition-all cursor-pointer"
+          >
              <ArrowLeft className="w-3.5 h-3.5" />
              <span>Back to List</span>
-          </Link>
+          </button>
           <div className="h-4 w-px bg-slate-200 mr-1" />
           
           <Link to="/" className="hover:text-cm-blue transition-colors">Home</Link>
+          <span>/</span>
+          <Link to="/shop" className="hover:text-cm-blue transition-colors">Shop</Link>
           <span>/</span>
           {product.category && (
             <>

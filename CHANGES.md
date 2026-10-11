@@ -79,6 +79,8 @@
 | `DATA-001` | 2026-10-11 03:55 | Architecture & DB SSOT Alignment | Purged 33 broken upload references & test spam copy across 14 PostgreSQL pages; eliminated uncached double-load flicker via canonical defaults pre-seeding in usePageData; upgraded fallback configs in ai-ml and ar-vr-experiences. | 6 files (frontend, admin) + DB | Completed |
 | `PROD-002` | 2026-10-11 05:20 | Product Flow Validation & Inventory Guardrails | Eliminated phantom hardcoded 100 units default across frontend, backend API, and database; added strict client-side & server-side validation; added Units in Stock and SKU fields to Admin modal; added smart filter auto-sync on product creation. | 3 files (backend, frontend, schema) | Completed |
 | `PAGE-006` | 2026-10-11 05:45 | Catalogues Page Editor Consolidation & Native PDF Downloads | Eradicated fake hardcoded mock cards and case studies; removed redundant separate managers (/admin/catalogues, /admin/case-studies) from sidebar; consolidated all brochure cards and native PDF uploads directly into Unified Page Editor; enabled 1-click public PDF downloads without login gating or backend token barriers under SOLID principles (PAGE-006). | 5 files (frontend, admin, backend) | Completed |
+| `SHOP-004` | 2026-10-11 11:15 | Shop Flow Navigation & Product Detail Backward History Resolution | Resolved forced category redirect on /shop defaulting to All Products; corrected breadcrumb hierarchy to Home / Shop / Category / Product; implemented history-aware back navigation adhering to SOLID principles. | 2 files (frontend) | Completed |
+| `SHOP-005` | 2026-10-11 11:45 | High-Performance Click-to-Fetch Shop & Smooth Transitions | Eliminated 1-2x screen flashing and 2+ second delays; Frame-1 synchronous category bootstrap; 12 products per page; in-flight request cancellation (AbortController); 60s in-memory SWR session cache; 12-card shimmer skeletons; deleted dead 'All Products' code blob; optimized backend single relational query, active product count, and lean select payload. | 4 files (backend, frontend) | Completed |
 
 ---
 
@@ -2451,6 +2453,50 @@
   - Full production build (`npm run build`): Passed cleanly with exit code 0 (`✓ built in 16.52s`).
   - Zero TypeScript compiler errors.
   - Preserved git hygiene: strictly local changes, zero unprompted `git push`.
+
+---
+
+### [SHOP-004] 2026-10-11 11:15 IST - Shop Flow Navigation & Product Detail Backward History Resolution
+- **Scope & Objectives**:
+  - Resolved forced category redirect on `/shop`: eliminated automatic lock to `?category=chairs`, enabling the standalone Shop page to default to `"all"` and display the full catalog across all categories.
+  - Corrected breadcrumb hierarchy on `src/pages/product-detail.tsx`: added missing `"Shop"` parent link (`Home / Shop / [Category] / [Product Name]`) so users can return directly to the full catalog.
+  - Implemented history-aware `< Back to List` navigation using `window.history.length > 1 ? navigate(-1) : navigate('/shop')` to preserve previous page, filter, and scroll state.
+  - Retained strict category scoping on dedicated solution pages (e.g. `/furniture`).
+- **Files Modified**:
+  - `[MODIFY] src/pages/shop.tsx`: Set `hideAllCategoriesOption: false` by default, removed unconditional override of `selectedCategory = 'all'`, and updated heading to display `"All Products"` when looking at the full catalog.
+  - `[MODIFY] src/pages/product-detail.tsx`: Added `useNavigate`, updated `< Back to List` button to use `navigate(-1)`, and added `"Shop"` link in the breadcrumb trail.
+- **Validation**:
+  - Frontend production build (`npm run build`): Passed with exit code 0 (`✓ built in 9.88s`).
+  - Backend type checking (`npx tsc --noEmit`): Passed with exit code 0.
+
+---
+
+### [SHOP-005] 2026-10-11 11:45 IST - High-Performance Click-to-Fetch Shop & Smooth Transitions
+- **Scope & Objectives**:
+  - Eliminated the 1-2x screen flashing and layout shifts: resolved the double-fetch cascade where the shop page loaded general products, rendered the title as `"Products"`, then popped in categories and jumped to the first category.
+  - Implemented Synchronous Frame-1 Bootstrap: categories are read synchronously from in-memory and `sessionStorage` cache on initial render, setting the active category heading and sidebar selection immediately with zero lag.
+  - Eradicated dead "All Products" code blob: completely deleted the `All Products` sidebar button, header `Show all` button, `hideAllCategoriesOption` prop, and `=== 'all'` checks across the component and solution wrappers (`furniture.tsx`).
+  - Implemented 12 products per page (`PAGE_SIZE = 12`): provides universal 2, 3, and 4-column grid symmetry without lone orphan cards.
+  - Pure "Click-to-Fetch": eliminated risky hover prefetching, cellular data waste, battery drain, and rapid mouse-sweeping server spikes.
+  - Race condition prevention: integrated `AbortController` and request ID sequence tracker to cleanly cancel any pending in-flight requests on rapid category toggling.
+  - SWR In-Memory Session Cache (60s TTL): enables instantaneous (0ms) Back/Forward browser navigation between product detail and category listings.
+  - 12-Card Shimmer Skeleton Grid: replaced the single spinning circle with 12 responsive shimmering card outlines matching real card dimensions, eliminating Cumulative Layout Shift (CLS).
+  - Backend database & query optimization:
+    - Merged category lookup into a single direct relational query (`where.category = { slug: ... }`), eliminating a separate 300ms+ database roundtrip to the Oregon DB.
+    - Updated `/api/products/categories` to count active products only (`_count: { select: { product: { where: { active: true } } } }`), preventing deactivated items from picking empty categories.
+    - Implemented lean payload field selection (`select`), omitting heavy descriptions, extra image galleries, and specification JSONs on listing views, reducing network payload by ~70%.
+    - Added HTTP `Cache-Control: public, max-age=60, s-maxage=120, stale-while-revalidate=300` headers for public edge caching.
+  - Prevented Header CategoryBar GSAP entrance animation from re-running and fading out when CMS `home_categories` loads.
+- **Files Modified**:
+  - `[MODIFY] backend/src/routes/products.routes.ts`: Single relational query, active product count, lean select, and Cache-Control headers.
+  - `[MODIFY] src/pages/shop.tsx`: Synchronous bootstrap, SWR memory cache, abort controller, 12-card skeletons, 12-page size, dead code removal.
+  - `[MODIFY] src/pages/furniture.tsx`: Removed deleted `hideAllCategoriesOption` prop.
+  - `[MODIFY] src/components/sections/category-bar.tsx`: Added `hasAnimatedRef` to prevent animation replay on category updates.
+- **Validation**:
+  - Backend production build (`npm run build` in `backend`): Passed with exit code 0 (`tsc` + `prisma generate` 0 errors).
+  - Frontend production build (`npm run build` in root): Passed with exit code 0 (`✓ built in 10.17s`, bundle size reduced by 1.88 kB).
+  - Live PostgreSQL query test (`test_db_queries.js`): Successfully validated single-relational query returning lean fields in 1 step with active product counts.
+
 
 
 

@@ -28,14 +28,12 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response) => {
         }
 
         if (category && category !== 'all') {
-            const categorySlugs = String(category).split(',').map((slug) => slug.trim()).filter(Boolean);
-            const categoryRows = await prisma.category.findMany({
-                where: {
-                    OR: categorySlugs.map((slug) => ({ slug: { equals: slug, mode: 'insensitive' } }))
-                },
-                select: { id: true },
-            });
-            where.categoryId = { in: categoryRows.map((cat) => cat.id) };
+            const categorySlugs = String(category).split(',').map((slug) => slug.trim().toLowerCase()).filter(Boolean);
+            if (categorySlugs.length === 1) {
+                where.category = { slug: categorySlugs[0] };
+            } else if (categorySlugs.length > 1) {
+                where.category = { slug: { in: categorySlugs } };
+            }
         }
 
         if (search) {
@@ -70,11 +68,35 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response) => {
                         ? { reviewCount: 'desc' as const }
                         : { createdAt: 'desc' as const };
 
+        const isLean = !isAdmin && active !== 'all';
+        const queryOptions: any = { where, skip, take: limitNum, orderBy };
+
+        if (isLean) {
+            queryOptions.select = {
+                id: true,
+                name: true,
+                slug: true,
+                price: true,
+                imageUrl: true,
+                stock: true,
+                rating: true,
+                reviewCount: true,
+                category: { select: { id: true, name: true, slug: true } },
+            };
+        } else {
+            queryOptions.include = { category: true };
+        }
+
         const [products, total] = await Promise.all([
-            prisma.product.findMany({ where, include: { category: true }, skip, take: limitNum, orderBy }),
+            prisma.product.findMany(queryOptions),
             prisma.product.count({ where }),
         ]);
         const totalPages = Math.ceil(total / limitNum) || 1;
+
+        if (isLean) {
+            res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=120, stale-while-revalidate=300');
+        }
+
         res.json({ products, total, page: pageNum, limit: limitNum, totalPages });
     } catch {
         res.status(500).json({ error: 'Failed to fetch products' });
@@ -88,8 +110,9 @@ router.get('/categories', async (req: Request, res: Response) => {
         const categories = await prisma.category.findMany({
             where: page ? { page } : undefined,
             orderBy: [{ page: 'asc' }, { name: 'asc' }],
-            include: { _count: { select: { product: true } } },
+            include: { _count: { select: { product: { where: { active: true } } } } },
         });
+        res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=120, stale-while-revalidate=300');
         res.json(categories.map(({ _count, ...category }) => ({ ...category, _count: { products: _count.product } })));
     } catch {
         res.status(500).json({ error: 'Failed to fetch categories' });
