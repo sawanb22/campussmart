@@ -1,14 +1,18 @@
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Users } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
-import { resolveMediaUrl } from '@/lib/media-url';
-import { COLLAB_PAGE_SLUG, COLLAB_DEFAULTS, slugifyCollabTitle } from './collaboration.data';
+import { MediaImage } from '@/components/ui/media-image';
+import { COLLAB_PAGE_SLUG, slugifyCollabTitle } from './collaboration.data';
 
 const CollaborationDetail = () => {
   const { itemSlug } = useParams();
   const { data, loading } = usePageData(COLLAB_PAGE_SLUG);
-  const cards = Array.isArray(data.cards) ? data.cards : COLLAB_DEFAULTS.cards;
-  const card = cards.find((item: any) => slugifyCollabTitle(item.title) === itemSlug);
+  const cards = Array.isArray(data.cards) ? data.cards : [];
+  const card = cards.find(
+    (item: any) =>
+      item.slug === itemSlug ||
+      slugifyCollabTitle(item.title) === itemSlug
+  );
 
   if (loading) {
     return (
@@ -27,8 +31,6 @@ const CollaborationDetail = () => {
     );
   }
 
-  const image = resolveMediaUrl(card.image);
-
   return (
     <main className="min-h-screen bg-gray-50/50 py-8 sm:py-12">
       <article className="mx-auto max-w-3xl px-4 sm:px-6">
@@ -36,7 +38,13 @@ const CollaborationDetail = () => {
           <ArrowLeft className="h-4 w-4" /> Back to Collaboration Spaces
         </Link>
         <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-          {image && <img src={image} alt={card.title} className="h-56 w-full object-cover sm:h-72" />}
+          {card.image && (
+            <MediaImage
+              src={card.image}
+              alt={card.title}
+              className="h-56 w-full object-cover sm:h-72"
+            />
+          )}
           <div className="p-6 sm:p-10">
             <div className="mb-5 inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cm-blue">
               <Users className="h-3 w-3" /> Collaboration Space

@@ -37,24 +37,9 @@ const EMPTY_FORM = {
   message: '',
 };
 
-export const DEFAULTS = {
-  heroTitle: 'Education opportunities, thoughtfully matched.',
-  heroSubtitle: 'Explore institutions, funding pathways, partnerships and roles shaping the future of education.',
-  categories: ['All opportunities', 'Institutions', 'Funding', 'Partnerships', 'Careers'],
-  featured: {
-    eyebrow: 'Featured opportunity',
-    title: 'Find the right next step for your institution',
-    description: 'From acquisition and funding to strategic partnerships, discover practical ways to move an education project forward.',
-    image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1200&q=85',
-  },
-  ctaTitle: 'Have an opportunity to share?',
-  ctaSubtitle: 'Connect with the CampusMart team and reach education leaders looking for their next move.',
-  ctaButtonLabel: 'Post a Classified',
-};
-
 const Classifieds = () => {
   const { data } = usePageData<any>('classifieds');
-  const [activeCategory, setActiveCategory] = useState('All opportunities');
+  const [activeCategory, setActiveCategory] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'post' | 'enquiry'>('post');
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
@@ -63,55 +48,21 @@ const Classifieds = () => {
   const [submitted, setSubmitted] = useState(false);
   const [formError, setFormError] = useState('');
 
-  const categories: string[] = Array.isArray(data.categories) ? data.categories : DEFAULTS.categories;
-  const featured = { ...DEFAULTS.featured, ...(data.featured ?? {}) };
+  const categories: string[] = Array.isArray(data.categories) ? data.categories : [];
+  const featured = data.featured ?? {};
+  const currentCategory = activeCategory || categories[0] || '';
 
-  const defaults: Listing[] = [
-    {
-      title: 'Colleges for Sale',
-      category: 'Institutions',
-      desc: 'Browse educational institutions available for acquisition.',
-      image: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=900&q=85',
-      link: '/colleges-universities-for-sale',
-      icon: Building2,
-    },
-    {
-      title: 'Education Funding',
-      category: 'Funding',
-      desc: 'Explore funding options for your institution.',
-      image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=900&q=85',
-      link: '#',
-      icon: DollarSign,
-    },
-    {
-      title: 'Partnership Opportunities',
-      category: 'Partnerships',
-      desc: 'Find partnership opportunities with running colleges.',
-      image: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=900&q=85',
-      link: '/partner-with-colleges',
-      icon: Handshake,
-    },
-    {
-      title: 'Job Openings',
-      category: 'Careers',
-      desc: 'Apply for current opportunities with our team.',
-      image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=900&q=85',
-      link: '/job-openings',
-      icon: BriefcaseBusiness,
-    },
-  ];
-
-  const listings: Listing[] = (Array.isArray(data.cards) ? data.cards : defaults).map((item: any, index: number) => ({
+  const listings: Listing[] = (Array.isArray(data.cards) ? data.cards : []).map((item: any, index: number) => ({
     ...item,
     icon: [Building2, DollarSign, Handshake, BriefcaseBusiness][index % 4],
-    desc: item.description ?? item.desc,
-    category: item.category ?? categories[(index + 1) % categories.length],
-    link: /job|career/i.test(item.title) ? '/job-openings' : item.href ?? item.link ?? '#',
+    desc: item.description ?? item.desc ?? '',
+    category: (item.category ?? categories[(index + 1) % Math.max(categories.length, 1)] ?? '').trim(),
+    link: item.href?.trim() || item.link?.trim() || (/job|career/i.test(item.title) ? '/job-openings' : '#'),
   }));
 
   const visibleListings = useMemo(
-    () => (activeCategory === categories[0] ? listings : listings.filter((item) => item.category === activeCategory)),
-    [activeCategory, categories, listings],
+    () => (!currentCategory || currentCategory === categories[0] ? listings : listings.filter((item) => item.category?.toLowerCase() === currentCategory.trim().toLowerCase())),
+    [currentCategory, categories, listings],
   );
 
   const openPostModal = () => {
@@ -168,164 +119,190 @@ const Classifieds = () => {
     <main className="classifieds-page min-h-screen bg-slate-50/60 py-8 sm:py-14">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 pb-8 border-b border-slate-200">
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cm-blue/10 text-cm-blue text-xs font-bold uppercase tracking-wider mb-3">
-              CampusMart Opportunities
+        {!data.hideHero && (
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 pb-8 border-b border-slate-200">
+            <div className="max-w-2xl">
+              {data.heroEyebrow && (
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cm-blue/10 text-cm-blue text-xs font-bold uppercase tracking-wider mb-3">
+                  {data.heroEyebrow}
+                </div>
+              )}
+              <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
+                {data.heroTitle}
+              </h1>
+              {data.heroSubtitle && (
+                <p className="mt-3 text-base sm:text-lg text-slate-600 leading-relaxed">
+                  {data.heroSubtitle}
+                </p>
+              )}
             </div>
-            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
-              {data.heroTitle ?? DEFAULTS.heroTitle}
-            </h1>
-            <p className="mt-3 text-base sm:text-lg text-slate-600 leading-relaxed">
-              {data.heroSubtitle ?? DEFAULTS.heroSubtitle}
-            </p>
+            {data.heroButtonLabel && (
+              <div className="flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={openPostModal}
+                  className="inline-flex items-center gap-2 rounded-xl bg-cm-blue px-5 py-3 text-sm font-bold text-white shadow-md hover:bg-cm-blue-dark transition-all transform hover:-translate-y-0.5"
+                >
+                  <PlusCircle className="h-4 w-4" /> {data.heroButtonLabel}
+                </button>
+              </div>
+            )}
           </div>
-          <div className="flex-shrink-0">
-            <button
-              type="button"
-              onClick={openPostModal}
-              className="inline-flex items-center gap-2 rounded-xl bg-cm-blue px-5 py-3 text-sm font-bold text-white shadow-md hover:bg-cm-blue-dark transition-all transform hover:-translate-y-0.5"
-            >
-              <PlusCircle className="h-4 w-4" /> Post a Classified
-            </button>
-          </div>
-        </div>
+        )}
 
         {/* Categories Filter Bar */}
-        <div className="mt-8 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-          {categories.map((category) => (
-            <button
-              key={category}
-              type="button"
-              onClick={() => setActiveCategory(category)}
-              className={`whitespace-nowrap rounded-full px-4 py-2 text-xs sm:text-sm font-semibold transition-all ${
-                activeCategory === category
-                  ? 'bg-slate-900 text-white shadow-sm'
-                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 hover:text-slate-900'
-              }`}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
+        {categories.length > 0 && (
+          <div className="mt-8 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+            {categories.map((category) => (
+              <button
+                key={category}
+                type="button"
+                onClick={() => setActiveCategory(category)}
+                className={`whitespace-nowrap rounded-full px-4 py-2 text-xs sm:text-sm font-semibold transition-all ${
+                  currentCategory === category
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 hover:text-slate-900'
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Featured Opportunity */}
-        <section className="mt-8 overflow-hidden rounded-2xl bg-gradient-to-br from-[#155b51] to-[#0d3d36] text-white shadow-lg grid grid-cols-1 md:grid-cols-2">
-          <div className="flex flex-col justify-center p-6 sm:p-10">
-            <span className="text-xs font-bold uppercase tracking-widest text-emerald-300 mb-2">
-              {featured.eyebrow}
-            </span>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight">
-              {featured.title}
-            </h2>
-            <p className="mt-4 text-sm sm:text-base text-emerald-100/90 leading-relaxed">
-              {featured.description}
-            </p>
-            <div className="mt-6 flex flex-wrap gap-4 items-center">
-              <a
-                href="#classified-opportunities"
-                className="inline-flex items-center gap-2 text-sm font-bold text-white underline underline-offset-4 hover:text-emerald-200 transition"
-              >
-                Explore all opportunities <ArrowRight className="h-4 w-4" />
-              </a>
-              <button
-                type="button"
-                onClick={openPostModal}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs sm:text-sm px-4 py-2 transition"
-              >
-                <PlusCircle className="h-4 w-4" /> Post Opportunity
-              </button>
+        {!data.hideFeatured && (featured.title || featured.description) && (
+          <section className="mt-8 overflow-hidden rounded-2xl bg-gradient-to-br from-[#155b51] to-[#0d3d36] text-white shadow-lg grid grid-cols-1 md:grid-cols-2">
+            <div className="flex flex-col justify-center p-6 sm:p-10">
+              {featured.eyebrow && (
+                <span className="text-xs font-bold uppercase tracking-widest text-emerald-300 mb-2">
+                  {featured.eyebrow}
+                </span>
+              )}
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight">
+                {featured.title}
+              </h2>
+              <p className="mt-4 text-sm sm:text-base text-emerald-100/90 leading-relaxed">
+                {featured.description}
+              </p>
+              <div className="mt-6 flex flex-wrap gap-4 items-center">
+                {featured.exploreLabel && (
+                  <a
+                    href="#classified-opportunities"
+                    className="inline-flex items-center gap-2 text-sm font-bold text-white underline underline-offset-4 hover:text-emerald-200 transition"
+                  >
+                    {featured.exploreLabel} <ArrowRight className="h-4 w-4" />
+                  </a>
+                )}
+                {featured.postButtonLabel && (
+                  <button
+                    type="button"
+                    onClick={openPostModal}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs sm:text-sm px-4 py-2 transition"
+                  >
+                    <PlusCircle className="h-4 w-4" /> {featured.postButtonLabel}
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-          <div className="h-56 sm:h-72 md:h-auto overflow-hidden">
-            <MediaImage
-              src={featured.image}
-              alt={featured.title}
-              className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
-            />
-          </div>
-        </section>
+            <div className="h-56 sm:h-72 md:h-auto overflow-hidden">
+              <MediaImage
+                src={featured.image}
+                alt={featured.title}
+                className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+              />
+            </div>
+          </section>
+        )}
 
         {/* Opportunities Grid */}
-        <section id="classified-opportunities" className="mt-10">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {visibleListings.map((item) => {
-              const isExternalOrAnchor = item.link === '#' || !item.link;
-              return (
-                <div
-                  key={item.title}
-                  className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs hover:shadow-xl transition-all duration-300"
-                >
-                  <div className="relative h-48 w-full overflow-hidden bg-slate-100">
-                    <MediaImage
-                      src={item.image}
-                      alt={item.title}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    <span className="absolute top-3 left-3 rounded-full bg-slate-950/70 px-3 py-1 text-[11px] font-bold text-white backdrop-blur-xs">
-                      {item.category}
-                    </span>
-                  </div>
-                  <div className="flex flex-1 flex-col p-5 sm:p-6">
-                    <h3 className="text-lg font-bold text-slate-900 group-hover:text-cm-blue transition">
-                      {item.title}
-                    </h3>
-                    <p className="mt-2 text-sm text-slate-600 leading-relaxed line-clamp-3 flex-1">
-                      {item.desc}
-                    </p>
-                    <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
-                      {isExternalOrAnchor ? (
+        {!data.hideCards && (
+          <section id="classified-opportunities" className="mt-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {visibleListings.map((item) => {
+                const isExternalOrAnchor = item.link === '#' || !item.link;
+                return (
+                  <div
+                    key={item.title}
+                    className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs hover:shadow-xl transition-all duration-300"
+                  >
+                    <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+                      <MediaImage
+                        src={item.image}
+                        alt={item.title}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <span className="absolute top-3 left-3 rounded-full bg-slate-950/70 px-3 py-1 text-[11px] font-bold text-white backdrop-blur-xs">
+                        {item.category}
+                      </span>
+                    </div>
+                    <div className="flex flex-1 flex-col p-5 sm:p-6">
+                      <h3 className="text-lg font-bold text-slate-900 group-hover:text-cm-blue transition">
+                        {item.title}
+                      </h3>
+                      <p className="mt-2 text-sm text-slate-600 leading-relaxed line-clamp-3 flex-1">
+                        {item.desc}
+                      </p>
+                      <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
+                        {isExternalOrAnchor ? (
+                          <button
+                            type="button"
+                            onClick={() => openEnquiryModal(item)}
+                            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-cm-blue hover:text-cm-blue-dark transition"
+                          >
+                            Send enquiry <ArrowRight className="h-3.5 w-3.5" />
+                          </button>
+                        ) : (
+                          <Link
+                            to={item.link}
+                            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-900 group-hover:text-cm-blue transition"
+                          >
+                            Explore details <ArrowRight className="h-3.5 w-3.5" />
+                          </Link>
+                        )}
                         <button
                           type="button"
                           onClick={() => openEnquiryModal(item)}
-                          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-cm-blue hover:text-cm-blue-dark transition"
+                          className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+                          title="Inquire about this opportunity"
                         >
-                          Send enquiry <ArrowRight className="h-3.5 w-3.5" />
+                          <Send className="h-4 w-4" />
                         </button>
-                      ) : (
-                        <Link
-                          to={item.link}
-                          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-900 group-hover:text-cm-blue transition"
-                        >
-                          Explore details <ArrowRight className="h-3.5 w-3.5" />
-                        </Link>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => openEnquiryModal(item)}
-                        className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
-                        title="Inquire about this opportunity"
-                      >
-                        <Send className="h-4 w-4" />
-                      </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* Bottom CTA Banner */}
-        <section className="mt-14 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-800 p-8 sm:p-12 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
-          <div className="max-w-xl">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              {data.ctaTitle ?? DEFAULTS.ctaTitle}
-            </h2>
-            <p className="mt-2 text-sm sm:text-base text-slate-300 leading-relaxed">
-              {data.ctaSubtitle ?? DEFAULTS.ctaSubtitle}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={openPostModal}
-              className="rounded-xl bg-cm-blue hover:bg-cm-blue-dark text-white font-bold text-sm px-6 py-3.5 transition-all shadow-md transform hover:-translate-y-0.5 flex items-center gap-2"
-            >
-              <PlusCircle className="h-4 w-4" /> {data.ctaButtonLabel ?? 'Post a Classified'}
-            </button>
-          </div>
-        </section>
+        {!data.hideCta && (data.ctaTitle || data.ctaSubtitle) && (
+          <section className="mt-14 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-800 p-8 sm:p-12 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+            <div className="max-w-xl">
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                {data.ctaTitle}
+              </h2>
+              {data.ctaSubtitle && (
+                <p className="mt-2 text-sm sm:text-base text-slate-300 leading-relaxed">
+                  {data.ctaSubtitle}
+                </p>
+              )}
+            </div>
+            {data.ctaButtonLabel && (
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={openPostModal}
+                  className="rounded-xl bg-cm-blue hover:bg-cm-blue-dark text-white font-bold text-sm px-6 py-3.5 transition-all shadow-md transform hover:-translate-y-0.5 flex items-center gap-2"
+                >
+                  <PlusCircle className="h-4 w-4" /> {data.ctaButtonLabel}
+                </button>
+              </div>
+            )}
+          </section>
+        )}
       </div>
 
       {/* Alert Modal Dialog */}
@@ -431,7 +408,7 @@ const Classifieds = () => {
                       <input
                         type="tel"
                         required
-                        pattern="(?:\+91[ -]?)?[6-9][0-9]{9}"
+                        pattern="(?:\+?91[\s\-]?)?0?[0-9\s\-]{10,14}"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         placeholder="+91 98765 43210"

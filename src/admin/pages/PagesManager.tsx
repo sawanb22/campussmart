@@ -55,7 +55,31 @@ function getSubpageMatch(page: Page, query: string): string | null {
             }
         }
 
-        // 5. Check hero or section titles if distinct
+        // 5. Check FAQs
+        if (Array.isArray(data.faqs)) {
+            for (const f of data.faqs) {
+                if (f?.question && f.question.toLowerCase().includes(query)) {
+                    return `FAQ: "${f.question}"`;
+                }
+                if (f?.answer && f.answer.toLowerCase().includes(query)) {
+                    return `FAQ Answer: "${f.question || 'Item'}"`;
+                }
+            }
+        }
+
+        // 5b. Check article / policy sections
+        if (Array.isArray(data.sections)) {
+            for (const s of data.sections) {
+                if (s?.heading && s.heading.toLowerCase().includes(query)) {
+                    return `Section: "${s.heading}"`;
+                }
+                if (s?.body && s.body.toLowerCase().includes(query)) {
+                    return `Article Body: "${s.heading || 'Section'}"`;
+                }
+            }
+        }
+
+        // 6. Check hero or section titles if distinct
         if (data.heroTitle && data.heroTitle.toLowerCase().includes(query) && !page.title.toLowerCase().includes(query)) {
             return `Hero Title: "${data.heroTitle}"`;
         }
@@ -96,7 +120,9 @@ const MAIN_SLUGS = new Set([
     'solutions', 'corporate', 'catalogues', 'classifieds', 'login',
     'registration', 'my-account', 'request-quote', 'not-found',
     'privacy-policy', 'terms-of-use', 'payment-policy', 'replacement-return',
-    'order-rejection', 'partnership', 'job-openings', 'partner-with-colleges', 'lookbook', 'ugc-guidelines',
+    'order-rejection', 'partnership', 'job-openings', 'partner-with-colleges', 'lookbook', 'ugc-guidelines', 'faq',
+    'how-it-works', 'brand-help', 'sell-on-campusmart',
+    '20-stunning-college-buildings', 'academic-buildings', 'research-facilities', 'student-life-centers',
 ]);
 
 // Primary category / solution pages
@@ -106,7 +132,7 @@ const CATEGORY_SLUGS = new Set([
     'smart-classrooms',
     'digital-transformation', 'campus-automation', 'assessment-system',
     'library-management', 'new-environments', 'setup-college',
-    'innovation-centres', 'science-tech-labs', 'ai-guide',
+    'science-tech-labs', 'ai-guide',
     'campus-master-planning', 'ar-vr-experiences', 'campus-furniture-design',
 ]);
 
@@ -396,15 +422,37 @@ export default function PagesManager() {
             }
             const titleLower = (p.title || '').toLowerCase();
             const slugLower = (p.slug || '').toLowerCase();
-            const titleMatch = titleLower.includes(normalizedSearch) || (titleLower.length >= 4 && normalizedSearch.includes(titleLower));
-            const slugMatch = slugLower.includes(normalizedSearch);
-            // Search aliases for AI-Powered Learning Stations
-            const isAliasMatch = (slugLower === 'ai-stations' || p.id === 6) && (
-                normalizedSearch.includes('ai-powered') ||
-                normalizedSearch.includes('ai powered') ||
-                normalizedSearch.includes('learning station') ||
-                normalizedSearch.includes('learning stations')
-            );
+
+            // Prevent false-positive substring match of "lab" inside "collaboration"
+            const isFalsePositiveCollab =
+                (normalizedSearch === 'lab' || normalizedSearch === 'labs') &&
+                slugLower.includes('collaboration');
+
+            const titleMatch =
+                !isFalsePositiveCollab &&
+                (titleLower.includes(normalizedSearch) || (titleLower.length >= 4 && normalizedSearch.includes(titleLower)));
+            const slugMatch = !isFalsePositiveCollab && slugLower.includes(normalizedSearch);
+
+            // Search aliases for AI-Powered Learning Stations, Sports & Labs
+            const isAliasMatch =
+                ((slugLower === 'ai-stations' || p.id === 6) && (
+                    normalizedSearch.includes('ai-powered') ||
+                    normalizedSearch.includes('ai powered') ||
+                    normalizedSearch.includes('learning station') ||
+                    normalizedSearch.includes('learning stations')
+                )) ||
+                ((slugLower === 'sports-infra' || slugLower === 'sports-design-execution') && (
+                    normalizedSearch === 'sports' ||
+                    normalizedSearch === 'sport'
+                )) ||
+                (slugLower === 'labs' && (
+                    normalizedSearch === 'lab' ||
+                    normalizedSearch === 'labs' ||
+                    normalizedSearch.includes('lab page') ||
+                    normalizedSearch.includes('labs page') ||
+                    normalizedSearch.includes('laboratory') ||
+                    normalizedSearch.includes('laboratories')
+                ));
 
             if (titleMatch || slugMatch || isAliasMatch) {
                 map.set(p.id, null); // Direct title/slug/alias match
@@ -427,7 +475,54 @@ export default function PagesManager() {
         return true;
     });
 
-    const groups = classifyPages(filtered);
+    const groups: Group[] = useMemo(() => {
+        if (!normalizedSearch) {
+            return classifyPages(filtered);
+        }
+
+        const getRelevanceScore = (p: Page): number => {
+            const slugLower = (p.slug || '').toLowerCase();
+            const titleLower = (p.title || '').toLowerCase();
+            if (slugLower === normalizedSearch || titleLower === normalizedSearch) return 100;
+            if (slugLower === 'labs' && (normalizedSearch === 'lab' || normalizedSearch === 'labs' || normalizedSearch.startsWith('lab'))) return 99;
+            if (slugLower.startsWith(normalizedSearch) || titleLower.startsWith(normalizedSearch)) return 85;
+            const slugWords = slugLower.split(/[-_\s]+/);
+            const titleWords = titleLower.split(/[-_\s()/]+/);
+            if (slugWords.includes(normalizedSearch) || titleWords.includes(normalizedSearch)) return 75;
+            if (slugWords.some(w => w.startsWith(normalizedSearch)) || titleWords.some(w => w.startsWith(normalizedSearch))) return 65;
+            return 30;
+        };
+
+        const directMatches = filtered
+            .filter(p => searchMatches.get(p.id) === null)
+            .sort((a, b) => {
+                const diff = getRelevanceScore(b) - getRelevanceScore(a);
+                return diff !== 0 ? diff : a.title.localeCompare(b.title);
+            });
+
+        const contentMatches = filtered
+            .filter(p => searchMatches.get(p.id) !== null)
+            .sort((a, b) => a.title.localeCompare(b.title));
+
+        const searchGroups: Group[] = [];
+        if (directMatches.length > 0) {
+            searchGroups.push({
+                label: 'Best Page Matches',
+                badge: 'Direct page title & URL matches',
+                badgeColor: 'bg-emerald-100 text-emerald-800',
+                pages: directMatches,
+            });
+        }
+        if (contentMatches.length > 0) {
+            searchGroups.push({
+                label: 'Matched Inside Page Content & Cards',
+                badge: 'Pages containing matching cards or sections',
+                badgeColor: 'bg-blue-100 text-blue-700',
+                pages: contentMatches,
+            });
+        }
+        return searchGroups;
+    }, [filtered, normalizedSearch, searchMatches]);
 
     if (loading) return (
         <div className="flex items-center justify-center h-64">

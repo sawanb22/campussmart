@@ -4,7 +4,7 @@ import { Mail, Phone, Facebook, Twitter, Youtube, Instagram, Linkedin } from 'lu
 import { Link, useNavigate } from 'react-router-dom';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useSiteContent } from '@/contexts/SiteContentContext';
-import { getUserSession, isUserLoggedIn, clearUserSession } from '@/lib/auth-session';
+import { getUserSession, isUserLoggedIn, isAdminSession, clearUserSession } from '@/lib/auth-session';
 
 import { useContactAction } from '@/hooks/useContactAction';
 import ContactActionModal from '@/components/ui/contact-action-modal';
@@ -64,6 +64,7 @@ const TopBar = () => {
   const navigate = useNavigate();
   const currentUser = getUserSession();
   const isLoggedIn = isUserLoggedIn();
+  const isAdmin = isAdminSession();
   const userName = currentUser?.name || currentUser?.email || '';
   const { count: wishlistCount, refresh: refreshWishlist } = useWishlist();
 
@@ -141,6 +142,15 @@ const TopBar = () => {
               {isLoggedIn ? (
                 <>
                   <span className="hidden text-slate-100 sm:inline">Hi, {userName}</span>
+                  {isAdmin && (
+                    <Link
+                      to="/admin/dashboard"
+                      className="text-cm-yellow hover:text-white transition-colors duration-200 relative group font-bold tracking-wider"
+                    >
+                      ADMIN DASHBOARD
+                      <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-cm-yellow transition-all duration-300 group-hover:w-full" />
+                    </Link>
+                  )}
                   <Link
                     to="/my-account"
                     className="hover:text-cm-yellow transition-colors duration-200 relative group"

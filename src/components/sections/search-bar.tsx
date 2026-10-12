@@ -3,8 +3,10 @@ import gsap from 'gsap';
 import { Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '@/api/client';
+import { useSiteContent } from '@/contexts/SiteContentContext';
 
 const SearchBar = () => {
+  const { content } = useSiteContent();
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -94,7 +96,7 @@ const SearchBar = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search: I need a design for an AI STATION"
+            placeholder={content.home_search_placeholder || "Search: I need a design for an AI STATION"}
             className="search-input pr-16 h-10 text-base border-2 border-black/5 focus:border-cm-blue/30 shadow-lg group-hover:shadow-xl transition-shadow"
           />
           <button

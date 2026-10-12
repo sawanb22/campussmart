@@ -1,14 +1,18 @@
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Star } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
-import { resolveMediaUrl } from '@/lib/media-url';
-import { TECH_INFRA_PAGE_SLUG, TECH_INFRA_DEFAULTS, slugifyTechInfraTitle } from './tech-infra';
+import { MediaImage } from '@/components/ui/media-image';
+import { TECH_INFRA_PAGE_SLUG, slugifyTechInfraTitle } from './tech-infra';
 
 const TechInfraDetail = () => {
   const { solutionSlug } = useParams();
   const { data, loading } = usePageData(TECH_INFRA_PAGE_SLUG);
-  const cards = Array.isArray(data.cards) ? data.cards : TECH_INFRA_DEFAULTS.cards;
-  const card = cards.find((item: any) => slugifyTechInfraTitle(item.title) === solutionSlug);
+  const cards = Array.isArray(data?.cards) ? data.cards : [];
+  const card = cards.find(
+    (item: any) =>
+      item.slug === solutionSlug ||
+      slugifyTechInfraTitle(item.title) === solutionSlug
+  );
 
   if (loading) {
     return (
@@ -27,8 +31,6 @@ const TechInfraDetail = () => {
     );
   }
 
-  const image = resolveMediaUrl(card.image);
-
   return (
     <main className="min-h-screen bg-gray-50/50 py-8 sm:py-12">
       <article className="mx-auto max-w-3xl px-4 sm:px-6">
@@ -36,7 +38,13 @@ const TechInfraDetail = () => {
           <ArrowLeft className="h-4 w-4" /> Back to Technology Infrastructure
         </Link>
         <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-          {image && <img src={image} alt={card.title} className="h-56 w-full object-cover sm:h-72" />}
+          {card.image && (
+            <MediaImage
+              src={card.image}
+              alt={card.title}
+              className="h-56 w-full object-cover sm:h-72"
+            />
+          )}
           <div className="p-6 sm:p-10">
             <div className="mb-5 inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cm-blue">
               <Star className="h-3 w-3" /> {card.categories?.[0] ?? 'Tech'}

@@ -3,10 +3,22 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
 import { MoveUpRight } from 'lucide-react';
+import { useSiteContent } from '@/contexts/SiteContentContext';
+import { resolveMediaUrl } from '@/lib/media-url';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const resourceItems = [
+export interface ResourceItem {
+  title: string;
+  description: string;
+  image: string;
+  color: string;
+  tag: string;
+  href: string;
+  active?: boolean;
+}
+
+export const DEFAULT_RESOURCES: ResourceItem[] = [
   {
     title: 'Complete Guide on AI Implementation',
     description: 'A comprehensive guide for implementing AI in educational institutions.',
@@ -53,16 +65,25 @@ const resourceItems = [
     image: 'https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?auto=format&fit=crop&q=80&w=800',
     color: '#ec4899',
     tag: 'SHOWCASE',
-    href: '/catalogues',
+    href: '/20-stunning-college-buildings',
   }
 ];
 
 const Resources = () => {
+  const { content, loading } = useSiteContent();
+
+  const rawResources = content.home_resources || {};
+  const heading = rawResources.heading || '';
+  const subtitle = rawResources.subtitle || '';
+  const rawItems: ResourceItem[] = Array.isArray(rawResources.items) ? rawResources.items : [];
+  const items = rawItems.filter((it) => it.active !== false);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (loading || items.length === 0) return;
     const ctx = gsap.context(() => {
       // Title reveal
       if (titleRef.current) {
@@ -90,7 +111,26 @@ const Resources = () => {
       }
     });
     return () => ctx.revert();
-  }, []);
+  }, [loading, items]);
+
+  if (loading) {
+    return (
+      <section className="py-4 md:py-6 bg-[#f4f3ef] animate-pulse">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <div className="h-8 w-64 rounded bg-stone-200" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-48 rounded-2xl bg-stone-200" />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (items.length === 0) {
+    return null;
+  }
 
   return (
     <section ref={containerRef} className="py-4 md:py-6 bg-[#f4f3ef] relative overflow-hidden">
@@ -99,50 +139,49 @@ const Resources = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-4 gap-4">
           <div className="max-w-2xl">
             <h2 ref={titleRef} className="text-3xl md:text-5xl font-extrabold text-[#12395b] tracking-tight">
-              Resources & Catalogues
+              {heading}
             </h2>
             <p className="mt-4 text-gray-600 text-lg">
-              Explore our curated guides, product showrooms, and official frameworks to inspire your next campus project.
+              {subtitle}
             </p>
           </div>
         </div>
 
         <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {resourceItems.map((item, index) => (
+          {items.map((item, index) => (
             <Link
               key={index}
-              to={item.href}
+              to={item.href || '/'}
               className="group relative h-[200px] rounded-2xl overflow-hidden cursor-pointer block transform-gpu"
             >
               {/* Background Image */}
               <div className="absolute inset-0">
                 <img
-                  src={item.image}
+                  src={resolveMediaUrl(item.image) || item.image}
                   alt={item.title}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
               </div>
 
               {/* Tag Pin */}
               <div className="absolute top-3 left-3 z-10">
                 <span
-                  className="px-2.5 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-bold tracking-widest text-white border border-white/20 uppercase"
+                  className="px-2.5 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-bold tracking-widest text-white border border-white/20 uppercase shadow"
                 >
                   {item.tag}
                 </span>
               </div>
 
-              {/* Bottom Read More Box */}
-              <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col justify-end h-full">
-                <h3 className="text-white font-extrabold text-base md:text-lg leading-tight mb-1 drop-shadow-lg group-hover:-translate-y-1 transition-transform duration-300">
+              {/* Bottom Read More Box — clean flat dark glass with zero gradient overlay */}
+              <div className="absolute bottom-0 left-0 right-0 p-3.5 sm:p-4 bg-slate-950/75 backdrop-blur-md border-t border-white/10 z-10">
+                <h3 className="text-white font-extrabold text-sm sm:text-base md:text-lg leading-tight mb-1 group-hover:-translate-y-0.5 transition-transform duration-300">
                   {item.title}
                 </h3>
-                <p className="text-white/80 text-xs md:text-sm leading-relaxed mb-2 line-clamp-2 group-hover:-translate-y-1 transition-transform duration-300 delay-75">
+                <p className="text-white/80 text-xs sm:text-sm leading-relaxed mb-2 line-clamp-2">
                   {item.description}
                 </p>
 
-                <div className="flex items-center gap-2 group-hover:-translate-y-1 transition-transform duration-300 delay-150">
+                <div className="flex items-center gap-2">
                   <span
                     className="text-xs font-bold uppercase tracking-widest flex items-center gap-1"
                     style={{ color: item.color }}

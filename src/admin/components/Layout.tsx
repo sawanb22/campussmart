@@ -18,9 +18,9 @@ const navGroups = [
     {
         label: 'Website Content',
         items: [
-            { to: '/admin/homepage-editor', icon: Star, label: 'Hero & Homepage', desc: 'Edit banners, sections' },
+            { to: '/admin/homepage-editor', icon: Star, label: 'Homepage & Cards', desc: 'Edit cards, images & hero' },
             { to: '/admin/pages', icon: Globe, label: 'All Pages', desc: 'Manage all site pages' },
-            { to: '/admin/blog', icon: BookOpen, label: 'Blog Posts', desc: 'Articles & news' },
+            { to: '/admin/blog', icon: BookOpen, label: "Blog (What's Trending)", desc: 'Articles, categories & layout' },
         ]
     },
     {
@@ -28,8 +28,8 @@ const navGroups = [
         items: [
             { to: '/admin/products', icon: Package, label: 'Products', desc: 'Add, edit, remove items' },
             { to: '/admin/categories', icon: Tag, label: 'Categories', desc: 'Manage classifications' },
-            { to: '/admin/catalogues', icon: BookMarked, label: 'Catalogue Page', desc: 'Edit brochures & PDFs' },
-            { to: '/admin/classifieds', icon: Tag, label: 'Classifieds', desc: 'Review & approve listings' },
+            { to: '/admin/catalogues', icon: BookMarked, label: 'Catalogues & Case Studies', desc: 'Brochures, PDFs & case studies' },
+            { to: '/admin/classifieds', icon: Tag, label: 'Classifieds', desc: 'Edit opportunities & listings' },
         ]
     },
     {

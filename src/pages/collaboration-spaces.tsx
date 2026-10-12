@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { getCardCover } from '@/lib/card-covers';
 import MediaImage from '@/components/ui/media-image';
+import { PageCardGridSkeleton } from '@/components/ui/page-skeleton';
 
 export interface CollaborationSpaceCard {
   title: string;
@@ -25,62 +26,17 @@ export function slugifyCollaborationSpaceTitle(title: string): string {
   );
 }
 
-export const COLLABORATION_SPACES_DEFAULTS = {
-  heroTitle: 'Collaboration Spaces',
-  heroSubtitle:
-    'Foster teamwork and creativity with purpose-built collaboration environments — modern spaces designed to bring students and faculty together.',
-  heroImage: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1100&q=85',
-  section1Title: 'Explore Collaboration Spaces',
-  cards: [
-    {
-      title: 'Breakout Discussion Pods',
-      description: 'Compact, semi-enclosed pods where small groups can talk, video-call or work through a problem without booking a whole room.',
-      image: 'https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=900&q=85',
-      categories: ['Pods'],
-    },
-    {
-      title: 'Open Collaboration Lounges',
-      description: 'Soft seating and flexible furniture in open zones that invite spontaneous teamwork between classes.',
-      image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=900&q=85',
-      categories: ['Lounges'],
-    },
-    {
-      title: 'Team Project Rooms',
-      description: 'Bookable rooms with writable walls, large screens and movable furniture built around group project work.',
-      image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=900&q=85',
-      categories: ['Project Rooms'],
-    },
-    {
-      title: 'Faculty Collaboration Hubs',
-      description: 'Shared workspaces where faculty can co-plan lessons, grade together and exchange ideas outside the staff room.',
-      image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=900&q=85',
-      categories: ['Faculty'],
-    },
-    {
-      title: 'Maker & Ideation Studios',
-      description: 'Flexible studio space with prototyping tools and movable walls for hands-on, cross-disciplinary sessions.',
-      image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=85',
-      categories: ['Studios'],
-    },
-    {
-      title: 'Outdoor Collaboration Decks',
-      description: 'Covered outdoor seating and work decks that extend group work into the campus courtyard on good-weather days.',
-      image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=900&q=85',
-      categories: ['Outdoor'],
-    },
-  ] as CollaborationSpaceCard[],
-  ctaTitle: 'Ready to design your collaboration spaces?',
-  ctaSubtitle: "Tell us about your campus and we'll help you plan spaces that bring students and faculty together.",
-};
+const PAGE_SIZE = 12;
 
 const CollaborationSpaces = () => {
-  const { data } = usePageData(COLLABORATION_SPACES_PAGE_SLUG);
+  const { data, loading } = usePageData(COLLABORATION_SPACES_PAGE_SLUG);
   const [activeCategory, setActiveCategory] = useState('All');
+  const [page, setPage] = useState(1);
 
-  const section1Title = data.section1Title ?? COLLABORATION_SPACES_DEFAULTS.section1Title;
-  const cards: CollaborationSpaceCard[] = Array.isArray(data.cards) ? data.cards : COLLABORATION_SPACES_DEFAULTS.cards;
-  const ctaTitle = data.ctaTitle ?? COLLABORATION_SPACES_DEFAULTS.ctaTitle;
-  const ctaSubtitle = data.ctaSubtitle ?? COLLABORATION_SPACES_DEFAULTS.ctaSubtitle;
+  const section1Title = data.section1Title || '';
+  const cards: CollaborationSpaceCard[] = Array.isArray(data.cards) ? data.cards : [];
+  const ctaTitle = data.ctaTitle || '';
+  const ctaSubtitle = data.ctaSubtitle || '';
 
   const categoryOptions = useMemo(
     () => Array.from(new Set(cards.flatMap((card) => card.categories ?? []).filter(Boolean))),
@@ -91,7 +47,21 @@ const CollaborationSpaces = () => {
     [cards, activeCategory],
   );
 
+  const totalPages = Math.ceil(filteredCards.length / PAGE_SIZE);
+  const paginatedCards = useMemo(() => {
+    const startIndex = (page - 1) * PAGE_SIZE;
+    return filteredCards.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [filteredCards, page]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [activeCategory]);
+
   const cardLink = (card: CollaborationSpaceCard) => card.href?.trim() || `/${COLLABORATION_SPACES_PAGE_SLUG}/${slugifyCollaborationSpaceTitle(card.title)}`;
+
+  if (loading) {
+    return <PageCardGridSkeleton cardCount={6} />;
+  }
 
   return (
     <main className="min-h-screen bg-white">
@@ -129,7 +99,7 @@ const CollaborationSpaces = () => {
             <div className="rounded-2xl border border-gray-100 bg-gray-50 py-20 text-center text-gray-500">No spaces match that category.</div>
           ) : (
             <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredCards.map((card, index) => {
+              {paginatedCards.map((card, index) => {
                 const cover = getCardCover(index);
                 return (
                   <Link
@@ -151,6 +121,38 @@ const CollaborationSpaces = () => {
                   </Link>
                 );
               })}
+            </div>
+          )}
+
+          {totalPages > 1 && (
+            <div className="mt-10 flex items-center justify-center gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              >
+                <ChevronLeft className="h-4 w-4" /> Prev
+              </button>
+              {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPage(p)}
+                  className={`h-8 w-8 rounded-lg text-sm font-semibold transition ${
+                    p === page
+                      ? 'bg-cm-blue text-white shadow-sm'
+                      : 'text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              >
+                Next <ChevronRight className="h-4 w-4" />
+              </button>
             </div>
           )}
         </div>

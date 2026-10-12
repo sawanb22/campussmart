@@ -2,11 +2,16 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/client';
 import UnifiedPageEditor, { type Page } from '../components/UnifiedPageEditor';
+import HomepageEditor from './HomepageEditor';
 
 export default function PageEditor({ slugOverride }: { slugOverride?: string }) {
     const params = useParams<{ id: string }>();
     const id = slugOverride || params.id;
     const navigate = useNavigate();
+
+    if (id === 'home') {
+        return <HomepageEditor />;
+    }
 
     const [page, setPage] = useState<Page | null>(null);
     const [loading, setLoading] = useState(true);
@@ -15,8 +20,9 @@ export default function PageEditor({ slugOverride }: { slugOverride?: string }) 
     useEffect(() => {
         const load = async () => {
             if (!id) return;
+            const targetId = id === 'sports' ? 'sports-infra' : id;
             try {
-                const { data: p } = await api.get(`/pages/${id}`);
+                const { data: p } = await api.get(`/pages/${targetId}`);
                 setPage(p);
             } catch (err: any) {
                 console.error(`Failed to load page ${id}:`, err);

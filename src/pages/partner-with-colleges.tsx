@@ -276,8 +276,8 @@ const PartnerWithColleges = () => {
                 </h2>
                 <p className="mt-1 text-xs sm:text-sm text-slate-500">
                   {selectedModel && selectedModel !== 'General Partnership'
-                    ? `Express interest in the "${selectedModel}" model.`
-                    : 'Connect with our leadership team to structure a customized campus partnership.'}
+                    ? `Express interest in the "${selectedModel}" model. Our partnerships leadership team will review your requirements and reach out within 24–48 business hours.`
+                    : (data.formIntro || 'Connect with our leadership team to structure a customized campus partnership. Our team will review your requirements and reach out within 24–48 business hours.')}
                 </p>
               </div>
               <button
@@ -355,7 +355,7 @@ const PartnerWithColleges = () => {
                       <input
                         type="tel"
                         required
-                        pattern="(?:\+91[ -]?)?[6-9][0-9]{9}"
+                        pattern="(?:\+?91[\s\-]?)?0?[0-9\s\-]{10,14}"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         placeholder="+91 98765 43210"

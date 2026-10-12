@@ -2,13 +2,17 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, FlaskConical } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { resolveMediaUrl } from '@/lib/media-url';
-import { SCIENCE_TECH_LABS_PAGE_SLUG, SCIENCE_TECH_LABS_DEFAULTS, slugifyScienceLabTitle } from './science-tech-labs.data';
+import { SCIENCE_TECH_LABS_PAGE_SLUG, SCIENCE_TECH_LABS_DEFAULTS, slugifyScienceLabTitle, type ScienceTechLabsCard } from './science-tech-labs.data';
 
 const ScienceTechLabsDetail = () => {
   const { labSlug } = useParams();
-  const { data, loading } = usePageData(SCIENCE_TECH_LABS_PAGE_SLUG);
-  const cards = Array.isArray(data.cards) ? data.cards : SCIENCE_TECH_LABS_DEFAULTS.cards;
-  const card = cards.find((item: any) => slugifyScienceLabTitle(item.title) === labSlug);
+  const { data, loading } = usePageData<any>(SCIENCE_TECH_LABS_PAGE_SLUG);
+  const cards: ScienceTechLabsCard[] = (Array.isArray(data?.cards) && data.cards.length > 0)
+    ? data.cards
+    : SCIENCE_TECH_LABS_DEFAULTS.cards;
+  const featured = data?.featured?.title ? data.featured : SCIENCE_TECH_LABS_DEFAULTS.featured;
+  const allLabs = [featured, ...cards];
+  const card = allLabs.find((item: any) => item && (item.slug === labSlug || slugifyScienceLabTitle(item.title) === labSlug));
 
   if (loading) {
     return (

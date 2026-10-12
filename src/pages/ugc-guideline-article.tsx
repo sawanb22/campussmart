@@ -29,10 +29,20 @@ const UGCGuidelineArticle = () => {
     image: card.image || '',
   }));
 
+  const defaultMoreArticles: Article[] = DEFAULTS.moreCards.map((card) => ({
+    title: card.title,
+    description: card.description || `Practical guidance for education teams working on ${card.category.toLowerCase()} across a modern campus.`,
+    category: card.category,
+    readTime: '4 min read',
+    image: card.image || '',
+  }));
+  const defaultArticles: Article[] = [featuredArticle, ...DEFAULTS.cards, ...defaultMoreArticles];
+  const fallback = defaultArticles.find((c) => slugify(c.title) === articleSlug);
   const allArticles: Article[] = [featuredArticle, ...cards, ...moreArticles];
-  const article = allArticles.find((item) => slugify(item.title) === articleSlug);
+  const article = allArticles.find((item) => slugify(item.title) === articleSlug || (fallback && item.title === fallback.title));
+  const resolvedArticle = article ? { ...(fallback || {}), ...article } : fallback;
 
-  if (loading) {
+  if (loading && !resolvedArticle) {
     return (
       <main className="min-h-[60vh] flex items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-cm-blue border-t-transparent" aria-label="Loading article" />
@@ -40,7 +50,7 @@ const UGCGuidelineArticle = () => {
     );
   }
 
-  if (!article) {
+  if (!resolvedArticle) {
     return (
       <main className="min-h-[60vh] flex flex-col items-center justify-center gap-5 px-4">
         <h1 className="text-3xl font-bold text-cm-blue-dark">Guidance not found</h1>
@@ -49,8 +59,7 @@ const UGCGuidelineArticle = () => {
     );
   }
 
-  const fallback = DEFAULTS.cards.find((c) => c.title === article.title) || DEFAULTS.moreCards.find((c) => c.title === article.title);
-  const image = article.image || fallback?.image || DEFAULTS.featured.image;
+  const image = resolvedArticle.image || fallback?.image || DEFAULTS.featured.image;
 
   return (
     <main className="ugc-guideline-article-page min-h-screen bg-[#faf8f0] py-10 sm:py-16">
@@ -65,24 +74,24 @@ const UGCGuidelineArticle = () => {
           {image && (
             <MediaImage
               src={image}
-              alt={article.title}
+              alt={resolvedArticle.title}
               className="h-64 w-full object-cover sm:h-[440px]"
             />
           )}
           <div className="px-6 py-8 sm:px-12 sm:py-12">
             <div className="mb-4 text-[10px] font-bold uppercase tracking-[0.14em] text-[#ed9816]">
-              {article.category}
+              {resolvedArticle.category}
             </div>
             <h1 className="mb-6 font-serif text-4xl font-medium leading-tight tracking-tight text-[#3c2f26] sm:text-6xl">
-              {article.title}
+              {resolvedArticle.title}
             </h1>
             <p className="max-w-2xl border-l-2 border-[#ed9816] pl-5 text-base leading-8 text-[#695e56] sm:text-lg">
-              {article.description || `Practical guidance for education teams working on ${article.category.toLowerCase()} across a modern campus.`}
+              {resolvedArticle.description || `Practical guidance for education teams working on ${resolvedArticle.category?.toLowerCase() || 'education'} across a modern campus.`}
             </p>
-            {article.readTime && (
+            {resolvedArticle.readTime && (
               <div className="mt-8 flex items-center justify-between border-t border-[#3c2f26]/10 pt-5 text-xs uppercase tracking-[0.12em] text-[#89614d]">
-                <span>{article.category}</span>
-                <span>{article.readTime}</span>
+                <span>{resolvedArticle.category}</span>
+                <span>{resolvedArticle.readTime}</span>
               </div>
             )}
           </div>

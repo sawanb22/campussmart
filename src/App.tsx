@@ -54,9 +54,15 @@ const PageTemplates: Record<string, any> = {
   'about-us': lazy(() => import('@/pages/corporate')),
   'digital-transformation': lazy(() => import('@/pages/digital-transformation')),
   'faq': lazy(() => import('@/pages/faq')),
+  'how-it-works': lazy(() => import('@/pages/how-it-works')),
+  'brand-help': lazy(() => import('@/pages/brand-help')),
+  'sell-on-campusmart': lazy(() => import('@/pages/sell-on-campusmart')),
+  '20-stunning-college-buildings': lazy(() => import('@/pages/20-stunning-college-buildings')),
+  'academic-buildings': lazy(() => import('@/pages/academic-buildings')),
+  'research-facilities': lazy(() => import('@/pages/research-facilities')),
+  'student-life-centers': lazy(() => import('@/pages/student-life-centers')),
   'furniture-design-supply': lazy(() => import('@/pages/furniture-design-supply')),
   'furniture': lazy(() => import('@/pages/furniture')),
-  'innovation-centres': lazy(() => import('@/pages/innovation-centres')),
   'innovation': lazy(() => import('@/pages/innovation')),
   'science-tech-labs': lazy(() => import('@/pages/science-tech-labs')),
   'job-openings': lazy(() => import('@/pages/job-openings')),
@@ -145,7 +151,7 @@ const DynamicPageRoute = () => {
   const resolvedTemplate = templateId
     ? (PageTemplates[templateId]
        || (templateId === 'sports-infrastructure' ? PageTemplates['sports-infra'] : null)
-       || (templateId === 'innovation-centers' ? PageTemplates['innovation-centres'] : null)
+       || (templateId === 'innovation-centers' || templateId === 'innovation-centres' ? PageTemplates['innovation'] : null)
        || (templateId === 'lab-products' ? PageTemplates['labs'] : null)
        || (templateId === 'library-products' ? PageTemplates['libraries'] : null)
        || (templateId === 'sports-products' ? PageTemplates['sports-infra'] : null)
@@ -175,7 +181,6 @@ const CollaborationDetail = lazy(() => import('@/pages/collaboration-detail'));
 const InnovationDetail = lazy(() => import('@/pages/innovation-detail'));
 const AiMlDetail = lazy(() => import('@/pages/ai-ml-detail'));
 const LibraryManagementDetail = lazy(() => import('@/pages/library-management-detail'));
-const InnovationCentresDetail = lazy(() => import('@/pages/innovation-centres-detail'));
 const ScienceTechLabsDetail = lazy(() => import('@/pages/science-tech-labs-detail'));
 const CampusMasterPlanningDetail = lazy(() => import('@/pages/campus-master-planning-detail'));
 const ArVrExperiencesDetail = lazy(() => import('@/pages/ar-vr-experiences-detail'));
@@ -217,7 +222,8 @@ function App() {
               <Route path="/innovation/:trackSlug" element={<Layout><InnovationDetail /></Layout>} />
               <Route path="/ai-ml/:moduleSlug" element={<Layout><AiMlDetail /></Layout>} />
               <Route path="/library-management/:moduleSlug" element={<Layout><LibraryManagementDetail /></Layout>} />
-              <Route path="/innovation-centres/:spaceSlug" element={<Layout><InnovationCentresDetail /></Layout>} />
+              <Route path="/innovation-centres/:spaceSlug" element={<Navigate to="/innovation" replace />} />
+              <Route path="/innovation-centres" element={<Navigate to="/innovation" replace />} />
               <Route path="/science-tech-labs/:labSlug" element={<Layout><ScienceTechLabsDetail /></Layout>} />
               <Route path="/campus-master-planning/:serviceSlug" element={<Layout><CampusMasterPlanningDetail /></Layout>} />
               <Route path="/ar-vr-experiences/:experienceSlug" element={<Layout><ArVrExperiencesDetail /></Layout>} />
@@ -244,18 +250,21 @@ function App() {
               <Route path="/wishlist" element={<Navigate to="/my-account?tab=wishlist" replace />} />
               <Route path="/cart" element={<Navigate to="/my-account?tab=wishlist" replace />} />
               <Route path="/corporate" element={<Navigate to="/about-us" replace />} />
+              <Route path="/blogs" element={<Navigate to="/blog" replace />} />
               <Route path="/tech-infra/products" element={<Navigate to="/tech-infra" replace />} />
               <Route path="/ai-ml/products" element={<Navigate to="/ai-ml" replace />} />
               <Route path="/lab-products" element={<Navigate to="/labs" replace />} />
               <Route path="/labs/products" element={<Navigate to="/labs" replace />} />
               <Route path="/library-products" element={<Navigate to="/libraries" replace />} />
               <Route path="/libraries/products" element={<Navigate to="/libraries" replace />} />
+              <Route path="/sports" element={<Navigate to="/sports-infra" replace />} />
+              <Route path="/sports/:facilitySlug" element={<Navigate to="/sports-infra" replace />} />
               <Route path="/sports-products" element={<Navigate to="/sports-infra" replace />} />
               <Route path="/sports-infra/products" element={<Navigate to="/sports-infra" replace />} />
               <Route path="/sports-infrastructure" element={<Navigate to="/sports-infra" replace />} />
               <Route path="/sports-infrastructure/:facilitySlug" element={<Navigate to="/sports-infra" replace />} />
-              <Route path="/innovation-centers" element={<Navigate to="/innovation-centres" replace />} />
-              <Route path="/innovation-centers/:spaceSlug" element={<Navigate to="/innovation-centres" replace />} />
+              <Route path="/innovation-centers" element={<Navigate to="/innovation" replace />} />
+              <Route path="/innovation-centers/:spaceSlug" element={<Navigate to="/innovation" replace />} />
               <Route path="/services" element={<Navigate to="/campus-design-execution" replace />} />
               <Route path="/solutions" element={<Navigate to="/labs" replace />} />
 

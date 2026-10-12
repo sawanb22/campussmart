@@ -165,37 +165,61 @@ const escapeCsvValue = (value: string) => {
     return `"${sanitized.replace(/"/g, '""')}"`;
 };
 
-// GET /api/admin/wishlist-report/export - same data as a downloadable CSV file.
-router.get('/wishlist-report/export', verifyToken, requireAdmin, async (_req: AuthRequest, res: Response) => {
+// GET /api/admin/wishlist-report/export - downloadable CSV file with optional userId filter and clean user separators.
+router.get('/wishlist-report/export', verifyToken, requireAdmin, async (req: AuthRequest, res: Response) => {
     try {
+        const userIdQuery = req.query.userId ? Number(req.query.userId) : null;
+        const whereClause = userIdQuery && Number.isInteger(userIdQuery) ? { userId: userIdQuery } : {};
+
         const items = await prisma.wishlistItem.findMany({
+            where: whereClause,
             include: {
-                user: { select: { name: true, email: true, phone: true, institution: true } },
+                user: { select: { id: true, name: true, email: true, phone: true, institution: true } },
                 product: { include: { category: true } },
             },
-            orderBy: { createdAt: 'desc' },
+            orderBy: [
+                { userId: 'asc' },
+                { createdAt: 'desc' },
+            ],
         });
 
-        const header = ['User Name', 'Email', 'Phone', 'Institution', 'Item', 'Category', 'Date Added'];
-        const rows = items.map((item) => {
+        const header = ['User Name', 'Email', 'Phone', 'Institution', 'Item', 'Category', 'Units / Qty', 'Date Added'];
+        const rows: string[] = [];
+        let lastUserId: number | null = null;
+
+        for (const item of items) {
+            // Option A: If switching to a new user in a multi-user report, insert a clean blank row separator
+            if (lastUserId !== null && item.user.id !== lastUserId) {
+                rows.push(['', '', '', '', '', '', '', ''].map(escapeCsvValue).join(','));
+            }
+            lastUserId = item.user.id;
+
             const itemName = item.product?.name ?? item.designTitle ?? '';
             const category = item.product?.category?.name ?? item.pageSlug ?? '';
-            return [
+            const dateStr = item.createdAt ? new Date(item.createdAt).toISOString().slice(0, 10) : '';
+
+            rows.push([
                 item.user.name,
                 item.user.email,
                 item.user.phone ?? '',
                 item.user.institution ?? '',
                 itemName,
                 category,
-                item.createdAt.toISOString(),
+                item.quantity || 1,
+                dateStr,
             ]
                 .map((value) => escapeCsvValue(String(value)))
-                .join(',');
-        });
+                .join(','));
+        }
+
         const csv = [header.map(escapeCsvValue).join(','), ...rows].join('\n');
 
+        const safeFilename = userIdQuery && items.length > 0
+            ? `wishlist-${items[0].user.name.replace(/[^a-zA-Z0-9_-]/g, '_')}-${new Date().toISOString().slice(0, 10)}.csv`
+            : `wishlist-report-${new Date().toISOString().slice(0, 10)}.csv`;
+
         res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-        res.setHeader('Content-Disposition', `attachment; filename="wishlist-report-${Date.now()}.csv"`);
+        res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"`);
         res.send(csv);
     } catch (error) {
         console.error('Failed to export wishlist report:', error);

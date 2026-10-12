@@ -2,12 +2,12 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Glasses } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { resolveMediaUrl } from '@/lib/media-url';
-import { AR_VR_PAGE_SLUG, AR_VR_DEFAULTS, slugifyArVrTitle } from './ar-vr-experiences.data';
+import { AR_VR_PAGE_SLUG, slugifyArVrTitle } from './ar-vr-experiences.data';
 
 const ArVrExperiencesDetail = () => {
   const { experienceSlug } = useParams();
   const { data, loading } = usePageData(AR_VR_PAGE_SLUG);
-  const cards = Array.isArray(data.cards) ? data.cards : AR_VR_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : [];
   const card = cards.find((item: any) => slugifyArVrTitle(item.title) === experienceSlug);
 
   if (loading) {

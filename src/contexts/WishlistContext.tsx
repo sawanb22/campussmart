@@ -20,6 +20,7 @@ export interface WishlistItem {
   designTitle?: string | null;
   designImage?: string | null;
   pageSlug?: string | null;
+  quantity?: number;
   createdAt?: string;
 }
 
@@ -31,11 +32,12 @@ interface WishlistContextValue {
   loading: boolean;
   isInWishlist: (productId: number) => boolean;
   isDesignInWishlist: (designKey: string) => boolean;
-  addProduct: (productId: number) => Promise<{ success: boolean; unauthenticated?: boolean; error?: string }>;
+  addProduct: (productId: number, quantity?: number) => Promise<{ success: boolean; unauthenticated?: boolean; error?: string }>;
   removeProduct: (productId: number) => Promise<{ success: boolean; error?: string }>;
   toggleProduct: (productId: number) => Promise<{ added: boolean; success: boolean; unauthenticated?: boolean }>;
-  addDesign: (card: { title: string; image?: string }, pageSlug: string) => Promise<{ success: boolean; unauthenticated?: boolean; error?: string }>;
+  addDesign: (card: { title: string; image?: string }, pageSlug: string, quantity?: number) => Promise<{ success: boolean; unauthenticated?: boolean; error?: string }>;
   removeDesign: (designKey: string) => Promise<{ success: boolean; error?: string }>;
+  updateQuantity: (id: number, quantity: number) => Promise<{ success: boolean; error?: string }>;
   refresh: () => Promise<void>;
 }
 
@@ -52,6 +54,7 @@ const WishlistContext = createContext<WishlistContextValue>({
   toggleProduct: async () => ({ added: false, success: false }),
   addDesign: async () => ({ success: false }),
   removeDesign: async () => ({ success: false }),
+  updateQuantity: async () => ({ success: false }),
   refresh: async () => {},
 });
 
@@ -99,15 +102,15 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const isInWishlist = useCallback((productId: number) => productIds.has(productId), [productIds]);
   const isDesignInWishlist = useCallback((designKey: string) => designKeys.has(designKey), [designKeys]);
 
-  const addProduct = useCallback(async (productId: number) => {
+  const addProduct = useCallback(async (productId: number, quantity: number = 1) => {
     if (!isUserLoggedIn() || !getUserToken()) {
       return { success: false, unauthenticated: true, error: 'Please login to add to wishlist' };
     }
     try {
-      const { data } = await api.post('/wishlist', { productId });
+      const { data } = await api.post('/wishlist', { productId, quantity });
       setItems((prev) => {
         const exists = prev.some((i) => (i.productId || i.product?.id) === productId);
-        return exists ? prev : [data, ...prev];
+        return exists ? prev.map((i) => (i.productId || i.product?.id) === productId ? data : i) : [data, ...prev];
       });
       return { success: true };
     } catch (err: any) {
@@ -138,7 +141,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     }
   }, [productIds, addProduct, removeProduct]);
 
-  const addDesign = useCallback(async (card: { title: string; image?: string }, pageSlug: string) => {
+  const addDesign = useCallback(async (card: { title: string; image?: string }, pageSlug: string, quantity: number = 1) => {
     if (!isUserLoggedIn() || !getUserToken()) {
       return { success: false, unauthenticated: true, error: 'Please login to add to wishlist' };
     }
@@ -150,10 +153,11 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         designTitle: card.title,
         designImage: card.image,
         pageSlug,
+        quantity,
       });
       setItems((prev) => {
         const exists = prev.some((i) => i.designKey === designKey);
-        return exists ? prev : [data, ...prev];
+        return exists ? prev.map((i) => i.designKey === designKey ? data : i) : [data, ...prev];
       });
       return { success: true };
     } catch (err: any) {
@@ -174,6 +178,18 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const updateQuantity = useCallback(async (id: number, quantity: number) => {
+    const validQty = Math.max(1, Math.min(10000, quantity || 1));
+    // Optimistic UI update
+    setItems((prev) => prev.map((item) => item.id === id ? { ...item, quantity: validQty } : item));
+    try {
+      await api.patch(`/wishlist/${id}/quantity`, { quantity: validQty });
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.response?.data?.error || 'Failed to update quantity' };
+    }
+  }, []);
+
   const value = useMemo(() => ({
     items,
     productIds,
@@ -187,8 +203,9 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     toggleProduct,
     addDesign,
     removeDesign,
+    updateQuantity,
     refresh,
-  }), [items, productIds, designKeys, loading, isInWishlist, isDesignInWishlist, addProduct, removeProduct, toggleProduct, addDesign, removeDesign, refresh]);
+  }), [items, productIds, designKeys, loading, isInWishlist, isDesignInWishlist, addProduct, removeProduct, toggleProduct, addDesign, removeDesign, updateQuantity, refresh]);
 
   return <WishlistContext.Provider value={value}>{children}</WishlistContext.Provider>;
 }

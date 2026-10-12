@@ -23,7 +23,8 @@ const ROUTE_METADATA: Record<string, RouteMeta> = {
   '/tech-infra': { title: 'Technology Infrastructure' },
   '/sports-infra': { title: 'Sports Infrastructure' },
   '/furniture': { title: 'Campus Furniture' },
-  '/innovation-centres': { title: 'Innovation Centres' },
+  '/innovation': { title: 'Innovation' },
+  '/innovation-centres': { title: 'Innovation' },
   '/new-environments': { title: 'Learning Environments' },
   '/ai-stations': { title: 'AI Stations' },
   '/smart-classrooms': { title: 'Smart Classrooms' },
@@ -62,6 +63,13 @@ const ROUTE_METADATA: Record<string, RouteMeta> = {
   '/ai-guide': { title: 'Complete AI Implementation Guide' },
   '/setup-college': { title: 'Setting Up a College in India' },
   '/ugc-guidelines': { title: 'UGC Guidelines for Digital Campus' },
+  '/how-it-works': { title: 'How It Works', parent: { label: 'Articles', href: '/blog' } },
+  '/brand-help': { title: 'Brand Help', parent: { label: 'Articles', href: '/blog' } },
+  '/sell-on-campusmart': { title: 'Sell on CampusMart', parent: { label: 'Articles', href: '/blog' } },
+  '/20-stunning-college-buildings': { title: '20 Stunning College Buildings', parent: { label: 'Projects', href: '/catalogues' } },
+  '/academic-buildings': { title: 'Academic Buildings', parent: { label: 'Projects', href: '/catalogues' } },
+  '/research-facilities': { title: 'Research Facilities', parent: { label: 'Projects', href: '/catalogues' } },
+  '/student-life-centers': { title: 'Student Life Centers', parent: { label: 'Projects', href: '/catalogues' } },
 
   // E-Commerce, Careers & Contact
   '/shop': { title: 'Shop' },

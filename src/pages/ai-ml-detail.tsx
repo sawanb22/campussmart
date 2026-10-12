@@ -1,16 +1,20 @@
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Cpu } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
-import { resolveMediaUrl } from '@/lib/media-url';
-import { AI_ML_PAGE_SLUG, AI_ML_DEFAULTS, slugifyAiMlTitle } from './ai-ml.data';
+import { MediaImage } from '@/components/ui/media-image';
+import { AI_ML_PAGE_SLUG, slugifyAiMlTitle } from './ai-ml.data';
 
 const AiMlDetail = () => {
   const { moduleSlug } = useParams();
   const { data, loading } = usePageData(AI_ML_PAGE_SLUG);
-  const cards = Array.isArray(data.cards) ? data.cards : AI_ML_DEFAULTS.cards;
-  const card = cards.find((item: any) => slugifyAiMlTitle(item.title) === moduleSlug);
+  const cards = Array.isArray(data?.cards) ? data.cards : [];
+  const card = cards.find(
+    (item: any) =>
+      item.slug === moduleSlug ||
+      slugifyAiMlTitle(item.title) === moduleSlug
+  );
 
-  if (loading && !card) {
+  if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-cm-blue border-t-transparent" />
@@ -27,10 +31,6 @@ const AiMlDetail = () => {
     );
   }
 
-  const defaultCard = AI_ML_DEFAULTS.cards.find((c) => slugifyAiMlTitle(c.title) === moduleSlug);
-  const fallbackImage = defaultCard?.image || 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=700&q=85';
-  const image = resolveMediaUrl(card.image) || fallbackImage;
-
   return (
     <main className="min-h-screen bg-stone-50 py-8 sm:py-12">
       <article className="mx-auto max-w-3xl px-4 sm:px-6">
@@ -38,13 +38,10 @@ const AiMlDetail = () => {
           <ArrowLeft className="h-4 w-4" /> Back to AI &amp; ML
         </Link>
         <div className="overflow-hidden rounded-2xl border border-stone-100 bg-white shadow-sm">
-          {image && (
-            <img
-              src={image}
+          {card.image && (
+            <MediaImage
+              src={card.image}
               alt={card.title}
-              onError={(e) => {
-                if (e.currentTarget.src !== fallbackImage) e.currentTarget.src = fallbackImage;
-              }}
               className="h-56 w-full object-cover sm:h-72"
             />
           )}

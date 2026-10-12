@@ -5,10 +5,33 @@ import { MessageCircle, Phone, Send } from 'lucide-react';
 import api from '@/api/client';
 import { useContactAction } from '@/hooks/useContactAction';
 import ContactActionModal from '@/components/ui/contact-action-modal';
+import { useSiteContent } from '@/contexts/SiteContentContext';
 
 gsap.registerPlugin(ScrollTrigger);
 
+export interface PartnershipContentData {
+  formTitle?: string;
+  formSubtitle?: string;
+  readyTitle?: string;
+  readyText?: string;
+  whatsappNumber?: string;
+  whatsappText?: string;
+  phoneNumber?: string;
+  phoneText?: string;
+}
+
 const PartnershipForm = () => {
+  const { content } = useSiteContent();
+  const pData: PartnershipContentData = content.home_partnership || {};
+  const formTitle = pData.formTitle || 'Partnership Enquiry Form';
+  const formSubtitle = pData.formSubtitle || "Please fill out the form and we'll get back to you as soon as possible.";
+  const readyTitle = pData.readyTitle || 'Ready to talk?';
+  const readyText = pData.readyText || 'At Campus Mart, we have the expertise in guiding you to set up your new campus project and help you maximize the performance of your campus while also figuring out your return on investment. We have the expertise in guiding you to set up your new campus project and help you maximize.';
+  const whatsappNumber = pData.whatsappNumber || '919966109191';
+  const whatsappText = pData.whatsappText || 'Connect On WhatsApp';
+  const phoneNumber = pData.phoneNumber || '+919966109191';
+  const phoneText = pData.phoneText || 'Call Us 9966109191';
+
   const { modalState, closeModal, triggerPhone } = useContactAction();
   const containerRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -141,10 +164,10 @@ const PartnershipForm = () => {
             className="bg-cm-gray rounded-2xl p-6"
           >
             <h2 className="text-2xl font-bold text-cm-blue-dark mb-1">
-              Partnership Enquiry Form
+              {formTitle}
             </h2>
             <p className="text-gray-600 mb-4">
-              Please fill out the form and we'll get back to you as soon as possible.
+              {formSubtitle}
             </p>
             {submitted && (
               <div className="mb-5 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">
@@ -195,7 +218,7 @@ const PartnershipForm = () => {
                 </label>
                 <input
                   type="tel"
-                  pattern="(?:\+91[ -]?)?[6-9][0-9]{9}"
+                  pattern="(?:\+?91[\s\-]?)?0?[0-9\s\-]{10,14}"
                   minLength={10}
                   maxLength={14}
                   id="partnership-phone"
@@ -249,34 +272,31 @@ const PartnershipForm = () => {
           {/* Contact Info */}
           <div ref={contactRef} className="flex flex-col justify-center">
             <h2 className="text-2xl font-bold text-cm-blue-dark mb-4">
-              Ready to talk?
+              {readyTitle}
             </h2>
             <p className="text-gray-600 mb-8 leading-relaxed">
-              At Campus Mart, we have the expertise in guiding you to set up your new
-              campus project and help you maximize the performance of your campus while
-              also figuring out your return on investment. We have the expertise in
-              guiding you to set up your new campus project and help you maximize.
+              {readyText}
             </p>
 
             <div className="space-y-4">
               <a
-                href="https://wa.me/919966109191"
+                href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="contact-btn btn-whatsapp w-full justify-center"
               >
                 <MessageCircle className="w-5 h-5" />
-                Connect On WhatsApp
+                {whatsappText}
               </a>
 
               <button
                 type="button"
-                onClick={() => triggerPhone('+919966109191', 'Call Campus Mart Support')}
+                onClick={() => triggerPhone(phoneNumber, 'Call Campus Mart Support')}
                 className="contact-btn btn-call w-full justify-center cursor-pointer"
-                title="Call +91 9966109191"
+                title={`Call ${phoneNumber}`}
               >
                 <Phone className="w-5 h-5" />
-                Call Us 9966109191
+                {phoneText}
               </button>
             </div>
 

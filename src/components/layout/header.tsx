@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { Menu, X, ChevronDown } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { isAdminSession } from '@/lib/auth-session';
 
 interface NavItem {
   label: string;
@@ -18,6 +19,7 @@ const MainHeader = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
   const location = useLocation();
+  const isAdmin = isAdminSession();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -228,6 +230,17 @@ const MainHeader = () => {
                   ) : null}
                 </li>
               ))}
+              {isAdmin && (
+                <li className="pt-2 border-t border-black/10">
+                  <Link
+                    to="/admin/dashboard"
+                    className="block rounded-lg px-3 py-2 text-xs font-bold uppercase transition-colors bg-cm-yellow text-cm-blue-dark text-center shadow-2xs"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Admin Dashboard
+                  </Link>
+                </li>
+              )}
             </ul>
           </nav>
         )}

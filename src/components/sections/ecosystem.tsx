@@ -8,7 +8,7 @@ gsap.registerPlugin(ScrollTrigger);
 const ecosystemItems = [
   { number: '01', title: 'Campus Design\n& Planning', href: '/campus-design' },
   { number: '02', title: 'Academic\nInfrastructure', href: '/services' },
-  { number: '03', title: 'Research &\nInnovation', href: '/innovation-centres' },
+  { number: '03', title: 'Research &\nInnovation', href: '/innovation' },
   { number: '04', title: 'Sports &\nWellness', href: '/sports-infra' },
   { number: '05', title: 'Digital\nInfrastructure', href: '/tech-infra' },
   { number: '06', title: 'AI & Smart\nCampus', href: '/digital-transformation' },

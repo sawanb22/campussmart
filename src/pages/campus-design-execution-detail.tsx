@@ -2,15 +2,32 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, HardHat } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { MediaImage } from '@/components/ui/media-image';
-import { CDE_PAGE_SLUG, CDE_DEFAULTS, slugifyStepTitle } from './campus-design-execution.data';
+import {
+  CDE_PAGE_SLUG,
+  CDE_DEFAULTS,
+  slugifyStepTitle,
+  type CampusDesignExecutionCard,
+} from './campus-design-execution.data';
 
 const CampusDesignExecutionDetail = () => {
   const { stepSlug } = useParams();
   const { data, loading } = usePageData(CDE_PAGE_SLUG);
-  const cards = Array.isArray(data.cards) ? data.cards : CDE_DEFAULTS.cards;
-  const card = cards.find((item: any) => slugifyStepTitle(item.title) === stepSlug || item.slug === stepSlug);
+  const cards =
+    Array.isArray((data as any).cards) && (data as any).cards.length > 0
+      ? (data as any).cards
+      : CDE_DEFAULTS.cards;
+  const card =
+    cards.find(
+      (item: any) =>
+        slugifyStepTitle(item.title) === stepSlug ||
+        item.slug === stepSlug ||
+        item.href?.endsWith(`/${stepSlug}`),
+    ) ||
+    CDE_DEFAULTS.cards.find(
+      (item: CampusDesignExecutionCard) => slugifyStepTitle(item.title) === stepSlug || item.slug === stepSlug,
+    );
 
-  if (loading) {
+  if (loading && !(data as any).cards) {
     return (
       <main className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-cm-blue border-t-transparent" />

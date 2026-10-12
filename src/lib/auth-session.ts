@@ -40,6 +40,16 @@ export const isUserLoggedIn = (): boolean => {
 };
 
 /**
+ * Returns true if an authenticated administrator session is active.
+ */
+export const isAdminSession = (): boolean => {
+  const user = getUserSession();
+  const token = getUserToken();
+  const adminToken = sessionStorage.getItem('cm_admin_token') || localStorage.getItem('cm_admin_token');
+  return Boolean(user && user.role === 'admin' && (token || adminToken));
+};
+
+/**
  * Saves authenticated user credentials across storages adhering to role requirements.
  * Atomically synchronizes credentials across both localStorage and sessionStorage.
  */

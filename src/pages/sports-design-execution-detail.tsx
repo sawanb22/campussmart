@@ -4,14 +4,13 @@ import { usePageData } from '@/hooks/usePageData';
 import { MediaImage } from '@/components/ui/media-image';
 import {
   SDE_PAGE_SLUG,
-  SDE_DEFAULTS,
   slugifySportsStepTitle,
 } from './sports-design-execution.data';
 
 const SportsDesignExecutionDetail = () => {
   const { stepSlug } = useParams();
   const { data, loading } = usePageData(SDE_PAGE_SLUG);
-  const cards = Array.isArray(data.cards) ? data.cards : SDE_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : [];
   const card = cards.find(
     (item: any) => slugifySportsStepTitle(item.title) === stepSlug || item.slug === stepSlug,
   );

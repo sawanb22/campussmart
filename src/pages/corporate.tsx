@@ -19,6 +19,7 @@ const DEFAULTS = {
   missionImage: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=80',
   ecosystemTitle: 'Global Ecosystem',
   ecosystemSubtitle: 'Our strength lies in our network of global partners who bring the best of edtech and infrastructure to Indian soil.',
+  whyBulletsTitle: 'Why Sign Up Bullets',
   whyBullets: [
     "India's leading Consortium for Campus Infrastructure",
     "Bespoke Design to Delivery across 100+ categories",
@@ -123,146 +124,165 @@ const Corporate = () => {
   return (
     <main className="min-h-screen bg-white font-opensans">
       {/* Grand Legacy Hero */}
-      <section ref={heroRef} className="relative min-h-[40vh] flex items-center bg-cm-blue-dark overflow-hidden py-16 md:py-24 mx-3 sm:mx-6 lg:mx-8 rounded-[2rem] mt-4">
-        <div className="absolute inset-0 opacity-10" 
-             style={{ backgroundImage: 'radial-gradient(var(--cm-blue) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-        <div className="w-full mx-auto px-4 sm:px-8 text-center relative z-10">
-          <div className="max-w-4xl mx-auto">
-            <span className="text-cm-yellow font-bold uppercase tracking-[0.3em] text-[10px] mb-6 block">Est. 2017</span>
-            <h1 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight leading-tight">
-              {heroTitle}
-            </h1>
-            <p className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed font-opensans">
-              {heroSubtitle}
-            </p>
+      {data.hideHero !== true && (
+        <section ref={heroRef} className="relative min-h-[40vh] flex items-center bg-cm-blue-dark overflow-hidden py-16 md:py-24 mx-3 sm:mx-6 lg:mx-8 rounded-[2rem] mt-4">
+          <div className="absolute inset-0 opacity-10" 
+               style={{ backgroundImage: 'radial-gradient(var(--cm-blue) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+          <div className="w-full mx-auto px-4 sm:px-8 text-center relative z-10">
+            <div className="max-w-4xl mx-auto">
+              <span className="text-cm-yellow font-bold uppercase tracking-[0.3em] text-[10px] mb-6 block">Est. 2017</span>
+              <h1 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight leading-tight">
+                {heroTitle}
+              </h1>
+              <p className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed font-opensans">
+                {heroSubtitle}
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Impact Stats */}
-      <section className="relative z-20 -mt-10 mb-16 px-4">
-        <div className="w-full mx-auto max-w-6xl bg-white shadow-xl rounded-[2rem] p-8 border border-cm-gray">
-          <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-8 md:divide-x divide-cm-gray">
-            {stats.map(({ icon: Icon, value, label }) => (
-              <div key={label} className="text-center md:px-4 group">
-                <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-cm-blue/5 flex items-center justify-center border border-cm-blue/10 group-hover:bg-cm-blue group-hover:scale-105 transition-all duration-500 shadow-md">
-                  <Icon className="w-7 h-7 text-cm-blue group-hover:text-white" />
+      {data.hideStats !== true && (
+        <section className="relative z-20 -mt-10 mb-16 px-4">
+          <div className="w-full mx-auto max-w-6xl bg-white shadow-xl rounded-[2rem] p-8 border border-cm-gray">
+            <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-8 md:divide-x divide-cm-gray">
+              {stats.map(({ icon: Icon, value, label }) => (
+                <div key={label} className="text-center md:px-4 group">
+                  <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-cm-blue/5 flex items-center justify-center border border-cm-blue/10 group-hover:bg-cm-blue group-hover:scale-105 transition-all duration-500 shadow-md">
+                    <Icon className="w-7 h-7 text-cm-blue group-hover:text-white" />
+                  </div>
+                  <div className="text-3xl font-bold text-cm-blue-dark mb-1 tracking-tighter">{value}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{label}</div>
                 </div>
-                <div className="text-3xl font-bold text-cm-blue-dark mb-1 tracking-tighter">{value}</div>
-                <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{label}</div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Structured Mission */}
-      <section ref={missionRef} className="py-16 md:py-20 overflow-hidden">
-        <div className="w-full mx-auto px-4 sm:px-8 max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="relative group">
-              <div className="absolute -inset-6 bg-cm-blue/10 rounded-[3rem] group-hover:rotate-1 transition-transform duration-1000" />
-              <MediaImage
-                src={data.missionImage}
-                fallbackSrc={DEFAULTS.missionImage}
-                alt="Campus Mart Mission"
-                className="relative rounded-[2.5rem] shadow-xl w-full h-[360px] sm:h-[440px] object-cover translate-x-2 grayscale group-hover:grayscale-0 transition-all duration-1000 bg-slate-100"
-              />
-              <div className="absolute -bottom-6 -right-6 bg-cm-yellow p-6 rounded-2xl shadow-xl">
-                <Building2 className="w-6 h-6 text-cm-blue-dark" />
-              </div>
-            </div>
-            
-            <div className="relative">
-              <span className="text-cm-blue font-bold uppercase tracking-[0.2em] text-[10px] mb-6 block font-mono">/ Mission Statement</span>
-              <h2 className="text-2xl md:text-3xl font-bold text-cm-blue-dark mb-6 leading-tight tracking-tight">
-                {data.missionTitle ?? data.section1Title ?? DEFAULTS.section1Title}
-              </h2>
-              <p className="text-lg text-gray-500 leading-relaxed mb-6 border-l-4 border-cm-blue pl-6 py-2">
-                {data.missionBody1 ?? DEFAULTS.missionBody1}
-              </p>
-              <p className="text-base text-gray-400 leading-relaxed font-opensans">
-                 {data.missionBody2 ?? DEFAULTS.missionBody2}
-              </p>
-              
-              <div className="mt-8 space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-widest text-cm-blue">Institutional Highlights</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {(Array.isArray(data.whyBullets) ? data.whyBullets : DEFAULTS.whyBullets).map((bullet: string) => (
-                    <div key={bullet} className="flex items-start gap-2.5 text-xs text-slate-700 font-medium">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>{bullet}</span>
-                    </div>
-                  ))}
+      {data.hideMission !== true && (
+        <section ref={missionRef} className="py-16 md:py-20 overflow-hidden">
+          <div className="w-full mx-auto px-4 sm:px-8 max-w-6xl">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+              <div className="relative group">
+                <div className="absolute -inset-6 bg-cm-blue/10 rounded-[3rem] group-hover:rotate-1 transition-transform duration-1000" />
+                <MediaImage
+                  src={data.missionImage}
+                  fallbackSrc={DEFAULTS.missionImage}
+                  alt="Campus Mart Mission"
+                  className="relative rounded-[2.5rem] shadow-xl w-full h-[360px] sm:h-[440px] object-cover translate-x-2 grayscale group-hover:grayscale-0 transition-all duration-1000 bg-slate-100"
+                />
+                <div className="absolute -bottom-6 -right-6 bg-cm-yellow p-6 rounded-2xl shadow-xl">
+                  <Building2 className="w-6 h-6 text-cm-blue-dark" />
                 </div>
               </div>
               
-              <div className="mt-12 flex items-center gap-6">
-                <div className="w-12 h-1 bg-cm-blue" />
-                <span className="text-cm-blue-dark font-bold uppercase tracking-widest text-sm">Designing Tomorrow</span>
+              <div className="relative">
+                <span className="text-cm-blue font-bold uppercase tracking-[0.2em] text-[10px] mb-6 block font-mono">/ Mission Statement</span>
+                <h2 className="text-2xl md:text-3xl font-bold text-cm-blue-dark mb-6 leading-tight tracking-tight">
+                  {data.missionTitle ?? data.section1Title ?? DEFAULTS.section1Title}
+                </h2>
+                <p className="text-lg text-gray-500 leading-relaxed mb-6 border-l-4 border-cm-blue pl-6 py-2">
+                  {data.missionBody1 ?? DEFAULTS.missionBody1}
+                </p>
+                <p className="text-base text-gray-400 leading-relaxed font-opensans">
+                   {data.missionBody2 ?? DEFAULTS.missionBody2}
+                </p>
+                
+                <div className="mt-12 flex items-center gap-6">
+                  <div className="w-12 h-1 bg-cm-blue" />
+                  <span className="text-cm-blue-dark font-bold uppercase tracking-widest text-sm">Designing Tomorrow</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
+
+      {/* Why Sign Up Bullets */}
+      {data.hideWhyBullets !== true && (
+        <section className="py-12 md:py-16 bg-slate-50/80 border-y border-slate-100">
+          <div className="w-full mx-auto px-4 sm:px-8 max-w-6xl">
+            <div className="mb-8">
+              <span className="text-cm-blue font-bold uppercase tracking-[0.2em] text-[10px] mb-2 block font-mono">/ Highlights</span>
+              <h2 className="text-2xl md:text-3xl font-bold text-cm-blue-dark tracking-tight">
+                {data.whyBulletsTitle ?? 'Why Sign Up Bullets'}
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {(Array.isArray(data.whyBullets) ? data.whyBullets : DEFAULTS.whyBullets).map((bullet: string) => (
+                <div key={bullet} className="flex items-start gap-3 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                  <span className="text-sm text-slate-700 font-medium leading-relaxed">{bullet}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Core Values - Large Typography */}
-      <section className="py-12 md:py-16 bg-cm-gray/30 border-y border-cm-gray rounded-[3rem] mx-4 my-6">
-        <div className="w-full mx-auto px-4 sm:px-8 max-w-6xl">
-          <div className="mb-8 text-center">
-            <h2 className="text-2xl md:text-4xl font-bold text-cm-blue-dark tracking-tighter leading-none">
-              {data.section2Title ?? DEFAULTS.section2Title}
-            </h2>
-          </div>
+      {data.hideValues !== true && (
+        <section className="py-12 md:py-16 bg-cm-gray/30 border-y border-cm-gray rounded-[3rem] mx-4 my-6">
+          <div className="w-full mx-auto px-4 sm:px-8 max-w-6xl">
+            <div className="mb-8 text-center">
+              <h2 className="text-2xl md:text-4xl font-bold text-cm-blue-dark tracking-tighter leading-none">
+                {data.section2Title ?? DEFAULTS.section2Title}
+              </h2>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {values.map(({ icon: Icon, title, description }) => (
-              <div key={title} className="bg-white p-10 rounded-[2.5rem] hover:shadow-lg transition-all duration-500 transform hover:-translate-y-2 border border-cm-gray group shadow-sm">
-                <div className="w-16 h-16 rounded-full bg-cm-blue flex items-center justify-center mb-8 shadow-md group-hover:scale-110 transition-transform duration-500">
-                  <Icon className="w-8 h-8 text-white" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {values.map(({ icon: Icon, title, description }) => (
+                <div key={title} className="bg-white p-10 rounded-[2.5rem] hover:shadow-lg transition-all duration-500 transform hover:-translate-y-2 border border-cm-gray group shadow-sm">
+                  <div className="w-16 h-16 rounded-full bg-cm-blue flex items-center justify-center mb-8 shadow-md group-hover:scale-110 transition-transform duration-500">
+                    <Icon className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-cm-blue-dark mb-4 tracking-tight">{title}</h3>
+                  <p className="text-gray-500 leading-relaxed text-base font-opensans">{description}</p>
                 </div>
-                <h3 className="text-2xl font-bold text-cm-blue-dark mb-4 tracking-tight">{title}</h3>
-                <p className="text-gray-500 leading-relaxed text-base font-opensans">{description}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
-
+        </section>
+      )}
 
       {/* Executive Profiles */}
-      <section id="team" className="py-12 md:py-16">
-        <div className="w-full mx-auto px-4 sm:px-8 max-w-6xl">
-          <div className="flex flex-col md:flex-row items-end justify-between mb-8 gap-6">
-            <h2 className="text-3xl md:text-5xl font-bold text-cm-blue-dark tracking-tighter leading-none">
-              Governance & Leadership
-            </h2>
-            <div className="text-gray-400 font-bold max-w-sm text-right">Driven by a vision to revolutionize the Indian educational landscape.</div>
-          </div>
+      {data.hideTeam !== true && (
+        <section id="team" className="py-12 md:py-16">
+          <div className="w-full mx-auto px-4 sm:px-8 max-w-6xl">
+            <div className="flex flex-col md:flex-row items-end justify-between mb-8 gap-6">
+              <h2 className="text-3xl md:text-5xl font-bold text-cm-blue-dark tracking-tighter leading-none">
+                {data.teamTitle ?? 'Governance & Leadership'}
+              </h2>
+              <div className="text-gray-400 font-bold max-w-sm text-right">{data.teamSubtitle ?? 'Driven by a vision to revolutionize the Indian educational landscape.'}</div>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            {(Array.isArray(data.team) ? data.team : DEFAULTS.team).map((member: any) => (
-              <div key={member.name} className="group flex flex-col items-center">
-                <div className="relative mb-6 w-full aspect-[4/3] overflow-hidden rounded-2xl shadow-xl border border-gray-100">
-                  <MediaImage
-                    src={member.image}
-                    fallbackSrc="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"
-                    alt={member.name}
-                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-cm-blue-dark/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="absolute bottom-6 left-6 text-white opacity-0 translate-y-3 group-hover:opacity-100 group-hover:translate-y-0 transition-all">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-cm-yellow block mb-1 font-opensans">Executive Team</span>
-                    <span className="text-lg font-bold">{member.name}</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+              {(Array.isArray(data.team) ? data.team : DEFAULTS.team).map((member: any) => (
+                <div key={member.name} className="group flex flex-col items-center">
+                  <div className="relative mb-6 w-full aspect-[4/3] overflow-hidden rounded-2xl shadow-xl border border-gray-100">
+                    <MediaImage
+                      src={member.image}
+                      fallbackSrc="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"
+                      alt={member.name}
+                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-cm-blue-dark/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute bottom-6 left-6 text-white opacity-0 translate-y-3 group-hover:opacity-100 group-hover:translate-y-0 transition-all">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-cm-yellow block mb-1 font-opensans">Executive Team</span>
+                      <span className="text-lg font-bold">{member.name}</span>
+                    </div>
                   </div>
+                  <h3 className="text-xl font-bold text-cm-blue-dark mb-1 tracking-tight">{member.name}</h3>
+                  <p className="text-cm-blue font-bold uppercase text-[10px] tracking-[0.2em] font-opensans">{member.role}</p>
                 </div>
-                <h3 className="text-xl font-bold text-cm-blue-dark mb-1 tracking-tight">{member.name}</h3>
-                <p className="text-cm-blue font-bold uppercase text-[10px] tracking-[0.2em] font-opensans">{member.role}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Partner Network */}
       {data.hideEcosystem !== true && (

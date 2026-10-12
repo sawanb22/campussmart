@@ -100,6 +100,11 @@ export default function Blog() {
                 </div>
             </div>
 
+            <div className="mb-4 bg-blue-50 border border-blue-100 rounded-xl px-4 py-2.5 flex items-center justify-between text-xs text-blue-800">
+                <span>The first published post in this list automatically serves as the split Hero Card at the top of <strong>/blog</strong>. All subsequent posts appear in the 3-column articles grid.</span>
+                <a href="/blog" target="_blank" rel="noreferrer" className="font-bold underline hover:text-blue-900 ml-4 shrink-0">View Live Blog ↗</a>
+            </div>
+
             <div className="card p-0 overflow-hidden">
                 <table className="w-full text-sm">
                     <thead className="bg-gray-50 border-b border-gray-100">
@@ -107,11 +112,18 @@ export default function Blog() {
                     </thead>
                     <tbody className="divide-y divide-gray-50">
                         {loading ? <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
-                            : posts.map((p) => (
+                            : posts.map((p, index) => (
                                 <tr key={p.id} className="hover:bg-gray-50 transition-colors">
                                     <td className="px-4 py-3"><img src={p.imageUrl || 'https://via.placeholder.com/40'} alt="" className="w-10 h-10 rounded-lg object-cover" /></td>
                                     <td className="px-4 py-3">
-                                        <div className="font-medium text-gray-900 max-w-[200px] truncate">{p.title}</div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium text-gray-900 max-w-[200px] truncate">{p.title}</span>
+                                            {index === 0 && p.published && (
+                                                <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
+                                                    Featured Hero
+                                                </span>
+                                            )}
+                                        </div>
                                         <div className="text-gray-500 text-xs max-w-[200px] truncate">{p.excerpt}</div>
                                     </td>
                                     <td className="px-4 py-3"><span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-semibold">{p.category?.name || 'Uncategorized'}</span></td>

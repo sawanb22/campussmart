@@ -2,12 +2,12 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { resolveMediaUrl } from '@/lib/media-url';
-import { AI_DIGITAL_SUPPLY_PAGE_SLUG, AI_DIGITAL_SUPPLY_DEFAULTS, slugifyAiDigitalSupplyTitle } from './ai-digital-design-supply';
+import { AI_DIGITAL_SUPPLY_PAGE_SLUG, slugifyAiDigitalSupplyTitle } from './ai-digital-design-supply';
 
 const AiDigitalDesignSupplyDetail = () => {
   const { solutionSlug } = useParams();
   const { data, loading } = usePageData(AI_DIGITAL_SUPPLY_PAGE_SLUG);
-  const cards = Array.isArray(data.cards) ? data.cards : AI_DIGITAL_SUPPLY_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : [];
   const card = cards.find((item: any) => slugifyAiDigitalSupplyTitle(item.title) === solutionSlug);
 
   if (loading) {

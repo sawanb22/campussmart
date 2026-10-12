@@ -1,60 +1,58 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle, Send, Sparkles } from 'lucide-react';
+import { ArrowRight, CheckCircle, ChevronLeft, ChevronRight, Send, Sparkles } from 'lucide-react';
 import api from '@/api/client';
 import { usePageData } from '@/hooks/usePageData';
 import { MediaImage } from '@/components/ui/media-image';
 import { PageCardGridSkeleton } from '@/components/ui/page-skeleton';
 
-interface CardItem { title: string; description: string; image?: string; href?: string; }
+interface CardItem {
+  title: string;
+  description: string;
+  image?: string;
+  href?: string;
+}
 
-const DEFAULTS = {
-  heroTitle: 'Smart Classrooms',
-  heroSubtitle: 'Create connected, flexible classrooms that help educators teach more effectively and keep every learner engaged.',
-  heroImage: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=1200&q=90',
-  features: [
-    'IoT-Enabled Rooms',
-    'Interactive Displays',
-    'Real-Time Analytics',
-    'Flexible Furniture',
-    'Teacher Enablement',
-  ],
-  cards: [
-    {
-      title: 'Interactive Learning',
-      description: 'Interactive displays, digital content, and collaborative tools make lessons more engaging.',
-      image: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=600&q=80',
-    },
-    {
-      title: 'Connected Classrooms',
-      description: 'Reliable audio, video, networking, and device integration keep the classroom connected.',
-      image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=600&q=80',
-    },
-    {
-      title: 'Flexible Furniture',
-      description: 'Ergonomic, movable furniture supports group work, presentations, and different teaching styles.',
-      image: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=600&q=80',
-    },
-    {
-      title: 'Teacher Enablement',
-      description: 'Simple controls and training help teachers use the technology confidently every day.',
-      image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=600&q=80',
-    },
-  ] as CardItem[],
-  ctaTitle: 'Ready to upgrade your classrooms?',
-  ctaSubtitle: 'Talk to our team about a smart classroom rollout tailored to your campus and budget.',
-};
+const PAGE_SIZE = 12;
 
 const SmartClassrooms = () => {
   const { data, loading } = usePageData('smart-classrooms');
+  const [page, setPage] = useState(1);
 
-  const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
-  const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
-  const heroImage = data.heroImage || DEFAULTS.heroImage;
-  const features: string[] = Array.isArray(data.features) ? data.features : DEFAULTS.features;
-  const cards: CardItem[] = Array.isArray(data.cards) ? data.cards : DEFAULTS.cards;
-  const ctaTitle = data.ctaTitle ?? DEFAULTS.ctaTitle;
-  const ctaSubtitle = data.ctaSubtitle ?? DEFAULTS.ctaSubtitle;
+  const heroTitle = data.heroTitle || 'Smart Classrooms';
+  const heroSubtitle = data.heroSubtitle || '';
+  const heroImage = data.heroImage || '';
+  const heroButtonLabel = data.heroButtonLabel !== undefined ? data.heroButtonLabel : 'Get Quote';
+  const heroButtonHref = data.heroButtonHref || '/request-quote';
+
+  const features: string[] = Array.isArray(data.features) ? data.features : [];
+  const section1Title = data.section1Title || "What's included";
+  const cards: CardItem[] = Array.isArray(data.cards) ? data.cards : [];
+
+  const highlightEyebrow = data.highlightEyebrow || 'Built for every classroom';
+  const highlightTitle = data.highlightTitle || 'Technology that fades into the background, so teaching stays in front';
+  const highlightBullets: string[] = Array.isArray(data.highlightBullets)
+    ? data.highlightBullets
+    : [
+        'Faster classroom setup with plug-and-play hardware',
+        'Higher student engagement through interactive tools',
+        'Lower total cost of ownership with remote management',
+      ];
+  const highlightImage = data.highlightImage || heroImage;
+
+  const ctaTitle = data.ctaTitle || 'Ready to upgrade your classrooms?';
+  const ctaSubtitle = data.ctaSubtitle || 'Talk to our team about a smart classroom rollout tailored to your campus and budget.';
+  const ctaButtonLabel = data.ctaButtonLabel !== undefined ? data.ctaButtonLabel : 'Contact Us';
+  const ctaHref = data.ctaHref || '/contact-us';
+
+  const formTitle = data.formTitle || 'Request More Information';
+  const formSubtitle = data.formSubtitle || 'Tell us what your institution needs and our team will contact you.';
+
+  const totalPages = Math.ceil(cards.length / PAGE_SIZE);
+  const paginatedCards = useMemo(() => {
+    const startIndex = (page - 1) * PAGE_SIZE;
+    return cards.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [cards, page]);
 
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', institution: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
@@ -75,183 +73,241 @@ const SmartClassrooms = () => {
     }
   };
 
-  if (loading && !data.cards) {
-    return <PageCardGridSkeleton cardCount={5} />;
+  if (loading) {
+    return <PageCardGridSkeleton cardCount={4} />;
   }
 
   return (
     <main className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="bg-cm-blue mx-3 sm:mx-6 lg:mx-8 rounded-[2rem] py-6 md:py-8 overflow-hidden relative shadow-inner mt-4 mb-2">
-        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 relative z-10 px-4">
-          <div className="lg:w-1/2 text-left text-white">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-3 tracking-tight text-white leading-tight">
-              {heroTitle}
-            </h1>
-            <p className="text-sm md:text-base text-white/85 leading-relaxed max-w-xl">
-              {heroSubtitle}
-            </p>
-            <div className="mt-5 flex flex-wrap gap-4">
-              <Link to="/request-quote" className="btn-secondary px-6 py-2.5 text-sm font-bold shadow-md">
-                Get Quote
-              </Link>
+      {!data.hideHero && (
+        <section className="bg-cm-blue mx-3 sm:mx-6 lg:mx-8 rounded-[2rem] py-6 md:py-8 overflow-hidden relative shadow-inner mt-4 mb-2">
+          <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 relative z-10 px-4">
+            <div className="lg:w-1/2 text-left text-white">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-3 tracking-tight text-white leading-tight">
+                {heroTitle}
+              </h1>
+              <p className="text-sm md:text-base text-white/85 leading-relaxed max-w-xl">
+                {heroSubtitle}
+              </p>
+              {heroButtonLabel && (
+                <div className="mt-5 flex flex-wrap gap-4">
+                  <Link to={heroButtonHref} className="btn-secondary px-6 py-2.5 text-sm font-bold shadow-md">
+                    {heroButtonLabel}
+                  </Link>
+                </div>
+              )}
+            </div>
+            <div className="lg:w-1/2 relative w-full">
+              <MediaImage
+                src={heroImage}
+                alt={heroTitle}
+                className="rounded-2xl shadow-xl w-full h-[240px] sm:h-[260px] object-cover border-2 border-cm-blue-dark relative z-10"
+              />
             </div>
           </div>
-          <div className="lg:w-1/2 relative w-full">
-            <MediaImage
-              src={heroImage}
-              alt={heroTitle}
-              className="rounded-2xl shadow-xl w-full h-[240px] sm:h-[260px] object-cover border-2 border-cm-blue-dark relative z-10"
-            />
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* Capability pills */}
-      <section className="px-4 pt-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
-          <div className="flex items-center gap-2 overflow-x-auto rounded-full bg-cm-blue-dark p-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {features.map((feature) => (
-              <span
-                key={feature}
-                className="shrink-0 rounded-full px-4 py-2 text-[11px] font-semibold text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-              >
-                {feature}
-              </span>
-            ))}
+      {/* Capability highlights */}
+      {!data.hideFeatures && features.length > 0 && (
+        <section className="px-4 pt-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-6xl">
+            <div className="flex items-center gap-2 overflow-x-auto rounded-full bg-cm-blue-dark p-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="flex items-center gap-1.5 shrink-0 pl-3 pr-4 text-[11px] font-bold uppercase tracking-wider text-cm-yellow border-r border-white/15">
+                <Sparkles className="h-3.5 w-3.5 text-cm-yellow shrink-0" />
+                <span>Capabilities</span>
+              </div>
+              {features.map((feature) => (
+                <div
+                  key={feature}
+                  className="flex items-center gap-1.5 shrink-0 px-3 py-1.5 text-[11px] sm:text-xs font-semibold text-white/90 select-none cursor-default"
+                >
+                  <CheckCircle className="h-3.5 w-3.5 text-cm-yellow shrink-0" />
+                  <span>{feature}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Capability cards */}
-      <section id="capabilities" className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <div className="mx-auto max-w-6xl">
-          <h2 className="mb-5 text-2xl font-bold tracking-tight text-cm-blue-dark sm:text-3xl">What's included</h2>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {cards.map((card, i) => (
-              <div
-                key={`${card.title}-${i}`}
-                className="flex flex-col justify-between rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-              >
-                <div>
-                  {card.image ? (
-                    <div className="mb-3 h-36 w-full overflow-hidden rounded-xl bg-slate-100 relative group">
-                      <MediaImage
-                        src={card.image}
-                        alt={card.title}
-                        className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        fallbackNode={
-                          <div className="flex h-full w-full items-center justify-center bg-blue-50/60 text-cm-blue">
-                            <CheckCircle className="h-8 w-8 text-cm-blue/70" />
-                          </div>
-                        }
-                      />
-                    </div>
-                  ) : (
-                    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-cm-blue">
-                      <CheckCircle className="h-5 w-5 text-cm-blue" />
-                    </div>
+      {!data.hideCards && cards.length > 0 && (
+        <section id="capabilities" className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <div className="mx-auto max-w-6xl">
+            <h2 className="mb-5 text-2xl font-bold tracking-tight text-cm-blue-dark sm:text-3xl">
+              {section1Title}
+            </h2>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {paginatedCards.map((card, i) => (
+                <div
+                  key={`${card.title}-${i}`}
+                  className="flex flex-col justify-between rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                >
+                  <div>
+                    {card.image ? (
+                      <div className="mb-3 h-36 w-full overflow-hidden rounded-xl bg-slate-100 relative group">
+                        <MediaImage
+                          src={card.image}
+                          alt={card.title}
+                          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          fallbackNode={
+                            <div className="flex h-full w-full items-center justify-center bg-blue-50/60 text-cm-blue">
+                              <CheckCircle className="h-8 w-8 text-cm-blue/70" />
+                            </div>
+                          }
+                        />
+                      </div>
+                    ) : (
+                      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-cm-blue">
+                        <CheckCircle className="h-5 w-5 text-cm-blue" />
+                      </div>
+                    )}
+                    <h3 className="mb-1.5 font-bold text-cm-blue-dark text-base">{card.title}</h3>
+                    <p className="text-xs sm:text-sm leading-relaxed text-gray-500">{card.description}</p>
+                  </div>
+                  {card.href && (
+                    <Link to={card.href} className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-cm-blue hover:underline">
+                      Learn more &rarr;
+                    </Link>
                   )}
-                  <h3 className="mb-1.5 font-bold text-cm-blue-dark text-base">{card.title}</h3>
-                  <p className="text-xs sm:text-sm leading-relaxed text-gray-500">{card.description}</p>
                 </div>
-                {card.href && (
-                  <Link to={card.href} className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-cm-blue hover:underline">
-                    Learn more &rarr;
-                  </Link>
-                )}
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="mt-12 flex items-center justify-center gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(p - 1, 1))}
+                  disabled={page === 1}
+                  className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ChevronLeft className="h-4 w-4" /> Previous
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    onClick={() => setPage(pageNum)}
+                    className={`h-9 w-9 rounded-lg text-sm font-semibold transition-colors ${
+                      page === pageNum
+                        ? 'bg-cm-blue text-white shadow-sm'
+                        : 'border border-gray-200 text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+                  disabled={page === totalPages}
+                  className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Next <ChevronRight className="h-4 w-4" />
+                </button>
               </div>
-            ))}
+            )}
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Highlight band */}
-      <section className="px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl overflow-hidden rounded-[28px] bg-cm-blue-dark">
-          <div className="relative grid grid-cols-1 lg:grid-cols-2">
-            <div className="relative px-8 py-8 sm:px-12 sm:py-10">
-              <div className="pointer-events-none absolute -bottom-10 -right-10 h-40 w-40 rounded-full border border-white/10" />
-              <span className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-cm-yellow">
-                <Sparkles className="h-3 w-3" /> Built for every classroom
-              </span>
-              <h2 className="max-w-md text-2xl font-bold leading-tight text-white sm:text-3xl">
-                Technology that fades into the background, so teaching stays in front
-              </h2>
-              <ul className="mt-6 space-y-3">
-                {['Faster classroom setup with plug-and-play hardware', 'Higher student engagement through interactive tools', 'Lower total cost of ownership with remote management'].map((item) => (
-                  <li key={item} className="flex items-start gap-2.5 text-sm text-white/80">
-                    <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-cm-yellow" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="relative min-h-[220px]">
-              <MediaImage src={heroImage} alt="" className="absolute inset-0 h-full w-full object-cover opacity-90" />
-              <div className="absolute inset-0 bg-gradient-to-l from-transparent to-cm-blue-dark lg:bg-gradient-to-r" />
+      {!data.hideHighlight && (
+        <section className="px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-6xl overflow-hidden rounded-[28px] bg-cm-blue-dark">
+            <div className="relative grid grid-cols-1 lg:grid-cols-2">
+              <div className="relative px-8 py-8 sm:px-12 sm:py-10">
+                <div className="pointer-events-none absolute -bottom-10 -right-10 h-40 w-40 rounded-full border border-white/10" />
+                <span className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-cm-yellow">
+                  <Sparkles className="h-3 w-3" /> {highlightEyebrow}
+                </span>
+                <h2 className="max-w-md text-2xl font-bold leading-tight text-white sm:text-3xl">
+                  {highlightTitle}
+                </h2>
+                {highlightBullets.length > 0 && (
+                  <ul className="mt-6 space-y-3">
+                    {highlightBullets.map((item, idx) => (
+                      <li key={idx} className="flex items-start gap-2.5 text-sm text-white/80">
+                        <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-cm-yellow" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <div className="relative min-h-[220px]">
+                <MediaImage src={highlightImage} alt={highlightTitle} className="absolute inset-0 h-full w-full object-cover opacity-90" />
+                <div className="absolute inset-0 bg-gradient-to-l from-transparent to-cm-blue-dark lg:bg-gradient-to-r" />
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* CTA banner */}
-      <section className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-cm-gray p-6 text-center sm:flex-row sm:p-8 sm:text-left">
-          <div>
-            <p className="text-lg font-bold text-cm-blue-dark">{ctaTitle}</p>
-            <p className="mt-1 text-sm text-gray-500">{ctaSubtitle}</p>
+      {!data.hideCta && (
+        <section className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-cm-gray p-6 text-center sm:flex-row sm:p-8 sm:text-left">
+            <div>
+              <p className="text-lg font-bold text-cm-blue-dark">{ctaTitle}</p>
+              <p className="mt-1 text-sm text-gray-500">{ctaSubtitle}</p>
+            </div>
+            {ctaButtonLabel && (
+              <Link to={ctaHref} className="btn-secondary inline-flex flex-shrink-0 items-center gap-2">
+                {ctaButtonLabel} <ArrowRight className="h-4 w-4" />
+              </Link>
+            )}
           </div>
-          <Link to="/contact-us" className="btn-secondary inline-flex flex-shrink-0 items-center gap-2">
-            Contact Us <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Request info form */}
-      <section id="request-form" className="px-4 pb-8 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl rounded-2xl bg-white p-6 shadow-sm sm:p-10">
-          <h2 className="mb-2 text-2xl font-bold text-cm-blue-dark">Request More Information</h2>
-          <p className="mb-6 text-gray-600">Tell us what your institution needs and our team will contact you.</p>
-          {submitted ? (
-            <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-green-700">
-              Thank you. Your request has been submitted successfully.
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-red-600">{error}</div>}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="form-label">Full Name *</label>
-                  <input className="form-input" required value={formData.name} onChange={(event) => setFormData({ ...formData, name: event.target.value })} />
-                </div>
-                <div>
-                  <label className="form-label">Email *</label>
-                  <input type="email" className="form-input" required value={formData.email} onChange={(event) => setFormData({ ...formData, email: event.target.value })} />
-                </div>
+      {!data.hideForm && (
+        <section id="request-form" className="px-4 pb-8 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-3xl rounded-2xl bg-white p-6 shadow-sm sm:p-10">
+            <h2 className="mb-2 text-2xl font-bold text-cm-blue-dark">{formTitle}</h2>
+            <p className="mb-6 text-gray-600">{formSubtitle}</p>
+            {submitted ? (
+              <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-green-700">
+                Thank you. Your request has been submitted successfully.
               </div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="form-label">Phone *</label>
-                  <input type="tel" className="form-input" required value={formData.phone} onChange={(event) => setFormData({ ...formData, phone: event.target.value })} />
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-5">
+                {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-red-600">{error}</div>}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="form-label">Full Name *</label>
+                    <input className="form-input" required value={formData.name} onChange={(event) => setFormData({ ...formData, name: event.target.value })} />
+                  </div>
+                  <div>
+                    <label className="form-label">Email *</label>
+                    <input type="email" className="form-input" required value={formData.email} onChange={(event) => setFormData({ ...formData, email: event.target.value })} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="form-label">Phone *</label>
+                    <input type="tel" className="form-input" required value={formData.phone} onChange={(event) => setFormData({ ...formData, phone: event.target.value })} />
+                  </div>
+                  <div>
+                    <label className="form-label">Institution *</label>
+                    <input className="form-input" required value={formData.institution} onChange={(event) => setFormData({ ...formData, institution: event.target.value })} />
+                  </div>
                 </div>
                 <div>
-                  <label className="form-label">Institution *</label>
-                  <input className="form-input" required value={formData.institution} onChange={(event) => setFormData({ ...formData, institution: event.target.value })} />
+                  <label className="form-label">Message *</label>
+                  <textarea className="form-input min-h-[120px]" required value={formData.message} onChange={(event) => setFormData({ ...formData, message: event.target.value })} />
                 </div>
-              </div>
-              <div>
-                <label className="form-label">Message *</label>
-                <textarea className="form-input min-h-[120px]" required value={formData.message} onChange={(event) => setFormData({ ...formData, message: event.target.value })} />
-              </div>
-              <button type="submit" disabled={submitting} className="btn-primary flex w-full items-center justify-center gap-2 disabled:opacity-60">
-                <Send className="h-5 w-5" />
-                {submitting ? 'Submitting...' : 'Request Information'}
-              </button>
-            </form>
-          )}
-        </div>
-      </section>
+                <button type="submit" disabled={submitting} className="btn-primary flex w-full items-center justify-center gap-2 disabled:opacity-60">
+                  <Send className="h-5 w-5" />
+                  {submitting ? 'Submitting...' : 'Request Information'}
+                </button>
+              </form>
+            )}
+          </div>
+        </section>
+      )}
     </main>
   );
 };

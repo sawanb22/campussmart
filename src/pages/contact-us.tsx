@@ -243,7 +243,7 @@ const ContactUs = () => {
                     <label className="form-label">Phone Number *</label>
                     <input
                       type="tel"
-                      pattern="(?:\+91[ -]?)?[6-9][0-9]{9}"
+                      pattern="(?:\+?91[\s\-]?)?0?[0-9\s\-]{10,14}"
                       minLength={10}
                       maxLength={14}
                       value={formData.phone}

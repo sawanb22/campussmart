@@ -2,12 +2,12 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, MapPinned } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { resolveMediaUrl } from '@/lib/media-url';
-import { MASTER_PLANNING_PAGE_SLUG, MASTER_PLANNING_DEFAULTS, slugifyMasterPlanningTitle } from './campus-master-planning.data';
+import { MASTER_PLANNING_PAGE_SLUG, slugifyMasterPlanningTitle } from './campus-master-planning.data';
 
 const CampusMasterPlanningDetail = () => {
   const { serviceSlug } = useParams();
   const { data, loading } = usePageData(MASTER_PLANNING_PAGE_SLUG);
-  const cards = Array.isArray(data.cards) ? data.cards : MASTER_PLANNING_DEFAULTS.cards;
+  const cards = Array.isArray(data.cards) ? data.cards : [];
   const card = cards.find((item: any) => slugifyMasterPlanningTitle(item.title) === serviceSlug);
 
   if (loading) {

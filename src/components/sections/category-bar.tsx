@@ -26,6 +26,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { useSiteContent } from '@/contexts/SiteContentContext';
+import { HomeCategoryBarSkeleton } from '@/components/ui/page-skeleton';
 
 export const CATEGORY_ICONS: Record<string, LucideIcon> = {
   Ruler,
@@ -55,34 +56,33 @@ export interface CategoryItem {
   icon: string;
   label: string;
   href: string;
+  active?: boolean;
 }
 
 export const DEFAULT_CATEGORIES: CategoryItem[] = [
-  { icon: 'Ruler', label: 'Campus Design', href: '/campus-design' },
-  { icon: 'Armchair', label: 'Furniture', href: '/furniture' },
-  { icon: 'Volleyball', label: 'Sports Infra', href: '/sports-infra' },
-  { icon: 'Brain', label: 'AI/ML', href: '/ai-ml' },
-  { icon: 'Monitor', label: 'Tech Infra', href: '/tech-infra' },
-  { icon: 'Building2', label: 'Libraries', href: '/libraries' },
-  { icon: 'Microscope', label: 'Labs', href: '/labs' },
-  { icon: 'Users', label: 'Collaboration', href: '/collaboration' },
-  { icon: 'Lightbulb', label: 'Innovation', href: '/innovation-centres' },
+  { icon: 'Ruler', label: 'Campus Design', href: '/campus-design', active: true },
+  { icon: 'Armchair', label: 'Furniture', href: '/furniture', active: true },
+  { icon: 'Volleyball', label: 'Sports Infra', href: '/sports-infra', active: true },
+  { icon: 'Brain', label: 'AI/ML', href: '/ai-ml', active: true },
+  { icon: 'Monitor', label: 'Tech Infra', href: '/tech-infra', active: true },
+  { icon: 'Building2', label: 'Libraries', href: '/libraries', active: true },
+  { icon: 'Microscope', label: 'Labs', href: '/labs', active: true },
+  { icon: 'Users', label: 'Collaboration', href: '/collaboration', active: true },
+  { icon: 'Lightbulb', label: 'Innovation', href: '/innovation', active: true },
 ];
 
 const CategoryBar = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const iconsRef = useRef<HTMLDivElement>(null);
-  const { content } = useSiteContent();
+  const { content, loading } = useSiteContent();
 
-  const categories: CategoryItem[] = (
-    content.home_categories && Array.isArray(content.home_categories) && content.home_categories.length > 0
-  )
-    ? content.home_categories
-    : DEFAULT_CATEGORIES;
+  const rawCategories: CategoryItem[] = Array.isArray(content.home_categories) ? content.home_categories : [];
+  const categories: CategoryItem[] = rawCategories.filter((c) => c.active !== false);
 
   const hasAnimatedRef = useRef(false);
 
   useEffect(() => {
+    if (loading || categories.length === 0) return;
     if (hasAnimatedRef.current) return;
     hasAnimatedRef.current = true;
 
@@ -90,16 +90,24 @@ const CategoryBar = () => {
       gsap.fromTo(
         containerRef.current,
         { opacity: 0 },
-        { opacity: 1, duration: 0.4, delay: 0.6, ease: 'power2.out' }
+        { opacity: 1, duration: 0.4, delay: 0.1, ease: 'power2.out' }
       );
       gsap.fromTo(
         iconsRef.current?.children || [],
         { y: 40, scale: 0.5, opacity: 0 },
-        { y: 0, scale: 1, opacity: 1, duration: 0.5, stagger: 0.08, delay: 0.7, ease: 'back.out(1.7)' }
+        { y: 0, scale: 1, opacity: 1, duration: 0.5, stagger: 0.08, delay: 0.2, ease: 'back.out(1.7)' }
       );
     });
     return () => ctx.revert();
-  }, []);
+  }, [loading, categories.length]);
+
+  if (loading) {
+    return <HomeCategoryBarSkeleton />;
+  }
+
+  if (categories.length === 0) {
+    return null;
+  }
 
   return (
     <div

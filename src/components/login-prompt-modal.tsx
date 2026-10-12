@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Heart, X, type LucideIcon } from 'lucide-react';
+import { ArrowRight, X, type LucideIcon } from 'lucide-react';
 
 interface LoginPromptModalProps {
   open: boolean;
@@ -13,7 +13,7 @@ interface LoginPromptModalProps {
 const LoginPromptModal = ({
   open,
   onClose,
-  icon: Icon = Heart,
+  icon: Icon,
   eyebrow = 'Quotation Wishlist',
   title = 'Login to save items to your quotation wishlist',
   description = 'Sign in to build your institutional wishlist, track quotation requests, and receive official pricing for your campus.',
@@ -34,7 +34,11 @@ const LoginPromptModal = ({
 
         <div className="bg-cm-blue px-6 py-8 text-white sm:px-10 sm:py-10">
           <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-cm-yellow text-cm-blue-dark">
-            <Icon className="h-7 w-7" fill={Icon === Heart ? 'currentColor' : 'none'} />
+            {Icon ? (
+              <Icon className="h-7 w-7" />
+            ) : (
+              <img src="/logo-icon.png" alt="CampusMart" className="h-8 w-8 object-contain" />
+            )}
           </div>
           <p className="mb-2 text-sm font-bold uppercase tracking-[0.18em] text-cm-yellow">{eyebrow}</p>
           <h2 id="login-prompt-title" className="pr-8 text-2xl font-bold sm:text-3xl">{title}</h2>

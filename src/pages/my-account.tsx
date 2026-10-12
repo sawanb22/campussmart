@@ -48,7 +48,7 @@ const MyAccount = () => {
     initialTab && ['profile', 'orders', 'wishlist', 'addresses'].includes(initialTab) ? initialTab : 'profile'
   );
 
-  const { items: wishlist, loading: wishlistLoading, removeProduct, removeDesign } = useWishlist();
+  const { items: wishlist, loading: wishlistLoading, removeProduct, removeDesign, updateQuantity } = useWishlist();
 
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [addressesLoading, setAddressesLoading] = useState(false);
@@ -282,7 +282,7 @@ const MyAccount = () => {
                 {profileEditing ? (
                   <form onSubmit={saveProfile} className="space-y-4">
                     <input required value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} className="form-input" placeholder="Full name" />
-                    <input value={profileForm.phone} onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })} className="form-input" placeholder="Phone" pattern="(?:\+91[ -]?)?[6-9][0-9]{9}" minLength={10} maxLength={14} />
+                    <input value={profileForm.phone} onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })} className="form-input" placeholder="Phone" pattern="(?:\+?91[\s\-]?)?0?[0-9\s\-]{10,14}" minLength={10} maxLength={14} />
                     <input value={profileForm.institution} onChange={(e) => setProfileForm({ ...profileForm, institution: e.target.value })} className="form-input" placeholder="Institution" />
                     <div className="flex gap-3"><button type="submit" disabled={profileSaving} className="btn-primary disabled:opacity-60">{profileSaving ? 'Saving...' : 'Save Changes'}</button><button type="button" onClick={() => setProfileEditing(false)} className="px-4 py-2 text-sm text-gray-600">Cancel</button></div>
                   </form>
@@ -397,13 +397,42 @@ const MyAccount = () => {
                           <Link to={`/product/${item.product.slug}`} className="font-semibold text-cm-blue-dark hover:text-cm-blue line-clamp-1">
                             {item.product.name}
                           </Link>
-                          <p className="text-cm-blue font-bold mt-1">₹{item.product.price.toLocaleString()}</p>
+                          <p className="text-cm-blue font-bold mt-0.5">₹{item.product.price.toLocaleString()}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <span className="text-xs font-semibold text-slate-500">Required Units:</span>
+                            <div className="inline-flex items-center rounded-lg border border-slate-200 bg-white shadow-2xs">
+                              <button
+                                type="button"
+                                onClick={() => updateQuantity(item.id, Math.max(1, (item.quantity || 1) - 1))}
+                                className="px-2 py-0.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-l-lg transition"
+                                title="Decrease units"
+                              >
+                                -
+                              </button>
+                              <input
+                                type="number"
+                                min={1}
+                                max={10000}
+                                value={item.quantity || 1}
+                                onChange={(e) => updateQuantity(item.id, Math.max(1, parseInt(e.target.value) || 1))}
+                                className="w-12 text-center text-xs font-bold text-slate-900 border-x border-slate-200 py-0.5 outline-none focus:bg-blue-50/50"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => updateQuantity(item.id, (item.quantity || 1) + 1)}
+                                className="px-2 py-0.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-r-lg transition"
+                                title="Increase units"
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
                           <div className="flex flex-wrap items-center gap-3 mt-3">
                             <Link
-                              to={`/request-quote?product=${encodeURIComponent(item.product.name)}&qty=1`}
+                              to={`/request-quote?product=${encodeURIComponent(item.product.slug)}&qty=${item.quantity || 1}`}
                               className="text-xs font-semibold text-cm-blue hover:underline"
                             >
-                              Request Quote
+                              Request Quote ({item.quantity || 1} unit{(item.quantity || 1) === 1 ? '' : 's'})
                             </Link>
                             <span className="text-gray-300">|</span>
                             <button
@@ -448,13 +477,42 @@ const MyAccount = () => {
                                 ) : (
                                   <h3 className="font-semibold text-cm-blue-dark line-clamp-1">{item.designTitle || 'Custom Design'}</h3>
                                 )}
-                                <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mt-1">Saved Design</p>
+                                <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mt-0.5">Saved Design</p>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <span className="text-xs font-semibold text-slate-500">Required Units:</span>
+                                  <div className="inline-flex items-center rounded-lg border border-slate-200 bg-white shadow-2xs">
+                                    <button
+                                      type="button"
+                                      onClick={() => updateQuantity(item.id, Math.max(1, (item.quantity || 1) - 1))}
+                                      className="px-2 py-0.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-l-lg transition"
+                                      title="Decrease units"
+                                    >
+                                      -
+                                    </button>
+                                    <input
+                                      type="number"
+                                      min={1}
+                                      max={10000}
+                                      value={item.quantity || 1}
+                                      onChange={(e) => updateQuantity(item.id, Math.max(1, parseInt(e.target.value) || 1))}
+                                      className="w-12 text-center text-xs font-bold text-slate-900 border-x border-slate-200 py-0.5 outline-none focus:bg-blue-50/50"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => updateQuantity(item.id, (item.quantity || 1) + 1)}
+                                      className="px-2 py-0.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-r-lg transition"
+                                      title="Increase units"
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                </div>
                                 <div className="flex flex-wrap items-center gap-3 mt-3">
                                   <Link
                                     to="/request-quote?fromWishlist=true"
                                     className="text-xs font-semibold text-cm-blue hover:underline"
                                   >
-                                    Quote Design
+                                    Quote Design ({item.quantity || 1} unit{(item.quantity || 1) === 1 ? '' : 's'})
                                   </Link>
                                   <span className="text-gray-300">|</span>
                                   <button

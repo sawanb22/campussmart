@@ -2,12 +2,12 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Users2 } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { resolveMediaUrl } from '@/lib/media-url';
-import { COLLABORATION_SPACES_PAGE_SLUG, COLLABORATION_SPACES_DEFAULTS, slugifyCollaborationSpaceTitle } from './collaboration-spaces';
+import { COLLABORATION_SPACES_PAGE_SLUG, slugifyCollaborationSpaceTitle, type CollaborationSpaceCard } from './collaboration-spaces';
 
 const CollaborationSpacesDetail = () => {
   const { spaceSlug } = useParams();
   const { data, loading } = usePageData(COLLABORATION_SPACES_PAGE_SLUG);
-  const cards = Array.isArray(data.cards) ? data.cards : COLLABORATION_SPACES_DEFAULTS.cards;
+  const cards: CollaborationSpaceCard[] = Array.isArray(data?.cards) ? data.cards : [];
   const card = cards.find((item: any) => slugifyCollaborationSpaceTitle(item.title) === spaceSlug);
 
   if (loading) {

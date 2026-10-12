@@ -28,7 +28,7 @@ const DEFAULTS = {
         {
             title: 'Innovation Centres',
             description: 'Dedicated spaces for creative thinking, prototyping, and interdisciplinary collaboration.',
-            href: '/innovation-centres',
+            href: '/innovation',
             color: 'bg-emerald-600'
         },
         {

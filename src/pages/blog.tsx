@@ -5,6 +5,7 @@ import { ArrowRight, Search } from 'lucide-react';
 import api from '@/api/client';
 import { resolveMediaUrl } from '@/lib/media-url';
 import MediaImage from '@/components/ui/media-image';
+import { usePageData } from '@/hooks/usePageData';
 
 interface Category {
   id: number;
@@ -24,16 +25,6 @@ interface Post {
   blogcategory?: Category;
 }
 
-const FALLBACK_IMAGES = [
-  'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=85',
-  'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=85',
-  'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=800&q=85',
-  'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=800&q=85',
-  'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=85',
-  'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=85',
-  'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=85',
-];
-
 const formatDate = (value?: string) => {
   if (!value) return '';
   const date = new Date(value);
@@ -51,6 +42,7 @@ const estimateReadTime = (content?: string) => {
 const PAGE_SIZE = 9;
 
 const Blog = () => {
+  const { data } = usePageData<any>('blog');
   const [searchParams, setSearchParams] = useSearchParams();
   const [posts, setPosts] = useState<Post[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -227,13 +219,13 @@ const Blog = () => {
           align-items: flex-end;
           justify-content: space-between;
           gap: 24px;
-          margin-bottom: 24px;
+          margin-bottom: 20px;
         }
         .ai-guide-section-heading h1 {
           margin: 0;
           font-family: "Playfair Display", Georgia, serif;
-          font-size: clamp(32px, 3.8vw, 44px);
-          font-weight: 600;
+          font-size: clamp(30px, 3.5vw, 40px);
+          font-weight: 500;
           letter-spacing: -.04em;
         }
         .ai-guide-section-heading p {
@@ -262,7 +254,7 @@ const Blog = () => {
         .ai-guide-filter {
           border: 1px solid rgba(60, 47, 38, .18);
           border-radius: 30px;
-          padding: 6px 16px;
+          padding: 6px 15px;
           color: var(--ai-dark);
           background: transparent;
           cursor: pointer;
@@ -300,10 +292,10 @@ const Blog = () => {
         .ai-guide-featured {
           display: grid;
           grid-template-columns: 1.22fr .78fr;
-          min-height: 320px;
-          margin-bottom: 36px;
+          min-height: 300px;
+          margin-bottom: 28px;
           overflow: hidden;
-          border-radius: 12px;
+          border-radius: 10px;
           background: #dce9e5;
           transition: transform .2s ease, box-shadow .2s ease;
         }
@@ -312,7 +304,7 @@ const Blog = () => {
           box-shadow: 0 12px 28px rgba(60, 47, 38, .1);
         }
         .ai-guide-featured-image {
-          min-height: 320px;
+          min-height: 300px;
           overflow: hidden;
           background: var(--ai-teal);
         }
@@ -328,7 +320,7 @@ const Blog = () => {
           display: flex;
           flex-direction: column;
           justify-content: center;
-          padding: 36px 38px;
+          padding: 32px 34px;
         }
         .ai-guide-category {
           margin-bottom: 10px;
@@ -341,13 +333,13 @@ const Blog = () => {
         .ai-guide-featured-copy h3 {
           margin: 0 0 12px;
           font-family: "Playfair Display", Georgia, serif;
-          font-size: clamp(22px, 2.5vw, 32px);
-          font-weight: 600;
-          line-height: 1.2;
+          font-size: clamp(22px, 2.5vw, 30px);
+          font-weight: 500;
+          line-height: 1.15;
           letter-spacing: -.03em;
         }
         .ai-guide-featured-copy p {
-          margin: 0 0 20px;
+          margin: 0 0 18px;
           color: #594d45;
           font-size: 15px;
           line-height: 1.6;
@@ -372,13 +364,13 @@ const Blog = () => {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin-bottom: 22px;
+          margin-bottom: 18px;
         }
         .ai-guide-articles-heading h3 {
           margin: 0;
           font-family: "Playfair Display", Georgia, serif;
-          font-size: 26px;
-          font-weight: 600;
+          font-size: 24px;
+          font-weight: 500;
         }
         .ai-guide-view-all {
           font-size: 12px;
@@ -388,11 +380,11 @@ const Blog = () => {
         .ai-guide-articles {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 24px;
+          gap: 20px;
         }
         .ai-guide-card {
           overflow: hidden;
-          border-radius: 10px;
+          border-radius: 8px;
           background: #f7f2e7;
           transition: transform .25s ease, box-shadow .25s ease;
           display: flex;
@@ -403,7 +395,7 @@ const Blog = () => {
           box-shadow: 0 12px 25px rgba(60, 47, 38, .1);
         }
         .ai-guide-card-image {
-          height: 190px;
+          height: 180px;
           overflow: hidden;
         }
         .ai-guide-card-image img {
@@ -415,7 +407,7 @@ const Blog = () => {
           transform: scale(1.04);
         }
         .ai-guide-card-body {
-          padding: 18px 20px 20px;
+          padding: 16px 18px 18px;
           flex: 1;
           display: flex;
           flex-direction: column;
@@ -424,12 +416,12 @@ const Blog = () => {
           margin: 0 0 8px;
           font-family: "Playfair Display", Georgia, serif;
           font-size: 18px;
-          font-weight: 600;
-          line-height: 1.3;
+          font-weight: 500;
+          line-height: 1.25;
           letter-spacing: -.02em;
         }
         .ai-guide-card-body p {
-          margin: 0 0 16px;
+          margin: 0 0 14px;
           color: #594d45;
           font-size: 13px;
           line-height: 1.55;
@@ -561,15 +553,21 @@ const Blog = () => {
       `}</style>
 
       <section className="ai-guide-content">
-        <div className="ai-guide-section-heading">
-          <div>
-            <div className="ai-guide-label">Campus Mart Articles</div>
-            <h1>Insights & Perspectives</h1>
+        {data.hideHero !== true && (
+          <div className="ai-guide-section-heading">
+            <div>
+              {(data.heroEyebrow || data.sectionLabel) && (
+                <div className="ai-guide-label">{data.heroEyebrow || data.sectionLabel}</div>
+              )}
+              <h1>{data.heroTitle || data.sectionTitle}</h1>
+            </div>
+            {(data.heroSubtitle || data.sectionDescription) && (
+              <p>
+                {data.heroSubtitle || data.sectionDescription}
+              </p>
+            )}
           </div>
-          <p>
-            Helpful perspectives for education leaders, campus planners, and teams shaping the next generation of learning environments.
-          </p>
-        </div>
+        )}
 
         {/* Toolbar: Category Filters + Search */}
         <div className="ai-guide-toolbar">
@@ -597,7 +595,7 @@ const Blog = () => {
             <Search size={14} className="text-gray-400 shrink-0" />
             <input
               type="text"
-              placeholder="Search articles..."
+              placeholder={data.searchPlaceholder || 'Search articles...'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -615,103 +613,106 @@ const Blog = () => {
         ) : (
           <>
             {/* Featured Post Hero */}
-            {featuredPost && (
+            {data.hideFeatured !== true && featuredPost && (
               <Link to={`/blog/${featuredPost.slug}`} className="ai-guide-featured">
                 <div className="ai-guide-featured-image">
                   <MediaImage
-                    src={featuredPost.imageUrl ? resolveMediaUrl(featuredPost.imageUrl) : FALLBACK_IMAGES[0]}
+                    src={featuredPost.imageUrl ? resolveMediaUrl(featuredPost.imageUrl) : ''}
                     alt={featuredPost.title}
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="ai-guide-featured-copy">
                   <div className="ai-guide-category">
-                    {featuredPost.category?.name || 'Featured Story'}
+                    {featuredPost.category?.name || ''}
                   </div>
                   <h3>{featuredPost.title}</h3>
                   <p>{featuredPost.excerpt}</p>
                   <span className="ai-guide-read-more">
-                    Read article <ArrowRight size={13} />
+                    {data.featuredReadMoreLabel || 'Read article'} <ArrowRight size={13} />
                   </span>
                 </div>
               </Link>
             )}
 
-            {/* Latest Articles Heading */}
-            {gridPosts.length > 0 && (
-              <div className="ai-guide-articles-heading">
-                <h3>Latest Articles</h3>
-              </div>
-            )}
+            {/* Articles Grid */}
+            {data.hideArticles !== true && (
+              <>
+                {gridPosts.length > 0 && (
+                  <div className="ai-guide-articles-heading">
+                    <h3>{data.latestArticlesHeading || 'Latest Articles'}</h3>
+                  </div>
+                )}
 
-            {/* 3-Column Articles Grid */}
-            {gridPosts.length > 0 && (
-              <div className="ai-guide-articles">
-                {gridPosts.map((post, idx) => {
-                  const fallbackImg = FALLBACK_IMAGES[(idx + 1) % FALLBACK_IMAGES.length];
-                  const imgSrc = post.imageUrl ? resolveMediaUrl(post.imageUrl) : fallbackImg;
-                  const postCategoryName = post.category?.name || 'General';
+                {gridPosts.length > 0 && (
+                  <div className="ai-guide-articles">
+                    {gridPosts.map((post) => {
+                      const imgSrc = post.imageUrl ? resolveMediaUrl(post.imageUrl) : '';
+                      const postCategoryName = post.category?.name || '';
 
-                  return (
-                    <Link to={`/blog/${post.slug}`} className="ai-guide-card" key={post.id}>
-                      <div className="ai-guide-card-image">
-                        <MediaImage
-                          src={imgSrc}
-                          alt={post.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="ai-guide-card-body">
-                        <div className="ai-guide-category">{postCategoryName}</div>
-                        <h4>{post.title}</h4>
-                        <p>{post.excerpt}</p>
-                        <div className="ai-guide-card-meta">
-                          <strong>{postCategoryName}</strong>
-                          <span>{post.publishedAt ? formatDate(post.publishedAt) : estimateReadTime(post.excerpt)}</span>
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
+                      return (
+                        <Link to={`/blog/${post.slug}`} className="ai-guide-card" key={post.id}>
+                          <div className="ai-guide-card-image">
+                            <MediaImage
+                              src={imgSrc}
+                              alt={post.title}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="ai-guide-card-body">
+                            {postCategoryName && <div className="ai-guide-category">{postCategoryName}</div>}
+                            <h4>{post.title}</h4>
+                            <p>{post.excerpt}</p>
+                            <div className="ai-guide-card-meta">
+                              <strong>{postCategoryName}</strong>
+                              <span>{post.publishedAt ? formatDate(post.publishedAt) : estimateReadTime(post.excerpt)}</span>
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
 
-            {/* Load More Pagination */}
-            {hasMore && (
-              <div className="mt-10 text-center">
-                <button
-                  type="button"
-                  onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
-                  className="rounded-full border border-[rgba(60,47,38,0.25)] bg-white px-8 py-3 text-xs font-bold text-[#3c2f26] transition-all hover:bg-[#3c2f26] hover:text-white"
-                >
-                  Load More Articles
-                </button>
-              </div>
+                {hasMore && (
+                  <div className="mt-10 text-center">
+                    <button
+                      type="button"
+                      onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+                      className="rounded-full border border-[rgba(60,47,38,0.25)] bg-white px-8 py-3 text-xs font-bold text-[#3c2f26] transition-all hover:bg-[#3c2f26] hover:text-white"
+                    >
+                      Load More Articles
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </>
         )}
 
-        {/* Newsletter Section matching ai-guide */}
-        <section className="ai-guide-newsletter">
-          <div className="ai-guide-newsletter-copy">
-            <div className="ai-guide-category">Stay curious</div>
-            <h3>Good ideas, occasionally.</h3>
-            <p>
-              Get useful campus infrastructure perspectives, new trends, and practical stories delivered to your inbox. No noise, just things worth reading.
-            </p>
-          </div>
-          <form className="ai-guide-newsletter-form" onSubmit={handleSubscribe}>
-            <input
-              type="email"
-              placeholder="Your email address"
-              aria-label="Your email address"
-              required
-            />
-            <button type="submit">
-              {subscribed ? 'Subscribed' : 'Subscribe'}
-            </button>
-          </form>
-        </section>
+        {/* Newsletter Section */}
+        {data.hideNewsletter !== true && (data.newsletterTitle || data.newsletterDescription) && (
+          <section className="ai-guide-newsletter">
+            <div className="ai-guide-newsletter-copy">
+              {data.newsletterLabel && <div className="ai-guide-category">{data.newsletterLabel}</div>}
+              <h3>{data.newsletterTitle}</h3>
+              <p>
+                {data.newsletterDescription}
+              </p>
+            </div>
+            <form className="ai-guide-newsletter-form" onSubmit={handleSubscribe}>
+              <input
+                type="email"
+                placeholder={data.newsletterPlaceholder || 'Your email address'}
+                aria-label={data.newsletterPlaceholder || 'Your email address'}
+                required
+              />
+              <button type="submit">
+                {subscribed ? 'Subscribed' : (data.newsletterButtonLabel || 'Subscribe')}
+              </button>
+            </form>
+          </section>
+        )}
       </section>
     </main>
   );

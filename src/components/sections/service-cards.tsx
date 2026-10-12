@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
 import { useSiteContent } from '@/contexts/SiteContentContext';
 import { ArrowUpRight } from 'lucide-react';
+import { HomeServiceCardsSkeleton } from '@/components/ui/page-skeleton';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -14,30 +15,28 @@ export interface ServiceItem {
   bgColor?: string;
   textColor?: string;
   icon?: any;
+  active?: boolean;
 }
 
 export const defaultServices: ServiceItem[] = [
-  { title: 'Campus Furniture Design', bgColor: '#ef4444', textColor: '#ffffff', href: '/campus-furniture-design' },
-  { title: 'Campus Design+ Execution', bgColor: '#a3e635', textColor: '#000000', href: '/campus-design-execution' },
-  { title: 'Sports Design+ Execution', bgColor: '#06b6d4', textColor: '#ffffff', href: '/sports-design-execution' },
-  { title: 'AI/Digital Design+ Supply', bgColor: '#a855f7', textColor: '#ffffff', href: '/ai-digital-design-supply' },
+  { title: 'Campus Furniture Design', bgColor: '#ef4444', textColor: '#ffffff', href: '/campus-furniture-design', active: true },
+  { title: 'Campus Design+ Execution', bgColor: '#a3e635', textColor: '#000000', href: '/campus-design-execution', active: true },
+  { title: 'Sports Design+ Execution', bgColor: '#06b6d4', textColor: '#ffffff', href: '/sports-design-execution', active: true },
+  { title: 'AI/Digital Design+ Supply', bgColor: '#a855f7', textColor: '#ffffff', href: '/ai-digital-design-supply', active: true },
 ];
 
 const ServiceCards = () => {
-  const { content } = useSiteContent();
+  const { content, loading } = useSiteContent();
   const rawServices = content.home_services;
   
-  // If home_services is explicitly configured as an array (even if empty []), respect it.
-  // Only fall back to defaultServices if never configured in DB (undefined / null).
-  const services: ServiceItem[] = Array.isArray(rawServices)
-    ? rawServices
-    : (rawServices === undefined || rawServices === null ? defaultServices : []);
+  const rawList: ServiceItem[] = Array.isArray(rawServices) ? rawServices : [];
+  const services: ServiceItem[] = rawList.filter((s) => s.active !== false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!services || services.length === 0) return;
+    if (loading || !services || services.length === 0) return;
 
     const ctx = gsap.context(() => {
       const cards = cardsRef.current?.children;
@@ -62,6 +61,10 @@ const ServiceCards = () => {
     });
     return () => ctx.revert();
   }, [services]);
+
+  if (loading) {
+    return <HomeServiceCardsSkeleton />;
+  }
 
   // If the admin deliberately removed all service cards, do not render an empty container
   if (!services || services.length === 0) {

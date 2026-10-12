@@ -8,11 +8,9 @@ import { clearUserSession } from '@/lib/auth-session';
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Products = lazy(() => import('./pages/Products'));
-const Blog = lazy(() => import('./pages/Blog'));
 const Orders = lazy(() => import('./pages/Orders'));
 const Users = lazy(() => import('./pages/Users'));
 const Enquiries = lazy(() => import('./pages/Enquiries'));
-const Classifieds = lazy(() => import('./pages/Classifieds'));
 const SiteContent = lazy(() => import('./pages/SiteContent'));
 const HomepageEditor = lazy(() => import('./pages/HomepageEditor'));
 const PagesManager = lazy(() => import('./pages/PagesManager'));
@@ -108,17 +106,18 @@ function AdminRoutes() {
         <Route path="dashboard" element={<Suspense fallback={<Loader />}><Dashboard /></Suspense>} />
         <Route path="products" element={<Suspense fallback={<Loader />}><Products /></Suspense>} />
         <Route path="categories" element={<Suspense fallback={<Loader />}><Categories /></Suspense>} />
-        <Route path="blog" element={<Suspense fallback={<Loader />}><Blog /></Suspense>} />
+        <Route path="blog" element={<Suspense fallback={<Loader />}><PageEditor slugOverride="blog" /></Suspense>} />
         <Route path="orders" element={<Suspense fallback={<Loader />}><Orders /></Suspense>} />
         <Route path="users" element={<Suspense fallback={<Loader />}><Users /></Suspense>} />
         <Route path="enquiries" element={<Suspense fallback={<Loader />}><Enquiries /></Suspense>} />
         <Route path="wishlist-report" element={<Suspense fallback={<Loader />}><WishlistReports /></Suspense>} />
-        <Route path="classifieds" element={<Suspense fallback={<Loader />}><Classifieds /></Suspense>} />
+        <Route path="classifieds" element={<Suspense fallback={<Loader />}><PageEditor slugOverride="classifieds" /></Suspense>} />
         <Route path="catalogues" element={<Suspense fallback={<Loader />}><PageEditor slugOverride="catalogues" /></Suspense>} />
-        <Route path="case-studies" element={<Navigate to="/admin/pages" replace />} />
+        <Route path="case-studies" element={<Suspense fallback={<Loader />}><PageEditor slugOverride="catalogues" /></Suspense>} />
         <Route path="site-content" element={<Suspense fallback={<Loader />}><SiteContent /></Suspense>} />
         <Route path="homepage-editor" element={<Suspense fallback={<Loader />}><HomepageEditor /></Suspense>} />
         <Route path="pages" element={<Suspense fallback={<Loader />}><PagesManager /></Suspense>} />
+        <Route path="pages/:id" element={<Suspense fallback={<Loader />}><PageEditor /></Suspense>} />
         <Route path="pages/:id/edit" element={<Suspense fallback={<Loader />}><PageEditor /></Suspense>} />
       </Route>
       <Route path="*" element={<Navigate to="dashboard" replace />} />

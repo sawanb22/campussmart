@@ -26,11 +26,15 @@ router.get('/', verifyToken, async (req: AuthRequest, res: Response) => {
 });
 
 // POST /api/wishlist
-// Accepts either { productId } for a real product, or { designKey, designTitle, designImage?, pageSlug? }
+// Accepts either { productId, quantity? } for a real product, or { designKey, designTitle, designImage?, pageSlug?, quantity? }
 // for a CMS "design" card (labs/libraries/sports-infra pages) that isn't a purchasable product yet.
 router.post('/', verifyToken, async (req: AuthRequest, res: Response) => {
     try {
-        const { productId, designKey, designTitle, designImage, pageSlug } = req.body;
+        const { productId, designKey, designTitle, designImage, pageSlug, quantity } = req.body;
+        const initialQty = quantity && Number.isInteger(Number(quantity)) && Number(quantity) > 0
+            ? Math.min(10000, Number(quantity))
+            : 1;
+
         if (productId !== undefined && productId !== null) {
             const numId = Number(productId);
             if (!Number.isInteger(numId) || numId <= 0) {
@@ -51,8 +55,8 @@ router.post('/', verifyToken, async (req: AuthRequest, res: Response) => {
             }
             const item = await prisma.wishlistItem.upsert({
                 where: { userId_productId: { userId: req.user!.id, productId: numId } },
-                update: {},
-                create: { userId: req.user!.id, productId: numId },
+                update: { quantity: initialQty },
+                create: { userId: req.user!.id, productId: numId, quantity: initialQty },
                 include: { product: { include: { category: true } } },
             });
             return res.status(201).json(item);
@@ -60,13 +64,14 @@ router.post('/', verifyToken, async (req: AuthRequest, res: Response) => {
         if (designKey && designTitle) {
             const item = await prisma.wishlistItem.upsert({
                 where: { userId_designKey: { userId: req.user!.id, designKey: String(designKey).trim() } },
-                update: {},
+                update: { quantity: initialQty },
                 create: {
                     userId: req.user!.id,
                     designKey: String(designKey).trim(),
                     designTitle: String(designTitle).trim(),
                     designImage: designImage ? String(designImage) : null,
                     pageSlug: pageSlug ? String(pageSlug).trim() : null,
+                    quantity: initialQty,
                 },
             });
             return res.status(201).json(item);
@@ -74,6 +79,29 @@ router.post('/', verifyToken, async (req: AuthRequest, res: Response) => {
         res.status(400).json({ error: 'productId or designKey with designTitle is required' });
     } catch {
         res.status(500).json({ error: 'Failed to add to wishlist' });
+    }
+});
+
+// PATCH /api/wishlist/:id/quantity - update unit count requested
+router.patch('/:id/quantity', verifyToken, async (req: AuthRequest, res: Response) => {
+    try {
+        const id = Number(req.params.id);
+        const parsedQuantity = Math.max(1, Math.min(10000, Number(req.body.quantity) || 1));
+        const item = await prisma.wishlistItem.findFirst({
+            where: { id, userId: req.user!.id },
+        });
+        if (!item) {
+            res.status(404).json({ error: 'Wishlist item not found' });
+            return;
+        }
+        const updated = await prisma.wishlistItem.update({
+            where: { id },
+            data: { quantity: parsedQuantity },
+            include: { product: { include: { category: true } } },
+        });
+        res.json(updated);
+    } catch {
+        res.status(500).json({ error: 'Failed to update item quantity' });
     }
 });
 

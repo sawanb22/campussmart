@@ -2,12 +2,12 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { resolveMediaUrl } from '@/lib/media-url';
-import { DIGITAL_TRANSFORMATION_PAGE_SLUG, DIGITAL_TRANSFORMATION_DEFAULTS, slugifyDigitalTransformationCard } from './digital-transformation';
+import { DIGITAL_TRANSFORMATION_PAGE_SLUG, slugifyDigitalTransformationCard } from './digital-transformation';
 
 const DigitalTransformationDetail = () => {
   const { cardSlug } = useParams();
   const { data, loading } = usePageData(DIGITAL_TRANSFORMATION_PAGE_SLUG);
-  const cards = Array.isArray(data.section2Cards) ? data.section2Cards : DIGITAL_TRANSFORMATION_DEFAULTS.section2Cards;
+  const cards = Array.isArray(data.section2Cards) ? data.section2Cards : [];
   const card = cards.find((item: any) => slugifyDigitalTransformationCard(item.title) === cardSlug);
 
   if (loading) {

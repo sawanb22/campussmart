@@ -41,30 +41,25 @@ const formatDate = (value?: string) => {
   return date.toLocaleDateString('en-IN', { month: 'short', day: '2-digit', year: 'numeric' });
 };
 
-const DEFAULTS = {
-  heroTitle: 'Catalogues & Downloads',
-  heroSubtitle:
-    'Every CampusMart product range, brief and design guide in one library — download the PDFs your team needs to plan and spec a campus.',
-  heroImage: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80',
-  cards: [] as any[],
-  caseStudies: [] as any[],
-  ctaTitle: 'Need a Custom Solution?',
-  ctaSubtitle:
-    'Our team can create customized catalogues based on your specific requirements.',
-  ctaButtonLabel: 'Request Custom Catalogue',
-  ctaHref: '/request-quote',
-};
-
 const Catalogues = () => {
   const { data, loading } = usePageData('catalogues');
 
-  const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
-  const rawSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
+  const heroTitle = data.heroTitle || '';
+  const rawSubtitle = data.heroSubtitle || '';
   const heroSubtitle = rawSubtitle.replace(/SchoolMart/g, 'CampusMart');
-  const heroImage = data.heroImage?.trim() ? data.heroImage : DEFAULTS.heroImage;
-  const ctaTitle = data.ctaTitle ?? DEFAULTS.ctaTitle;
-  const ctaSubtitle = data.ctaSubtitle ?? DEFAULTS.ctaSubtitle;
-  const ctaButtonLabel = data.ctaButtonLabel ?? DEFAULTS.ctaButtonLabel;
+  const heroImage = data.heroImage?.trim() || '';
+  const heroButtonLabel = data.heroButtonLabel || '';
+  const heroButtonHref = data.heroButtonHref || '/request-quote';
+
+  const caseStudiesEyebrow = data.caseStudiesEyebrow || '';
+  const caseStudiesTitle = data.caseStudiesTitle || '';
+  const caseStudiesSubtitle = data.caseStudiesSubtitle || '';
+
+  const ctaTitle = data.ctaTitle || '';
+  const ctaSubtitle = data.ctaSubtitle || '';
+  const ctaButtonLabel = data.ctaButtonLabel || '';
+  const ctaSecondaryLabel = data.ctaSecondaryLabel || '';
+  const ctaSecondaryHref = data.ctaSecondaryHref || '/contact-us';
 
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
@@ -133,7 +128,6 @@ const Catalogues = () => {
   };
 
   // Pure database-driven binding to usePageData('catalogues')
-  // Do NOT resurrect DEFAULTS when database provides an empty array []
   const catalogues = loading
     ? []
     : Array.isArray(data.cards)
@@ -149,10 +143,12 @@ const Catalogues = () => {
   const caseStudies = loading
     ? []
     : Array.isArray(data.caseStudies)
-      ? data.caseStudies.map((cs: any) => ({
-          ...cs,
-          slug: cs.slug || slugify(cs.title),
-        }))
+      ? data.caseStudies
+          .filter((cs: any) => cs && cs.active !== false)
+          .map((cs: any) => ({
+            ...cs,
+            slug: cs.slug || slugify(cs.title),
+          }))
       : [];
 
   const visibleCatalogues = catalogues.slice(0, visibleCount);
@@ -161,144 +157,157 @@ const Catalogues = () => {
   return (
     <main className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="bg-cm-blue mx-3 sm:mx-6 lg:mx-8 rounded-[2rem] py-6 md:py-8 overflow-hidden relative shadow-inner mt-4 mb-2">
-        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 relative z-10 px-4">
-          <div className="lg:w-1/2 text-left text-white">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-3 tracking-tight text-white leading-tight">
-              {heroTitle}
-            </h1>
-            <p className="text-sm md:text-base text-white/85 leading-relaxed max-w-xl">
-              {heroSubtitle}
-            </p>
-            <div className="mt-5 flex flex-wrap gap-4">
-              <Link to="/request-quote" className="btn-secondary px-6 py-2.5 text-sm font-bold shadow-md">
-                Request Custom Catalogue
-              </Link>
-            </div>
-          </div>
-          {heroImage && (
-            <div className="lg:w-1/2 relative w-full">
-              <MediaImage
-                src={heroImage}
-                alt={heroTitle}
-                className="rounded-2xl shadow-xl w-full h-[240px] sm:h-[260px] object-cover border-2 border-cm-blue-dark relative z-10"
-              />
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Catalogues Grid */}
-      <section className="px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
-          {loading ? (
-            <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
-              {[...Array(6)].map((_, idx) => (
-                <div key={idx} className="animate-pulse rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-                  <div className="h-48 rounded-xl bg-gray-200" />
-                  <div className="mt-4 h-4 w-1/3 rounded bg-gray-200" />
-                  <div className="mt-2 h-5 w-3/4 rounded bg-gray-200" />
-                  <div className="mt-2 h-4 w-full rounded bg-gray-100" />
-                  <div className="mt-4 h-10 w-36 rounded-lg bg-gray-200" />
-                </div>
-              ))}
-            </div>
-          ) : visibleCatalogues.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 py-16 text-center px-4">
-              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-cm-blue flex items-center justify-center mx-auto mb-3 shadow-sm">
-                <FileText className="w-6 h-6" />
-              </div>
-              <h3 className="text-base font-bold text-gray-800">No Catalogues Published Yet</h3>
-              <p className="text-xs text-gray-500 mt-1 max-w-md mx-auto leading-relaxed">
-                Product catalogues, brochures, and specification sheets configured in the Page Editor will appear here.
+      {!data.hideHero && (
+        <section className="bg-cm-blue mx-3 sm:mx-6 lg:mx-8 rounded-[2rem] py-6 md:py-8 overflow-hidden relative shadow-inner mt-4 mb-2">
+          <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 relative z-10 px-4">
+            <div className="lg:w-1/2 text-left text-white">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-3 tracking-tight text-white leading-tight">
+                {heroTitle}
+              </h1>
+              <p className="text-sm md:text-base text-white/85 leading-relaxed max-w-xl">
+                {heroSubtitle}
               </p>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
-                {visibleCatalogues.map((catalogue: any, index: number) => {
-                  const cover = getCardCover(index);
-                  const hasPdf = hasValidPdf(catalogue.downloadLink);
-
-                  return (
-                    <div key={catalogue.title || index} className="group min-w-0 flex flex-col justify-between rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition hover:shadow-md">
-                      <div>
-                        <div className="relative h-48 overflow-hidden rounded-xl" style={{ background: cover.background }}>
-                          <MediaImage
-                            src={catalogue.image}
-                            alt={catalogue.title}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                          <span className="absolute bottom-0 left-0 h-7 w-7 rounded-tr-xl rounded-bl-xl" style={{ background: cover.accent }} />
-                        </div>
-                        <div className="mt-3 flex items-center gap-2 text-[11px] text-gray-400">
-                          <FileText className="h-3 w-3 text-cm-blue" />
-                          <span className="font-bold text-cm-blue">{catalogue.size || 'PDF'}</span>
-                          {catalogue.date && <span>{formatDate(catalogue.date)}</span>}
-                        </div>
-                        <h3 className="mt-1.5 text-base font-extrabold leading-snug tracking-tight text-cm-blue-dark line-clamp-2 sm:text-lg">
-                          {catalogue.title}
-                        </h3>
-                        <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-gray-500">{catalogue.description}</p>
-                      </div>
-
-                      <div className="pt-4">
-                        {hasPdf ? (
-                          <a
-                            href={resolveMediaUrl(catalogue.downloadLink)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => handleDownloadClick(e, catalogue)}
-                            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-cm-blue px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-cm-blue-dark shadow-sm"
-                          >
-                            <FileText className="h-4 w-4" />
-                            Download PDF
-                          </a>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => openRequestModal(catalogue)}
-                            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-cm-yellow px-4 py-2.5 text-sm font-bold text-cm-blue-dark transition-colors hover:bg-yellow-400 shadow-sm"
-                          >
-                            <Send className="h-4 w-4" />
-                            Request Catalogue
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {hasMore && (
-                <div className="mt-10 text-center">
-                  <button
-                    type="button"
-                    onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
-                    className="rounded-full border border-gray-200 bg-white px-6 py-2.5 text-xs font-semibold text-gray-600 transition-colors hover:border-cm-blue hover:text-cm-blue"
-                  >
-                    Load More
-                  </button>
+              {heroButtonLabel && (
+                <div className="mt-5 flex flex-wrap gap-4">
+                  <Link to={heroButtonHref} className="btn-secondary px-6 py-2.5 text-sm font-bold shadow-md">
+                    {heroButtonLabel}
+                  </Link>
                 </div>
               )}
-            </>
-          )}
-        </div>
-      </section>
+            </div>
+            {heroImage && (
+              <div className="lg:w-1/2 relative w-full">
+                <MediaImage
+                  src={heroImage}
+                  alt={heroTitle}
+                  className="rounded-2xl shadow-xl w-full h-[240px] sm:h-[260px] object-cover border-2 border-cm-blue-dark relative z-10"
+                />
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
-      {/* Case Studies Showcase - Omitted entirely when caseStudies.length === 0 */}
-      {!loading && caseStudies.length > 0 && (
+      {/* Catalogues Grid */}
+      {!data.hideCards && (
+        <section className="px-4 py-8 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-6xl">
+            {loading ? (
+              <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+                {[...Array(6)].map((_, idx) => (
+                  <div key={idx} className="animate-pulse rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                    <div className="h-48 rounded-xl bg-gray-200" />
+                    <div className="mt-4 h-4 w-1/3 rounded bg-gray-200" />
+                    <div className="mt-2 h-5 w-3/4 rounded bg-gray-200" />
+                    <div className="mt-2 h-4 w-full rounded bg-gray-100" />
+                    <div className="mt-4 h-10 w-36 rounded-lg bg-gray-200" />
+                  </div>
+                ))}
+              </div>
+            ) : visibleCatalogues.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 py-16 text-center px-4">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 text-cm-blue flex items-center justify-center mx-auto mb-3 shadow-sm">
+                  <FileText className="w-6 h-6" />
+                </div>
+                <h3 className="text-base font-bold text-gray-800">No Catalogues Published Yet</h3>
+                <p className="text-xs text-gray-500 mt-1 max-w-md mx-auto leading-relaxed">
+                  Product catalogues, brochures, and specification sheets configured in the Page Editor will appear here.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+                  {visibleCatalogues.map((catalogue: any, index: number) => {
+                    const cover = getCardCover(index);
+                    const hasPdf = hasValidPdf(catalogue.downloadLink);
+
+                    return (
+                      <div key={catalogue.title || index} className="group min-w-0 flex flex-col justify-between rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition hover:shadow-md">
+                        <div>
+                          <div className="relative h-48 overflow-hidden rounded-xl" style={{ background: cover.background }}>
+                            <MediaImage
+                              src={catalogue.image}
+                              alt={catalogue.title}
+                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                            <span className="absolute bottom-0 left-0 h-7 w-7 rounded-tr-xl rounded-bl-xl" style={{ background: cover.accent }} />
+                          </div>
+                          <div className="mt-3 flex items-center gap-2 text-[11px] text-gray-400">
+                            <FileText className="h-3 w-3 text-cm-blue" />
+                            <span className="font-bold text-cm-blue">{catalogue.size || 'PDF'}</span>
+                            {catalogue.date && <span>{formatDate(catalogue.date)}</span>}
+                          </div>
+                          <h3 className="mt-1.5 text-base font-extrabold leading-snug tracking-tight text-cm-blue-dark line-clamp-2 sm:text-lg">
+                            {catalogue.title}
+                          </h3>
+                          <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-gray-500">{catalogue.description}</p>
+                        </div>
+
+                        <div className="pt-4">
+                          {hasPdf ? (
+                            <a
+                              href={resolveMediaUrl(catalogue.downloadLink)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => handleDownloadClick(e, catalogue)}
+                              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-cm-blue px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-cm-blue-dark shadow-sm"
+                            >
+                              <FileText className="h-4 w-4" />
+                              Download PDF
+                            </a>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => openRequestModal(catalogue)}
+                              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-cm-yellow px-4 py-2.5 text-sm font-bold text-cm-blue-dark transition-colors hover:bg-yellow-400 shadow-sm"
+                            >
+                              <Send className="h-4 w-4" />
+                              Request Catalogue
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {hasMore && (
+                  <div className="mt-10 text-center">
+                    <button
+                      type="button"
+                      onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+                      className="rounded-full border border-gray-200 bg-white px-6 py-2.5 text-xs font-semibold text-gray-600 transition-colors hover:border-cm-blue hover:text-cm-blue"
+                    >
+                      Load More
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Case Studies Showcase */}
+      {!loading && !data.hideCaseStudies && caseStudies.length > 0 && (
         <section className="border-t border-gray-100 bg-slate-50/70 px-4 py-12 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-6xl">
-            <div className="mb-8 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
+            <div className="mb-8">
               <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-cm-blue">Proven Transformations</span>
-                <h2 className="text-2xl font-bold tracking-tight text-cm-blue-dark sm:text-3xl">Campus Case Studies</h2>
-                <p className="mt-1 text-sm text-gray-500">Explore real-world implementations delivered across leading institutions.</p>
+                {caseStudiesEyebrow && (
+                  <span className="text-xs font-bold uppercase tracking-wider text-cm-blue">
+                    {caseStudiesEyebrow}
+                  </span>
+                )}
+                {caseStudiesTitle && (
+                  <h2 className="text-2xl font-bold tracking-tight text-cm-blue-dark sm:text-3xl">
+                    {caseStudiesTitle}
+                  </h2>
+                )}
+                {caseStudiesSubtitle && (
+                  <p className="mt-1 text-sm text-gray-500">{caseStudiesSubtitle}</p>
+                )}
               </div>
-              <Link to="/contact-us" className="text-xs font-semibold text-cm-blue hover:underline">
-                Partner on a Case Study &rarr;
-              </Link>
             </div>
 
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -306,7 +315,7 @@ const Catalogues = () => {
                 const cover = getCardCover(index);
                 return (
                   <Link
-                    key={study.title || index}
+                    key={study.id || study.title || index}
                     to={`/case-studies/${study.slug || slugify(study.title)}`}
                     className="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
                   >
@@ -319,8 +328,12 @@ const Catalogues = () => {
                       <span className="absolute bottom-0 left-0 h-6 w-6 rounded-tr-lg rounded-bl-lg" style={{ background: cover.accent }} />
                     </div>
                     <div className="flex flex-1 flex-col p-5">
-                      <div className="mb-2 text-[10px] font-bold uppercase tracking-wider text-cm-blue">Case Study</div>
-                      <h3 className="text-base font-bold text-gray-900 group-hover:text-cm-blue line-clamp-1">{study.title}</h3>
+                      <div className="mb-2 text-[10px] font-bold uppercase tracking-wider text-cm-blue">
+                        {study.category || 'Case Study'}
+                      </div>
+                      <h3 className="text-base font-bold text-gray-900 group-hover:text-cm-blue line-clamp-1">
+                        {study.title}
+                      </h3>
                       {study.description && (
                         <p className="mt-2 text-xs leading-relaxed text-gray-500 line-clamp-2">{study.description}</p>
                       )}
@@ -337,29 +350,35 @@ const Catalogues = () => {
       )}
 
       {/* CTA Section */}
-      <section className="bg-cm-yellow px-4 py-8 sm:px-6 md:py-10 lg:px-8">
-        <div className="mx-auto max-w-4xl text-center">
-          <h2 className="mb-4 text-2xl font-bold text-cm-blue-dark md:text-3xl">{ctaTitle}</h2>
+      {!data.hideCta && (
+        <section className="bg-cm-yellow px-4 py-8 sm:px-6 md:py-10 lg:px-8">
+          <div className="mx-auto max-w-4xl text-center">
+            <h2 className="mb-4 text-2xl font-bold text-cm-blue-dark md:text-3xl">{ctaTitle}</h2>
 
-          <p className="mx-auto mb-6 max-w-2xl text-base text-gray-700 md:text-lg">
-            {ctaSubtitle}
-          </p>
+            <p className="mx-auto mb-6 max-w-2xl text-base text-gray-700 md:text-lg">
+              {ctaSubtitle}
+            </p>
 
-          <div className="flex flex-col justify-center gap-4 sm:flex-row">
-            <button
-              type="button"
-              onClick={() => openRequestModal({ title: 'Custom Institutional Catalogue', slug: 'custom-catalogue' })}
-              className="btn-primary cursor-pointer shadow-sm hover:shadow-md transition text-center"
-            >
-              {ctaButtonLabel || 'Request Custom Catalogue'}
-            </button>
+            <div className="flex flex-col justify-center gap-4 sm:flex-row">
+              {ctaButtonLabel && (
+                <button
+                  type="button"
+                  onClick={() => openRequestModal({ title: 'Custom Institutional Catalogue', slug: 'custom-catalogue' })}
+                  className="btn-primary cursor-pointer shadow-sm hover:shadow-md transition text-center"
+                >
+                  {ctaButtonLabel}
+                </button>
+              )}
 
-            <Link to="/contact-us" className="rounded-full bg-white px-6 py-3 font-semibold text-cm-blue-dark transition-colors hover:bg-gray-100">
-              Contact Sales
-            </Link>
+              {ctaSecondaryLabel && (
+                <Link to={ctaSecondaryHref} className="rounded-full bg-white px-6 py-3 font-semibold text-cm-blue-dark transition-colors hover:bg-gray-100">
+                  {ctaSecondaryLabel}
+                </Link>
+              )}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Request Catalogue Modal */}
       {requestTarget && (
@@ -432,7 +451,7 @@ const Catalogues = () => {
                       <label className="block text-xs font-bold text-slate-700 mb-1">Phone *</label>
                       <input
                         type="tel"
-                        pattern="(?:\+91[ -]?)?[6-9][0-9]{9}"
+                        pattern="(?:\+?91[\s\-]?)?0?[0-9\s\-]{10,14}"
                         className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-cm-blue focus:outline-none focus:ring-1 focus:ring-cm-blue"
                         required
                         value={formData.phone}

@@ -1,9 +1,14 @@
 import { useRef, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Save, Plus, Trash2, Link as LinkIcon, X, ArrowLeft, FileText } from 'lucide-react';
+import { Save, Plus, Trash2, Link as LinkIcon, X, ArrowLeft, FileText, Eye, EyeOff, Sparkles, Type, Palette, Layout, Sliders } from 'lucide-react';
 import api from '../api/client';
 import { pageDefaults } from '../pageDefaults';
 import MediaImageField from './MediaImageField';
+import JobOpeningsEditorSection from './JobOpeningsEditorSection';
+import CaseStudiesEditorSection from './CaseStudiesEditorSection';
+import BlogEditorSection from './BlogEditorSection';
+import FaqEditorSection from './FaqEditorSection';
+import ArticleEditorSection from './ArticleEditorSection';
 import { clearPageDataCache, broadcastCmsInvalidation } from '@/hooks/usePageData';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -42,9 +47,13 @@ export interface SectionItem {
 export interface PageData {
     pageTitle?: string;
     heroLabel?: string;
+    heroEyebrow?: string;
     heroTitle?: string;
     heroSubtitle?: string;
     heroImage?: string;
+    heroButtonLabel?: string;
+    heroButtonHref?: string;
+    styles?: any;
     filterLabel?: string;
     sectionLabel?: string;
     sectionTitle?: string;
@@ -68,6 +77,9 @@ export interface PageData {
         image?: string;
         href?: string;
         readMoreLabel?: string;
+        exploreLabel?: string;
+        postButtonLabel?: string;
+        [key: string]: any;
     };
     brandName?: string;
     headerActionLabel?: string;
@@ -238,6 +250,140 @@ function Field({
     );
 }
 
+function CardCategoriesField({
+    categories = [],
+    availableCategories = [],
+    onChange,
+    onAddGlobalCategory,
+}: {
+    categories?: string[];
+    availableCategories: string[];
+    onChange: (cats: string[]) => void;
+    onAddGlobalCategory?: (cat: string) => void;
+}) {
+    const [inputValue, setInputValue] = useState('');
+
+    const currentCats = Array.isArray(categories) ? categories : [];
+
+    // Filter available options to those not currently selected on this card
+    const quickAddOptions = availableCategories.filter(
+        (cat) => !currentCats.some((c) => c.toLowerCase() === cat.toLowerCase())
+    );
+
+    const handleAdd = () => {
+        const parts = inputValue
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean);
+        if (parts.length === 0) return;
+
+        const next = [...currentCats];
+        for (const part of parts) {
+            if (!next.some((c) => c.toLowerCase() === part.toLowerCase())) {
+                next.push(part);
+            }
+            if (onAddGlobalCategory) {
+                onAddGlobalCategory(part);
+            }
+        }
+        onChange(next);
+        setInputValue('');
+    };
+
+    const handleRemove = (catToRemove: string) => {
+        onChange(currentCats.filter((c) => c !== catToRemove));
+    };
+
+    const handleQuickAdd = (catToAdd: string) => {
+        if (!currentCats.some((c) => c.toLowerCase() === catToAdd.toLowerCase())) {
+            onChange([...currentCats, catToAdd]);
+        }
+    };
+
+    return (
+        <div className="space-y-2 md:col-span-2 bg-slate-50/80 p-4 rounded-2xl border border-slate-200">
+            <div className="flex items-center justify-between">
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-800">
+                    Categories (Side Menu Filters)
+                </label>
+                <span className="text-[10px] text-blue-700 bg-blue-100 font-bold px-2 py-0.5 rounded-full">
+                    {currentCats.length} assigned
+                </span>
+            </div>
+
+            {/* Currently Assigned Badges */}
+            <div className="flex flex-wrap gap-2 items-center min-h-[32px]">
+                {currentCats.length === 0 ? (
+                    <span className="text-xs text-slate-400 italic">
+                        No categories assigned to this card yet. Click a suggestion below or type a category name.
+                    </span>
+                ) : (
+                    currentCats.map((cat) => (
+                        <span
+                            key={cat}
+                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-600 text-white text-xs font-bold shadow-xs group"
+                        >
+                            <span>{cat}</span>
+                            <button
+                                type="button"
+                                onClick={() => handleRemove(cat)}
+                                className="w-4 h-4 rounded-full hover:bg-blue-700 flex items-center justify-center transition-colors text-blue-200 hover:text-white"
+                                title={`Remove ${cat}`}
+                            >
+                                <X className="w-3 h-3" />
+                            </button>
+                        </span>
+                    ))
+                )}
+            </div>
+
+            {/* Quick Add Suggestions from other cards / page categories */}
+            {quickAddOptions.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-slate-200/60">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        Quick Add:
+                    </span>
+                    {quickAddOptions.map((opt) => (
+                        <button
+                            key={opt}
+                            type="button"
+                            onClick={() => handleQuickAdd(opt)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-700 text-xs font-semibold border border-slate-200 hover:border-blue-300 transition-all shadow-xs"
+                        >
+                            <Plus className="w-3 h-3 text-blue-500" />
+                            {opt}
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            {/* Create new category or type custom tag */}
+            <div className="flex gap-2 pt-1">
+                <input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAdd();
+                        }
+                    }}
+                    placeholder="Type new category (or comma-separated) and click Add..."
+                    className="flex-1 border border-gray-300 rounded-xl px-3.5 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 bg-white"
+                />
+                <button
+                    type="button"
+                    onClick={handleAdd}
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-xs shrink-0"
+                >
+                    <Plus className="w-3.5 h-3.5" /> Add
+                </button>
+            </div>
+        </div>
+    );
+}
+
 // ─── Main Unified Page Editor ────────────────────────────────────────────────
 export default function UnifiedPageEditor({
     page,
@@ -252,6 +398,16 @@ export default function UnifiedPageEditor({
 }) {
     const isAboutUs = page.slug === 'about-us' || page.slug === 'corporate';
     const isContactUs = page.slug === 'contact-us';
+    const isBlog = page.slug === 'blog';
+    const isFaq = page.slug === 'faq';
+    const isArticlePage =
+        page.slug === 'how-it-works' ||
+        page.slug === 'brand-help' ||
+        page.slug === 'sell-on-campusmart' ||
+        page.slug === '20-stunning-college-buildings' ||
+        page.slug === 'academic-buildings' ||
+        page.slug === 'research-facilities' ||
+        page.slug === 'student-life-centers';
 
     const [title, setTitle] = useState(page.title);
     const [published, setPublished] = useState(page.published);
@@ -307,9 +463,24 @@ export default function UnifiedPageEditor({
         ],
     };
 
+    const defaultBlog = {
+        heroEyebrow: 'Campus Mart Articles',
+        heroTitle: 'Campus Insights & Ideas',
+        heroSubtitle:
+            'Practical guidance on campus design, technology, and infrastructure — written for principals, administrators and facility teams building better institutions.',
+        newsletterLabel: 'Stay curious',
+        newsletterTitle: 'Good ideas, occasionally.',
+        newsletterDescription:
+            'Get useful campus infrastructure perspectives, new trends, and practical stories delivered to your inbox. No noise, just things worth reading.',
+        hideHero: false,
+        hideFeatured: false,
+        hideArticles: false,
+        hideNewsletter: false,
+    };
+
     const parsedData = parsePageData(page.pageData);
     const genericDefaults = pageDefaults[page.slug] || pageDefaults[page.template || ''] || {};
-    const effectiveDefaults = isAboutUs ? defaultAboutUs : genericDefaults;
+    const effectiveDefaults = isAboutUs ? defaultAboutUs : isBlog ? defaultBlog : genericDefaults;
 
     const initialData = { ...effectiveDefaults };
     Object.entries(parsedData).forEach(([k, v]) => {
@@ -318,34 +489,76 @@ export default function UnifiedPageEditor({
         }
     });
 
+    // Safely backfill missing card fields from defaults without overwriting existing database values
+    if (Array.isArray(parsedData.cards) && Array.isArray(effectiveDefaults.cards)) {
+        const defaultCardMap = new Map(
+            effectiveDefaults.cards.map((c: any) => [(c?.title || '').trim().toLowerCase(), c])
+        );
+        initialData.cards = parsedData.cards.map((card: any, idx: number) => {
+            const key = (card?.title || '').trim().toLowerCase();
+            const defCard = defaultCardMap.get(key) || effectiveDefaults.cards[idx];
+            return defCard ? { ...defCard, ...card } : card;
+        });
+    }
+
+    // Safely backfill styles object from defaults without overwriting customized properties
+    if (effectiveDefaults.styles && typeof effectiveDefaults.styles === 'object') {
+        initialData.styles = {
+            ...effectiveDefaults.styles,
+            ...(parsedData.styles || {}),
+        };
+    }
+
     const [data, setData] = useState<PageData>(initialData);
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
  
-    // Live synchronization: hydrate contact channels from /api/content when editing contact-us
+    // Live synchronization: hydrate contact channels from /api/content when editing contact-us or faq
     useEffect(() => {
-        if (isContactUs) {
+        if (isContactUs || isFaq) {
             api.get('/content')
                 .then(({ data: siteContent }) => {
                     if (!siteContent || typeof siteContent !== 'object') return;
                     setData((prev) => {
                         const next = { ...prev };
-                        if (siteContent.contact_phone !== undefined) next.contact_phone = siteContent.contact_phone;
-                        if (siteContent.contact_phone_alt !== undefined) next.contact_phone_alt = siteContent.contact_phone_alt;
-                        if (siteContent.contact_email !== undefined) next.contact_email = siteContent.contact_email;
-                        if (siteContent.contact_email_alt !== undefined) next.contact_email_alt = siteContent.contact_email_alt;
-                        if (siteContent.contact_whatsapp !== undefined) next.contact_whatsapp = siteContent.contact_whatsapp;
-                        if (siteContent.contact_hours !== undefined) next.contact_hours = siteContent.contact_hours;
-                        if (siteContent.contact_address !== undefined) next.contact_address = siteContent.contact_address;
+                        if (isContactUs) {
+                            if (siteContent.contact_phone !== undefined) next.contact_phone = siteContent.contact_phone;
+                            if (siteContent.contact_phone_alt !== undefined) next.contact_phone_alt = siteContent.contact_phone_alt;
+                            if (siteContent.contact_email !== undefined) next.contact_email = siteContent.contact_email;
+                            if (siteContent.contact_email_alt !== undefined) next.contact_email_alt = siteContent.contact_email_alt;
+                            if (siteContent.contact_whatsapp !== undefined) next.contact_whatsapp = siteContent.contact_whatsapp;
+                            if (siteContent.contact_hours !== undefined) next.contact_hours = siteContent.contact_hours;
+                            if (siteContent.contact_address !== undefined) next.contact_address = siteContent.contact_address;
+                        }
+                        if (isFaq) {
+                            if (!Array.isArray(parsedData.faqs) && siteContent.home_faqs !== undefined) {
+                                try {
+                                    const parsedFaqs = typeof siteContent.home_faqs === 'string'
+                                        ? JSON.parse(siteContent.home_faqs)
+                                        : siteContent.home_faqs;
+                                    if (Array.isArray(parsedFaqs) && parsedFaqs.length > 0) {
+                                        next.faqs = parsedFaqs;
+                                    }
+                                } catch {
+                                    // Keep default faqs on parse error
+                                }
+                            }
+                            if (!parsedData.contact_phone && siteContent.contact_phone) {
+                                next.contact_phone = siteContent.contact_phone;
+                            }
+                            if (!parsedData.contact_email && siteContent.contact_email) {
+                                next.contact_email = siteContent.contact_email;
+                            }
+                        }
                         return next;
                     });
                 })
                 .catch((err) => {
-                    console.warn('[UnifiedPageEditor] Failed to hydrate contact channels from /api/content:', err);
+                    console.warn('[UnifiedPageEditor] Failed to hydrate content channels from /api/content:', err);
                 });
         }
-    }, [isContactUs]);
+    }, [isContactUs, isFaq]);
 
     const updateContactChannel = (key: string, value: string) => {
         setData((prev) => {
@@ -386,6 +599,7 @@ export default function UnifiedPageEditor({
     // Starter Template Modal state
     const [showTemplateModal, setShowTemplateModal] = useState(false);
     const [templateMode, setTemplateMode] = useState<'append' | 'replace'>('append');
+    const [newGlobalCategoryInput, setNewGlobalCategoryInput] = useState('');
 
     const handleApplyStarterTemplate = () => {
         if (!effectiveDefaults || Object.keys(effectiveDefaults).length === 0) {
@@ -471,6 +685,15 @@ export default function UnifiedPageEditor({
     };
 
     const set = (key: string, value: any) => setData((p: any) => ({ ...p, [key]: value }));
+    const setStyle = (key: string, value: any) => {
+        setData((p: any) => ({
+            ...p,
+            styles: {
+                ...(p.styles || {}),
+                [key]: value,
+            },
+        }));
+    };
 
     /**
      * Resilient DOM scroll & focus utility adhering to SRP.
@@ -556,6 +779,32 @@ export default function UnifiedPageEditor({
     const addCategory = () => set('categories', [...(data.categories ?? []), 'New Topic']);
     const removeCategory = (i: number) => set('categories', (data.categories ?? []).filter((_: string, idx: number) => idx !== i));
 
+    const handleAddGlobalCategory = (catName: string) => {
+        const trimmed = catName.trim();
+        if (!trimmed) return;
+        const currentCats = Array.isArray(data.categories) ? data.categories : [];
+        if (!currentCats.some((c: string) => c.toLowerCase() === trimmed.toLowerCase())) {
+            set('categories', [...currentCats, trimmed]);
+        }
+    };
+
+    const handleRemoveGlobalCategory = (catToRemove: string) => {
+        const currentCats = (Array.isArray(data.categories) ? data.categories : []).filter(
+            (c: string) => c.toLowerCase() !== catToRemove.toLowerCase()
+        );
+        const updatedCards = (data.cards ?? []).map((card: any) => {
+            if (Array.isArray(card.categories)) {
+                return {
+                    ...card,
+                    categories: card.categories.filter((c: string) => c.toLowerCase() !== catToRemove.toLowerCase()),
+                };
+            }
+            return card;
+        });
+        set('categories', currentCats);
+        set('cards', updatedCards);
+    };
+
     const setFilter = (i: number, value: string) => {
         const filters = [...(data.filters ?? [])];
         filters[i] = value;
@@ -596,6 +845,14 @@ export default function UnifiedPageEditor({
     const addFeature = () => set('features', [...(data.features ?? []), 'New feature']);
     const removeFeature = (i: number) => set('features', (data.features ?? []).filter((_: any, idx: number) => idx !== i));
 
+    const setHighlightBullet = (i: number, v: string) => {
+        const bullets = [...(data.highlightBullets ?? [])];
+        bullets[i] = v;
+        set('highlightBullets', bullets);
+    };
+    const addHighlightBullet = () => set('highlightBullets', [...(data.highlightBullets ?? []), 'New highlight bullet']);
+    const removeHighlightBullet = (i: number) => set('highlightBullets', (data.highlightBullets ?? []).filter((_: any, idx: number) => idx !== i));
+
     // About Us Methods
     const setWhyBullet = (i: number, v: string) => {
         const w = [...(data.whyBullets ?? [])];
@@ -617,12 +874,6 @@ export default function UnifiedPageEditor({
     };
     const removeTeamMember = (i: number) => set('team', (data.team ?? []).filter((_: any, idx: number) => idx !== i));
 
-    const addCaseStudy = () => {
-        const nextIndex = (data.caseStudies ?? []).length;
-        set('caseStudies', [...(data.caseStudies ?? []), { title: '', description: '', image: '' }]);
-        scrollToAndFocusNewItem(`casestudy-item-${nextIndex}`);
-    };
-
     const setPartner = (i: number, v: string) => {
         const p = [...(data.partners ?? [])];
         p[i] = v;
@@ -635,7 +886,7 @@ export default function UnifiedPageEditor({
         setSaving(true);
         setSaveError(null);
         try {
-            // Live synchronization: also update global content channels for contact-us
+            // Live synchronization: also update global content channels for contact-us or faq
             if (isContactUs) {
                 const contentPayload: Record<string, string> = {
                     contact_phone: data.contact_phone ?? '',
@@ -647,6 +898,11 @@ export default function UnifiedPageEditor({
                     contact_address: data.contact_address ?? '',
                 };
                 await api.put('/content', contentPayload);
+            }
+            if (isFaq && Array.isArray((data as any).faqs)) {
+                await api.put('/content', {
+                    home_faqs: JSON.stringify((data as any).faqs),
+                });
             }
 
             const { data: updated } = await api.put(`/pages/${page.id}`, {
@@ -698,14 +954,16 @@ export default function UnifiedPageEditor({
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button
-                        type="button"
-                        onClick={() => setShowTemplateModal(true)}
-                        className="flex items-center gap-2 px-3.5 py-2 text-xs font-bold border border-blue-200 text-blue-700 bg-blue-50/90 hover:bg-blue-100 rounded-xl transition-all shadow-sm active:scale-95"
-                        title="Load recommended template samples for this page"
-                    >
-                        <FileText className="w-3.5 h-3.5" /> Load Starter Template
-                    </button>
+                    {page.slug !== 'job-openings' && (
+                        <button
+                            type="button"
+                            onClick={() => setShowTemplateModal(true)}
+                            className="flex items-center gap-2 px-3.5 py-2 text-xs font-bold border border-blue-200 text-blue-700 bg-blue-50/90 hover:bg-blue-100 rounded-xl transition-all shadow-sm active:scale-95"
+                            title="Load recommended template samples for this page"
+                        >
+                            <FileText className="w-3.5 h-3.5" /> Load Starter Template
+                        </button>
+                    )}
                     <a
                         href={`/${page.slug}`}
                         target="_blank"
@@ -741,18 +999,35 @@ export default function UnifiedPageEditor({
             {/* Specialized Shortcut Banners */}
 
             {page.slug === 'home' && (
-                <div className="mx-6 sm:mx-8 mt-6 rounded-xl border border-amber-200 bg-amber-50/70 p-4 text-sm text-amber-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                <div className="mx-6 sm:mx-8 mt-6 rounded-2xl border-2 border-blue-400 bg-blue-50/90 p-5 text-sm text-blue-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
                     <div>
-                        <div className="font-bold text-amber-950">🏠 Dedicated Homepage Editor Available</div>
-                        <p className="text-xs text-amber-800 mt-0.5">
-                            For managing hero carousels, key statistics, and homepage showcases, use the dedicated Homepage Editor.
+                        <div className="font-extrabold text-blue-950 text-base">🏠 Homepage Cards, Images &amp; Content Editor</div>
+                        <p className="text-xs text-blue-800 mt-1">
+                            To change the images, text, and links on the homepage feature cards, hero banner, service links, and sidebar, open the dedicated Homepage Editor.
                         </p>
                     </div>
                     <Link
                         to="/admin/homepage-editor"
-                        className="px-3 py-1.5 text-xs font-bold rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition shrink-0 shadow-xs"
+                        className="px-4 py-2 text-xs font-bold rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition shrink-0 shadow-md"
                     >
-                        Open Homepage Editor →
+                        Edit Homepage Cards &amp; Images →
+                    </Link>
+                </div>
+            )}
+
+            {page.slug === 'blog' && (
+                <div className="mx-6 sm:mx-8 mt-6 rounded-xl border border-blue-200 bg-blue-50/70 p-4 text-sm text-blue-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                    <div>
+                        <div className="font-bold text-blue-950">📝 Dedicated Blog Posts Manager Available</div>
+                        <p className="text-xs text-blue-800 mt-0.5">
+                            To create, edit, or publish individual blog posts and categories, use the Blog Posts Manager.
+                        </p>
+                    </div>
+                    <Link
+                        to="/admin/blog"
+                        className="px-3 py-1.5 text-xs font-bold rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition shrink-0 shadow-xs"
+                    >
+                        Open Blog Manager →
                     </Link>
                 </div>
             )}
@@ -793,12 +1068,485 @@ export default function UnifiedPageEditor({
                     </div>
                 </section>
 
+                {(page.slug === 'ai-ml' || page.slug === 'campus-design-execution' || page.slug === 'campus-design' || page.slug === 'campus-furniture-design' || page.slug === 'sports-design-execution' || page.slug === 'ai-digital-design-supply' || page.slug === 'ar-vr-experiences' || page.slug === 'furniture' || page.slug === 'sports-infra' || page.slug === 'tech-infra' || page.slug === 'libraries' || page.slug === 'labs' || page.slug === 'collaboration' || page.slug === 'innovation' || page.slug === 'campus-automation' || page.slug === 'campus-master-planning') && (() => {
+                    const isServiceGridPage =
+                        page.slug === 'campus-design-execution' ||
+                        page.slug === 'campus-design' ||
+                        page.slug === 'campus-furniture-design' ||
+                        page.slug === 'sports-design-execution' ||
+                        page.slug === 'ai-digital-design-supply' ||
+                        page.slug === 'ar-vr-experiences' ||
+                        page.slug === 'sports-infra' ||
+                        page.slug === 'tech-infra' ||
+                        page.slug === 'libraries' ||
+                        page.slug === 'labs' ||
+                        page.slug === 'collaboration' ||
+                        page.slug === 'campus-automation' ||
+                        page.slug === 'campus-master-planning';
+                    const isFurniturePage = page.slug === 'furniture';
+                    const isSportsInfraPage = page.slug === 'sports-infra';
+                    const isTechInfraPage = page.slug === 'tech-infra';
+                    const isLibrariesPage = page.slug === 'libraries';
+                    const isLabsPage = page.slug === 'labs';
+                    const isCollabPage = page.slug === 'collaboration';
+                    const isInnovationPage = page.slug === 'innovation';
+                    const isCampusAutomationPage = page.slug === 'campus-automation';
+                    const isCampusMasterPlanningPage = page.slug === 'campus-master-planning';
+                    const defaultHeadingFont = effectiveDefaults.styles?.headingFont || (isInnovationPage ? 'poppins' : isServiceGridPage || isFurniturePage ? 'poppins' : 'playfair');
+                    const defaultPrimaryColor = effectiveDefaults.styles?.primaryColor || (isInnovationPage ? '#155b51' : isServiceGridPage || isFurniturePage ? '#0047ab' : '#ea580c');
+                    const defaultHeroBg = effectiveDefaults.styles?.heroBg || (isInnovationPage ? 'paper' : isCollabPage || isLabsPage || isLibrariesPage || isTechInfraPage || isSportsInfraPage || isFurniturePage ? 'blue' : isServiceGridPage ? 'white' : 'amber');
+                    const defaultCtaBg = effectiveDefaults.styles?.ctaBg || (isCollabPage ? 'white' : isServiceGridPage ? 'blue' : 'stone');
+                    const defaultHeroLayout = effectiveDefaults.styles?.heroLayout || (isCollabPage || isLabsPage || isLibrariesPage || isTechInfraPage || isSportsInfraPage || isFurniturePage ? 'split-right' : isServiceGridPage ? 'minimal' : 'split-right');
+                    const defaultShowFeatured =
+                        effectiveDefaults.styles?.showFeatured !== undefined
+                            ? effectiveDefaults.styles.showFeatured
+                            : isCampusAutomationPage || isInnovationPage ? true : !isServiceGridPage;
+                    const defaultShowFilters =
+                        effectiveDefaults.styles?.showFilters !== undefined
+                            ? effectiveDefaults.styles.showFilters
+                            : isCampusAutomationPage || isCampusMasterPlanningPage || isLabsPage || isLibrariesPage || isTechInfraPage || isSportsInfraPage || isInnovationPage
+                            ? true
+                            : !isServiceGridPage;
+
+                    const currentShowFeatured =
+                        data.styles?.showFeatured !== undefined ? data.styles.showFeatured : defaultShowFeatured;
+                    const currentShowFilters =
+                        data.styles?.showFilters !== undefined ? data.styles.showFilters : defaultShowFilters;
+
+                    return (
+                        <section className="space-y-6 rounded-2xl border-2 border-orange-500/20 bg-gradient-to-br from-orange-50/40 via-amber-50/20 to-white p-6 sm:p-7 shadow-xs">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-orange-200/60 gap-2">
+                                <div>
+                                    <h4 className="text-xs font-black text-orange-950 uppercase tracking-[0.2em] flex items-center gap-2">
+                                        <Sparkles className="w-3.5 h-3.5 text-orange-600" />
+                                        Page Control: Typography, Layout &amp; Theme
+                                    </h4>
+                                    <p className="text-xs text-orange-800/80 mt-1 font-medium">
+                                        Customize fonts, layout variants, brand colors, and display options for {page.title}.
+                                    </p>
+                                </div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider bg-orange-100 text-orange-900 px-3 py-1 rounded-full border border-orange-200 self-start sm:self-auto">
+                                    {page.title} Styles
+                                </span>
+                            </div>
+
+                            {/* 1. Typography / Fonts */}
+                            <div className="space-y-4">
+                                <h5 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                                    <Type className="w-3.5 h-3.5 text-orange-600" /> Typography &amp; Fonts
+                                </h5>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-1.5">
+                                        <label className="block text-sm font-bold text-gray-700">Heading Font</label>
+                                        <select
+                                            value={data.styles?.headingFont ?? defaultHeadingFont}
+                                            onChange={(e) => setStyle('headingFont', e.target.value)}
+                                            className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 transition-all bg-white text-slate-800"
+                                        >
+                                            <option value="playfair">Playfair Display (Editorial Serif)</option>
+                                            <option value="grotesk">Space Grotesk (Modern Tech Sans)</option>
+                                            <option value="poppins">Poppins (Geometric Clean Sans)</option>
+                                            <option value="opensans">Open Sans (Classic Neutral)</option>
+                                            <option value="system">System Sans (Native Clean UI)</option>
+                                        </select>
+                                        <p className="text-[11px] text-gray-500">Applied to hero headlines, section headings, and card titles</p>
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="block text-sm font-bold text-gray-700">Body Font</label>
+                                        <select
+                                            value={data.styles?.bodyFont ?? 'opensans'}
+                                            onChange={(e) => setStyle('bodyFont', e.target.value)}
+                                            className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 transition-all bg-white text-slate-800"
+                                        >
+                                            <option value="opensans">Open Sans (Classic Clean - Default)</option>
+                                            <option value="poppins">Poppins (Geometric Sans)</option>
+                                            <option value="grotesk">Space Grotesk (Modern Sans)</option>
+                                            <option value="system">System Sans (Native)</option>
+                                        </select>
+                                        <p className="text-[11px] text-gray-500">Applied to subtitles, descriptions, and article body text</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 2. Color & Theme */}
+                            <div className="space-y-4 pt-2 border-t border-orange-200/40">
+                                <h5 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                                    <Palette className="w-3.5 h-3.5 text-orange-600" /> Brand Colors &amp; Background Themes
+                                </h5>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-bold text-gray-700">Primary Accent Color</label>
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="color"
+                                                value={data.styles?.primaryColor || defaultPrimaryColor}
+                                                onChange={(e) => setStyle('primaryColor', e.target.value)}
+                                                className="h-10 w-12 rounded-lg border border-gray-300 p-0.5 cursor-pointer bg-white"
+                                            />
+                                            <input
+                                                type="text"
+                                                value={data.styles?.primaryColor || defaultPrimaryColor}
+                                                onChange={(e) => setStyle('primaryColor', e.target.value)}
+                                                placeholder={defaultPrimaryColor}
+                                                className="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-xs font-mono font-semibold"
+                                            />
+                                        </div>
+                                        <div className="flex flex-wrap gap-1.5 pt-1">
+                                            {[
+                                                { name: 'Blue', hex: '#0047ab' },
+                                                { name: 'Orange', hex: '#ea580c' },
+                                                { name: 'Emerald', hex: '#059669' },
+                                                { name: 'Purple', hex: '#7c3aed' },
+                                                { name: 'Charcoal', hex: '#1e293b' },
+                                            ].map((c) => (
+                                                <button
+                                                    key={c.hex}
+                                                    type="button"
+                                                    onClick={() => setStyle('primaryColor', c.hex)}
+                                                    className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border border-gray-200 bg-white hover:bg-gray-50 transition-all"
+                                                >
+                                                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: c.hex }} />
+                                                    {c.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="block text-sm font-bold text-gray-700">Hero Background</label>
+                                        <select
+                                            value={data.styles?.heroBg ?? defaultHeroBg}
+                                            onChange={(e) => setStyle('heroBg', e.target.value)}
+                                            className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 transition-all bg-white text-slate-800"
+                                        >
+                                            <option value="paper">Warm Paper / Cream (Journal Default)</option>
+                                            <option value="white">Clean White (Minimal)</option>
+                                            <option value="amber">Warm Amber</option>
+                                            <option value="slate">Modern Slate (Light Gray)</option>
+                                            <option value="blue">Soft Sky Blue</option>
+                                            <option value="stone">Dark Charcoal</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="block text-sm font-bold text-gray-700">Bottom CTA Background</label>
+                                        <select
+                                            value={data.styles?.ctaBg ?? defaultCtaBg}
+                                            onChange={(e) => setStyle('ctaBg', e.target.value)}
+                                            className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 transition-all bg-white text-slate-800"
+                                        >
+                                            <option value="blue">Campus Royal Blue</option>
+                                            <option value="stone">Dark Stone</option>
+                                            <option value="amber">Deep Amber</option>
+                                            <option value="slate">Dark Slate Gray</option>
+                                            <option value="white">Clean Slate / White</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 3. Layout Variants & Section Toggles */}
+                            <div className="space-y-4 pt-2 border-t border-orange-200/40">
+                                <h5 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                                    <Layout className="w-3.5 h-3.5 text-orange-600" /> Layout Variants &amp; Display Controls
+                                </h5>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="space-y-1.5">
+                                        <label className="block text-sm font-bold text-gray-700">Hero Layout</label>
+                                        <select
+                                            value={data.styles?.heroLayout ?? defaultHeroLayout}
+                                            onChange={(e) => setStyle('heroLayout', e.target.value)}
+                                            className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 transition-all bg-white text-slate-800"
+                                        >
+                                            {isServiceGridPage && <option value="minimal">Minimal Header (Text Only - Default)</option>}
+                                            <option value="split-right">Split (Text Left, Image Right)</option>
+                                            <option value="split-left">Split (Image Left, Text Right)</option>
+                                            <option value="centered">Centered Headline &amp; Banner</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="block text-sm font-bold text-gray-700">Card Grid Columns</label>
+                                        <select
+                                            value={data.styles?.cardColumns ?? '3'}
+                                            onChange={(e) => setStyle('cardColumns', e.target.value)}
+                                            className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 transition-all bg-white text-slate-800"
+                                        >
+                                            <option value="3">3 Columns (Standard Grid)</option>
+                                            <option value="2">2 Columns (Larger Cards)</option>
+                                            <option value="4">4 Columns (Compact Grid)</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="block text-sm font-bold text-gray-700">Featured Card Display</label>
+                                        <select
+                                            value={currentShowFeatured ? 'true' : 'false'}
+                                            onChange={(e) => setStyle('showFeatured', e.target.value === 'true')}
+                                            className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 transition-all bg-white text-slate-800"
+                                        >
+                                            <option value="true">Show 1st Card as Large Featured Banner</option>
+                                            <option value="false">Uniform Grid Only (All cards same size)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setStyle('showFilters', !currentShowFilters)}
+                                        className={`flex items-center justify-between px-4 py-3 rounded-xl border text-xs font-bold transition-all ${
+                                            currentShowFilters
+                                                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                                : 'bg-slate-50 text-slate-500 border-slate-200'
+                                        }`}
+                                    >
+                                        <span>Filter Chips</span>
+                                        <span>{currentShowFilters ? '● Visible' : '○ Hidden'}</span>
+                                    </button>
+
+                                    {page.slug !== 'innovation' && (
+                                        <button
+                                            type="button"
+                                            onClick={() => set('hideHero', !data.hideHero)}
+                                            className={`flex items-center justify-between px-4 py-3 rounded-xl border text-xs font-bold transition-all ${
+                                                !data.hideHero
+                                                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                                    : 'bg-slate-50 text-slate-500 border-slate-200'
+                                            }`}
+                                        >
+                                            <span>Hero Section</span>
+                                            <span>{!data.hideHero ? '● Visible' : '○ Hidden'}</span>
+                                        </button>
+                                    )}
+
+                                    {page.slug === 'innovation' ? (
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={() => set('hideNav', !data.hideNav)}
+                                                className={`flex items-center justify-between px-4 py-3 rounded-xl border text-xs font-bold transition-all ${
+                                                    !data.hideNav
+                                                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                                        : 'bg-slate-50 text-slate-500 border-slate-200'
+                                                }`}
+                                            >
+                                                <span>Journal Nav Bar</span>
+                                                <span>{!data.hideNav ? '● Visible' : '○ Hidden'}</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => set('hideCategories', !data.hideCategories)}
+                                                className={`flex items-center justify-between px-4 py-3 rounded-xl border text-xs font-bold transition-all ${
+                                                    !data.hideCategories
+                                                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                                        : 'bg-slate-50 text-slate-500 border-slate-200'
+                                                }`}
+                                            >
+                                                <span>Category Pills</span>
+                                                <span>{!data.hideCategories ? '● Visible' : '○ Hidden'}</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => set('hideFeatured', !data.hideFeatured)}
+                                                className={`flex items-center justify-between px-4 py-3 rounded-xl border text-xs font-bold transition-all ${
+                                                    !data.hideFeatured
+                                                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                                        : 'bg-slate-50 text-slate-500 border-slate-200'
+                                                }`}
+                                            >
+                                                <span>Featured Hub Card</span>
+                                                <span>{!data.hideFeatured ? '● Visible' : '○ Hidden'}</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => set('hideCards', !data.hideCards)}
+                                                className={`flex items-center justify-between px-4 py-3 rounded-xl border text-xs font-bold transition-all ${
+                                                    !data.hideCards
+                                                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                                        : 'bg-slate-50 text-slate-500 border-slate-200'
+                                                }`}
+                                            >
+                                                <span>Tracks Grid</span>
+                                                <span>{!data.hideCards ? '● Visible' : '○ Hidden'}</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => set('hideMore', !data.hideMore)}
+                                                className={`flex items-center justify-between px-4 py-3 rounded-xl border text-xs font-bold transition-all ${
+                                                    !data.hideMore
+                                                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                                        : 'bg-slate-50 text-slate-500 border-slate-200'
+                                                }`}
+                                            >
+                                                <span>More Resources</span>
+                                                <span>{!data.hideMore ? '● Visible' : '○ Hidden'}</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => set('hideFooter', !data.hideFooter)}
+                                                className={`flex items-center justify-between px-4 py-3 rounded-xl border text-xs font-bold transition-all ${
+                                                    !data.hideFooter
+                                                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                                        : 'bg-slate-50 text-slate-500 border-slate-200'
+                                                }`}
+                                            >
+                                                <span>Journal Footer</span>
+                                                <span>{!data.hideFooter ? '● Visible' : '○ Hidden'}</span>
+                                            </button>
+                                        </>
+                                    ) : page.slug === 'furniture' ? (
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={() => set('hideShop', !data.hideShop)}
+                                                className={`flex items-center justify-between px-4 py-3 rounded-xl border text-xs font-bold transition-all ${
+                                                    !data.hideShop
+                                                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                                        : 'bg-slate-50 text-slate-500 border-slate-200'
+                                                }`}
+                                            >
+                                                <span>Shop Catalog</span>
+                                                <span>{!data.hideShop ? '● Visible' : '○ Hidden'}</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => set('hideQuote', !data.hideQuote)}
+                                                className={`flex items-center justify-between px-4 py-3 rounded-xl border text-xs font-bold transition-all ${
+                                                    !data.hideQuote
+                                                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                                        : 'bg-slate-50 text-slate-500 border-slate-200'
+                                                }`}
+                                            >
+                                                <span>Design Quote</span>
+                                                <span>{!data.hideQuote ? '● Visible' : '○ Hidden'}</span>
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={() => set('hideCards', !data.hideCards)}
+                                                className={`flex items-center justify-between px-4 py-3 rounded-xl border text-xs font-bold transition-all ${
+                                                    !data.hideCards
+                                                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                                        : 'bg-slate-50 text-slate-500 border-slate-200'
+                                                }`}
+                                            >
+                                                <span>Cards Grid</span>
+                                                <span>{!data.hideCards ? '● Visible' : '○ Hidden'}</span>
+                                            </button>
+
+                                            {page.slug === 'sports-infra' && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => set('hideFeatures', !data.hideFeatures)}
+                                                    className={`flex items-center justify-between px-4 py-3 rounded-xl border text-xs font-bold transition-all ${
+                                                        !data.hideFeatures
+                                                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                                            : 'bg-slate-50 text-slate-500 border-slate-200'
+                                                    }`}
+                                                >
+                                                    <span>Services Bullets</span>
+                                                    <span>{!data.hideFeatures ? '● Visible' : '○ Hidden'}</span>
+                                                </button>
+                                            )}
+
+                                            {(page.slug === 'libraries' || page.slug === 'labs') && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => set('hidePhilosophy', !data.hidePhilosophy)}
+                                                    className={`flex items-center justify-between px-4 py-3 rounded-xl border text-xs font-bold transition-all ${
+                                                        !data.hidePhilosophy
+                                                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                                            : 'bg-slate-50 text-slate-500 border-slate-200'
+                                                    }`}
+                                                >
+                                                    <span>Philosophy Section</span>
+                                                    <span>{!data.hidePhilosophy ? '● Visible' : '○ Hidden'}</span>
+                                                </button>
+                                            )}
+
+                                            <button
+                                                type="button"
+                                                onClick={() => set('hideCta', !data.hideCta)}
+                                                className={`flex items-center justify-between px-4 py-3 rounded-xl border text-xs font-bold transition-all ${
+                                                    !data.hideCta
+                                                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                                        : 'bg-slate-50 text-slate-500 border-slate-200'
+                                                }`}
+                                            >
+                                                <span>Bottom CTA</span>
+                                                <span>{!data.hideCta ? '● Visible' : '○ Hidden'}</span>
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* 4. Micro-Copy & Labels */}
+                            <div className="space-y-4 pt-2 border-t border-orange-200/40">
+                                <h5 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                                    <Sliders className="w-3.5 h-3.5 text-orange-600" /> Micro-Copy &amp; Labels
+                                </h5>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <Field
+                                        label="Hero Eyebrow Tagline"
+                                        value={data.heroEyebrow ?? ''}
+                                        onChange={(v) => set('heroEyebrow', v)}
+                                        placeholder={effectiveDefaults.heroEyebrow || 'Turnkey Services'}
+                                        hint="Small badge text displayed directly above the main hero heading"
+                                    />
+                                    <Field
+                                        label="Card Action Link Label"
+                                        value={data.readMoreLabel ?? ''}
+                                        onChange={(v) => set('readMoreLabel', v)}
+                                        placeholder={effectiveDefaults.readMoreLabel || 'Learn More'}
+                                        hint="Link text on each card (e.g. Learn More / Explore Range)"
+                                    />
+                                    {isServiceGridPage && (
+                                        <>
+                                            <Field
+                                                label="Grid Section Heading"
+                                                value={data.section1Title ?? ''}
+                                                onChange={(v) => set('section1Title', v)}
+                                                placeholder={effectiveDefaults.section1Title || 'Turnkey Execution Phases'}
+                                                hint="Heading shown above the cards grid"
+                                            />
+                                            <Field
+                                                label="Items Counter Label"
+                                                value={data.stepCountLabel ?? ''}
+                                                onChange={(v) => set('stepCountLabel', v)}
+                                                placeholder={effectiveDefaults.stepCountLabel || 'Sequential Steps'}
+                                                hint="Counter label next to item count (e.g. '6 Specialized Ranges')"
+                                            />
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        </section>
+                    );
+                })()}
+
                 {isAboutUs ? (
                     // ─── ABOUT US & CORPORATE ──────────────────────────────────────────
                     <>
                         <section className="space-y-6">
-                            <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                            <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                                 <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Hero Banner Content</h4>
+                                <button
+                                    type="button"
+                                    onClick={() => set('hideHero', !data.hideHero)}
+                                    className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                        data.hideHero
+                                            ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                            : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                    }`}
+                                >
+                                    {data.hideHero ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                    {data.hideHero ? 'Hidden / Draft' : 'Live on Page'}
+                                </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <Field
@@ -818,8 +1566,20 @@ export default function UnifiedPageEditor({
                         </section>
 
                         <section className="space-y-6">
-                            <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                            <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                                 <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Our Mission Section</h4>
+                                <button
+                                    type="button"
+                                    onClick={() => set('hideMission', !data.hideMission)}
+                                    className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                        data.hideMission
+                                            ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                            : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                    }`}
+                                >
+                                    {data.hideMission ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                    {data.hideMission ? 'Hidden / Draft' : 'Live on Page'}
+                                </button>
                             </div>
                             <div className="space-y-6">
                                 <Field
@@ -855,14 +1615,34 @@ export default function UnifiedPageEditor({
                         <section className="space-y-6">
                             <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                                 <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Why Sign Up Bullets</h4>
-                                <button
-                                    type="button"
-                                    onClick={addWhyBullet}
-                                    className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-emerald-700 transition-all shadow-md"
-                                >
-                                    <Plus className="w-4 h-4" /> Add Bullet
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => set('hideWhyBullets', !data.hideWhyBullets)}
+                                        className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                            data.hideWhyBullets
+                                                ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                                : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                        }`}
+                                    >
+                                        {data.hideWhyBullets ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                        {data.hideWhyBullets ? 'Hidden / Draft' : 'Live on Page'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={addWhyBullet}
+                                        className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-emerald-700 transition-all shadow-md"
+                                    >
+                                        <Plus className="w-4 h-4" /> Add Bullet
+                                    </button>
+                                </div>
                             </div>
+                            <Field
+                                label="Section Heading"
+                                value={data.whyBulletsTitle ?? ''}
+                                onChange={(v) => set('whyBulletsTitle', v)}
+                                placeholder="Why Sign Up Bullets"
+                            />
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {(data.whyBullets ?? []).map((b: string, i: number) => (
                                     <div key={i} className="flex items-center gap-3 bg-gray-50 p-2 rounded-xl">
@@ -888,13 +1668,27 @@ export default function UnifiedPageEditor({
                         <section className="space-y-6">
                             <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                                 <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Leadership Team</h4>
-                                <button
-                                    type="button"
-                                    onClick={addTeamMember}
-                                    className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-blue-700 transition-all shadow-md"
-                                >
-                                    <Plus className="w-4 h-4" /> Add Member
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => set('hideTeam', !data.hideTeam)}
+                                        className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                            data.hideTeam
+                                                ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                                : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                        }`}
+                                    >
+                                        {data.hideTeam ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                        {data.hideTeam ? 'Hidden / Draft' : 'Live on Page'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={addTeamMember}
+                                        className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-blue-700 transition-all shadow-md"
+                                    >
+                                        <Plus className="w-4 h-4" /> Add Member
+                                    </button>
+                                </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 {(data.team ?? []).map((t: any, i: number) => (
@@ -922,13 +1716,42 @@ export default function UnifiedPageEditor({
                         <section className="space-y-6">
                             <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                                 <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Partners Matrix</h4>
-                                <button
-                                    type="button"
-                                    onClick={addPartner}
-                                    className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-amber-700 transition-all shadow-md"
-                                >
-                                    <Plus className="w-4 h-4" /> Add Partner
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => set('hideEcosystem', !data.hideEcosystem)}
+                                        className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                            data.hideEcosystem
+                                                ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                                : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                        }`}
+                                    >
+                                        {data.hideEcosystem ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                        {data.hideEcosystem ? 'Hidden / Draft' : 'Live on Page'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={addPartner}
+                                        className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-amber-700 transition-all shadow-md"
+                                    >
+                                        <Plus className="w-4 h-4" /> Add Partner
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <Field
+                                    label="Section Heading"
+                                    value={data.ecosystemTitle ?? ''}
+                                    onChange={(v) => set('ecosystemTitle', v)}
+                                    placeholder="Global Ecosystem"
+                                />
+                                <Field
+                                    label="Section Sub-heading"
+                                    value={data.ecosystemSubtitle ?? ''}
+                                    onChange={(v) => set('ecosystemSubtitle', v)}
+                                    multiline
+                                    placeholder="Our strength lies in our network of global partners who bring the best of edtech and infrastructure to Indian soil."
+                                />
                             </div>
                             <div className="flex flex-wrap gap-3">
                                 {(data.partners ?? []).map((p: string, i: number) => (
@@ -950,10 +1773,22 @@ export default function UnifiedPageEditor({
                 ) : (
                     // ─── GENERIC TEMPLATE EDITOR ──────────────────────────────────────────
                     <>
-                        {page.slug !== 'ai-guide' && page.slug !== 'ugc-guidelines' && (
+                        {page.slug !== 'ai-guide' && page.slug !== 'ugc-guidelines' && page.slug !== 'innovation' && page.slug !== 'blog' && page.slug !== 'science-tech-labs' && page.slug !== 'classifieds' && page.slug !== 'job-openings' && page.slug !== 'faq' && !isArticlePage && (
                             <section className="space-y-6">
-                                <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                                <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                                     <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Hero Banner Content</h4>
+                                    <button
+                                        type="button"
+                                        onClick={() => set('hideHero', !data.hideHero)}
+                                        className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                            data.hideHero
+                                                ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                                : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                        }`}
+                                    >
+                                        {data.hideHero ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                        {data.hideHero ? 'Hidden / Draft' : 'Live on Page'}
+                                    </button>
                                 </div>
                                 <div className="space-y-6">
                                     <Field
@@ -969,6 +1804,23 @@ export default function UnifiedPageEditor({
                                         multiline
                                         placeholder="Supporting text displayed below the headline…"
                                     />
+                                    {('formIntro' in effectiveDefaults || page.slug === 'partnership' || page.slug === 'partner-with-colleges') && (
+                                        <Field
+                                            label="Text Above Form / Introductory Note"
+                                            value={data.formIntro ?? ''}
+                                            onChange={(v) => set('formIntro', v)}
+                                            multiline
+                                            placeholder="Explanatory paragraph displayed directly above the form fields…"
+                                        />
+                                    )}
+                                    {('heroBadge' in effectiveDefaults || page.slug === 'digital-transformation') && (
+                                        <Field
+                                            label="Hero Badge / Category"
+                                            value={data.heroBadge ?? ''}
+                                            onChange={(v) => set('heroBadge', v)}
+                                            placeholder="Campus Innovation / Digital Transformation"
+                                        />
+                                    )}
                                     {page.slug === 'colleges-universities-for-sale' && (
                                         <Field
                                             label="Search Filter Label"
@@ -978,13 +1830,71 @@ export default function UnifiedPageEditor({
                                         />
                                     )}
 
-                                    {('heroImage' in effectiveDefaults) && (
+                                    {('heroImage' in effectiveDefaults || page.slug === 'catalogues') && (
                                         <MediaImageField
                                             label="Hero Image Backdrop"
                                             value={data.heroImage ?? ''}
                                             onChange={(v) => set('heroImage', v)}
                                             previewClassName="h-48 rounded-2xl"
                                         />
+                                    )}
+
+                                    {('heroButton1Label' in effectiveDefaults || 'heroButton1Label' in data || page.slug === 'furniture') ? (
+                                        <div className="space-y-4 pt-2 border-t border-gray-100">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <Field
+                                                    label="Primary Hero Button Label"
+                                                    value={data.heroButton1Label ?? data.heroButtonLabel ?? ''}
+                                                    onChange={(v) => {
+                                                        set('heroButton1Label', v);
+                                                        set('heroButtonLabel', v);
+                                                    }}
+                                                    placeholder="View Collections"
+                                                />
+                                                <Field
+                                                    label="Primary Hero Button Link"
+                                                    value={data.heroButton1Href ?? data.heroButtonHref ?? ''}
+                                                    onChange={(v) => {
+                                                        set('heroButton1Href', v);
+                                                        set('heroButtonHref', v);
+                                                    }}
+                                                    placeholder="/catalogues"
+                                                />
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <Field
+                                                    label="Secondary Hero Button Label"
+                                                    value={data.heroButton2Label ?? ''}
+                                                    onChange={(v) => set('heroButton2Label', v)}
+                                                    placeholder="Get Quote"
+                                                />
+                                                <Field
+                                                    label="Secondary Hero Button Link"
+                                                    value={data.heroButton2Href ?? ''}
+                                                    onChange={(v) => set('heroButton2Href', v)}
+                                                    placeholder="/request-quote"
+                                                />
+                                            </div>
+                                        </div>
+                                    ) : ('heroButtonLabel' in effectiveDefaults || 'heroButtonHref' in effectiveDefaults || page.slug === 'catalogues') && (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {('heroButtonLabel' in effectiveDefaults || page.slug === 'catalogues') && (
+                                                <Field
+                                                    label="Hero Button Label"
+                                                    value={data.heroButtonLabel ?? ''}
+                                                    onChange={(v) => set('heroButtonLabel', v)}
+                                                    placeholder={page.slug === 'catalogues' ? 'Request Custom Catalogue' : 'Deploy Solutions'}
+                                                />
+                                            )}
+                                            {('heroButtonHref' in effectiveDefaults || page.slug === 'catalogues') && (
+                                                <Field
+                                                    label="Hero Button Link"
+                                                    value={data.heroButtonHref ?? ''}
+                                                    onChange={(v) => set('heroButtonHref', v)}
+                                                    placeholder="/request-quote"
+                                                />
+                                            )}
+                                        </div>
                                     )}
                                 </div>
                             </section>
@@ -1097,37 +2007,61 @@ export default function UnifiedPageEditor({
                             </>
                         )}
 
-                        {page.slug === 'ai-guide' && (
+                        {(page.slug === 'ai-guide' || page.slug === 'science-tech-labs') && (
                             <>
                                 <section className="space-y-6">
                                     <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-                                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Journal Layout Content</h4>
+                                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">
+                                            {page.slug === 'science-tech-labs' ? 'Editorial Layout Content' : 'Journal Layout Content'}
+                                        </h4>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <Field label="Section Eyebrow" value={data.sectionLabel ?? ''} onChange={(v) => set('sectionLabel', v)} />
                                         <Field label="Section Heading" value={data.sectionTitle ?? ''} onChange={(v) => set('sectionTitle', v)} />
                                         <Field label="Section Description" value={data.sectionDescription ?? ''} onChange={(v) => set('sectionDescription', v)} multiline />
-                                        <Field label="Latest Articles Heading" value={data.latestTitle ?? ''} onChange={(v) => set('latestTitle', v)} />
+                                        <Field label={page.slug === 'science-tech-labs' ? 'Latest Labs Heading' : 'Latest Articles Heading'} value={data.latestTitle ?? ''} onChange={(v) => set('latestTitle', v)} />
                                         <Field label="View All Label" value={data.viewAllLabel ?? ''} onChange={(v) => set('viewAllLabel', v)} />
                                         <Field label="Featured Link Label" value={data.readMoreLabel ?? ''} onChange={(v) => set('readMoreLabel', v)} />
                                     </div>
                                 </section>
 
                                 <section className="space-y-6">
-                                    <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-                                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Featured Article</h4>
+                                    <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">
+                                            {page.slug === 'science-tech-labs' ? 'Featured Laboratory Showcase' : 'Featured Article'}
+                                        </h4>
+                                        <button
+                                            type="button"
+                                            onClick={() => set('hideFeatured', !data.hideFeatured)}
+                                            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                                data.hideFeatured
+                                                    ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                                    : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                            }`}
+                                        >
+                                            {data.hideFeatured ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                            {data.hideFeatured ? 'Hidden / Draft' : 'Live on Page'}
+                                        </button>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <Field label="Category Label" value={data.featured?.category ?? ''} onChange={(v) => setFeatured('category', v)} />
-                                        <Field label="Article Title" value={data.featured?.title ?? ''} onChange={(v) => setFeatured('title', v)} />
-                                        <Field label="Article Description" value={data.featured?.description ?? ''} onChange={(v) => setFeatured('description', v)} multiline />
+                                        {page.slug === 'ai-guide' && (
+                                            <Field label="Category Label" value={data.featured?.category ?? ''} onChange={(v) => setFeatured('category', v)} />
+                                        )}
+                                        <Field label={page.slug === 'science-tech-labs' ? 'Laboratory Title' : 'Article Title'} value={data.featured?.title ?? ''} onChange={(v) => setFeatured('title', v)} />
+                                        <Field label="Description" value={data.featured?.description ?? ''} onChange={(v) => setFeatured('description', v)} multiline />
                                         <MediaImageField label="Featured Image" value={data.featured?.image ?? ''} onChange={(v) => setFeatured('image', v)} previewClassName="h-32" />
+                                        {page.slug === 'science-tech-labs' && (
+                                            <>
+                                                <Field label="Action Link Label" value={data.featured?.readMoreLabel ?? ''} onChange={(v) => setFeatured('readMoreLabel', v)} placeholder="Explore Lab Programme" />
+                                                <Field label="Custom Action URL (Optional)" value={data.featured?.href ?? ''} onChange={(v) => setFeatured('href', v)} placeholder="/contact-us or leave blank for detail" />
+                                            </>
+                                        )}
                                     </div>
                                 </section>
 
                                 <section className="space-y-6">
                                     <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-                                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Article Filters</h4>
+                                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Filter Categories</h4>
                                         <button type="button" onClick={addFilter} className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-amber-700 transition-all shadow-md">
                                             <Plus className="w-4 h-4" /> Add Filter
                                         </button>
@@ -1145,8 +2079,22 @@ export default function UnifiedPageEditor({
                                 </section>
 
                                 <section className="space-y-6">
-                                    <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-                                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Newsletter Block</h4>
+                                    <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">
+                                            {page.slug === 'science-tech-labs' ? 'Inquiry & Consultation Block' : 'Newsletter Block'}
+                                        </h4>
+                                        <button
+                                            type="button"
+                                            onClick={() => set('hideNewsletter', !data.hideNewsletter)}
+                                            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                                data.hideNewsletter
+                                                    ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                                    : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                            }`}
+                                        >
+                                            {data.hideNewsletter ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                            {data.hideNewsletter ? 'Hidden / Draft' : 'Live on Page'}
+                                        </button>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <Field label="Eyebrow" value={data.newsletterLabel ?? ''} onChange={(v) => set('newsletterLabel', v)} />
@@ -1157,6 +2105,10 @@ export default function UnifiedPageEditor({
                                     </div>
                                 </section>
                             </>
+                        )}
+
+                        {page.slug === 'blog' && (
+                            <BlogEditorSection data={data} set={set} />
                         )}
 
                         {page.slug === 'setup-college' && (
@@ -1255,7 +2207,7 @@ export default function UnifiedPageEditor({
                             </>
                         )}
 
-                        {page.slug === 'ugc-guidelines' && (
+                        {(page.slug === 'ugc-guidelines' || page.slug === 'innovation') && (
                             <>
                                 <section className="space-y-6">
                                     <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
@@ -1379,33 +2331,39 @@ export default function UnifiedPageEditor({
                         {page.slug === 'classifieds' && (
                             <>
                                 <section className="space-y-6">
-                                    <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
-                                        <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800">Classifieds Journal Content</h4>
+                                    <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                                        <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800">Page Header Content</h4>
+                                        <button
+                                            type="button"
+                                            onClick={() => set('hideHero', !data.hideHero)}
+                                            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                                data.hideHero
+                                                    ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                                    : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                            }`}
+                                        >
+                                            {data.hideHero ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                            {data.hideHero ? 'Hidden / Draft' : 'Live on Page'}
+                                        </button>
                                     </div>
                                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                        <Field label="Header Eyebrow Badge" value={data.heroEyebrow ?? 'CampusMart Opportunities'} onChange={(v) => set('heroEyebrow', v)} />
                                         <Field label="Page Heading" value={data.heroTitle ?? ''} onChange={(v) => set('heroTitle', v)} />
                                         <Field label="Page Description" value={data.heroSubtitle ?? ''} onChange={(v) => set('heroSubtitle', v)} multiline />
-                                        <Field label="CTA Heading" value={data.ctaTitle ?? ''} onChange={(v) => set('ctaTitle', v)} />
-                                        <Field label="CTA Description" value={data.ctaSubtitle ?? ''} onChange={(v) => set('ctaSubtitle', v)} multiline />
-                                        <Field label="CTA Button Label" value={data.ctaButtonLabel ?? ''} onChange={(v) => set('ctaButtonLabel', v)} />
+                                        <Field label="Header Button Label" value={data.heroButtonLabel ?? 'Post a Classified'} onChange={(v) => set('heroButtonLabel', v)} />
                                     </div>
                                 </section>
 
                                 <section className="space-y-6">
-                                    <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
-                                        <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800">Featured Opportunity</h4>
-                                    </div>
-                                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                        <Field label="Eyebrow" value={data.featured?.eyebrow ?? ''} onChange={(v) => setFeatured('eyebrow', v)} />
-                                        <Field label="Title" value={data.featured?.title ?? ''} onChange={(v) => setFeatured('title', v)} />
-                                        <Field label="Description" value={data.featured?.description ?? ''} onChange={(v) => setFeatured('description', v)} multiline />
-                                        <MediaImageField label="Featured Image" value={data.featured?.image ?? ''} onChange={(v) => setFeatured('image', v)} previewClassName="h-32" />
-                                    </div>
-                                </section>
-
-                                <section className="space-y-6">
-                                    <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
-                                        <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800">Opportunity Categories</h4>
+                                    <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                                        <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800">Opportunity Filter Categories</h4>
+                                        <button
+                                            type="button"
+                                            onClick={() => addUgcArrayItem('categories', 'New Category')}
+                                            className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-blue-700 transition-all shadow-md"
+                                        >
+                                            <Plus className="w-4 h-4" /> Add Category
+                                        </button>
                                     </div>
                                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
                                         {(data.categories ?? []).map((category: string, i: number) => (
@@ -1418,7 +2376,77 @@ export default function UnifiedPageEditor({
                                         ))}
                                     </div>
                                 </section>
+
+                                <section className="space-y-6">
+                                    <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                                        <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800">Featured Opportunity Banner</h4>
+                                        <button
+                                            type="button"
+                                            onClick={() => set('hideFeatured', !data.hideFeatured)}
+                                            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                                data.hideFeatured
+                                                    ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                                    : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                            }`}
+                                        >
+                                            {data.hideFeatured ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                            {data.hideFeatured ? 'Hidden / Draft' : 'Live on Page'}
+                                        </button>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                        <Field label="Eyebrow" value={data.featured?.eyebrow ?? ''} onChange={(v) => setFeatured('eyebrow', v)} />
+                                        <Field label="Title" value={data.featured?.title ?? ''} onChange={(v) => setFeatured('title', v)} />
+                                        <Field label="Description" value={data.featured?.description ?? ''} onChange={(v) => setFeatured('description', v)} multiline />
+                                        <MediaImageField label="Featured Image" value={data.featured?.image ?? ''} onChange={(v) => setFeatured('image', v)} previewClassName="h-32" />
+                                        <Field label="Explore Link Label" value={data.featured?.exploreLabel ?? ''} onChange={(v) => setFeatured('exploreLabel', v)} placeholder="Explore all opportunities" />
+                                        <Field label="Post Button Label" value={data.featured?.postButtonLabel ?? ''} onChange={(v) => setFeatured('postButtonLabel', v)} placeholder="Post Opportunity" />
+                                    </div>
+                                </section>
                             </>
+                        )}
+
+                        {page.slug === 'job-openings' && (
+                            <JobOpeningsEditorSection
+                                data={data}
+                                set={set}
+                                onSyncOpenings={async (nextOpenings) => {
+                                    const nextData = { ...data, openings: nextOpenings };
+                                    setData(nextData);
+                                    try {
+                                        const { data: updated } = await api.put(`/pages/${page.id}`, {
+                                            title,
+                                            published,
+                                            pageData: JSON.stringify(nextData),
+                                        });
+                                        clearPageDataCache(page.slug);
+                                        clearPageDataCache();
+                                        broadcastCmsInvalidation({ type: 'INVALIDATE_PAGE', slug: page.slug });
+                                        broadcastCmsInvalidation({ type: 'INVALIDATE_ALL' });
+                                        setSaved(true);
+                                        setTimeout(() => setSaved(false), 2000);
+                                        if (onSaved) onSaved(updated);
+                                    } catch (err: any) {
+                                        console.error('Failed to sync job openings:', err);
+                                        const msg = err?.response?.data?.error || 'Failed to save job openings.';
+                                        setSaveError(msg);
+                                    }
+                                }}
+                            />
+                        )}
+
+                        {page.slug === 'faq' && (
+                            <FaqEditorSection
+                                data={data}
+                                set={set}
+                            />
+                        )}
+
+                        {isArticlePage && (
+                            <ArticleEditorSection
+                                slug={page.slug}
+                                data={data}
+                                set={set}
+                            />
                         )}
 
                         {/* NDA & Mandate documents (colleges-universities-for-sale only) */}
@@ -1438,7 +2466,7 @@ export default function UnifiedPageEditor({
                         )}
 
                         {/* Optional Custom Labels block */}
-                        {('section1Title' in effectiveDefaults || 'section2Title' in effectiveDefaults) && (
+                        {('section1Title' in effectiveDefaults || 'section2Title' in effectiveDefaults) && page.slug !== 'digital-transformation' && (
                             <section className="space-y-6">
                                 <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
                                     <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Custom Section Labels</h4>
@@ -1452,6 +2480,240 @@ export default function UnifiedPageEditor({
                                     )}
                                 </div>
                             </section>
+                        )}
+
+                        {/* Digital Transformation Dedicated Sections (Ordered 1:1 with Live Page) */}
+                        {page.slug === 'digital-transformation' && (
+                            <>
+                                {/* Section 1 on Live Page: Why Go Digital */}
+                                <section className="space-y-6">
+                                    <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                                        <div>
+                                            <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">
+                                                Why Go Digital Section (The Impact)
+                                            </h4>
+                                            <p className="text-xs text-gray-400 mt-0.5">Section 1 on live page</p>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => set('hideSection2', !data.hideSection2)}
+                                                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                                    data.hideSection2
+                                                        ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                                        : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                                }`}
+                                            >
+                                                {data.hideSection2 ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                                {data.hideSection2 ? 'Hidden / Draft' : 'Live on Page'}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={addSection2Card}
+                                                className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-blue-700 transition-all shadow-md"
+                                            >
+                                                <Plus className="w-4 h-4" /> New Impact Card
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <Field
+                                            label="Section Eyebrow Tag"
+                                            value={data.section2Eyebrow ?? ''}
+                                            onChange={(v) => set('section2Eyebrow', v)}
+                                            placeholder="The Impact"
+                                        />
+                                        <Field
+                                            label="Section Title"
+                                            value={data.section2Title ?? ''}
+                                            onChange={(v) => set('section2Title', v)}
+                                            placeholder="Why Go Digital"
+                                        />
+                                        <div className="md:col-span-2">
+                                            <Field
+                                                label="Supporting Description"
+                                                value={data.section2Description ?? ''}
+                                                onChange={(v) => set('section2Description', v)}
+                                                placeholder="Most institutions we work with see measurable results..."
+                                                multiline
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Impact Cards Grid */}
+                                    <div className="space-y-4">
+                                        <h5 className="text-[11px] font-black text-slate-500 uppercase tracking-wider">
+                                            Impact Cards ({(data.section2Cards ?? []).length})
+                                        </h5>
+                                        <div className="grid grid-cols-1 gap-6">
+                                            {(data.section2Cards ?? []).map((card: any, i: number) => (
+                                                <div key={i} id={`section2-card-item-${i}`} className="border border-gray-200 rounded-2xl p-6 bg-gray-50/30 hover:bg-white hover:shadow-lg hover:border-blue-200 transition-all group relative">
+                                                    <div className="flex items-center justify-between mb-6">
+                                                        <div className="flex items-center gap-3">
+                                                            <span className="w-8 h-8 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">{i + 1}</span>
+                                                            <span className="text-xs font-black text-slate-500 uppercase tracking-widest">{card.title || 'Untitled Card'}</span>
+                                                        </div>
+                                                        <button type="button" onClick={() => removeSection2Card(i)} className="flex items-center gap-1.5 text-red-400 hover:text-red-600 text-[10px] font-black uppercase tracking-wider">
+                                                            <Trash2 className="w-3.5 h-3.5" /> Delete
+                                                        </button>
+                                                    </div>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                        <Field label="Card Title" value={card.title ?? ''} onChange={(v) => setSection2Card(i, 'title', v)} />
+                                                        <Field label="Card Link (Optional)" value={card.href ?? ''} onChange={(v) => setSection2Card(i, 'href', v)} placeholder="/digital-transformation/..." />
+                                                        <div className="md:col-span-2">
+                                                            <Field label="Card Description" value={card.description ?? ''} onChange={(v) => setSection2Card(i, 'description', v)} multiline />
+                                                        </div>
+                                                        <div className="md:col-span-2">
+                                                            <MediaImageField label="Image" value={card.image ?? ''} onChange={(v) => setSection2Card(i, 'image', v)} previewClassName="h-24" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* Section 2 on Live Page: Our Expertise / Digital Services */}
+                                <section className="space-y-6">
+                                    <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                                        <div>
+                                            <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">
+                                                Our Expertise / Services Section
+                                            </h4>
+                                            <p className="text-xs text-gray-400 mt-0.5">Section 2 on live page</p>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => set('hideCards', !data.hideCards)}
+                                                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                                    data.hideCards
+                                                        ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                                        : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                                }`}
+                                            >
+                                                {data.hideCards ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                                {data.hideCards ? 'Hidden / Draft' : 'Live on Page'}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={addCard}
+                                                className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-blue-700 transition-all shadow-md"
+                                            >
+                                                <Plus className="w-4 h-4" /> New Expertise Card
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <Field
+                                            label="Section Eyebrow Tag"
+                                            value={data.section1Eyebrow ?? ''}
+                                            onChange={(v) => set('section1Eyebrow', v)}
+                                            placeholder="Our Expertise"
+                                        />
+                                        <Field
+                                            label="Section Title"
+                                            value={data.section1Title ?? ''}
+                                            onChange={(v) => set('section1Title', v)}
+                                            placeholder="Digital Services"
+                                        />
+                                    </div>
+
+                                    {/* Expertise Cards Grid */}
+                                    <div className="space-y-4">
+                                        <h5 className="text-[11px] font-black text-slate-500 uppercase tracking-wider">
+                                            Numbered Service Cards ({(data.cards ?? []).length})
+                                        </h5>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {(data.cards ?? []).map((card: CardItem, i: number) => (
+                                                <div key={i} id={`card-item-${i}`} className="border border-gray-200 rounded-2xl p-6 bg-gray-50/30 hover:bg-white hover:shadow-lg hover:border-blue-200 transition-all group relative">
+                                                    <div className="flex items-center justify-between mb-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <span className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs">{String(i + 1).padStart(2, '0')}</span>
+                                                            <span className="text-xs font-black text-slate-500 uppercase tracking-widest">{card.title || 'Untitled Card'}</span>
+                                                        </div>
+                                                        <button type="button" onClick={() => removeCard(i)} className="flex items-center gap-1.5 text-red-400 hover:text-red-600 text-[10px] font-black uppercase tracking-wider">
+                                                            <Trash2 className="w-3.5 h-3.5" /> Delete
+                                                        </button>
+                                                    </div>
+                                                    <div className="space-y-4">
+                                                        <Field label="Service Title" value={card.title ?? ''} onChange={(v) => setCard(i, 'title', v)} />
+                                                        <Field label="Service Description" value={card.description ?? ''} onChange={(v) => setCard(i, 'description', v)} multiline />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* Section 3 on Live Page: How We Work / Process Steps */}
+                                <section className="space-y-6">
+                                    <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                                        <div>
+                                            <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">
+                                                How We Work / Process Steps Section
+                                            </h4>
+                                            <p className="text-xs text-gray-400 mt-0.5">Section 3 on live page</p>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => set('hideSections', !data.hideSections)}
+                                                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                                    data.hideSections
+                                                        ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                                        : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                                }`}
+                                            >
+                                                {data.hideSections ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                                {data.hideSections ? 'Hidden / Draft' : 'Live on Page'}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={addSection}
+                                                className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-blue-700 transition-all shadow-md"
+                                            >
+                                                <Plus className="w-4 h-4" /> New Step
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <Field
+                                            label="Section Eyebrow Tag"
+                                            value={data.processEyebrow ?? ''}
+                                            onChange={(v) => set('processEyebrow', v)}
+                                            placeholder="How We Work"
+                                        />
+                                        <Field
+                                            label="Section Title"
+                                            value={data.processTitle ?? ''}
+                                            onChange={(v) => set('processTitle', v)}
+                                            placeholder="From Assessment to Adoption"
+                                        />
+                                    </div>
+
+                                    {/* Process Steps */}
+                                    <div className="space-y-6">
+                                        {(data.sections ?? []).map((section: SectionItem, i: number) => (
+                                            <div key={i} id={`section-item-${i}`} className="border border-gray-200 rounded-2xl p-6 bg-gray-50/30 relative">
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">{String(i + 1).padStart(2, '0')}</span>
+                                                        <span className="text-xs font-black text-slate-500 uppercase tracking-widest">{section.heading || 'Untitled Step'}</span>
+                                                    </div>
+                                                    <button type="button" onClick={() => removeSection(i)} className="flex items-center gap-1.5 text-red-400 hover:text-red-600 text-[10px] font-black uppercase tracking-wider">
+                                                        <Trash2 className="w-3.5 h-3.5" /> Delete
+                                                    </button>
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                    <Field label="Step Heading" value={section.heading ?? ''} onChange={(v) => setSection(i, 'heading', v)} placeholder="e.g. Assess" />
+                                                    <Field label="Step Description" value={section.body ?? ''} onChange={(v) => setSection(i, 'body', v)} multiline placeholder="Review current systems..." />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            </>
                         )}
 
                         {/* Catalogues unified info banner */}
@@ -1473,8 +2735,13 @@ export default function UnifiedPageEditor({
                             </section>
                         )}
 
-                        {('cards' in effectiveDefaults || page.slug === 'colleges-universities-for-sale' || page.slug === 'catalogues') && (() => {
-                            const cardsUseCategories = (effectiveDefaults.cards ?? []).some((c: any) => Array.isArray(c?.categories));
+                        {('cards' in effectiveDefaults || page.slug === 'colleges-universities-for-sale' || page.slug === 'catalogues') && page.slug !== 'digital-transformation' && (() => {
+                            const cardsUseCategories = ((effectiveDefaults.cards ?? []).some((c: any) => Array.isArray(c?.categories)) || page.slug === 'sports-infra' || page.slug === 'tech-infra' || page.slug === 'libraries' || page.slug === 'labs') && page.slug !== 'science-tech-labs' && page.slug !== 'ai-guide';
+                            const explicitCats: string[] = Array.isArray(data.categories) ? data.categories.filter(Boolean) : [];
+                            const cardCats: string[] = (data.cards ?? []).flatMap((c: any) =>
+                                Array.isArray(c?.categories) ? c.categories : c?.category ? [c.category] : []
+                            ).filter(Boolean);
+                            const allAvailableCategories = Array.from(new Set<string>([...explicitCats, ...cardCats]));
                             const cardsUseHref = (effectiveDefaults.cards ?? []).some((c: any) => 'href' in (c || {}));
                             const cardsUseDownloadLink = (effectiveDefaults.cards ?? []).some((c: any) => 'downloadLink' in (c || {})) || page.slug === 'catalogues';
                             const cardsUseSize = (effectiveDefaults.cards ?? []).some((c: any) => 'size' in (c || {})) || page.slug === 'catalogues';
@@ -1484,14 +2751,113 @@ export default function UnifiedPageEditor({
                                         <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">
                                             Interactive Cards <span className="text-blue-500 ml-2">({(data.cards ?? []).length})</span>
                                         </h4>
-                                        <button
-                                            type="button"
-                                            onClick={addCard}
-                                            className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-blue-700 transition-all shadow-md"
-                                        >
-                                            <Plus className="w-4 h-4" /> New Card
-                                        </button>
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => set('hideCards', !data.hideCards)}
+                                                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                                    data.hideCards
+                                                        ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                                        : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                                }`}
+                                            >
+                                                {data.hideCards ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                                {data.hideCards ? 'Hidden / Draft' : 'Live on Page'}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={addCard}
+                                                className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-blue-700 transition-all shadow-md"
+                                            >
+                                                <Plus className="w-4 h-4" /> New Card
+                                            </button>
+                                        </div>
                                     </div>
+
+                                    {cardsUseCategories && (
+                                        <div className="rounded-2xl border border-blue-200 bg-blue-50/60 p-5 space-y-4">
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-xs font-black uppercase tracking-wider text-blue-900">
+                                                        Side Menu Categories ({allAvailableCategories.length})
+                                                    </span>
+                                                    <span className="text-[10px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-full border border-blue-200">
+                                                        Live Navigation Sidebar
+                                                    </span>
+                                                </div>
+                                                <p className="text-[11px] text-blue-700 font-medium">
+                                                    Categories in this list appear in the side menu on the live page and as 1-click filters
+                                                </p>
+                                            </div>
+
+                                            <div className="flex flex-wrap gap-2 items-center">
+                                                {allAvailableCategories.length === 0 ? (
+                                                    <p className="text-xs text-slate-500 italic">
+                                                        No categories created yet. Type a category name below and click &ldquo;Add Category&rdquo; to create one.
+                                                    </p>
+                                                ) : (
+                                                    allAvailableCategories.map((cat: string) => {
+                                                        const count = (data.cards ?? []).filter((c: any) =>
+                                                            (Array.isArray(c?.categories) && c.categories.includes(cat)) || c?.category === cat
+                                                        ).length;
+                                                        return (
+                                                            <span
+                                                                key={cat}
+                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-blue-200 text-blue-900 text-xs font-bold shadow-xs group"
+                                                            >
+                                                                <span className="w-2 h-2 rounded-full bg-blue-500" />
+                                                                {cat}
+                                                                <span className="text-[10px] text-blue-600 font-semibold">
+                                                                    ({count} {count === 1 ? 'card' : 'cards'})
+                                                                </span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleRemoveGlobalCategory(cat)}
+                                                                    className="w-4 h-4 rounded-full text-slate-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors ml-1"
+                                                                    title={`Delete ${cat} from side menu and cards`}
+                                                                >
+                                                                    <X className="w-3 h-3" />
+                                                                </button>
+                                                            </span>
+                                                        );
+                                                    })
+                                                )}
+                                            </div>
+
+                                            {/* Global Add Category Bar */}
+                                            <div className="flex gap-2 items-center pt-2 border-t border-blue-200/60">
+                                                <input
+                                                    type="text"
+                                                    value={newGlobalCategoryInput}
+                                                    onChange={(e) => setNewGlobalCategoryInput(e.target.value)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            e.preventDefault();
+                                                            if (newGlobalCategoryInput.trim()) {
+                                                                handleAddGlobalCategory(newGlobalCategoryInput.trim());
+                                                                setNewGlobalCategoryInput('');
+                                                            }
+                                                        }
+                                                    }}
+                                                    placeholder="Create new side menu category (e.g. Aquatics, Fitness, E-Sports)..."
+                                                    className="flex-1 max-w-md border border-blue-200 rounded-xl px-4 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 bg-white"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        if (newGlobalCategoryInput.trim()) {
+                                                            handleAddGlobalCategory(newGlobalCategoryInput.trim());
+                                                            setNewGlobalCategoryInput('');
+                                                        }
+                                                    }}
+                                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center gap-1.5 shrink-0"
+                                                >
+                                                    <Plus className="w-4 h-4" /> Add Category
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <div className="grid grid-cols-1 gap-6">
                                         {(data.cards ?? []).map((card: any, i: number) => (
                                             <div key={i} id={`card-item-${i}`} className="border border-gray-200 rounded-2xl p-6 bg-gray-50/30 hover:bg-white hover:shadow-lg hover:border-blue-200 transition-all group relative">
@@ -1507,10 +2873,18 @@ export default function UnifiedPageEditor({
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                     <Field label="Card Title" value={card.title ?? ''} onChange={(v) => setCard(i, 'title', v)} />
                                                     <Field label="Card Description" value={card.description ?? ''} onChange={(v) => setCard(i, 'description', v)} multiline />
-                                                    {(page.slug === 'ai-guide' || page.slug === 'setup-college' || page.slug === 'ugc-guidelines' || page.slug === 'classifieds') && (
+                                                    {(page.slug === 'ai-guide' || page.slug === 'setup-college' || page.slug === 'ugc-guidelines' || page.slug === 'innovation' || page.slug === 'science-tech-labs' || page.slug === 'classifieds') && (
                                                         <>
-                                                            <Field label="Article Category" value={card.category ?? ''} onChange={(v) => setCard(i, 'category', v)} placeholder="Strategy" />
-                                                            <Field label="Read Time" value={card.readTime ?? ''} onChange={(v) => setCard(i, 'readTime', v)} placeholder="5 min read" />
+                                                            <Field label={page.slug === 'science-tech-labs' ? 'Lab Category (for Filter)' : page.slug === 'classifieds' ? 'Opportunity Category' : 'Article Category'} value={card.category ?? card.categories?.[0] ?? ''} onChange={(v) => { setCard(i, 'category', v); setCard(i, 'categories', [v]); }} placeholder={page.slug === 'science-tech-labs' ? 'Physics' : page.slug === 'classifieds' ? 'Institutions' : 'Ideation'} />
+                                                            {page.slug !== 'classifieds' && (
+                                                                <Field label={page.slug === 'science-tech-labs' ? 'Badge / Specs Label' : 'Read Time'} value={card.readTime ?? (page.slug === 'science-tech-labs' ? 'Full Specs Available' : '5 min read')} onChange={(v) => setCard(i, 'readTime', v)} placeholder={page.slug === 'science-tech-labs' ? 'Full Specs Available' : '5 min read'} />
+                                                            )}
+                                                            {(page.slug === 'ugc-guidelines' || page.slug === 'innovation') && (
+                                                                <>
+                                                                    <Field label="Author" value={card.author ?? 'CampusMart Team'} onChange={(v) => setCard(i, 'author', v)} placeholder="CampusMart Team" />
+                                                                    <MediaImageField label="Author Avatar Image (Optional)" value={card.authorImage ?? ''} onChange={(v) => setCard(i, 'authorImage', v)} previewClassName="h-16 w-16 rounded-full" />
+                                                                </>
+                                                            )}
                                                         </>
                                                     )}
                                                     <MediaImageField label="Image (Optional)" value={card.image ?? ''} onChange={(v) => setCard(i, 'image', v)} previewClassName="h-24" />
@@ -1537,15 +2911,15 @@ export default function UnifiedPageEditor({
                                                             <Field label="Asking Price" value={card.askingPrice ?? ''} onChange={(v) => setCard(i, 'askingPrice', v)} placeholder="INR 20 Cr" />
                                                         </>
                                                     )}
-                                                    {(Array.isArray(card.categories) || cardsUseCategories) && (
-                                                        <Field
-                                                            label="Categories (comma-separated)"
-                                                            value={(card.categories ?? []).join(', ')}
-                                                            onChange={(v) => setCard(i, 'categories', v.split(',').map((item: string) => item.trim()).filter(Boolean))}
-                                                            placeholder="Indoor, Adults"
+                                                    {cardsUseCategories && (
+                                                        <CardCategoriesField
+                                                            categories={card.categories ?? []}
+                                                            availableCategories={allAvailableCategories}
+                                                            onChange={(newCats) => setCard(i, 'categories', newCats)}
+                                                            onAddGlobalCategory={handleAddGlobalCategory}
                                                         />
                                                     )}
-                                                    {('href' in card || cardsUseHref) && (
+                                                    {page.slug !== 'catalogues' && ('href' in card || cardsUseHref || page.slug === 'classifieds' || page.slug === 'ai-ml' || page.slug === 'campus-design-execution' || page.slug === 'campus-design' || page.slug === 'campus-furniture-design' || page.slug === 'sports-design-execution' || page.slug === 'ai-digital-design-supply' || page.slug === 'ar-vr-experiences' || page.slug === 'sports-infra' || page.slug === 'tech-infra' || page.slug === 'libraries' || page.slug === 'labs' || page.slug === 'collaboration' || page.slug === 'innovation' || page.slug === 'campus-automation' || page.slug === 'campus-master-planning' || page.slug === 'science-tech-labs' || page.slug === 'smart-classrooms') && (
                                                         <Field label="Card Link" value={card.href ?? ''} onChange={(v) => setCard(i, 'href', v)} />
                                                     )}
                                                     {('downloadLink' in card || cardsUseDownloadLink) && (
@@ -1567,7 +2941,7 @@ export default function UnifiedPageEditor({
                         })()}
 
                         {/* Optional second cards block */}
-                        {('section2Cards' in effectiveDefaults) && (
+                        {('section2Cards' in effectiveDefaults) && page.slug !== 'digital-transformation' && (
                             <section className="space-y-6">
                                 <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                                     <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">
@@ -1605,7 +2979,7 @@ export default function UnifiedPageEditor({
                         )}
 
                         {/* Optional policy/content sections block */}
-                        {('sections' in effectiveDefaults) && (
+                        {('sections' in effectiveDefaults) && page.slug !== 'digital-transformation' && !isArticlePage && (
                             <section className="space-y-6">
                                 <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                                     <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">
@@ -1659,7 +3033,7 @@ export default function UnifiedPageEditor({
                             </section>
                         )}
 
-                        {('section2Description' in effectiveDefaults) && (
+                        {('section2Description' in effectiveDefaults) && page.slug !== 'digital-transformation' && (
                             <section className="space-y-6">
                                 <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
                                     <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Section Supporting Text</h4>
@@ -1675,13 +3049,27 @@ export default function UnifiedPageEditor({
                                     <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">
                                         Key Feature Bullets <span className="text-emerald-500 ml-2">({(data.features ?? []).length})</span>
                                     </h4>
-                                    <button
-                                        type="button"
-                                        onClick={addFeature}
-                                        className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-emerald-700 transition-all shadow-md"
-                                    >
-                                        <Plus className="w-4 h-4" /> Add Bullet
-                                    </button>
+                                    <div className="flex items-center gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => set('hideFeatures', !data.hideFeatures)}
+                                            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                                data.hideFeatures
+                                                    ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                                    : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                            }`}
+                                        >
+                                            {data.hideFeatures ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                            {data.hideFeatures ? 'Hidden / Draft' : 'Live on Page'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={addFeature}
+                                            className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-emerald-700 transition-all shadow-md"
+                                        >
+                                            <Plus className="w-4 h-4" /> Add Bullet
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     {(data.features ?? []).map((f: string, i: number) => (
@@ -1702,86 +3090,428 @@ export default function UnifiedPageEditor({
                             </section>
                         )}
 
-                        {('ctaTitle' in effectiveDefaults || 'ctaSubtitle' in effectiveDefaults || 'ctaButtonLabel' in effectiveDefaults || 'ctaHref' in effectiveDefaults) && (
+                        {('philosophyTitle' in effectiveDefaults || page.slug === 'libraries' || page.slug === 'labs') && (
                             <section className="space-y-6">
-                                <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-                                    <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Call-to-Action Footer</h4>
+                                <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                                    <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">
+                                        {page.slug === 'labs' ? 'Lab Evolution & Services Section' : 'Philosophy / Highlight Section'}
+                                    </h4>
+                                    <button
+                                        type="button"
+                                        onClick={() => set('hidePhilosophy', !data.hidePhilosophy)}
+                                        className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                            data.hidePhilosophy
+                                                ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                                : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                        }`}
+                                    >
+                                        {data.hidePhilosophy ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                        {data.hidePhilosophy ? 'Hidden / Draft' : 'Live on Page'}
+                                    </button>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {('ctaTitle' in effectiveDefaults) && <Field label="CTA Heading" value={data.ctaTitle ?? ''} onChange={(v) => set('ctaTitle', v)} />}
-                                    {('ctaSubtitle' in effectiveDefaults) && <Field label="CTA Subtitle" value={data.ctaSubtitle ?? ''} onChange={(v) => set('ctaSubtitle', v)} multiline />}
-                                    {('ctaButtonLabel' in effectiveDefaults) && <Field label="CTA Button Label" value={data.ctaButtonLabel ?? ''} onChange={(v) => set('ctaButtonLabel', v)} />}
-                                    {('ctaHref' in effectiveDefaults) && <Field label="CTA Link" value={data.ctaHref ?? ''} onChange={(v) => set('ctaHref', v)} />}
+                                    <Field
+                                        label="Section Heading"
+                                        value={data.philosophyTitle ?? ''}
+                                        onChange={(v) => set('philosophyTitle', v)}
+                                        placeholder={page.slug === 'labs' ? 'Static Lab to Innovation Centre.' : 'Beyond Books. Knowledge Networks.'}
+                                    />
+                                    <Field
+                                        label="Section Description"
+                                        value={data.philosophyDescription ?? ''}
+                                        onChange={(v) => set('philosophyDescription', v)}
+                                        multiline
+                                    />
+                                    {page.slug === 'labs' ? (
+                                        <>
+                                            <Field
+                                                label="Service Link Label"
+                                                value={data.philosophyLinkLabel ?? ''}
+                                                onChange={(v) => set('philosophyLinkLabel', v)}
+                                                placeholder="Full Service List"
+                                            />
+                                            <Field
+                                                label="Service Link URL"
+                                                value={data.philosophyLinkHref ?? ''}
+                                                onChange={(v) => set('philosophyLinkHref', v)}
+                                                placeholder="/contact-us"
+                                            />
+                                            <div className="md:col-span-2 space-y-3 pt-2">
+                                                <div className="flex items-center justify-between">
+                                                    <label className="block text-sm font-bold text-gray-700">
+                                                        Highlight Bullet Points ({(data.philosophyBullets ?? []).length})
+                                                    </label>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            set('philosophyBullets', [
+                                                                ...(data.philosophyBullets ?? []),
+                                                                'New highlight bullet',
+                                                            ])
+                                                        }
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-blue-700 transition-all shadow-xs"
+                                                    >
+                                                        <Plus className="w-3.5 h-3.5" /> Add Bullet
+                                                    </button>
+                                                </div>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    {(data.philosophyBullets ?? []).map((bullet: string, bIdx: number) => (
+                                                        <div
+                                                            key={bIdx}
+                                                            className="flex items-center gap-2 bg-gray-50/70 p-2.5 rounded-xl border border-gray-200"
+                                                        >
+                                                            <span className="w-5 h-5 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs shrink-0">
+                                                                ✓
+                                                            </span>
+                                                            <input
+                                                                type="text"
+                                                                value={bullet}
+                                                                onChange={(e) => {
+                                                                    const next = [...(data.philosophyBullets ?? [])];
+                                                                    next[bIdx] = e.target.value;
+                                                                    set('philosophyBullets', next);
+                                                                }}
+                                                                className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-sm font-medium"
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    set(
+                                                                        'philosophyBullets',
+                                                                        (data.philosophyBullets ?? []).filter((_: string, idx: number) => idx !== bIdx)
+                                                                    )
+                                                                }
+                                                                className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div className="md:col-span-2 space-y-3 pt-2">
+                                                <div className="flex items-center justify-between">
+                                                    <label className="block text-sm font-bold text-gray-700">
+                                                        Service Grid Cards ({(data.philosophyServices ?? []).length})
+                                                    </label>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            set('philosophyServices', [
+                                                                ...(data.philosophyServices ?? []),
+                                                                { title: 'New Service', desc: 'Service description' },
+                                                            ])
+                                                        }
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-blue-700 transition-all shadow-xs"
+                                                    >
+                                                        <Plus className="w-3.5 h-3.5" /> Add Service Card
+                                                    </button>
+                                                </div>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    {(data.philosophyServices ?? []).map((srv: any, sIdx: number) => (
+                                                        <div
+                                                            key={sIdx}
+                                                            className="border border-gray-200 rounded-2xl p-4 bg-gray-50/40 space-y-3 relative"
+                                                        >
+                                                            <div className="flex items-center justify-between">
+                                                                <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
+                                                                    Service Box #{sIdx + 1}
+                                                                </span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        set(
+                                                                            'philosophyServices',
+                                                                            (data.philosophyServices ?? []).filter((_: any, idx: number) => idx !== sIdx)
+                                                                        )
+                                                                    }
+                                                                    className="text-red-400 hover:text-red-600 text-[10px] font-black uppercase tracking-wider flex items-center gap-1"
+                                                                >
+                                                                    <Trash2 className="w-3.5 h-3.5" /> Delete
+                                                                </button>
+                                                            </div>
+                                                            <Field
+                                                                label="Service Title"
+                                                                value={srv.title ?? ''}
+                                                                onChange={(v) => {
+                                                                    const next = [...(data.philosophyServices ?? [])];
+                                                                    next[sIdx] = { ...next[sIdx], title: v };
+                                                                    set('philosophyServices', next);
+                                                                }}
+                                                            />
+                                                            <Field
+                                                                label="Service Subtitle"
+                                                                value={srv.desc ?? ''}
+                                                                onChange={(v) => {
+                                                                    const next = [...(data.philosophyServices ?? [])];
+                                                                    next[sIdx] = { ...next[sIdx], desc: v };
+                                                                    set('philosophyServices', next);
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Field
+                                                label="Stat 1 Value"
+                                                value={data.philosophyStat1Value ?? ''}
+                                                onChange={(v) => set('philosophyStat1Value', v)}
+                                                placeholder="98%"
+                                            />
+                                            <Field
+                                                label="Stat 1 Label"
+                                                value={data.philosophyStat1Label ?? ''}
+                                                onChange={(v) => set('philosophyStat1Label', v)}
+                                                placeholder="User Satisfaction"
+                                            />
+                                            <Field
+                                                label="Stat 2 Value"
+                                                value={data.philosophyStat2Value ?? ''}
+                                                onChange={(v) => set('philosophyStat2Value', v)}
+                                                placeholder="Turnkey"
+                                            />
+                                            <Field
+                                                label="Stat 2 Label"
+                                                value={data.philosophyStat2Label ?? ''}
+                                                onChange={(v) => set('philosophyStat2Label', v)}
+                                                placeholder="Implementation"
+                                            />
+                                            <div className="md:col-span-2">
+                                                <MediaImageField
+                                                    label="Highlight Image"
+                                                    value={data.philosophyImage ?? ''}
+                                                    onChange={(v) => set('philosophyImage', v)}
+                                                    previewClassName="h-32"
+                                                />
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </section>
                         )}
 
-                        {/* Optional Case Studies block */}
-                        {('caseStudies' in effectiveDefaults || page.slug === 'catalogues') && (
+                        {('quoteText' in effectiveDefaults || 'quoteText' in data || page.slug === 'furniture') && (
                             <section className="space-y-6">
                                 <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                                     <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">
-                                        Case Studies / Projects <span className="text-purple-500 ml-2">({(data.caseStudies ?? []).length})</span>
+                                        Design Philosophy / Quote Section
                                     </h4>
                                     <button
                                         type="button"
-                                        onClick={addCaseStudy}
-                                        className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-purple-700 transition-all shadow-md"
+                                        onClick={() => set('hideQuote', !data.hideQuote)}
+                                        className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                            data.hideQuote
+                                                ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                                : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                        }`}
                                     >
-                                        <Plus className="w-4 h-4" /> Add Project
+                                        {data.hideQuote ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                        {data.hideQuote ? 'Hidden / Draft' : 'Live on Page'}
                                     </button>
                                 </div>
-                                <div className="grid grid-cols-1 gap-6">
-                                    {(data.caseStudies ?? []).map((study: any, i: number) => (
-                                        <div key={i} id={`casestudy-item-${i}`} className="border border-gray-200 rounded-2xl p-6 bg-gray-50/30 group relative">
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    const newList = [...(data.caseStudies ?? [])];
-                                                    newList.splice(i, 1);
-                                                    set('caseStudies', newList);
-                                                }}
-                                                className="absolute top-4 right-4 text-red-400 hover:text-red-600"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <Field
-                                                    label="Project Title"
-                                                    value={study.title ?? ''}
-                                                    onChange={(v) => {
-                                                        const newList = [...(data.caseStudies ?? [])];
-                                                        newList[i] = { ...newList[i], title: v };
-                                                        set('caseStudies', newList);
-                                                    }}
-                                                />
-                                                <MediaImageField
-                                                    label="Image"
-                                                    value={study.image ?? ''}
-                                                    onChange={(v) => {
-                                                        const newList = [...(data.caseStudies ?? [])];
-                                                        newList[i] = { ...newList[i], image: v };
-                                                        set('caseStudies', newList);
-                                                    }}
-                                                    previewClassName="h-24"
-                                                />
-                                                <div className="md:col-span-2">
-                                                    <Field
-                                                        label="Description"
-                                                        value={study.description ?? ''}
-                                                        onChange={(v) => {
-                                                            const newList = [...(data.caseStudies ?? [])];
-                                                            newList[i] = { ...newList[i], description: v };
-                                                            set('caseStudies', newList);
-                                                        }}
-                                                        multiline
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
+                                <div className="space-y-6">
+                                    <Field
+                                        label="Quote / Philosophy Text"
+                                        value={data.quoteText ?? ''}
+                                        onChange={(v) => set('quoteText', v)}
+                                        multiline
+                                        placeholder="Infrastructure isn't just about buildings..."
+                                    />
+                                    <Field
+                                        label="Quote Attribution / Label"
+                                        value={data.quoteLabel ?? ''}
+                                        onChange={(v) => set('quoteLabel', v)}
+                                        placeholder="Campus Mart Design Philosophy"
+                                    />
                                 </div>
                             </section>
+                        )}
+
+                        {('highlightTitle' in effectiveDefaults || page.slug === 'smart-classrooms') && (
+                            <section className="space-y-6">
+                                <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                                    <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">
+                                        Highlight Band Section
+                                    </h4>
+                                    <button
+                                        type="button"
+                                        onClick={() => set('hideHighlight', !data.hideHighlight)}
+                                        className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                            data.hideHighlight
+                                                ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                                : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                        }`}
+                                    >
+                                        {data.hideHighlight ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                        {data.hideHighlight ? 'Hidden / Draft' : 'Live on Page'}
+                                    </button>
+                                </div>
+                                <div className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <Field
+                                            label="Badge / Eyebrow"
+                                            value={data.highlightEyebrow ?? ''}
+                                            onChange={(v) => set('highlightEyebrow', v)}
+                                            placeholder="Built for every classroom"
+                                        />
+                                        <Field
+                                            label="Highlight Heading"
+                                            value={data.highlightTitle ?? ''}
+                                            onChange={(v) => set('highlightTitle', v)}
+                                            placeholder="Technology that fades into the background, so teaching stays in front"
+                                        />
+                                    </div>
+                                    <MediaImageField
+                                        label="Highlight Image Backdrop"
+                                        value={data.highlightImage ?? ''}
+                                        onChange={(v) => set('highlightImage', v)}
+                                        previewClassName="h-32"
+                                    />
+                                    <div className="space-y-3 pt-2">
+                                        <div className="flex items-center justify-between">
+                                            <label className="block text-sm font-bold text-gray-700">
+                                                Key Bullet Points ({(data.highlightBullets ?? []).length})
+                                            </label>
+                                            <button
+                                                type="button"
+                                                onClick={addHighlightBullet}
+                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-blue-700 transition-all shadow-xs"
+                                            >
+                                                <Plus className="w-3.5 h-3.5" /> Add Bullet
+                                            </button>
+                                        </div>
+                                        <div className="grid grid-cols-1 gap-3">
+                                            {(data.highlightBullets ?? []).map((bullet: string, bIdx: number) => (
+                                                <div
+                                                    key={bIdx}
+                                                    className="flex items-center gap-2 bg-gray-50/70 p-2.5 rounded-xl border border-gray-200"
+                                                >
+                                                    <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs shrink-0">
+                                                        ✓
+                                                    </span>
+                                                    <input
+                                                        type="text"
+                                                        value={bullet}
+                                                        onChange={(e) => setHighlightBullet(bIdx, e.target.value)}
+                                                        className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-sm font-medium"
+                                                        placeholder="Highlight bullet description..."
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeHighlightBullet(bIdx)}
+                                                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        )}
+
+                        {page.slug !== 'faq' && !isArticlePage && ('ctaTitle' in effectiveDefaults || 'ctaSubtitle' in effectiveDefaults || 'ctaButtonLabel' in effectiveDefaults || 'ctaHref' in effectiveDefaults || page.slug === 'catalogues' || page.slug === 'classifieds') && (
+                            <section className="space-y-6">
+                                <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                                    <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Call-to-Action Footer</h4>
+                                    <button
+                                        type="button"
+                                        onClick={() => set('hideCta', !data.hideCta)}
+                                        className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                            data.hideCta
+                                                ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                                : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                        }`}
+                                    >
+                                        {data.hideCta ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                        {data.hideCta ? 'Hidden / Draft' : 'Live on Page'}
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {('ctaTitle' in effectiveDefaults || page.slug === 'catalogues' || page.slug === 'classifieds') && <Field label="CTA Heading" value={data.ctaTitle ?? ''} onChange={(v) => set('ctaTitle', v)} />}
+                                    {('ctaSubtitle' in effectiveDefaults || page.slug === 'catalogues' || page.slug === 'classifieds') && <Field label="CTA Subtitle" value={data.ctaSubtitle ?? ''} onChange={(v) => set('ctaSubtitle', v)} multiline />}
+                                    {('ctaButtonLabel' in effectiveDefaults || page.slug === 'catalogues' || page.slug === 'classifieds') && <Field label="CTA Button Label" value={data.ctaButtonLabel ?? ''} onChange={(v) => set('ctaButtonLabel', v)} />}
+                                    {page.slug === 'catalogues' ? (
+                                        <>
+                                            <Field label="Secondary CTA Button Label" value={data.ctaSecondaryLabel ?? ''} onChange={(v) => set('ctaSecondaryLabel', v)} placeholder="Contact Sales" />
+                                            <Field label="Secondary CTA Button Link" value={data.ctaSecondaryHref ?? ''} onChange={(v) => set('ctaSecondaryHref', v)} placeholder="/contact-us" />
+                                        </>
+                                    ) : (
+                                        ('ctaHref' in effectiveDefaults) && <Field label="CTA Link" value={data.ctaHref ?? ''} onChange={(v) => set('ctaHref', v)} />
+                                    )}
+                                </div>
+                            </section>
+                        )}
+
+                        {('formTitle' in effectiveDefaults || page.slug === 'smart-classrooms') && (
+                            <section className="space-y-6">
+                                <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                                    <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">
+                                        Request Information Form
+                                    </h4>
+                                    <button
+                                        type="button"
+                                        onClick={() => set('hideForm', !data.hideForm)}
+                                        className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                            data.hideForm
+                                                ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                                : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                        }`}
+                                    >
+                                        {data.hideForm ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                        {data.hideForm ? 'Hidden / Draft' : 'Live on Page'}
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <Field
+                                        label="Form Heading"
+                                        value={data.formTitle ?? ''}
+                                        onChange={(v) => set('formTitle', v)}
+                                        placeholder="Request More Information"
+                                    />
+                                    <Field
+                                        label="Form Subheading"
+                                        value={data.formSubtitle ?? ''}
+                                        onChange={(v) => set('formSubtitle', v)}
+                                        multiline
+                                        placeholder="Tell us what your institution needs and our team will contact you."
+                                    />
+                                </div>
+                            </section>
+                        )}
+
+                        {/* Case Studies / Projects Showcase Section */}
+                        {('caseStudies' in effectiveDefaults || page.slug === 'catalogues') && (
+                            <CaseStudiesEditorSection
+                                data={data}
+                                set={set}
+                                onSyncCaseStudies={async (nextCaseStudies) => {
+                                    const nextData = { ...data, caseStudies: nextCaseStudies };
+                                    setData(nextData);
+                                    try {
+                                        const { data: updated } = await api.put(`/pages/${page.id}`, {
+                                            title,
+                                            published,
+                                            pageData: JSON.stringify(nextData),
+                                        });
+                                        clearPageDataCache(page.slug);
+                                        clearPageDataCache();
+                                        broadcastCmsInvalidation({ type: 'INVALIDATE_PAGE', slug: page.slug });
+                                        broadcastCmsInvalidation({ type: 'INVALIDATE_ALL' });
+                                        setSaved(true);
+                                        setTimeout(() => setSaved(false), 2000);
+                                        if (onSaved) onSaved(updated);
+                                    } catch (err: any) {
+                                        console.error('Failed to sync case studies:', err);
+                                        const msg = err?.response?.data?.error || 'Failed to save case studies.';
+                                        setSaveError(msg);
+                                    }
+                                }}
+                            />
                         )}
 
                     </>

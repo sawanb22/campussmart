@@ -7,6 +7,7 @@ import { usePageData } from '@/hooks/usePageData';
 const DEFAULTS = {
   heroTitle: 'Partnership Enquiry',
   heroSubtitle: 'Partner with us to transform educational infrastructure.',
+  formIntro: 'Whether you are an institution looking to upgrade infrastructure, an educational group seeking strategic collaboration, or an academic partner exploring curriculum and technology alliances, fill out the form below. Our partnerships leadership team will review your requirements and reach out within 24–48 business hours.',
 };
 
 const Partnership = () => {
@@ -60,6 +61,7 @@ const Partnership = () => {
 
   const heroTitle = data.heroTitle ?? DEFAULTS.heroTitle;
   const heroSubtitle = data.heroSubtitle ?? DEFAULTS.heroSubtitle;
+  const formIntro = data.formIntro ?? DEFAULTS.formIntro;
 
   if (submitted) {
     return (
@@ -90,9 +92,15 @@ const Partnership = () => {
   return (
     <main className="min-h-screen bg-cm-gray py-8 sm:py-12">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-2xl p-6 sm:p-10 shadow-sm">
+        <div className="bg-white rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-100">
           <h1 className="text-3xl font-bold text-cm-blue-dark mb-2 text-center">{heroTitle}</h1>
-          <p className="text-gray-600 text-center mb-8">{heroSubtitle}</p>
+          <p className="text-gray-500 text-center mb-5">{heroSubtitle}</p>
+
+          {formIntro && (
+            <div className="mb-8 rounded-xl bg-slate-50 border border-slate-200/80 p-4 sm:p-5 text-xs sm:text-sm text-slate-700 leading-relaxed text-center sm:text-left">
+              {formIntro}
+            </div>
+          )}
 
           {modelParam && (
             <div className="mb-6 rounded-xl bg-blue-50 border border-blue-200 p-4 text-sm text-cm-blue flex items-center gap-2">
@@ -147,7 +155,7 @@ const Partnership = () => {
                 <input
                   id="partner-phone"
                   type="tel"
-                  pattern="(?:\+91[ -]?)?[6-9][0-9]{9}"
+                  pattern="(?:\+?91[\s\-]?)?0?[0-9\s\-]{10,14}"
                   minLength={10}
                   maxLength={14}
                   value={formData.phone}

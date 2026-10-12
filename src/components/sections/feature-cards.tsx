@@ -7,51 +7,9 @@ import { useSiteContent } from '@/contexts/SiteContentContext';
 import { useContactAction } from '@/hooks/useContactAction';
 import ContactActionModal from '@/components/ui/contact-action-modal';
 import { resolveMediaUrl } from '@/lib/media-url';
+import { HomeFeatureCardsSkeleton } from '@/components/ui/page-skeleton';
 
 gsap.registerPlugin(ScrollTrigger);
-
-const defaultFeatures = [
-  { title: 'Digital Transformation', description: 'Cutting-edge digital infrastructure transforming how modern campuses operate and learn.', image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=90', href: '/digital-transformation', tag: 'Digital', color: '#3B82F6', h: 340 },
-  { title: 'AI-Powered Learning Stations', description: 'Intelligent AI stations personalising education for every student at every level.', image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=800&q=90', href: '/ai-stations', tag: 'AI & Tech', color: '#8B5CF6', h: 220 },
-  { title: 'Innovation Centres', description: 'Purpose-built spaces designed to unlock creativity, collaboration and breakthrough thinking.', image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=90', href: '/innovation-centres', tag: 'Innovation', color: '#EC4899', h: 270 },
-  { title: 'Smart Classrooms', description: 'IoT-connected rooms with interactive boards, real-time analytics and immersive tools.', image: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=800&q=90', href: '/smart-classrooms', tag: 'Tech Infra', color: '#06B6D4', h: 220 },
-  { title: 'Campus Furniture Design', description: 'Thoughtfully engineered, ergonomic furniture that elevates the academic experience.', image: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=90', href: '/campus-furniture-design', tag: 'Furniture', color: '#F59E0B', h: 360 },
-  { title: 'Sports Infrastructure', description: 'World-class athletic facilities nurturing champions, wellness, and team spirit.', image: 'https://images.unsplash.com/photo-1575361204480-aadea25e6e68?auto=format&fit=crop&w=800&q=90', href: '/sports-infra', tag: 'Sports', color: '#10B981', h: 240 },
-  { title: 'Library Management', description: 'AI-driven smart library solutions providing seamless access to global knowledge.', image: 'https://images.unsplash.com/photo-1568667256549-094345857637?auto=format&fit=crop&w=800&q=90', href: '/library-management', tag: 'Library', color: '#6366F1', h: 300 },
-  { title: 'Science & Tech Labs', description: 'Fully equipped STEM laboratories built for discovery, experimentation and innovation.', image: 'https://images.unsplash.com/photo-1532094349884-543290e34c7d?auto=format&fit=crop&w=800&q=90', href: '/science-tech-labs', tag: 'Labs', color: '#14B8A6', h: 200 },
-  { title: 'Campus Master Planning', description: 'Visionary campus planning from concept to construction, built to inspire generations.', image: 'https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=800&q=90', href: '/campus-master-planning', tag: 'Planning', color: '#F97316', h: 320 },
-  { title: 'AR / VR Learning', description: 'Immersive reality experiences bringing complex concepts to vivid, unforgettable life.', image: 'https://images.unsplash.com/photo-1622979135225-d2ba269cf1ac?auto=format&fit=crop&w=800&q=90', href: '/ar-vr-experiences', tag: 'AR / VR', color: '#A855F7', h: 240 },
-  { title: 'Campus Automation', description: 'Smart systems automating admissions, attendance, finance and governance seamlessly.', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=90', href: '/campus-automation', tag: 'Automation', color: '#0EA5E9', h: 200 },
-  { title: 'Collaboration Spaces', description: 'Dynamic, flexible zones engineered for productive teamwork and creative ideation.', image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=90', href: '/collaboration-spaces', tag: 'Spaces', color: '#EF4444', h: 260 },
-];
-
-const defaultSidebar = {
-  classifieds: [
-    { label: 'Colleges / Universities for Sale', href: '/colleges-universities-for-sale' },
-    { label: 'Education Infra Funding', href: '/classifieds' },
-    { label: 'Partner with Running Colleges', href: '/partner-with-colleges' },
-  ],
-  resources: [
-    { label: 'Complete Guide on AI Implementation', href: '/ai-guide' },
-    { label: 'Setting Up a College in India', href: '/setup-college' },
-    { label: 'UGC Guidelines for Digital Campus', href: '/ugc-guidelines' },
-    { label: 'Product Catalog 2025', href: '/catalogues' },
-    { label: 'Lookbook – Play Furniture', href: '/furniture' },
-  ],
-  completedProjects: [
-    { label: 'Campus Master Planning', href: '/campus-master-planning' },
-    { label: '20 Stunning College Buildings', href: '/campus-master-planning' },
-    { label: 'Academic buildings', href: '/campus-master-planning' },
-    { label: 'Research facilities', href: '/innovation-centres' },
-    { label: 'Student life centers', href: '/innovation-centres' },
-    { label: 'Athletic complexes', href: '/sports-infra' },
-  ],
-  contacts: [
-    { bg: '#FFD700', title: 'DESIGN & ARCHITECTURE', contact: 'info@campusmart.in', href: 'mailto:info@campusmart.in', isEmail: true, queryText: 'FOR QUERIES ON' },
-    { bg: '#00c4cc', title: 'CAMPUS INNOVATIONS', contact: 'call us on 9966109191', href: 'tel:+919966109191', isEmail: false, queryText: 'FOR QUERIES ON' },
-    { bg: '#C8FF00', title: 'PARTNER CAMPUS', contact: 'call us on 9866091111', href: 'tel:+919866091111', isEmail: false, queryText: 'FOR QUERIES ON' },
-  ]
-};
 
 const getCanonicalFeatureHref = (title: string): string | null => {
   switch (title) {
@@ -59,7 +17,7 @@ const getCanonicalFeatureHref = (title: string): string | null => {
     case 'AR / VR Learning':
     case 'AR/VR Learning': return '/ar-vr-experiences';
     case 'Innovation Centres':
-    case 'Innovation Centers': return '/innovation-centres';
+    case 'Innovation Centers': return '/innovation';
     case 'Science & Tech Labs': return '/science-tech-labs';
     case 'Campus Master Planning': return '/campus-master-planning';
     case 'Campus Furniture Design': return '/campus-furniture-design';
@@ -70,40 +28,53 @@ const getCanonicalFeatureHref = (title: string): string | null => {
 };
 
 const getCanonicalProjectHref = (label: string): string => {
-  if (label === 'Research facilities' || label === 'Student life centers') return '/innovation-centres';
-  if (label === 'Athletic complexes') return '/sports-infra';
+  const norm = label?.toLowerCase()?.trim() || '';
+  if (norm.includes('20 stunning')) return '/20-stunning-college-buildings';
+  if (norm.includes('academic buildings')) return '/academic-buildings';
+  if (norm.includes('research facilities')) return '/research-facilities';
+  if (norm.includes('student life')) return '/student-life-centers';
+  if (norm.includes('athletic complexes')) return '/sports-infra';
   return '/campus-master-planning';
 };
 
 const FeatureCards = () => {
-  const { content } = useSiteContent();
-  const features = ((Array.isArray(content.home_features) ? content.home_features : null) || defaultFeatures).map((feature: any) => ({
-    ...feature,
-    href: (feature.href && feature.href !== '/')
-      ? feature.href
-      : (getCanonicalFeatureHref(feature.title) || feature.href || '/'),
-  }));
-  const rawSidebar = (typeof content.home_sidebar === 'object' && content.home_sidebar !== null) ? content.home_sidebar : defaultSidebar;
-  const classifieds = (Array.isArray(rawSidebar.classifieds) ? rawSidebar.classifieds : defaultSidebar.classifieds).map((item: any) =>
+  const { content, loading } = useSiteContent();
+
+  const rawFeatures = Array.isArray(content.home_features) ? content.home_features : [];
+  const features = rawFeatures
+    .filter((feature: any) => feature && feature.active !== false)
+    .map((feature: any) => ({
+      ...feature,
+      href: (feature.href && feature.href !== '/')
+        ? feature.href
+        : (getCanonicalFeatureHref(feature.title) || feature.href || '/'),
+    }));
+
+  const rawSidebar = (typeof content.home_sidebar === 'object' && content.home_sidebar !== null)
+    ? content.home_sidebar
+    : {};
+
+  const classifieds = (Array.isArray(rawSidebar.classifieds) ? rawSidebar.classifieds : []).map((item: any) =>
     item.label === 'Colleges / Universities for Sale'
       ? { ...item, href: '/colleges-universities-for-sale' }
       : item
   );
-  const resources = (Array.isArray(rawSidebar.resources) ? rawSidebar.resources : defaultSidebar.resources).map((item: any) =>
+  const resources = (Array.isArray(rawSidebar.resources) ? rawSidebar.resources : []).map((item: any) =>
     item.label?.toLowerCase().includes('product catalog') || item.label?.toLowerCase().includes('product catalogue')
       ? { ...item, href: '/catalogues' }
       : item
   );
-  const completedProjects = (Array.isArray(rawSidebar.completedProjects) ? rawSidebar.completedProjects : defaultSidebar.completedProjects).map((item: any) => ({
+  const completedProjects = (Array.isArray(rawSidebar.completedProjects) ? rawSidebar.completedProjects : []).map((item: any) => ({
     ...item,
     href: (item.href && item.href !== '/') ? item.href : (getCanonicalProjectHref(item.label) || item.href || '/'),
   }));
-  const contacts = Array.isArray(rawSidebar.contacts) ? rawSidebar.contacts : defaultSidebar.contacts;
+  const contacts = Array.isArray(rawSidebar.contacts) ? rawSidebar.contacts : [];
   const { modalState, closeModal, triggerContact } = useContactAction();
 
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    if (loading || features.length === 0) return;
     // Only run animation on desktop to avoid WebKit column rendering bugs with transforms
     const isMobile = window.innerWidth < 1024;
     const ctx = gsap.context(() => {
@@ -143,6 +114,10 @@ const FeatureCards = () => {
     return () => window.removeEventListener('resize', update);
   }, []);
 
+  if (loading) {
+    return <HomeFeatureCardsSkeleton />;
+  }
+
   return (
     <section ref={sectionRef} className="py-2 sm:py-4 px-3 bg-[#f0f2f5] sm:px-4">
       <div className="max-w-6xl mx-auto">
@@ -163,18 +138,13 @@ const FeatureCards = () => {
                       style={{ height: cardHeight }}
                     >
                     {/* Background image */}
-                    <img
-                      src={resolveMediaUrl(image) || ''}
-                      alt={title}
-                      onError={(e) => {
-                        const fallback = defaultFeatures.find((f) => f.title === title)?.image || '';
-                        const target = e.currentTarget;
-                        if (target.src !== fallback) {
-                          target.src = fallback;
-                        }
-                      }}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                    />
+                    {image && (
+                      <img
+                        src={resolveMediaUrl(image) || image}
+                        alt={title}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                      />
+                    )}
 
                     {/* Permanent subtle vignette — branded white/blue gradient */}
                     <div className="absolute inset-0 bg-gradient-to-t from-[#00173d]/85 via-[#002868]/25 to-white/10 transition-opacity duration-500 group-hover:from-[#001e4d]/90" />
@@ -281,8 +251,8 @@ const FeatureCards = () => {
                 </li>
                 {completedProjects.map(({ label, href }: any) => (
                   <li key={label}>
-                    <Link to={href} className="flex items-center gap-2 px-4 py-2 text-[11px] text-blue-600 hover:bg-blue-50/60 hover:underline transition-colors">
-                      <span className="w-1 h-1 rounded-full bg-blue-400 flex-shrink-0" />
+                    <Link to={href} className="flex items-center gap-2 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-gray-700 hover:text-blue-600 hover:bg-blue-50/60 transition-colors">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 flex-shrink-0" />
                       {label}
                     </Link>
                   </li>

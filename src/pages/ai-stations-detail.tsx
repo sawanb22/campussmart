@@ -2,13 +2,17 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import { resolveMediaUrl } from '@/lib/media-url';
-import { AI_STATIONS_DEFAULTS, AI_STATIONS_PAGE_SLUG, slugifyAIStationTitle } from './ai-stations.data';
+import { AI_STATIONS_PAGE_SLUG, slugifyAIStationTitle, type AIStationCard } from './ai-stations.data';
 
 const AIStationsDetail = () => {
   const { stationSlug } = useParams();
   const { data, loading } = usePageData(AI_STATIONS_PAGE_SLUG);
-  const cards = Array.isArray(data.cards) ? data.cards : AI_STATIONS_DEFAULTS.cards;
-  const card = cards.find((item: any) => slugifyAIStationTitle(item.title) === stationSlug);
+  const cards: AIStationCard[] = Array.isArray(data?.cards) ? data.cards : [];
+  const card = cards.find(
+    (item: any) =>
+      item.slug === stationSlug ||
+      slugifyAIStationTitle(item.title) === stationSlug
+  );
 
   if (loading) {
     return (
@@ -27,7 +31,7 @@ const AIStationsDetail = () => {
     );
   }
 
-  const image = resolveMediaUrl(card.image) || card.image;
+  const image = card.image ? (resolveMediaUrl(card.image) || card.image) : '';
 
   return (
     <main className="min-h-screen bg-gray-50/50 py-8 sm:py-12">

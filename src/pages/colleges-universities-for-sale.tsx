@@ -416,7 +416,7 @@ export default function CollegesUniversitiesForSale() {
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                       <label className="form-label">Phone *</label>
-                      <input type="tel" pattern="(?:\+91[ -]?)?[6-9][0-9]{9}" className="form-input" required value={formData.phone} onChange={(event) => setFormData({ ...formData, phone: event.target.value })} placeholder="+91 98765 43210" />
+                      <input type="tel" pattern="(?:\+?91[\s\-]?)?0?[0-9\s\-]{10,14}" className="form-input" required value={formData.phone} onChange={(event) => setFormData({ ...formData, phone: event.target.value })} placeholder="+91 98765 43210" />
                     </div>
                     <div>
                       <label className="form-label">Institution / Company</label>

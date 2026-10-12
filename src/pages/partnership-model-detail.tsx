@@ -212,7 +212,7 @@ const PartnershipModelDetail = () => {
                       <input
                         type="tel"
                         required
-                        pattern="(?:\+91[ -]?)?[6-9][0-9]{9}"
+                        pattern="(?:\+?91[\s\-]?)?0?[0-9\s\-]{10,14}"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         placeholder="+91 98765 43210"

@@ -3,14 +3,28 @@
 import { useSiteContent } from '../../contexts/SiteContentContext';
 
 const TickerBar = () => {
-    const { content } = useSiteContent();
-    const announcements = (Array.isArray(content.ticker_announcements) ? content.ticker_announcements : null) || [
-        "Digital Transformation Summit: 15 May 2026",
-        "New AI-Powered Learning Stations now available for pre-order",
-        "Join our upcoming Campus Design Webinar on 15th April 2026",
-        "Latest UGC Guidelines for Digital Campus implemented across 50+ institutions",
-        "Explore our new range of ergonomic Campus Furniture in the Lookbook",
-    ];
+    const { content, loading } = useSiteContent();
+
+    if (loading) {
+        return (
+            <div className="w-full relative overflow-hidden flex flex-col animate-pulse" style={{ backgroundColor: '#222b5c' }}>
+                <div className="w-full h-[5px]" style={{ backgroundColor: '#dca842' }} />
+                <div className="relative w-full h-[40px] flex items-center px-4">
+                    <div className="h-4 w-32 rounded bg-white/20" />
+                    <div className="ml-8 h-4 w-64 rounded bg-white/10 hidden sm:block" />
+                </div>
+            </div>
+        );
+    }
+
+    const rawAnnouncements: any[] = Array.isArray(content.ticker_announcements) ? content.ticker_announcements : [];
+    const announcements: string[] = rawAnnouncements
+        .filter((item: any) => (typeof item === 'string' ? Boolean(item.trim()) : item?.active !== false && item?.text))
+        .map((item: any) => (typeof item === 'string' ? item : item.text));
+
+    if (announcements.length === 0) {
+        return null;
+    }
 
     return (
         <div className="w-full relative overflow-hidden flex flex-col" style={{ backgroundColor: '#222b5c' }}>
@@ -36,7 +50,7 @@ const TickerBar = () => {
                         className="font-extrabold text-[12px] md:text-[14px] tracking-wide"
                         style={{ color: '#12395b', fontFamily: 'Georgia, serif' }}
                     >
-                        LATEST UPDATES
+                        {content.ticker_title || 'LATEST UPDATES'}
                     </span>
                 </div>
 

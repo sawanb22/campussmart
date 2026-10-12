@@ -1,22 +1,39 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import gsap from 'gsap';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BarChart3, Brain, Radio, Zap } from 'lucide-react';
+import { ArrowRight, BarChart3, Brain, ChevronLeft, ChevronRight, Radio, Zap } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 import MediaImage from '@/components/ui/media-image';
-import { AI_STATIONS_DEFAULTS, AI_STATIONS_PAGE_SLUG, slugifyAIStationTitle, type AIStationCard } from './ai-stations.data';
+import { PageCardGridSkeleton } from '@/components/ui/page-skeleton';
+import { AI_STATIONS_PAGE_SLUG, slugifyAIStationTitle, type AIStationCard } from './ai-stations.data';
 
 const ICONS = [Brain, Zap, BarChart3, Radio];
+const PAGE_SIZE = 12;
 
 const AIStations = () => {
   const cardsRef = useRef<HTMLDivElement>(null);
-  const { data } = usePageData(AI_STATIONS_PAGE_SLUG);
+  const { data, loading } = usePageData(AI_STATIONS_PAGE_SLUG);
+  const [page, setPage] = useState(1);
+
+  const heroTitle = data.heroTitle || '';
+  const heroSubtitle = data.heroSubtitle || '';
+  const heroImage = data.heroImage || '';
+  const section1Title = data.section1Title || '';
+  const cards: AIStationCard[] = Array.isArray(data.cards) ? data.cards : [];
+  const ctaTitle = data.ctaTitle || '';
+  const ctaSubtitle = data.ctaSubtitle || '';
+
+  const totalPages = Math.ceil(cards.length / PAGE_SIZE);
+  const paginatedCards = useMemo(() => {
+    const startIndex = (page - 1) * PAGE_SIZE;
+    return cards.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [cards, page]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const cards = cardsRef.current?.children;
-      if (cards) {
-        gsap.fromTo(cards,
+      const cardEls = cardsRef.current?.children;
+      if (cardEls && cardEls.length > 0) {
+        gsap.fromTo(cardEls,
           { opacity: 0, y: 30 },
           {
             opacity: 1, y: 0,
@@ -31,17 +48,13 @@ const AIStations = () => {
       }
     });
     return () => ctx.revert();
-  }, []);
-
-  const heroTitle = data.heroTitle ?? AI_STATIONS_DEFAULTS.heroTitle;
-  const heroSubtitle = data.heroSubtitle ?? AI_STATIONS_DEFAULTS.heroSubtitle;
-  const heroImage = data.heroImage || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80';
-  const section1Title = data.section1Title ?? AI_STATIONS_DEFAULTS.section1Title;
-  const cards: AIStationCard[] = Array.isArray(data.cards) ? data.cards : AI_STATIONS_DEFAULTS.cards;
-  const ctaTitle = data.ctaTitle ?? AI_STATIONS_DEFAULTS.ctaTitle;
-  const ctaSubtitle = data.ctaSubtitle ?? AI_STATIONS_DEFAULTS.ctaSubtitle;
+  }, [paginatedCards]);
 
   const cardLink = (card: AIStationCard) => card.href?.trim() || `/${AI_STATIONS_PAGE_SLUG}/${slugifyAIStationTitle(card.title)}`;
+
+  if (loading) {
+    return <PageCardGridSkeleton cardCount={4} />;
+  }
 
   return (
     <main className="min-h-screen bg-white">
@@ -61,13 +74,15 @@ const AIStations = () => {
               </Link>
             </div>
           </div>
-          <div className="lg:w-1/2 relative w-full">
-            <MediaImage
-              src={heroImage}
-              alt={heroTitle}
-              className="rounded-2xl shadow-xl w-full h-[240px] sm:h-[260px] object-cover border-2 border-cm-blue-dark relative z-10"
-            />
-          </div>
+          {heroImage && (
+            <div className="lg:w-1/2 relative w-full">
+              <MediaImage
+                src={heroImage}
+                alt={heroTitle}
+                className="rounded-2xl shadow-xl w-full h-[240px] sm:h-[260px] object-cover border-2 border-cm-blue-dark relative z-10"
+              />
+            </div>
+          )}
         </div>
       </section>
 
@@ -80,7 +95,7 @@ const AIStations = () => {
           </div>
 
           <div ref={cardsRef} className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {cards.map((station, i) => {
+            {paginatedCards.map((station, i) => {
               const Icon = ICONS[i % ICONS.length];
               return (
                 <Link
@@ -104,6 +119,47 @@ const AIStations = () => {
               );
             })}
           </div>
+
+          {totalPages > 1 && (
+            <div className="mt-10 flex items-center justify-center gap-2">
+              <button
+                onClick={() => {
+                  setPage((p) => Math.max(1, p - 1));
+                  cardsRef.current?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                disabled={page === 1}
+                className="flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              >
+                <ChevronLeft className="h-4 w-4" /> Prev
+              </button>
+              {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => {
+                    setPage(p);
+                    cardsRef.current?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className={`h-8 w-8 rounded-lg text-sm font-semibold transition ${
+                    p === page
+                      ? 'bg-cm-blue text-white shadow-sm'
+                      : 'text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+              <button
+                onClick={() => {
+                  setPage((p) => Math.min(totalPages, p + 1));
+                  cardsRef.current?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                disabled={page === totalPages}
+                className="flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              >
+                Next <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

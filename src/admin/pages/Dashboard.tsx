@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import {
     Users, Package, ShoppingBag, MessageSquare, TrendingUp, AlertCircle,
     Tag, FileText, Globe, CheckCircle, Database, Zap, Star, BookMarked,
-    BookOpen, ArrowRight, Activity
+    BookOpen, ArrowRight, Activity, Heart
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../api/client';
@@ -22,9 +22,9 @@ const sectionGroups = [
         heading: '🌐 Website Content',
         color: 'blue',
         items: [
-            { to: '/admin/homepage-editor', icon: Star, label: 'Hero & Homepage', desc: 'Edit banners, hero images, announcements', bg: 'bg-blue-50', txt: 'text-blue-700', ibg: 'bg-blue-100' },
+            { to: '/admin/homepage-editor', icon: Star, label: 'Homepage & Cards', desc: 'Edit cards, images, text & hero', bg: 'bg-blue-50', txt: 'text-blue-700', ibg: 'bg-blue-100' },
             { to: '/admin/pages', icon: Globe, label: 'All Pages', desc: 'Edit every page on the website', bg: 'bg-sky-50', txt: 'text-sky-700', ibg: 'bg-sky-100' },
-            { to: '/admin/blog', icon: BookOpen, label: 'Blog Posts', desc: 'Publish articles and news', bg: 'bg-indigo-50', txt: 'text-indigo-700', ibg: 'bg-indigo-100' },
+            { to: '/admin/blog', icon: BookOpen, label: "Blog (What's Trending)", desc: 'Manage articles, categories & layout', bg: 'bg-indigo-50', txt: 'text-indigo-700', ibg: 'bg-indigo-100' },
         ]
     },
     {
@@ -32,8 +32,8 @@ const sectionGroups = [
         color: 'emerald',
         items: [
             { to: '/admin/products', icon: Package, label: 'Products', desc: 'Add, edit, or remove product listings', bg: 'bg-emerald-50', txt: 'text-emerald-700', ibg: 'bg-emerald-100' },
-            { to: '/admin/catalogues', icon: BookMarked, label: 'Catalogues', desc: 'Upload and manage PDFs', bg: 'bg-teal-50', txt: 'text-teal-700', ibg: 'bg-teal-100' },
-            { to: '/admin/classifieds', icon: Tag, label: 'Classifieds', desc: 'Review & approve listings', bg: 'bg-green-50', txt: 'text-green-700', ibg: 'bg-green-100' },
+            { to: '/admin/catalogues', icon: BookMarked, label: 'Catalogues & Case Studies', desc: 'Manage PDF brochures & case studies', bg: 'bg-teal-50', txt: 'text-teal-700', ibg: 'bg-teal-100' },
+            { to: '/admin/classifieds', icon: Tag, label: 'Classifieds', desc: 'Manage opportunities & listings', bg: 'bg-green-50', txt: 'text-green-700', ibg: 'bg-green-100' },
         ]
     },
     {
@@ -42,6 +42,7 @@ const sectionGroups = [
         items: [
             { to: '/admin/orders', icon: ShoppingBag, label: 'Orders', desc: 'Track and update all orders', bg: 'bg-orange-50', txt: 'text-orange-700', ibg: 'bg-orange-100' },
             { to: '/admin/enquiries', icon: MessageSquare, label: 'Enquiries & Leads', desc: 'View quote requests & messages', bg: 'bg-amber-50', txt: 'text-amber-700', ibg: 'bg-amber-100' },
+            { to: '/admin/wishlist-report', icon: Heart, label: 'Wishlist Reports', desc: 'Leads for quotations', bg: 'bg-rose-50', txt: 'text-rose-700', ibg: 'bg-rose-100' },
         ]
     },
     {

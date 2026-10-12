@@ -2,36 +2,28 @@ import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Building2, Landmark, GraduationCap, Library, TestTube } from 'lucide-react';
-
 import { useSiteContent } from '../../contexts/SiteContentContext';
+import { HomeCollaborationsSkeleton } from '@/components/ui/page-skeleton';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Mock data for collaborations - using icons as placeholders for logos
-const defaultCollaborations = [
-    { name: 'Stanford University', icon: Landmark },
-    { name: 'MIT Labs', icon: TestTube },
-    { name: 'Oxford Library', icon: Library },
-    { name: 'Cambridge Tech', icon: Building2 },
-    { name: 'Harvard Research', icon: GraduationCap },
-    { name: 'Yale Architecture', icon: Landmark },
-    { name: 'Princeton Science', icon: TestTube },
-    { name: 'Columbia Design', icon: Building2 },
-];
+const PARTNER_ICONS = [Landmark, TestTube, Library, Building2, GraduationCap];
 
 const CollaborationsTicker = () => {
-    const { content } = useSiteContent();
+    const { content, loading } = useSiteContent();
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // Merge CMS names with default icons or fallback to Building2
-    const collaborations = (content.collaborations || []).length > 0
-        ? content.collaborations.map((c: any, i: number) => ({
-            name: c.name,
-            icon: defaultCollaborations[i]?.icon || Building2
-        }))
-        : defaultCollaborations;
+    const rawCollabs = Array.isArray(content.collaborations)
+        ? content.collaborations.filter((c: any) => c && c.active !== false && c.name)
+        : [];
+
+    const collaborations = rawCollabs.map((c: any, i: number) => ({
+        name: c.name,
+        icon: PARTNER_ICONS[i % PARTNER_ICONS.length] || Building2
+    }));
 
     useEffect(() => {
+        if (loading || collaborations.length === 0) return;
         const ctx = gsap.context(() => {
             gsap.fromTo(
                 containerRef.current,
@@ -50,13 +42,21 @@ const CollaborationsTicker = () => {
         });
 
         return () => ctx.revert();
-    }, []);
+    }, [loading, collaborations.length]);
+
+    if (loading) {
+        return <HomeCollaborationsSkeleton />;
+    }
+
+    if (collaborations.length === 0) {
+        return null;
+    }
 
     return (
         <section ref={containerRef} className="py-8 bg-gray-50 border-y border-gray-200 overflow-hidden">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 flex justify-center">
                 <h3 className="text-xs md:text-sm font-bold text-gray-500 tracking-[0.2em] uppercase">
-                    Trusted By Leading Institutions Worldwide
+                    {content.collaborations_title || 'Trusted By Leading Institutions Worldwide'}
                 </h3>
             </div>
 

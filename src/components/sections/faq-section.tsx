@@ -15,6 +15,7 @@ gsap.registerPlugin(ScrollTrigger);
 export interface FaqItem {
   question: string;
   answer: string;
+  active?: boolean;
 }
 
 export const defaultFaqs: FaqItem[] = [
@@ -47,10 +48,11 @@ export default function FaqSection() {
   const accordionRef = useRef<HTMLDivElement>(null);
 
   // Consume dynamic CMS FAQs if configured, otherwise fall back to defaults
-  const rawFaqs = content.home_faqs;
-  const faqs: FaqItem[] = Array.isArray(rawFaqs) && rawFaqs.length > 0
+  const rawFaqs = (content as any)?.home_faqs;
+  const rawList: FaqItem[] = Array.isArray(rawFaqs) && rawFaqs.length > 0
     ? rawFaqs
     : defaultFaqs;
+  const faqs = rawList.filter((f) => f.active !== false);
 
   useEffect(() => {
     const ctx = gsap.context(() => {

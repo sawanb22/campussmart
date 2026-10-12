@@ -1,176 +1,600 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { Heart, Check, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
-import { resolveMediaUrl } from '@/lib/media-url';
-import { INNOVATION_PAGE_SLUG, INNOVATION_DEFAULTS, slugifyInnovationTitle, type InnovationCard } from './innovation.data';
+import { useDesignWishlist } from '@/hooks/useDesignWishlist';
+import LoginPromptModal from '@/components/login-prompt-modal';
+import MediaImage from '@/components/ui/media-image';
+import {
+  INNOVATION_PAGE_SLUG,
+  INNOVATION_DEFAULTS,
+  slugifyInnovationTitle,
+  type InnovationCard,
+  type MoreCard,
+} from './innovation.data';
 
-gsap.registerPlugin(ScrollTrigger);
+export interface InnovationStyles {
+  headingFont?: 'playfair' | 'grotesk' | 'poppins' | 'opensans' | 'system';
+  bodyFont?: 'opensans' | 'poppins' | 'grotesk' | 'system';
+  primaryColor?: string;
+  secondaryColor?: string;
+  heroBg?: 'paper' | 'white' | 'slate' | 'blue' | 'stone' | string;
+  cardColumns?: '2' | '3' | '4';
+  showFeatured?: boolean;
+}
+
+const PAGE_SIZE = 12;
+
+const resolveJournalFooterUrl = (label: string): { to?: string; href?: string; isExternal?: boolean } => {
+  const norm = label.toLowerCase().trim();
+  if (norm.includes('planning')) return { to: '/campus-master-planning' };
+  if (norm.includes('tech')) return { to: '/tech-infra' };
+  if (norm.includes('resource')) return { to: '/resources' };
+  if (norm.includes('about')) return { to: '/about-us' };
+  if (norm.includes('contact')) return { to: '/contact-us' };
+  if (norm.includes('partner')) return { to: '/partnership' };
+  if (norm.includes('ideation') || norm.includes('incubation') || norm.includes('acceleration') || norm.includes('funding')) {
+    return { to: '/innovation' };
+  }
+  if (norm.includes('linkedin')) return { href: 'https://www.linkedin.com/company/campusmart/', isExternal: true };
+  if (norm.includes('instagram')) return { href: 'https://www.instagram.com/campusmart.in/', isExternal: true };
+  if (norm.includes('youtube')) return { href: 'https://www.youtube.com/@campusmartindia', isExternal: true };
+  return { to: '/resources' };
+};
 
 const Innovation = () => {
-  const heroRef = useRef<HTMLDivElement>(null);
-  const gridRef = useRef<HTMLDivElement>(null);
-  const { data } = usePageData(INNOVATION_PAGE_SLUG);
-  const [activeCategory, setActiveCategory] = useState('All');
+  const { data } = usePageData<any>(INNOVATION_PAGE_SLUG);
+  const { isSaved, isPending, add, remove, showLoginPrompt, setShowLoginPrompt } = useDesignWishlist('innovation');
+  const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.fromTo(heroRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' });
-      const items = gridRef.current?.children;
-      if (items) {
-        gsap.fromTo(
-          items,
-          { opacity: 0, y: 24 },
-          { opacity: 1, y: 0, duration: 0.6, stagger: 0.08, scrollTrigger: { trigger: gridRef.current, start: 'top 85%' } },
-        );
-      }
+  const get = (key: string) => data[key] ?? INNOVATION_DEFAULTS[key as keyof typeof INNOVATION_DEFAULTS];
+
+  const styles: InnovationStyles = {
+    headingFont: 'poppins',
+    bodyFont: 'opensans',
+    primaryColor: '#155b51',
+    secondaryColor: '#f47b20',
+    heroBg: 'paper',
+    cardColumns: '3',
+    showFeatured: true,
+    ...(data.styles || {}),
+  };
+
+  const headingFontFamily =
+    styles.headingFont === 'playfair'
+      ? '"Playfair Display", Georgia, serif'
+      : styles.headingFont === 'grotesk'
+      ? '"Space Grotesk", sans-serif'
+      : styles.headingFont === 'opensans'
+      ? '"Open Sans", sans-serif'
+      : styles.headingFont === 'system'
+      ? 'system-ui, -apple-system, sans-serif'
+      : '"Poppins", sans-serif';
+
+  const bodyFontFamily =
+    styles.bodyFont === 'poppins'
+      ? '"Poppins", sans-serif'
+      : styles.bodyFont === 'grotesk'
+      ? '"Space Grotesk", sans-serif'
+      : styles.bodyFont === 'system'
+      ? 'system-ui, -apple-system, sans-serif'
+      : '"Open Sans", sans-serif';
+
+  const primaryColor = styles.primaryColor || '#155b51';
+  const secondaryColor = styles.secondaryColor || '#f47b20';
+
+  const pageBg =
+    styles.heroBg === 'white'
+      ? '#ffffff'
+      : styles.heroBg === 'slate'
+      ? '#f1f5f9'
+      : styles.heroBg === 'blue'
+      ? '#eff6ff'
+      : styles.heroBg === 'stone'
+      ? '#f4f4f5'
+      : styles.heroBg?.startsWith('#')
+      ? styles.heroBg
+      : '#f5f4ef';
+
+  const paperBg = styles.heroBg === 'white' ? '#ffffff' : '#f8f8f4';
+
+  const categories: string[] = Array.isArray(data.categories) && data.categories.length > 0
+    ? data.categories
+    : INNOVATION_DEFAULTS.categories;
+
+  const [selectedCategory, setSelectedCategory] = useState(categories[0] || 'All tracks');
+
+  const cards: InnovationCard[] = Array.isArray(data.cards) && data.cards.length > 0
+    ? data.cards
+    : INNOVATION_DEFAULTS.cards;
+
+  const featured = { ...INNOVATION_DEFAULTS.featured, ...(data.featured ?? {}) };
+
+  const visibleCards = useMemo(() => {
+    if (!selectedCategory || selectedCategory === categories[0] || selectedCategory.toLowerCase().startsWith('all')) {
+      return cards;
+    }
+    return cards.filter(card => {
+      const cat = card.category || (card.categories?.[0]);
+      return cat?.toLowerCase() === selectedCategory.toLowerCase() || (card.categories ?? []).some(c => c.toLowerCase() === selectedCategory.toLowerCase());
     });
-    return () => ctx.revert();
-  }, []);
+  }, [cards, categories, selectedCategory]);
 
-  const heroTitle = data.heroTitle ?? INNOVATION_DEFAULTS.heroTitle;
-  const heroSubtitle = data.heroSubtitle ?? INNOVATION_DEFAULTS.heroSubtitle;
-  const ctaTitle = data.ctaTitle ?? INNOVATION_DEFAULTS.ctaTitle;
-  const ctaSubtitle = data.ctaSubtitle ?? INNOVATION_DEFAULTS.ctaSubtitle;
-  const allCards: InnovationCard[] = Array.isArray(data.cards) ? data.cards : INNOVATION_DEFAULTS.cards;
+  const totalPages = Math.ceil(visibleCards.length / PAGE_SIZE);
+  const safePage = totalPages > 0 ? Math.min(page, totalPages) : 1;
+  const paginatedCards = visibleCards.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-  const categoryOptions = useMemo(
-    () => Array.from(new Set(allCards.flatMap((card) => card.categories ?? []).filter(Boolean))),
-    [allCards],
-  );
+  const navLinks: string[] = Array.isArray(data.navLinks) && data.navLinks.length > 0
+    ? data.navLinks
+    : INNOVATION_DEFAULTS.navLinks;
 
-  const filteredCards = useMemo(
-    () => (activeCategory === 'All' ? allCards : allCards.filter((card) => (card.categories ?? []).includes(activeCategory))),
-    [allCards, activeCategory],
-  );
-
-  const [featured, ...remaining] = filteredCards;
-  const richGrid = remaining.slice(0, 3);
-  const simpleGrid = remaining.slice(3);
-
-  const cardLink = (card: InnovationCard) =>
-    card.href?.trim() || `/${INNOVATION_PAGE_SLUG}/${slugifyInnovationTitle(card.title)}`;
+  const resolveNavUrl = (label: string) => {
+    const norm = label.toLowerCase().trim();
+    if (norm.includes('maker') || norm.includes('prototype')) return '/innovation';
+    if (norm.includes('incubation') || norm.includes('ideation')) return '/innovation';
+    if (norm.includes('planning')) return '/campus-master-planning';
+    if (norm.includes('tech')) return '/tech-infra';
+    if (norm.includes('resource')) return '/resources';
+    return '/innovation';
+  };
 
   return (
-    <main className="min-h-screen bg-white">
-      <section ref={heroRef} className="px-4 pt-5 sm:px-6 sm:pt-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
-          <h1 className="text-4xl font-bold tracking-tight text-emerald-800 sm:text-5xl">{heroTitle}</h1>
-          <p className="mt-3 max-w-xl text-sm leading-relaxed text-gray-500 sm:text-base">{heroSubtitle}</p>
+    <main className="ugc-journal-page">
+      <LoginPromptModal open={showLoginPrompt} onClose={() => setShowLoginPrompt(false)} />
+      <style>{`
+        .ugc-journal-page {
+          --ugc-cream: ${pageBg};
+          --ugc-paper: ${paperBg};
+          --ugc-green: ${primaryColor};
+          --ugc-green-dark: ${primaryColor};
+          --ugc-green-soft: #dfe9e4;
+          --ugc-orange: ${secondaryColor};
+          --ugc-blue: #8ca8d9;
+          --ugc-text: #173e39;
+          --ugc-muted: #5e6b66;
+          background: var(--ugc-cream);
+          color: var(--ugc-text);
+          font-family: ${bodyFontFamily};
+          min-height: 100vh;
+          padding: 16px 3vw;
+        }
+        .ugc-page-title, .ugc-featured-title, .ugc-article-title, .ugc-website h1, .ugc-website h2, .ugc-website h3, .ugc-more-heading {
+          font-family: ${headingFontFamily};
+        }
+        .ugc-journal-page *, .ugc-journal-page *::before, .ugc-journal-page *::after { box-sizing: border-box; }
+        .ugc-journal-page a { color: inherit; text-decoration: none; }
+        .ugc-journal-page img { display: block; width: 100%; }
 
-          {/* Category pill bar */}
-          {categoryOptions.length > 0 && (
-          <div className="mt-4 inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-full bg-emerald-800 p-1.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {categoryOptions.map((category) => (
-              <button
-                key={category}
-                type="button"
-                onClick={() => setActiveCategory(category)}
-                className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-2 text-xs font-semibold transition-colors ${
-                  activeCategory === category ? 'bg-white/15 text-white' : 'text-white/60 hover:text-white/90'
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
+        .ugc-website {
+          position: relative;
+          width: min(1160px, 100%);
+          overflow: hidden;
+          margin: auto;
+          border: 1px solid rgba(255, 255, 255, 0.75);
+          border-radius: 24px;
+          background: var(--ugc-paper);
+          box-shadow: 0 16px 45px rgba(14, 35, 30, 0.1);
+        }
+
+        .ugc-header {
+          position: relative;
+          z-index: 2;
+          height: 68px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 36px;
+        }
+        .ugc-logo { display: flex; align-items: center; gap: 8px; color: var(--ugc-text); font-size: 15px; font-weight: 700; letter-spacing: -0.5px; }
+        .ugc-logo-mark { position: relative; width: 22px; height: 22px; border: 2px solid var(--ugc-orange); border-radius: 50%; }
+        .ugc-logo-mark::before { content: ""; position: absolute; width: 8px; height: 8px; top: 5px; left: 5px; border-radius: 50%; background: var(--ugc-orange); }
+        .ugc-logo-mark::after { content: ""; position: absolute; right: -4px; bottom: 3px; width: 10px; height: 2px; background: var(--ugc-green); transform: rotate(-40deg); }
+
+        .ugc-nav { display: flex; align-items: center; gap: 28px; margin-right: 28px; }
+        .ugc-nav a { position: relative; color: #45615c; font-size: 13px; font-weight: 600; }
+        .ugc-nav a:hover { color: var(--ugc-green); }
+
+        .ugc-header-action { display: inline-block; border: 1px solid #d6ddd8; border-radius: 20px; padding: 7px 15px; color: var(--ugc-green); background: rgba(255, 255, 255, 0.75); font-size: 12px; font-weight: 700; transition: all 0.2s ease; }
+        .ugc-header-action:hover { background: var(--ugc-green); color: #fff; }
+
+        .ugc-main { padding: 4px 36px 28px; }
+        .ugc-page-title { margin: 0 0 14px; color: var(--ugc-green); font-size: clamp(30px, 3.5vw, 44px); line-height: 1.05; letter-spacing: -1.2px; font-weight: 700; }
+
+        .ugc-categories { width: min(690px, 100%); min-height: 38px; display: flex; align-items: center; gap: 4px; overflow-x: auto; scrollbar-width: none; margin-bottom: 18px; padding: 4px 8px; border-radius: 30px; background: var(--ugc-green); }
+        .ugc-categories::-webkit-scrollbar { display: none; }
+        .ugc-category { flex: 0 0 auto; border: 0; border-radius: 20px; padding: 6px 14px; background: transparent; color: rgba(255, 255, 255, 0.78); cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s ease; }
+        .ugc-category:hover, .ugc-category.active { background: rgba(255, 255, 255, 0.2); color: #fff; }
+
+        /* Featured article card */
+        .ugc-featured { display: grid; grid-template-columns: 1.15fr 0.85fr; overflow: hidden; border-radius: 18px; background: var(--ugc-green); min-height: 270px; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .ugc-featured:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(21, 91, 81, 0.16); }
+        .ugc-featured-copy { position: relative; display: flex; flex-direction: column; justify-content: center; padding: 28px 32px; color: #fff; }
+        .ugc-eyebrow { margin-bottom: 10px; color: #a3c9c1; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+        .ugc-featured-title { max-width: 480px; margin: 0; font-size: clamp(22px, 2.6vw, 34px); line-height: 1.18; letter-spacing: -0.8px; font-weight: 700; }
+        .ugc-featured-description { max-width: 460px; margin: 12px 0 18px; color: rgba(255, 255, 255, 0.9); font-size: clamp(14px, 1.2vw, 15px); line-height: 1.6; }
+        .ugc-read-link { display: inline-flex; align-items: center; gap: 8px; width: max-content; color: #fff; font-size: 13px; font-weight: 700; }
+        .ugc-read-link span { display: grid; width: 22px; height: 22px; place-items: center; border-radius: 50%; background: var(--ugc-orange); transition: transform 0.2s ease; font-size: 13px; }
+        .ugc-featured:hover .ugc-read-link span { transform: translateX(4px); }
+        .ugc-featured-art { min-height: 270px; overflow: hidden; background: var(--ugc-green-soft); position: relative; }
+        .ugc-featured-art img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Articles list */
+        .ugc-articles {
+          display: grid;
+          grid-template-columns: ${
+            styles.cardColumns === '2'
+              ? 'repeat(2, 1fr)'
+              : styles.cardColumns === '4'
+              ? 'repeat(4, 1fr)'
+              : 'repeat(3, 1fr)'
+          };
+          gap: 18px;
+          margin-top: 20px;
+        }
+        .ugc-article-card { min-width: 0; display: flex; flex-direction: column; background: #fff; border: 1px solid #e2eae5; border-radius: 16px; overflow: hidden; transition: transform 0.2s ease, box-shadow 0.2s ease; position: relative; }
+        .ugc-article-card:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(21, 91, 81, 0.08); }
+        .ugc-article-image { height: 175px; width: 100%; overflow: hidden; background: #d9ded8; position: relative; }
+        .ugc-article-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+        .ugc-article-card:hover .ugc-article-image img { transform: scale(1.04); }
+        .ugc-article-content { padding: 14px 16px 16px; display: flex; flex-direction: column; flex: 1; }
+        .ugc-article-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; color: #6e7e78; font-size: 11px; font-weight: 600; }
+        .ugc-article-category { color: var(--ugc-orange); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; font-size: 11px; }
+        .ugc-article-title { margin: 0 0 6px; color: var(--ugc-green); font-size: 16px; line-height: 1.3; letter-spacing: -0.3px; font-weight: 700; }
+        .ugc-article-desc { margin: 0 0 12px; color: #50615b; font-size: 13px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex: 1; }
+        .ugc-author { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 8px; border-top: 1px solid #eef3f0; color: #5a6b65; font-size: 12px; font-weight: 600; }
+        .ugc-avatar { width: 22px; height: 22px; flex: 0 0 22px; overflow: hidden; border-radius: 50%; background: #c2ccc6; display: grid; place-items: center; font-size: 10px; color: var(--ugc-green); font-weight: 700; }
+
+        /* More section */
+        .ugc-more { margin-top: 32px; padding-top: 20px; border-top: 1px solid #dce1dc; }
+        .ugc-more-heading { margin: 0 0 16px; color: var(--ugc-green); font-size: 22px; letter-spacing: -0.4px; font-weight: 700; }
+        .ugc-more-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+        .ugc-simple-card { display: flex; flex-direction: column; border-radius: 14px; background: #eef3ef; overflow: hidden; transition: all 0.2s ease; border: 1px solid #dce5df; }
+        .ugc-simple-card:hover { background: #e3ede6; transform: translateY(-2px); }
+        .ugc-simple-card-image { height: 120px; width: 100%; overflow: hidden; background: #d9ded8; }
+        .ugc-simple-card-image img { width: 100%; height: 100%; object-fit: cover; }
+        .ugc-simple-card-body { padding: 12px 14px 14px; flex: 1; }
+        .ugc-simple-card small { color: var(--ugc-orange); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 3px; }
+        .ugc-simple-card h3 { margin: 0 0 4px; color: var(--ugc-green); font-size: 15px; font-weight: 700; line-height: 1.25; }
+        .ugc-simple-card-desc { margin: 0; color: #50615b; font-size: 13px; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        /* Footer */
+        .ugc-footer { display: flex; align-items: flex-start; justify-content: space-between; margin-top: 32px; padding: 20px 0 0; border-top: 1px solid #dce1dc; }
+        .ugc-footer-brand { max-width: 300px; }
+        .ugc-footer-brand p { margin: 8px 0 0; color: var(--ugc-muted); font-size: 13px; line-height: 1.5; }
+        .ugc-footer-links { display: flex; gap: 52px; }
+        .ugc-footer-column { display: flex; flex-direction: column; gap: 7px; }
+        .ugc-footer-column strong { margin-bottom: 2px; color: var(--ugc-green); font-size: 13px; font-weight: 700; }
+        .ugc-footer-column a { color: #5a6d67; font-size: 12px; transition: color 0.2s; }
+        .ugc-footer-column a:hover { color: var(--ugc-green); }
+        .ugc-copyright { margin-top: 20px; padding: 12px 0 4px; border-top: 1px solid #e0e3df; color: #828f89; font-size: 11px; }
+
+        /* Responsive overrides */
+        @media (max-width: 900px) {
+          .ugc-journal-page { padding: 14px 16px; }
+          .ugc-header { padding: 0 20px; }
+          .ugc-main { padding: 4px 20px 24px; }
+          .ugc-nav { gap: 16px; margin-right: 0; }
+          .ugc-header-action { display: none; }
+          .ugc-featured { grid-template-columns: 1fr; }
+          .ugc-featured-art { min-height: 200px; max-height: 240px; }
+        }
+        @media (max-width: 680px) {
+          .ugc-journal-page { padding: 0; }
+          .ugc-website { border-radius: 0; border: 0; box-shadow: none; }
+          .ugc-header { height: 58px; padding: 0 16px; }
+          .ugc-nav { display: none; }
+          .ugc-main { padding: 6px 16px 20px; }
+          .ugc-page-title { margin-bottom: 10px; font-size: 28px; }
+          .ugc-featured { border-radius: 14px; }
+          .ugc-featured-copy { padding: 20px 16px; }
+          .ugc-articles { grid-template-columns: 1fr !important; gap: 14px; }
+          .ugc-more-grid { grid-template-columns: 1fr; gap: 12px; }
+          .ugc-footer { flex-direction: column; gap: 20px; }
+          .ugc-footer-links { width: 100%; justify-content: space-between; gap: 14px; }
+        }
+      `}</style>
+      <div className="ugc-website">
+        {/* Navigation Bar */}
+        {!data.hideNav && (
+          <header className="ugc-header">
+            <Link to="/" className="ugc-logo">
+              <span className="ugc-logo-mark" />
+              {get('brandName')}
+            </Link>
+            <nav className="ugc-nav" aria-label="Journal navigation">
+              <a href="#innovation-journal-content">Tracks</a>
+              {navLinks.map((link) => (
+                <Link key={link} to={resolveNavUrl(link)}>
+                  {link}
+                </Link>
+              ))}
+            </nav>
+            <Link to={get('headerActionHref') || '/partnership'} className="ugc-header-action">
+              {get('headerActionLabel') || 'Explore Incubation Models'}
+            </Link>
+          </header>
+        )}
+
+        <main id="innovation-journal-content" className="ugc-main">
+          <h1 className="ugc-page-title">{get('pageTitle')}</h1>
+
+          {/* Category Filter Pills */}
+          {!data.hideCategories && categories.length > 0 && (
+            <div className="ugc-categories" role="tablist">
+              {categories.map((category) => (
+                <button
+                  type="button"
+                  key={category}
+                  className={`ugc-category ${selectedCategory === category ? 'active' : ''}`}
+                  onClick={() => {
+                    setSelectedCategory(category);
+                    setPage(1);
+                  }}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
           )}
-        </div>
-      </section>
 
-      <section className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
-          {!featured ? (
-            <div className="rounded-2xl border border-gray-100 bg-gray-50 py-20 text-center text-gray-500">No programme tracks match that filter.</div>
-          ) : (
-            <>
-              {/* Featured spotlight */}
+          {/* Featured Hub Card */}
+          {!data.hideFeatured && styles.showFeatured !== false && featured.title && (
+            <div className="relative">
               <Link
-                to={cardLink(featured)}
-                className="group grid grid-cols-1 overflow-hidden rounded-[1.75rem] bg-emerald-50 sm:grid-cols-2"
+                to={featured.href?.trim() || `/innovation/${slugifyInnovationTitle(featured.title)}`}
+                className="ugc-featured"
               >
-                <div className="flex flex-col justify-center bg-emerald-800 p-8 text-white sm:p-10">
-                  <span className="mb-3 inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-300">
-                    <Sparkles className="h-3 w-3" /> Featured track
-                  </span>
-                  <h2 className="max-w-md text-2xl font-bold leading-tight tracking-tight sm:text-3xl">{featured.title}</h2>
-                  {featured.description && <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/75">{featured.description}</p>}
-                  <span className="mt-6 inline-flex w-fit items-center gap-2.5 text-sm font-bold text-white">
-                    Read more
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-orange-500 transition-transform group-hover:translate-x-0.5">
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </span>
+                <div className="ugc-featured-copy">
+                  <div className="ugc-eyebrow">{featured.eyebrow}</div>
+                  <h2 className="ugc-featured-title">{featured.title}</h2>
+                  <p className="ugc-featured-description">{featured.description}</p>
+                  <span className="ugc-read-link">
+                    <span>→</span>
+                    {featured.readMoreLabel || 'Explore the track'}
                   </span>
                 </div>
-                <div className="min-h-[220px] overflow-hidden sm:min-h-full">
-                  {resolveMediaUrl(featured.image) && (
-                    <img
-                      src={resolveMediaUrl(featured.image)}
-                      alt={featured.title}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  )}
-                </div>
+                {featured.image && (
+                  <div className="ugc-featured-art">
+                    <MediaImage src={featured.image} alt={featured.title} className="w-full h-full object-cover" />
+                  </div>
+                )}
               </Link>
+              <div className="absolute top-4 right-4 z-20">
+                {isSaved({ title: featured.title, image: featured.image }) ? (
+                  <div className="flex items-center gap-1.5 bg-white/95 backdrop-blur-sm rounded-full px-3 py-1 shadow-md border border-slate-200">
+                    <Check className="h-3.5 w-3.5 text-green-600" />
+                    <span className="text-xs font-bold text-green-700">Saved</span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        remove({ title: featured.title, image: featured.image });
+                      }}
+                      disabled={isPending({ title: featured.title, image: featured.image })}
+                      className="text-red-500 hover:text-red-700 ml-1"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      add({ title: featured.title, image: featured.image });
+                    }}
+                    disabled={isPending({ title: featured.title, image: featured.image })}
+                    className="flex items-center gap-1.5 rounded-full bg-white/90 hover:bg-white text-slate-800 hover:text-red-600 px-3 py-1 text-xs font-bold shadow-md transition-all backdrop-blur-sm"
+                  >
+                    <Heart className="h-3.5 w-3.5" /> Wishlist
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
-              {/* Rich grid */}
-              {richGrid.length > 0 && (
-                  <div ref={gridRef} className="mt-6 grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
-                    {richGrid.map((card) => {
-                      const image = resolveMediaUrl(card.image);
-                      return (
-                        <Link key={card.title} to={cardLink(card)} className="group block min-w-0">
-                          <div className="aspect-[4/3] w-full overflow-hidden rounded-xl bg-gray-100">
-                            {image && (
-                              <img src={image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          {/* Innovation Tracks Grid */}
+          {!data.hideCards && paginatedCards.length > 0 && (
+            <section className="ugc-articles" aria-label="Latest innovation tracks">
+              {paginatedCards.map((card, index) => {
+                const cardTarget = card.href?.trim() || `/innovation/${card.slug?.trim() || slugifyInnovationTitle(card.title)}`;
+                const categoryLabel = card.category || (card.categories?.[0]) || 'Innovation';
+                const wishlistCard = { title: card.title, image: card.image };
+
+                return (
+                  <div className="ugc-article-card" key={`${card.title}-${index}`}>
+                    <Link to={cardTarget} className="flex flex-col flex-1">
+                      <div className="ugc-article-image">
+                        <MediaImage src={card.image} alt={card.title} className="w-full h-full object-cover" />
+                        <div className="absolute top-2.5 right-2.5 z-10">
+                          {isSaved(wishlistCard) ? (
+                            <div className="flex items-center gap-1 bg-white/95 rounded-full px-2 py-0.5 shadow-sm border border-slate-200">
+                              <Check className="h-3 w-3 text-green-600" />
+                              <span className="text-[10px] font-bold text-green-700">Saved</span>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  remove(wishlistCard);
+                                }}
+                                disabled={isPending(wishlistCard)}
+                                className="text-red-500 hover:text-red-700 ml-0.5"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                add(wishlistCard);
+                              }}
+                              disabled={isPending(wishlistCard)}
+                              className="flex items-center justify-center w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-700 hover:text-red-600 shadow-sm transition-all"
+                            >
+                              <Heart className="h-3.5 w-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <div className="ugc-article-content">
+                        <div className="ugc-article-meta">
+                          <span className="ugc-article-category">{categoryLabel}</span>
+                          <span>{card.readTime || '5 min read'}</span>
+                        </div>
+                        <h3 className="ugc-article-title">{card.title}</h3>
+                        {card.description && <p className="ugc-article-desc">{card.description}</p>}
+                        <div className="ugc-author">
+                          <span className="ugc-avatar">
+                            {card.authorImage ? (
+                              <MediaImage
+                                src={card.authorImage}
+                                alt={card.author || ''}
+                                className="w-full h-full object-cover rounded-full"
+                                fallbackNode={<span>{(card.author || 'CM').charAt(0)}</span>}
+                              />
+                            ) : (
+                              <span>{(card.author || 'CM').charAt(0)}</span>
                             )}
-                          </div>
-                          <div className="mt-3 flex items-center gap-2 text-xs text-gray-400">
-                            <span className="font-semibold uppercase tracking-wide text-orange-600">{card.categories?.[0] ?? 'Programme'}</span>
-                          </div>
-                          <h3 className="mt-1 text-base font-extrabold leading-snug tracking-tight text-emerald-800 group-hover:text-emerald-700 sm:text-lg">
-                            {card.title}
-                          </h3>
-                          {card.description && <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-gray-500">{card.description}</p>}
-                        </Link>
+                          </span>
+                          <span>{card.author || 'CampusMart Team'}</span>
+                        </div>
+                      </div>
+                    </Link>
+                  </div>
+                );
+              })}
+            </section>
+          )}
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="mt-8 flex items-center justify-center border-t border-slate-200/60 pt-6 px-2">
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => {
+                    setPage((p) => Math.max(1, p - 1));
+                    const el = document.getElementById('innovation-journal-content');
+                    el?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  disabled={safePage === 1}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" /> Prev
+                </button>
+
+                <div className="flex items-center gap-1 px-2">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter((p) => p === 1 || p === totalPages || Math.abs(p - safePage) <= 2)
+                    .map((p, idx, arr) => {
+                      const showEllipsis = idx > 0 && p - arr[idx - 1] > 1;
+                      return (
+                        <div key={p} className="flex items-center">
+                          {showEllipsis && <span className="px-1 text-slate-400 text-xs">...</span>}
+                          <button
+                            onClick={() => {
+                              setPage(p);
+                              const el = document.getElementById('innovation-journal-content');
+                              el?.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            style={safePage === p ? { backgroundColor: primaryColor, color: '#fff' } : undefined}
+                            className={`w-8 h-8 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                              safePage === p
+                                ? 'shadow-sm'
+                                : 'text-slate-600 hover:bg-slate-100 bg-white'
+                            }`}
+                          >
+                            {p}
+                          </button>
+                        </div>
                       );
                     })}
-                  </div>
-              )}
-
-              {/* Simple flat cards */}
-              {simpleGrid.length > 0 && (
-                  <div className="mt-6 border-t border-gray-100 pt-5">
-                    <h2 className="mb-5 text-2xl font-bold tracking-tight text-emerald-800">More from the ecosystem</h2>
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                      {simpleGrid.map((card) => (
-                        <Link key={card.title} to={cardLink(card)} className="group block rounded-2xl bg-emerald-50 p-5 transition-colors hover:bg-emerald-100">
-                          <span className="text-xs font-bold uppercase tracking-wide text-orange-600">{card.categories?.[0] ?? 'Programme'}</span>
-                          <h3 className="mt-2 text-base font-bold leading-snug text-emerald-800">{card.title}</h3>
-                        </Link>
-                      ))}
-                  </div>
                 </div>
-              )}
-            </>
-          )}
-        </div>
-      </section>
 
-      {/* CTA */}
-      <section className="px-4 pb-6 sm:px-6 lg:px-8">
-        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-6 rounded-3xl bg-gradient-to-br from-cm-yellow via-amber-400 to-amber-500 p-8 text-center shadow-xl shadow-amber-500/10 sm:flex-row sm:p-10 sm:text-left">
-          <div>
-            <h3 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{ctaTitle}</h3>
-            <p className="mt-1.5 text-sm font-semibold text-slate-800/80">{ctaSubtitle}</p>
-          </div>
-          <Link to="/contact-us" className="shrink-0 rounded-xl bg-slate-900 px-8 py-3 text-sm font-bold text-white shadow-xl shadow-slate-900/10 transition-all hover:bg-slate-800">
-            Contact Us
-          </Link>
-        </div>
-      </section>
+                <button
+                  onClick={() => {
+                    setPage((p) => Math.min(totalPages, p + 1));
+                    const el = document.getElementById('innovation-journal-content');
+                    el?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  disabled={safePage === totalPages}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                >
+                  Next <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* More Resources */}
+          {!data.hideMore && (
+            <section className="ugc-more">
+              <h2 className="ugc-more-heading">{get('moreTitle')}</h2>
+              <div className="ugc-more-grid">
+                {(Array.isArray(data.moreCards) ? data.moreCards : INNOVATION_DEFAULTS.moreCards).map(
+                  (card: MoreCard, index: number) => {
+                    const moreTarget = card.href?.trim() || `/innovation/${slugifyInnovationTitle(card.title)}`;
+                    return (
+                      <Link to={moreTarget} className="ugc-simple-card" key={`${card.title}-${index}`}>
+                        {card.image && (
+                          <div className="ugc-simple-card-image">
+                            <MediaImage src={card.image} alt={card.title} className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        <div className="ugc-simple-card-body">
+                          <small>{card.category}</small>
+                          <h3>{card.title}</h3>
+                          {card.description && <p className="ugc-simple-card-desc">{card.description}</p>}
+                        </div>
+                      </Link>
+                    );
+                  }
+                )}
+              </div>
+            </section>
+          )}
+
+          {/* Journal Footer */}
+          {!data.hideFooter && (
+            <footer className="ugc-footer">
+              <div className="ugc-footer-brand">
+                <Link to="/" className="ugc-logo">
+                  <span className="ugc-logo-mark" />
+                  {get('brandName')}
+                </Link>
+                <p>{get('footerDescription')}</p>
+              </div>
+              <div className="ugc-footer-links">
+                {(Array.isArray(data.footerColumns) ? data.footerColumns : INNOVATION_DEFAULTS.footerColumns).map(
+                  (column: { title: string; links: string[] }) => (
+                    <div className="ugc-footer-column" key={column.title}>
+                      <strong>{column.title}</strong>
+                      {column.links.map((link) => {
+                        const target = resolveJournalFooterUrl(link);
+                        return target.isExternal && target.href ? (
+                          <a key={link} href={target.href} target="_blank" rel="noopener noreferrer">
+                            {link}
+                          </a>
+                        ) : (
+                          <Link key={link} to={target.to || '/'}>
+                            {link}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )
+                )}
+              </div>
+            </footer>
+          )}
+          <div className="ugc-copyright">{get('copyright')}</div>
+        </main>
+      </div>
     </main>
   );
 };

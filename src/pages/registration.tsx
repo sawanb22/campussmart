@@ -158,7 +158,7 @@ const Registration = () => {
                   <label className="text-sm font-semibold text-gray-700">Phone</label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input type="tel" pattern="(?:\+91[ -]?)?[6-9][0-9]{9}" minLength={10} maxLength={14} className="w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                    <input type="tel" pattern="(?:\+?91[\s\-]?)?0?[0-9\s\-]{10,14}" minLength={10} maxLength={14} className="w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30"
                       placeholder="9876543210" value={formData.phone} onChange={set('phone')} />
                   </div>
                 </div>

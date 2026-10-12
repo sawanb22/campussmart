@@ -283,7 +283,7 @@ const CampusDesignService = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="form-label text-xs">Phone *</label>
-                      <input type="tel" pattern="(?:\+91[ -]?)?[6-9][0-9]{9}" className="form-input text-sm" required value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} placeholder="+91 98765 43210" />
+                      <input type="tel" pattern="(?:\+?91[\s\-]?)?0?[0-9\s\-]{10,14}" className="form-input text-sm" required value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} placeholder="+91 98765 43210" />
                     </div>
                     <div>
                       <label className="form-label text-xs">Pincode *</label>

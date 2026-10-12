@@ -1,9 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Send, CheckCircle, Package, ArrowLeft, ShieldCheck, RefreshCw, X } from 'lucide-react';
+import { Send, CheckCircle, Package, ArrowLeft, ShieldCheck, RefreshCw, X, Plus, Minus, Trash2 } from 'lucide-react';
 import api from '@/api/client';
 import { getUserSession } from '@/lib/auth-session';
 import { useWishlist } from '@/contexts/WishlistContext';
+import { resolveMediaUrl } from '@/lib/media-url';
+
+interface QuoteItemRow {
+  id: string;
+  wishlistId?: number;
+  name: string;
+  sku?: string | null;
+  category?: string;
+  price?: number;
+  quantity: number;
+  image?: string;
+  isDesign?: boolean;
+}
 
 const RequestQuote = () => {
   const [searchParams] = useSearchParams();
@@ -11,6 +24,10 @@ const RequestQuote = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [prefillNotice, setPrefillNotice] = useState('');
+
+  // Interactive Quote Items State
+  const [quoteItems, setQuoteItems] = useState<QuoteItemRow[]>([]);
+  const quoteItemsInitializedRef = useRef(false);
 
   // OTP Verification States
   const [showOtpModal, setShowOtpModal] = useState(false);
@@ -20,7 +37,7 @@ const RequestQuote = () => {
   const [otpError, setOtpError] = useState('');
   const [resendCooldown, setResendCooldown] = useState(0);
 
-  const { items: wishlistItems } = useWishlist();
+  const { items: wishlistItems, updateQuantity: updateWishlistQty } = useWishlist();
   const user = getUserSession();
 
   const [formData, setFormData] = useState({
@@ -38,58 +55,77 @@ const RequestQuote = () => {
 
   useEffect(() => {
     const productSlug = searchParams.get('product');
-    const qty = searchParams.get('qty') || '1';
+    const qtyParam = searchParams.get('qty');
+    const initialQty = Math.max(1, parseInt(qtyParam || '1', 10) || 1);
     const fromWishlist = searchParams.get('fromWishlist') === 'true';
 
     if (productSlug) {
+      if (quoteItemsInitializedRef.current) return;
+      quoteItemsInitializedRef.current = true;
       api.get(`/products/${encodeURIComponent(productSlug)}`)
         .then(({ data }) => {
           setPrefillNotice(`Inquiry pre-filled for product: ${data.name}`);
-          setFormData((prev) => ({
-            ...prev,
-            requirement: `Product Requested: ${data.name}\nSKU: ${data.sku || 'N/A'}\nQuantity: ${qty}\nUnit Price: ₹${data.price.toLocaleString('en-IN')}\n\nAdditional requirements: `,
-          }));
+          setQuoteItems([
+            {
+              id: `prod-${data.id}`,
+              name: data.name,
+              sku: data.sku,
+              category: data.category?.name,
+              price: data.price,
+              quantity: initialQty,
+              image: resolveMediaUrl(data.imageUrl),
+            },
+          ]);
         })
         .catch(() => {
           setPrefillNotice(`Inquiry for product: ${productSlug}`);
-          setFormData((prev) => ({
-            ...prev,
-            requirement: `Product Requested: ${productSlug}\nQuantity: ${qty}\n\nAdditional requirements: `,
-          }));
+          setQuoteItems([
+            {
+              id: `prod-${productSlug}`,
+              name: productSlug,
+              quantity: initialQty,
+            },
+          ]);
         });
     } else if (fromWishlist) {
+      if (quoteItemsInitializedRef.current) return;
       if (wishlistItems.length > 0) {
+        quoteItemsInitializedRef.current = true;
         setPrefillNotice(`Inquiry pre-filled with ${wishlistItems.length} items from your wishlist.`);
-        const itemsList = wishlistItems
-          .map((item, idx) => {
-            if (item.product) {
-              return `${idx + 1}. ${item.product.name} (SKU: ${item.product.sku || 'N/A'}) - ₹${item.product.price.toLocaleString('en-IN')}`;
-            }
-            return `${idx + 1}. ${item.designTitle || 'Custom Space Design'}`;
-          })
-          .join('\n');
-        setFormData((prev) => ({
-          ...prev,
-          requirement: `Wishlist Quotation Items:\n${itemsList}\n\nTarget delivery date and custom specifications: `,
-        }));
+        setQuoteItems(
+          wishlistItems.map((item) => ({
+            id: `wl-${item.id}`,
+            wishlistId: item.id,
+            name: item.product?.name || item.designTitle || 'Custom Space Design',
+            sku: item.product?.sku,
+            category: item.product?.category?.name || item.pageSlug || undefined,
+            price: item.product?.price,
+            quantity: item.quantity && item.quantity > 0 ? item.quantity : 1,
+            image: resolveMediaUrl(item.product?.imageUrl || item.designImage || undefined),
+            isDesign: !item.product,
+          }))
+        );
       } else {
         // Fallback fetch if context hasn't loaded yet
         api.get('/wishlist')
           .then(({ data }) => {
+            if (quoteItemsInitializedRef.current) return;
             if (Array.isArray(data) && data.length > 0) {
+              quoteItemsInitializedRef.current = true;
               setPrefillNotice(`Inquiry pre-filled with ${data.length} items from your wishlist.`);
-              const itemsList = data
-                .map((item: any, idx: number) => {
-                  if (item.product) {
-                    return `${idx + 1}. ${item.product.name} (SKU: ${item.product.sku || 'N/A'}) - ₹${item.product.price.toLocaleString('en-IN')}`;
-                  }
-                  return `${idx + 1}. ${item.designTitle || 'Custom Space Design'}`;
-                })
-                .join('\n');
-              setFormData((prev) => ({
-                ...prev,
-                requirement: `Wishlist Quotation Items:\n${itemsList}\n\nTarget delivery date and custom specifications: `,
-              }));
+              setQuoteItems(
+                data.map((item: any) => ({
+                  id: `wl-${item.id}`,
+                  wishlistId: item.id,
+                  name: item.product?.name || item.designTitle || 'Custom Space Design',
+                  sku: item.product?.sku,
+                  category: item.product?.category?.name || item.pageSlug || undefined,
+                  price: item.product?.price,
+                  quantity: item.quantity && item.quantity > 0 ? item.quantity : 1,
+                  image: resolveMediaUrl(item.product?.imageUrl || item.designImage || undefined),
+                  isDesign: !item.product,
+                }))
+              );
             }
           })
           .catch(() => {});
@@ -105,18 +141,64 @@ const RequestQuote = () => {
     return () => clearInterval(timer);
   }, [resendCooldown]);
 
+  const handleUpdateItemQuantity = (id: string, newQty: number) => {
+    const validQty = Math.max(1, Math.min(10000, newQty || 1));
+    setQuoteItems((prev) =>
+      prev.map((item) => {
+        if (item.id === id) {
+          if (item.wishlistId) {
+            updateWishlistQty(item.wishlistId, validQty);
+          }
+          return { ...item, quantity: validQty };
+        }
+        return item;
+      })
+    );
+  };
+
+  const handleRemoveItem = (id: string) => {
+    setQuoteItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const totalUnits = quoteItems.reduce((acc, item) => acc + item.quantity, 0);
+
   const executeQuoteSubmission = async (otp?: string) => {
     setSubmitting(true);
     setSubmitError('');
     try {
+      const itemsListSummary = quoteItems.length > 0
+        ? quoteItems
+            .map((item, idx) => {
+              const skuPart = item.sku ? ` (SKU: ${item.sku})` : '';
+              const pricePart = item.price ? ` [Est. ₹${item.price.toLocaleString('en-IN')}/unit]` : '';
+              const typePart = item.isDesign ? ' [Custom Space Design]' : '';
+              return `${idx + 1}. ${item.quantity} unit${item.quantity === 1 ? '' : 's'} × ${item.name}${skuPart}${typePart}${pricePart}`;
+            })
+            .join('\n')
+        : 'General Institutional Inquiry (No specific items preselected)';
+
+      const itemsPayload = [
+        `Authorised Person: ${formData.authorisedPerson || 'Not specified'}`,
+        `Campus Pincode: ${formData.pincode}`,
+        `Budget Range: ${formData.budget || 'Not specified'}`,
+        `Deployment Timeline: ${formData.timeline || 'Not specified'}`,
+        `\nRequested Quotation Items (${quoteItems.length} items, ${totalUnits} total units):`,
+        itemsListSummary,
+      ].join('\n');
+
+      const messagePayload = [
+        `Campus Address: ${formData.address}`,
+        formData.requirement ? `\nAdditional Requirements & Specifications:\n${formData.requirement}` : '',
+      ].filter(Boolean).join('\n');
+
       await api.post('/contact/quote', {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         institution: formData.collegeName,
         pincode: formData.pincode,
-        items: `Authorised Person: ${formData.authorisedPerson}\nPincode: ${formData.pincode}\nBudget: ${formData.budget || 'Not specified'}\nTimeline: ${formData.timeline || 'Not specified'}`,
-        message: `Address: ${formData.address}\nRequirements:\n${formData.requirement}`,
+        items: itemsPayload,
+        message: messagePayload,
         otpCode: otp,
       });
       setSubmitted(true);
@@ -292,7 +374,7 @@ const RequestQuote = () => {
                 <label className="form-label">Phone Number *</label>
                 <input
                   type="tel"
-                  pattern="(?:\+91[ -]?)?[6-9][0-9]{9}"
+                  pattern="(?:\+?91[\s\-]?)?0?[0-9\s\-]{10,14}"
                   minLength={10}
                   maxLength={14}
                   value={formData.phone}
@@ -331,14 +413,114 @@ const RequestQuote = () => {
               />
             </div>
 
+            {quoteItems.length > 0 && (
+              <div className="rounded-2xl border border-blue-100 bg-slate-50/80 p-4 sm:p-5 shadow-2xs">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-3 pb-3 border-b border-slate-200">
+                  <div className="flex items-center gap-2">
+                    <Package className="w-4 h-4 text-cm-blue" />
+                    <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">
+                      Quotation Items &amp; Required Units ({quoteItems.length})
+                    </h3>
+                  </div>
+                  <span className="text-xs font-bold px-2.5 py-1 bg-blue-100 text-cm-blue rounded-full">
+                    {totalUnits} Total Unit{totalUnits === 1 ? '' : 's'}
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  {quoteItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="bg-white rounded-xl p-3 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        {item.image ? (
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            onError={(e) => {
+                              const fallback = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=400&q=80';
+                              if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback;
+                            }}
+                            className="w-12 h-12 object-cover rounded-lg bg-slate-50 border border-slate-100 shrink-0"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0 text-slate-400">
+                            <Package className="w-5 h-5" />
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold text-slate-900 truncate" title={item.name}>
+                            {item.name}
+                          </p>
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 mt-0.5">
+                            {item.sku && <span>SKU: {item.sku}</span>}
+                            {item.price && <span className="font-semibold text-slate-700">₹{item.price.toLocaleString('en-IN')}/unit</span>}
+                            {item.isDesign && <span className="text-purple-600 font-semibold">Custom Space Design</span>}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-slate-600">Units:</span>
+                          <div className="inline-flex items-center rounded-lg border border-slate-200 bg-white shadow-2xs">
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateItemQuantity(item.id, item.quantity - 1)}
+                              className="w-7 h-7 flex items-center justify-center text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-l-lg transition"
+                              title="Decrease units"
+                            >
+                              <Minus className="w-3.5 h-3.5" />
+                            </button>
+                            <input
+                              type="number"
+                              min={1}
+                              max={10000}
+                              value={item.quantity}
+                              onChange={(e) => handleUpdateItemQuantity(item.id, parseInt(e.target.value) || 1)}
+                              className="w-12 text-center text-xs font-bold text-slate-900 border-x border-slate-200 py-1 outline-none focus:bg-blue-50/50"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateItemQuantity(item.id, item.quantity + 1)}
+                              className="w-7 h-7 flex items-center justify-center text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-r-lg transition"
+                              title="Increase units"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveItem(item.id)}
+                          className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                          title="Exclude item from this quote"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div>
-              <label className="form-label">Equipment Requirements &amp; Quantities *</label>
+              <label className="form-label">
+                {quoteItems.length > 0 ? 'Additional Requirements & Custom Specifications (Optional)' : 'Equipment Requirements & Quantities *'}
+              </label>
               <textarea
                 value={formData.requirement}
                 onChange={(e) => setFormData({ ...formData, requirement: e.target.value })}
-                className="form-input min-h-[140px] text-sm font-mono text-xs leading-relaxed"
-                placeholder="List required items, estimated quantities, room dimensions, or specific brands..."
-                required
+                className="form-input min-h-[120px] text-sm font-sans text-xs leading-relaxed"
+                placeholder={
+                  quoteItems.length > 0
+                    ? 'Specify any customization details, preferred brands, dimensions, delivery dates, or institutional guidelines...'
+                    : 'List required items, estimated quantities, room dimensions, or specific brands...'
+                }
+                required={quoteItems.length === 0}
               />
             </div>
 

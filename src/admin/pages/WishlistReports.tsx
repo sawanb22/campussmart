@@ -6,6 +6,7 @@ import { resolveMediaUrl } from '../../lib/media-url';
 interface WishlistItem {
     id: number;
     createdAt: string;
+    quantity?: number;
     designTitle?: string | null;
     designImage?: string | null;
     pageSlug?: string | null;
@@ -15,7 +16,7 @@ interface WishlistItem {
 
 interface UserGroup {
     user: WishlistItem['user'];
-    items: { id: number; title: string; category: string; image?: string | null; createdAt: string }[];
+    items: { id: number; title: string; category: string; quantity: number; image?: string | null; createdAt: string }[];
 }
 
 export default function WishlistReports() {
@@ -38,10 +39,11 @@ export default function WishlistReports() {
             const title = item.product?.name ?? item.designTitle ?? 'Untitled item';
             const category = item.product?.category?.name ?? item.pageSlug ?? '—';
             const image = resolveMediaUrl(item.product?.imageUrl ?? item.designImage ?? '') || null;
+            const quantity = item.quantity && item.quantity > 0 ? item.quantity : 1;
             if (!byUser.has(item.user.id)) {
                 byUser.set(item.user.id, { user: item.user, items: [] });
             }
-            byUser.get(item.user.id)!.items.push({ id: item.id, title, category, image, createdAt: item.createdAt });
+            byUser.get(item.user.id)!.items.push({ id: item.id, title, category, quantity, image, createdAt: item.createdAt });
         }
         return Array.from(byUser.values());
     }, [items]);
@@ -53,6 +55,8 @@ export default function WishlistReports() {
             `${g.user.name} ${g.user.email} ${g.user.institution ?? ''}`.toLowerCase().includes(query),
         );
     }, [groups, search]);
+
+    const [exportingUserId, setExportingUserId] = useState<number | null>(null);
 
     const downloadReport = async () => {
         setExporting(true);
@@ -72,6 +76,25 @@ export default function WishlistReports() {
         setExporting(false);
     };
 
+    const downloadUserReport = async (userId: number, userName: string) => {
+        setExportingUserId(userId);
+        try {
+            const { data } = await api.get(`/admin/wishlist-report/export?userId=${userId}`, { responseType: 'blob' });
+            const blobUrl = URL.createObjectURL(new Blob([data], { type: 'text/csv' }));
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            const safeName = userName.replace(/[^a-zA-Z0-9_-]/g, '_');
+            link.download = `wishlist-${safeName}-${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(blobUrl);
+        } catch {
+            /* noop */
+        }
+        setExportingUserId(null);
+    };
+
     return (
         <div className="p-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
@@ -87,7 +110,7 @@ export default function WishlistReports() {
                     className="flex items-center gap-2 bg-cm-blue text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-sm hover:bg-cm-blue-dark transition-all disabled:opacity-50"
                 >
                     <Download className="w-4 h-4" />
-                    {exporting ? 'Preparing…' : 'Download Report (CSV)'}
+                    {exporting ? 'Preparing…' : 'Download All Leads (CSV)'}
                 </button>
             </div>
 
@@ -124,6 +147,16 @@ export default function WishlistReports() {
                                         {group.user.institution && <span className="flex items-center gap-1"><Building2 className="w-3.5 h-3.5" />{group.user.institution}</span>}
                                     </div>
                                 </div>
+                                <button
+                                    type="button"
+                                    onClick={() => downloadUserReport(group.user.id, group.user.name)}
+                                    disabled={exportingUserId === group.user.id}
+                                    className="flex items-center gap-1.5 bg-slate-50 hover:bg-cm-blue hover:text-white text-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs border border-slate-200 hover:border-cm-blue disabled:opacity-50"
+                                    title={`Download CSV for ${group.user.name}`}
+                                >
+                                    <Download className="w-3.5 h-3.5" />
+                                    {exportingUserId === group.user.id ? 'Exporting…' : 'Download Lead (CSV)'}
+                                </button>
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -134,8 +167,15 @@ export default function WishlistReports() {
                                         ) : (
                                             <div className="w-10 h-10 rounded-md bg-gray-200 flex-shrink-0" />
                                         )}
-                                        <div className="min-w-0">
-                                            <div className="text-sm font-medium text-gray-800 truncate">{item.title}</div>
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-center justify-between gap-1.5">
+                                                <span className="text-sm font-medium text-gray-800 truncate" title={item.title}>
+                                                    {item.title}
+                                                </span>
+                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-bold bg-blue-100 text-cm-blue shrink-0">
+                                                    {item.quantity} {item.quantity === 1 ? 'unit' : 'units'}
+                                                </span>
+                                            </div>
                                             <div className="text-xs text-gray-400 truncate">{item.category} · {new Date(item.createdAt).toLocaleDateString('en-IN')}</div>
                                         </div>
                                     </div>
