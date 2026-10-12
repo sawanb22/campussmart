@@ -49,6 +49,7 @@ const FeatureCards = () => {
     .map((item: any) => ({
       ...item,
       label: item.label || item.title || '',
+      href: item.href === '/campus-sale' ? '/colleges-universities-for-sale' : item.href,
     }));
   const resources = (Array.isArray(rawSidebar.resources) ? rawSidebar.resources : [])
     .filter((item: any) => item && item.active !== false && (item.label || item.title))

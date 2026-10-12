@@ -319,6 +319,14 @@ export default function HomepageEditor() {
             // Sidebar
             try {
                 const rawSb = data.home_sidebar ? JSON.parse(data.home_sidebar) : { classifieds: [], resources: [], completedProjects: [], contacts: [] };
+                if (Array.isArray(rawSb.classifieds)) {
+                    rawSb.classifieds = rawSb.classifieds.map((item: any) => ({
+                        ...item,
+                        label: (item?.label || item?.title || '').trim(),
+                        href: item?.href === '/campus-sale' ? '/colleges-universities-for-sale' : (item?.href || '/classifieds'),
+                        active: item?.active !== false,
+                    }));
+                }
                 if (Array.isArray(rawSb.completedProjects)) {
                     rawSb.completedProjects = rawSb.completedProjects.map((item: any) => ({
                         ...item,
