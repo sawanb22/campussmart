@@ -139,74 +139,62 @@ const FeatureCards = () => {
             {Array.from({ length: cols }).map((_, colIndex) => (
               <div key={colIndex} className="flex flex-1 flex-col gap-3 md:gap-4">
                 {features.filter((_: any, i: number) => i % cols === colIndex).map(({ title, description, image, href, tag, color, h }: any) => {
-                  const cardHeight = window.innerWidth < 640 ? Math.min(h || 220, 220) : (window.innerWidth < 1024 ? Math.min(h || 240, 240) : (h || 240));
+                  const photoHeight = window.innerWidth < 640 ? 150 : Math.max(125, (h || 240) - 105);
 
                   return (
                     <Link
                       key={title}
                       to={href}
-                      className="fc-card group flex w-full flex-col overflow-hidden rounded-2xl relative shadow-lg"
-                      style={{ height: cardHeight }}
+                      className="fc-card group flex w-full flex-col overflow-hidden rounded-2xl relative bg-white border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300"
                     >
-                    {/* Background image */}
-                    {image && (
-                      <img
-                        src={resolveMediaUrl(image) || image}
-                        alt={title}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                      />
-                    )}
-
-                    {/* Permanent subtle vignette — branded white/blue gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#00173d]/85 via-[#002868]/25 to-white/10 transition-opacity duration-500 group-hover:from-[#001e4d]/90" />
-
-                    {/* Category badge */}
-                    <div
-                      className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm shadow"
-                      style={{ background: color + 'CC' }}
-                    >
-                      <span
-                        className="w-1.5 h-1.5 rounded-full bg-white inline-block flex-shrink-0"
-                        style={{ boxShadow: '0 0 4px white' }}
-                      />
-                      {tag}
-                    </div>
-
-                    {/* Arrow icon — top right on hover */}
-                    <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/10 backdrop-blur-md border border-white/30 flex items-center justify-center opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-400">
-                      <MoveUpRight className="w-4 h-4 text-white" />
-                    </div>
-
-                    {/* Bottom content — always visible and readable with deep blue-to-transparent gradient */}
-                    <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 md:p-5 bg-gradient-to-t from-[#001438]/95 via-[#002058]/65 to-transparent">
-                      <h3
-                        className="mb-1 text-white font-extrabold text-[12px] leading-snug drop-shadow-lg break-words sm:text-[14px] md:text-lg"
-                        style={{ textShadow: '0 2px 10px rgba(0, 20, 50, 0.9)' }}
+                      {/* Natural Photo (Top section, zero dark tint or overlay, masonry height) */}
+                      <div
+                        className="relative w-full overflow-hidden bg-slate-100 flex-shrink-0"
+                        style={{ height: photoHeight }}
                       >
-                        {title}
-                      </h3>
+                        {image && (
+                          <img
+                            src={resolveMediaUrl(image) || image}
+                            alt={title}
+                            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
+                          />
+                        )}
+                        {/* Category badge */}
+                        <div
+                          className="absolute top-2.5 left-2.5 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-white text-[10px] font-bold uppercase tracking-wider shadow z-10"
+                          style={{ background: (color || '#3B82F6') + 'EE' }}
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-white inline-block flex-shrink-0" />
+                          {tag}
+                        </div>
+                      </div>
 
-                      <div className="overflow-hidden">
-                        <p className="text-[10px] leading-snug font-medium text-white/90 sm:text-[11px] md:text-sm md:leading-relaxed">
-                          {description}
-                        </p>
-                        <div className="mt-2 flex items-center sm:mt-3">
+                      {/* Clean Auto-Height White Body (tightly wraps text with no empty gap) */}
+                      <div className="p-3.5 sm:p-4 flex flex-col bg-white">
+                        <h3 className="text-slate-900 font-extrabold text-[13px] sm:text-[15px] leading-snug group-hover:text-blue-600 transition-colors">
+                          {title}
+                        </h3>
+                        {description && (
+                          <p className="text-slate-600 text-[11px] sm:text-xs leading-relaxed whitespace-pre-line mt-1">
+                            {description}
+                          </p>
+                        )}
+                        <div className="mt-2.5 pt-2.5 flex items-center justify-between border-t border-slate-100">
                           <span
-                            className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest transition-transform group-hover:translate-x-1 duration-300 sm:text-[11px] md:text-sm"
+                            className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider group-hover:translate-x-1 transition-transform"
                             style={{ color }}
                           >
-                            Explore <MoveUpRight className="w-3.5 h-3.5 ml-1 sm:w-4 sm:h-4" />
+                            Explore <MoveUpRight className="w-3.5 h-3.5 ml-0.5" />
                           </span>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Hover border ring */}
-                    <div
-                      className="pointer-events-none absolute inset-0 rounded-2xl ring-0 transition-all duration-400 group-hover:ring-2"
-                      style={{ '--tw-ring-color': color } as React.CSSProperties}
-                    />
-                  </Link>
+                      {/* Hover border ring */}
+                      <div
+                        className="pointer-events-none absolute inset-0 rounded-2xl ring-0 transition-all duration-300 group-hover:ring-2"
+                        style={{ '--tw-ring-color': color } as React.CSSProperties}
+                      />
+                    </Link>
                   );
                 })}
               </div>

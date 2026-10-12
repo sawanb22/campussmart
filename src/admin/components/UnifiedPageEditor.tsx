@@ -1332,18 +1332,6 @@ export default function UnifiedPageEditor({
                                         <>
                                             <button
                                                 type="button"
-                                                onClick={() => set('hideNav', !data.hideNav)}
-                                                className={`flex items-center justify-between px-4 py-3 rounded-xl border text-xs font-bold transition-all ${
-                                                    !data.hideNav
-                                                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                                                        : 'bg-slate-50 text-slate-500 border-slate-200'
-                                                }`}
-                                            >
-                                                <span>Journal Nav Bar</span>
-                                                <span>{!data.hideNav ? '● Visible' : '○ Hidden'}</span>
-                                            </button>
-                                            <button
-                                                type="button"
                                                 onClick={() => set('hideCategories', !data.hideCategories)}
                                                 className={`flex items-center justify-between px-4 py-3 rounded-xl border text-xs font-bold transition-all ${
                                                     !data.hideCategories
@@ -2281,28 +2269,36 @@ export default function UnifiedPageEditor({
                             <>
                                 <section className="space-y-6">
                                     <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-                                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Journal Frame & Navigation</h4>
+                                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">
+                                            {page.slug === 'innovation' ? 'Journal Title & Brand' : 'Journal Frame & Navigation'}
+                                        </h4>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <Field label="Brand Name" value={data.brandName ?? ''} onChange={(v) => set('brandName', v)} />
                                         <Field label="Page Title" value={data.pageTitle ?? ''} onChange={(v) => set('pageTitle', v)} />
-                                        <Field label="Header Action Label" value={data.headerActionLabel ?? ''} onChange={(v) => set('headerActionLabel', v)} />
-                                        <Field label="Header Action Link" value={data.headerActionHref ?? ''} onChange={(v) => set('headerActionHref', v)} />
+                                        {page.slug !== 'innovation' && (
+                                            <>
+                                                <Field label="Header Action Label" value={data.headerActionLabel ?? ''} onChange={(v) => set('headerActionLabel', v)} />
+                                                <Field label="Header Action Link" value={data.headerActionHref ?? ''} onChange={(v) => set('headerActionHref', v)} />
+                                            </>
+                                        )}
                                     </div>
-                                    <div className="space-y-3">
-                                        <div className="flex items-center justify-between">
-                                            <label className="block text-sm font-bold text-gray-700">Navigation Links</label>
-                                            <button type="button" onClick={() => addUgcArrayItem('navLinks', 'New link')} className="text-xs font-bold text-blue-600 hover:text-blue-800">+ Add link</button>
-                                        </div>
-                                        {(data.navLinks ?? []).map((link: string, i: number) => (
-                                            <div key={i} className="flex items-center gap-3">
-                                                <input className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm" value={link} onChange={(e) => setUgcArrayItem('navLinks', i, e.target.value)} />
-                                                <button type="button" onClick={() => removeUgcArrayItem('navLinks', i)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg">
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
+                                    {page.slug !== 'innovation' && (
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <label className="block text-sm font-bold text-gray-700">Navigation Links</label>
+                                                <button type="button" onClick={() => addUgcArrayItem('navLinks', 'New link')} className="text-xs font-bold text-blue-600 hover:text-blue-800">+ Add link</button>
                                             </div>
-                                        ))}
-                                    </div>
+                                            {(data.navLinks ?? []).map((link: string, i: number) => (
+                                                <div key={i} className="flex items-center gap-3">
+                                                    <input className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm" value={link} onChange={(e) => setUgcArrayItem('navLinks', i, e.target.value)} />
+                                                    <button type="button" onClick={() => removeUgcArrayItem('navLinks', i)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg">
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </section>
 
                                 <section className="space-y-6">

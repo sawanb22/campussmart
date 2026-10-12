@@ -5,9 +5,9 @@ import { usePageData } from '@/hooks/usePageData';
 import { useDesignWishlist } from '@/hooks/useDesignWishlist';
 import LoginPromptModal from '@/components/login-prompt-modal';
 import MediaImage from '@/components/ui/media-image';
+import { PageCardGridSkeleton } from '@/components/ui/page-skeleton';
 import {
   INNOVATION_PAGE_SLUG,
-  INNOVATION_DEFAULTS,
   slugifyInnovationTitle,
   type InnovationCard,
   type MoreCard,
@@ -43,11 +43,11 @@ const resolveJournalFooterUrl = (label: string): { to?: string; href?: string; i
 };
 
 const Innovation = () => {
-  const { data } = usePageData<any>(INNOVATION_PAGE_SLUG);
+  const { data, loading } = usePageData<any>(INNOVATION_PAGE_SLUG);
   const { isSaved, isPending, add, remove, showLoginPrompt, setShowLoginPrompt } = useDesignWishlist('innovation');
   const [page, setPage] = useState(1);
 
-  const get = (key: string) => data[key] ?? INNOVATION_DEFAULTS[key as keyof typeof INNOVATION_DEFAULTS];
+  const get = (key: string, fallback = '') => (data[key] !== undefined && data[key] !== '' ? data[key] : fallback);
 
   const styles: InnovationStyles = {
     headingFont: 'poppins',
@@ -98,45 +98,32 @@ const Innovation = () => {
 
   const paperBg = styles.heroBg === 'white' ? '#ffffff' : '#f8f8f4';
 
-  const categories: string[] = Array.isArray(data.categories) && data.categories.length > 0
-    ? data.categories
-    : INNOVATION_DEFAULTS.categories;
+  const categories: string[] = Array.isArray(data.categories) ? data.categories : [];
 
-  const [selectedCategory, setSelectedCategory] = useState(categories[0] || 'All tracks');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const activeCategory = selectedCategory || categories[0] || 'All tracks';
 
-  const cards: InnovationCard[] = Array.isArray(data.cards) && data.cards.length > 0
-    ? data.cards
-    : INNOVATION_DEFAULTS.cards;
+  const cards: InnovationCard[] = Array.isArray(data.cards) ? data.cards : [];
 
-  const featured = { ...INNOVATION_DEFAULTS.featured, ...(data.featured ?? {}) };
+  const featured = data.featured ?? {};
 
   const visibleCards = useMemo(() => {
-    if (!selectedCategory || selectedCategory === categories[0] || selectedCategory.toLowerCase().startsWith('all')) {
+    if (!activeCategory || activeCategory === categories[0] || activeCategory.toLowerCase().startsWith('all')) {
       return cards;
     }
     return cards.filter(card => {
       const cat = card.category || (card.categories?.[0]);
-      return cat?.toLowerCase() === selectedCategory.toLowerCase() || (card.categories ?? []).some(c => c.toLowerCase() === selectedCategory.toLowerCase());
+      return cat?.toLowerCase() === activeCategory.toLowerCase() || (card.categories ?? []).some(c => c.toLowerCase() === activeCategory.toLowerCase());
     });
-  }, [cards, categories, selectedCategory]);
+  }, [cards, categories, activeCategory]);
 
   const totalPages = Math.ceil(visibleCards.length / PAGE_SIZE);
   const safePage = totalPages > 0 ? Math.min(page, totalPages) : 1;
   const paginatedCards = visibleCards.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-  const navLinks: string[] = Array.isArray(data.navLinks) && data.navLinks.length > 0
-    ? data.navLinks
-    : INNOVATION_DEFAULTS.navLinks;
-
-  const resolveNavUrl = (label: string) => {
-    const norm = label.toLowerCase().trim();
-    if (norm.includes('maker') || norm.includes('prototype')) return '/innovation';
-    if (norm.includes('incubation') || norm.includes('ideation')) return '/innovation';
-    if (norm.includes('planning')) return '/campus-master-planning';
-    if (norm.includes('tech')) return '/tech-infra';
-    if (norm.includes('resource')) return '/resources';
-    return '/innovation';
-  };
+  if (loading) {
+    return <PageCardGridSkeleton cardCount={6} />;
+  }
 
   return (
     <main className="ugc-journal-page">
@@ -197,7 +184,7 @@ const Innovation = () => {
         .ugc-header-action { display: inline-block; border: 1px solid #d6ddd8; border-radius: 20px; padding: 7px 15px; color: var(--ugc-green); background: rgba(255, 255, 255, 0.75); font-size: 12px; font-weight: 700; transition: all 0.2s ease; }
         .ugc-header-action:hover { background: var(--ugc-green); color: #fff; }
 
-        .ugc-main { padding: 4px 36px 28px; }
+        .ugc-main { padding: 28px 36px 28px; }
         .ugc-page-title { margin: 0 0 14px; color: var(--ugc-green); font-size: clamp(30px, 3.5vw, 44px); line-height: 1.05; letter-spacing: -1.2px; font-weight: 700; }
 
         .ugc-categories { width: min(690px, 100%); min-height: 38px; display: flex; align-items: center; gap: 4px; overflow-x: auto; scrollbar-width: none; margin-bottom: 18px; padding: 4px 8px; border-radius: 30px; background: var(--ugc-green); }
@@ -272,7 +259,7 @@ const Innovation = () => {
         @media (max-width: 900px) {
           .ugc-journal-page { padding: 14px 16px; }
           .ugc-header { padding: 0 20px; }
-          .ugc-main { padding: 4px 20px 24px; }
+          .ugc-main { padding: 20px 20px 24px; }
           .ugc-nav { gap: 16px; margin-right: 0; }
           .ugc-header-action { display: none; }
           .ugc-featured { grid-template-columns: 1fr; }
@@ -283,7 +270,7 @@ const Innovation = () => {
           .ugc-website { border-radius: 0; border: 0; box-shadow: none; }
           .ugc-header { height: 58px; padding: 0 16px; }
           .ugc-nav { display: none; }
-          .ugc-main { padding: 6px 16px 20px; }
+          .ugc-main { padding: 20px 16px 20px; }
           .ugc-page-title { margin-bottom: 10px; font-size: 28px; }
           .ugc-featured { border-radius: 14px; }
           .ugc-featured-copy { padding: 20px 16px; }
@@ -294,27 +281,6 @@ const Innovation = () => {
         }
       `}</style>
       <div className="ugc-website">
-        {/* Navigation Bar */}
-        {!data.hideNav && (
-          <header className="ugc-header">
-            <Link to="/" className="ugc-logo">
-              <span className="ugc-logo-mark" />
-              {get('brandName')}
-            </Link>
-            <nav className="ugc-nav" aria-label="Journal navigation">
-              <a href="#innovation-journal-content">Tracks</a>
-              {navLinks.map((link) => (
-                <Link key={link} to={resolveNavUrl(link)}>
-                  {link}
-                </Link>
-              ))}
-            </nav>
-            <Link to={get('headerActionHref') || '/partnership'} className="ugc-header-action">
-              {get('headerActionLabel') || 'Explore Incubation Models'}
-            </Link>
-          </header>
-        )}
-
         <main id="innovation-journal-content" className="ugc-main">
           <h1 className="ugc-page-title">{get('pageTitle')}</h1>
 
@@ -325,7 +291,7 @@ const Innovation = () => {
                 <button
                   type="button"
                   key={category}
-                  className={`ugc-category ${selectedCategory === category ? 'active' : ''}`}
+                  className={`ugc-category ${activeCategory === category ? 'active' : ''}`}
                   onClick={() => {
                     setSelectedCategory(category);
                     setPage(1);
@@ -536,7 +502,7 @@ const Innovation = () => {
             <section className="ugc-more">
               <h2 className="ugc-more-heading">{get('moreTitle')}</h2>
               <div className="ugc-more-grid">
-                {(Array.isArray(data.moreCards) ? data.moreCards : INNOVATION_DEFAULTS.moreCards).map(
+                {(Array.isArray(data.moreCards) ? data.moreCards : []).map(
                   (card: MoreCard, index: number) => {
                     const moreTarget = card.href?.trim() || `/innovation/${slugifyInnovationTitle(card.title)}`;
                     return (
@@ -565,12 +531,12 @@ const Innovation = () => {
               <div className="ugc-footer-brand">
                 <Link to="/" className="ugc-logo">
                   <span className="ugc-logo-mark" />
-                  {get('brandName')}
+                  {get('brandName', 'CampusMart Innovation')}
                 </Link>
                 <p>{get('footerDescription')}</p>
               </div>
               <div className="ugc-footer-links">
-                {(Array.isArray(data.footerColumns) ? data.footerColumns : INNOVATION_DEFAULTS.footerColumns).map(
+                {(Array.isArray(data.footerColumns) ? data.footerColumns : []).map(
                   (column: { title: string; links: string[] }) => (
                     <div className="ugc-footer-column" key={column.title}>
                       <strong>{column.title}</strong>

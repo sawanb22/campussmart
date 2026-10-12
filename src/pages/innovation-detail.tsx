@@ -4,7 +4,6 @@ import { usePageData } from '@/hooks/usePageData';
 import MediaImage from '@/components/ui/media-image';
 import {
   INNOVATION_PAGE_SLUG,
-  INNOVATION_DEFAULTS,
   slugifyInnovationTitle,
   type InnovationCard,
   type MoreCard,
@@ -13,21 +12,40 @@ import {
 const InnovationDetail = () => {
   const { trackSlug } = useParams();
   const { data, loading } = usePageData<any>(INNOVATION_PAGE_SLUG);
-  const cards: InnovationCard[] = Array.isArray(data.cards) && data.cards.length > 0
-    ? data.cards
-    : INNOVATION_DEFAULTS.cards;
-  const moreCards: MoreCard[] = Array.isArray(data.moreCards) && data.moreCards.length > 0
-    ? data.moreCards
-    : INNOVATION_DEFAULTS.moreCards;
-  const rawFeatured = { ...INNOVATION_DEFAULTS.featured, ...(data.featured ?? {}) };
 
-  const featuredArticle: InnovationCard = {
-    title: rawFeatured.title,
-    description: rawFeatured.description,
-    category: rawFeatured.eyebrow || 'Featured Innovation Hub',
-    readTime: '6 min read',
-    image: rawFeatured.image,
-  };
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-[#faf8f0] py-8 sm:py-14 animate-pulse">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6">
+          <div className="mb-8 h-5 w-44 rounded bg-stone-200" />
+          <div className="overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-sm">
+            <div className="h-64 w-full bg-stone-200 sm:h-[420px]" />
+            <div className="p-6 sm:p-10 space-y-4">
+              <div className="h-6 w-28 rounded-full bg-stone-200" />
+              <div className="h-9 w-3/4 rounded-lg bg-stone-200" />
+              <div className="h-4 w-full rounded bg-stone-200" />
+              <div className="h-4 w-5/6 rounded bg-stone-200" />
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  const cards: InnovationCard[] = Array.isArray(data.cards) ? data.cards : [];
+  const moreCards: MoreCard[] = Array.isArray(data.moreCards) ? data.moreCards : [];
+  const rawFeatured = data.featured ?? {};
+
+  const featuredArticle: InnovationCard | null = rawFeatured.title
+    ? {
+        title: rawFeatured.title,
+        description: rawFeatured.description,
+        category: rawFeatured.eyebrow || 'Featured Innovation Hub',
+        readTime: '6 min read',
+        image: rawFeatured.image,
+        href: rawFeatured.href,
+      }
+    : null;
 
   const moreArticles: InnovationCard[] = moreCards.map((card) => ({
     title: card.title,
@@ -35,18 +53,11 @@ const InnovationDetail = () => {
     category: card.category,
     readTime: '4 min read',
     image: card.image || '',
-  }));
-
-  const defaultMoreArticles: InnovationCard[] = INNOVATION_DEFAULTS.moreCards.map((card) => ({
-    title: card.title,
-    description: card.description || `Practical guidance for education teams establishing ${card.category.toLowerCase()} across an innovation hub.`,
-    category: card.category,
-    readTime: '4 min read',
-    image: card.image || '',
+    href: card.href,
   }));
 
   const matchesTrack = (item: InnovationCard) => {
-    if (!item) return false;
+    if (!item || !item.title) return false;
     const hrefSlug = item.href ? item.href.replace(/^\/innovation\//, '').trim() : '';
     return (
       item.slug === trackSlug ||
@@ -55,21 +66,12 @@ const InnovationDetail = () => {
     );
   };
 
-  const defaultArticles: InnovationCard[] = [featuredArticle, ...INNOVATION_DEFAULTS.cards, ...defaultMoreArticles];
-  const fallback = defaultArticles.find(matchesTrack);
-  const allArticles: InnovationCard[] = [featuredArticle, ...cards, ...moreArticles];
-  const article = allArticles.find(
-    (item) => matchesTrack(item) || (fallback && item.title === fallback.title)
-  );
-  const resolvedArticle = article ? { ...(fallback || {}), ...article } : fallback;
-
-  if (loading && !resolvedArticle) {
-    return (
-      <main className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-cm-blue border-t-transparent" />
-      </main>
-    );
-  }
+  const allArticles: InnovationCard[] = [
+    ...(featuredArticle ? [featuredArticle] : []),
+    ...cards,
+    ...moreArticles,
+  ];
+  const resolvedArticle = allArticles.find(matchesTrack);
 
   if (!resolvedArticle) {
     return (
@@ -81,7 +83,7 @@ const InnovationDetail = () => {
     );
   }
 
-  const image = resolvedArticle.image || fallback?.image || rawFeatured.image;
+  const image = resolvedArticle.image || rawFeatured.image;
   const categoryTag = resolvedArticle.category || (resolvedArticle.categories?.[0]) || 'Innovation';
 
   return (

@@ -147,49 +147,61 @@ const Resources = () => {
           </div>
         </div>
 
-        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
           {items.map((item, index) => (
             <Link
               key={index}
               to={item.href || '/'}
-              className="group relative h-[200px] rounded-2xl overflow-hidden cursor-pointer block transform-gpu"
+              className="group relative flex flex-col rounded-2xl overflow-hidden bg-white border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer transform-gpu"
             >
-              {/* Background Image */}
-              <div className="absolute inset-0">
-                <img
-                  src={resolveMediaUrl(item.image) || item.image}
-                  alt={item.title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
+              {/* Natural Horizontal Photo (Top section, 100% visible, zero dark tint or overlay) */}
+              <div className="relative w-full h-44 sm:h-48 overflow-hidden bg-slate-100 flex-shrink-0">
+                {item.image && (
+                  <img
+                    src={resolveMediaUrl(item.image) || item.image}
+                    alt={item.title}
+                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
+                  />
+                )}
+
+                {/* Tag Pin */}
+                {item.tag && (
+                  <div
+                    className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-white text-[10px] font-bold uppercase tracking-wider shadow z-10"
+                    style={{ background: (item.color || '#0ea5e9') + 'EE' }}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-white inline-block flex-shrink-0" />
+                    {item.tag}
+                  </div>
+                )}
               </div>
 
-              {/* Tag Pin */}
-              <div className="absolute top-3 left-3 z-10">
-                <span
-                  className="px-2.5 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-bold tracking-widest text-white border border-white/20 uppercase shadow"
-                >
-                  {item.tag}
-                </span>
-              </div>
-
-              {/* Bottom Read More Box — clean flat dark glass with zero gradient overlay */}
-              <div className="absolute bottom-0 left-0 right-0 p-3.5 sm:p-4 bg-slate-950/75 backdrop-blur-md border-t border-white/10 z-10">
-                <h3 className="text-white font-extrabold text-sm sm:text-base md:text-lg leading-tight mb-1 group-hover:-translate-y-0.5 transition-transform duration-300">
+              {/* Clean Auto-Height White Body */}
+              <div className="p-4 sm:p-5 flex flex-col bg-white">
+                <h3 className="text-slate-900 font-extrabold text-sm sm:text-base md:text-lg leading-snug group-hover:text-blue-600 transition-colors">
                   {item.title}
                 </h3>
-                <p className="text-white/80 text-xs sm:text-sm leading-relaxed mb-2 line-clamp-2">
-                  {item.description}
-                </p>
+                {item.description && (
+                  <p className="text-slate-600 text-xs sm:text-sm leading-relaxed whitespace-pre-line mt-1.5">
+                    {item.description}
+                  </p>
+                )}
 
-                <div className="flex items-center gap-2">
+                <div className="mt-3 pt-3 flex items-center justify-between border-t border-slate-100">
                   <span
-                    className="text-xs font-bold uppercase tracking-widest flex items-center gap-1"
-                    style={{ color: item.color }}
+                    className="text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform"
+                    style={{ color: item.color || '#0ea5e9' }}
                   >
-                    Read Now <MoveUpRight className="w-3 h-3 ml-1" />
+                    Read Now <MoveUpRight className="w-3.5 h-3.5 ml-0.5" />
                   </span>
                 </div>
               </div>
+
+              {/* Hover border ring */}
+              <div
+                className="pointer-events-none absolute inset-0 rounded-2xl ring-0 transition-all duration-300 group-hover:ring-2"
+                style={{ '--tw-ring-color': item.color || '#0ea5e9' } as React.CSSProperties}
+              />
             </Link>
           ))}
         </div>
