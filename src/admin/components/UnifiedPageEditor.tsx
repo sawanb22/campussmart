@@ -2879,6 +2879,13 @@ export default function UnifiedPageEditor({
                                         </div>
                                     )}
 
+                                    {page.slug === 'colleges-universities-for-sale' && (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-4 rounded-xl border border-slate-200/60 mb-2">
+                                            <Field label="Left Button Text (All Cards)" value={data.cardDetailsButtonLabel ?? 'View Full Details'} onChange={(v) => set('cardDetailsButtonLabel', v)} placeholder="View Full Details" />
+                                            <Field label="Right Button Text (All Cards)" value={data.cardContactButtonLabel ?? 'Contact Business'} onChange={(v) => set('cardContactButtonLabel', v)} placeholder="Contact Business" />
+                                        </div>
+                                    )}
+
                                     {cardsUseCategories && (
                                         <div className="rounded-2xl border border-blue-200 bg-blue-50/60 p-5 space-y-4">
                                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">

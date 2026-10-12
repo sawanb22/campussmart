@@ -324,7 +324,7 @@ export default function CollegesUniversitiesForSale() {
                       <span className="text-amber-600 font-semibold flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-current" />{listing.rating ?? '6.8'} Rating</span>
                     </div>
 
-                    <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-slate-600">{listing.description}</p>
+                    <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-slate-600">{listing.description}</p>
 
                     {(listing.ndaUrl || listing.mandateUrl) && (
                       <div className="mt-3 flex flex-wrap gap-2">
@@ -363,14 +363,14 @@ export default function CollegesUniversitiesForSale() {
                         onClick={() => setDossierListing(listing)}
                         className="rounded-lg border border-[#087ea4] bg-white px-3 py-2.5 text-xs sm:text-sm font-bold text-[#087ea4] hover:bg-[#087ea4]/5 transition text-center cursor-pointer shadow-xs"
                       >
-                        View Dossier
+                        {data.cardDetailsButtonLabel || 'View Full Details'}
                       </button>
                       <button
                         type="button"
                         onClick={() => openContactForm(listing)}
                         className="rounded-lg bg-[#e6bb00] px-3 py-2.5 text-xs sm:text-sm font-bold text-slate-950 hover:bg-[#d5ab00] transition text-center cursor-pointer shadow-xs"
                       >
-                        Contact Business
+                        {data.cardContactButtonLabel || 'Contact Business'}
                       </button>
                     </div>
                   </div>
