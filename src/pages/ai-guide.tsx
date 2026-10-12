@@ -42,8 +42,11 @@ const AIGuide = () => {
   const [subscribed, setSubscribed] = useState(false);
   const value = (key: string) => data[key] ?? DEFAULTS[key as keyof typeof DEFAULTS];
   const featured = { ...DEFAULTS.featured, ...(data.featured ?? {}) };
-  const cards: Article[] = Array.isArray(data.cards) ? data.cards : DEFAULTS.cards;
-  const filters: string[] = Array.isArray(data.filters) ? data.filters : DEFAULTS.filters;
+  const rawCards: Article[] = Array.isArray(data.cards) && data.cards.length > 0 ? data.cards : DEFAULTS.cards;
+  const cards: Article[] = useMemo(() => {
+    return rawCards.filter((card: any) => card.active !== false);
+  }, [rawCards]);
+  const filters: string[] = Array.isArray(data.filters) && data.filters.length > 0 ? data.filters : DEFAULTS.filters;
   const visibleCards = useMemo(() => selectedFilter === 'All' ? cards : cards.filter(card => card.category?.toLowerCase() === selectedFilter.toLowerCase()), [cards, selectedFilter]);
 
   const handleSubscribe = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); setSubscribed(true); event.currentTarget.reset(); };
@@ -68,70 +71,82 @@ const AIGuide = () => {
         @media (max-width:760px) { .ai-guide-hero,.ai-guide-hero-inner { min-height:420px; } .ai-guide-hero-inner { align-items:flex-start; padding:36px 20px; } .ai-guide-hero-copy { width:100%; } .ai-guide-hero h1 { font-size:42px; } .ai-guide-content { padding:24px 16px 36px; } .ai-guide-section-heading { display:block; } .ai-guide-section-heading h2 { margin-bottom:8px; font-size:30px; } .ai-guide-section-heading p { text-align:left; font-size:14px; } .ai-guide-featured { grid-template-columns:1fr; } .ai-guide-featured-image { min-height:220px; } .ai-guide-featured-copy { padding:24px 20px; } .ai-guide-articles { grid-template-columns:1fr; gap:16px; } .ai-guide-card-image { height:200px; } .ai-guide-newsletter { display:block; padding:26px 20px; } .ai-guide-newsletter-form { width:100%; margin-top:20px; } } @media (max-width:420px) { .ai-guide-hero h1 { font-size:36px; } .ai-guide-newsletter-form { display:block; } .ai-guide-newsletter-form input,.ai-guide-newsletter-form button { width:100%; height:40px; border-radius:4px; } .ai-guide-newsletter-form button { margin-top:8px; } }
       `}</style>
       <section className="ai-guide-content">
-        <div className="ai-guide-section-heading">
-          <div>
-            <div className="ai-guide-label">{value('sectionLabel')}</div>
-            <h2>{value('sectionTitle')}</h2>
+        {!data.hideHeader && (
+          <div className="ai-guide-section-heading">
+            <div>
+              <div className="ai-guide-label">{value('sectionLabel')}</div>
+              <h2>{value('sectionTitle')}</h2>
+            </div>
+            <p>{value('sectionDescription')}</p>
           </div>
-          <p>{value('sectionDescription')}</p>
-        </div>
-        <div className="ai-guide-filters" aria-label="Filter articles">
-          {filters.map(filter => (
-            <button
-              key={filter}
-              className={`ai-guide-filter ${selectedFilter === filter ? 'active' : ''}`}
-              onClick={() => setSelectedFilter(filter)}
-            >
-              {filter}
-            </button>
-          ))}
-        </div>
-        <Link to={`/ai-guide/${articleSlug(featured.title)}`} className="ai-guide-featured">
-          <div className="ai-guide-featured-image">
-            <MediaImage src={featured.image} alt={featured.title} className="w-full h-full object-cover" />
+        )}
+        {!data.hideFilters && filters.length > 0 && (
+          <div className="ai-guide-filters" aria-label="Filter articles">
+            {filters.map(filter => (
+              <button
+                key={filter}
+                className={`ai-guide-filter ${selectedFilter === filter ? 'active' : ''}`}
+                onClick={() => setSelectedFilter(filter)}
+              >
+                {filter}
+              </button>
+            ))}
           </div>
-          <div className="ai-guide-featured-copy">
-            <div className="ai-guide-category">{featured.category}</div>
-            <h3>{featured.title}</h3>
-            <p>{featured.description}</p>
-            <span className="ai-guide-read-more">{value('readMoreLabel')} <ArrowRight size={13} /></span>
-          </div>
-        </Link>
-        <div className="ai-guide-articles-heading">
-          <h3>{value('latestTitle')}</h3>
-          <a href="#ai-guide-articles" className="ai-guide-view-all">
-            {value('viewAllLabel')} <ArrowRight size={11} className="inline" />
-          </a>
-        </div>
-        <div id="ai-guide-articles" className="ai-guide-articles">
-          {visibleCards.map((card, index) => (
-            <Link to={`/ai-guide/${articleSlug(card.title)}`} className="ai-guide-card" key={`${card.title}-${index}`}>
-              <div className="ai-guide-card-image">
-                <MediaImage src={card.image} alt={card.title} className="w-full h-full object-cover" />
-              </div>
-              <div className="ai-guide-card-body">
-                <div className="ai-guide-category">{card.category}</div>
-                <h4>{card.title}</h4>
-                <p>{card.description}</p>
-                <div className="ai-guide-card-meta">
-                  <strong>{card.category}</strong>
-                  <span>{card.readTime}</span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-        <section className="ai-guide-newsletter">
-          <div className="ai-guide-newsletter-copy">
-            <div className="ai-guide-category">{value('newsletterLabel')}</div>
-            <h3>{value('newsletterTitle')}</h3>
-            <p>{value('newsletterDescription')}</p>
-          </div>
-          <form className="ai-guide-newsletter-form" onSubmit={handleSubscribe}>
-            <input type="email" placeholder={value('newsletterPlaceholder')} aria-label={value('newsletterPlaceholder')} required />
-            <button type="submit">{subscribed ? 'Subscribed' : value('newsletterButtonLabel')}</button>
-          </form>
-        </section>
+        )}
+        {!data.hideFeatured && featured && featured.title && (
+          <Link to={`/ai-guide/${articleSlug(featured.title)}`} className="ai-guide-featured">
+            <div className="ai-guide-featured-image">
+              <MediaImage src={featured.image} alt={featured.title} className="w-full h-full object-cover" />
+            </div>
+            <div className="ai-guide-featured-copy">
+              <div className="ai-guide-category">{featured.category}</div>
+              <h3>{featured.title}</h3>
+              <p>{featured.description}</p>
+              <span className="ai-guide-read-more">{featured.readMoreLabel || value('readMoreLabel')} <ArrowRight size={13} /></span>
+            </div>
+          </Link>
+        )}
+        {!data.hideCards && !data.hideArticles && (
+          <>
+            <div className="ai-guide-articles-heading">
+              <h3>{value('latestTitle')}</h3>
+              <a href="#ai-guide-articles" className="ai-guide-view-all">
+                {value('viewAllLabel')} <ArrowRight size={11} className="inline" />
+              </a>
+            </div>
+            <div id="ai-guide-articles" className="ai-guide-articles">
+              {visibleCards.map((card, index) => (
+                <Link to={`/ai-guide/${articleSlug(card.title)}`} className="ai-guide-card" key={`${card.title}-${index}`}>
+                  <div className="ai-guide-card-image">
+                    <MediaImage src={card.image} alt={card.title} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="ai-guide-card-body">
+                    <div className="ai-guide-category">{card.category}</div>
+                    <h4>{card.title}</h4>
+                    <p>{card.description}</p>
+                    <div className="ai-guide-card-meta">
+                      <strong>{card.category}</strong>
+                      <span>{card.readTime}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
+        {!data.hideNewsletter && (
+          <section className="ai-guide-newsletter">
+            <div className="ai-guide-newsletter-copy">
+              <div className="ai-guide-category">{value('newsletterLabel')}</div>
+              <h3>{value('newsletterTitle')}</h3>
+              <p>{value('newsletterDescription')}</p>
+            </div>
+            <form className="ai-guide-newsletter-form" onSubmit={handleSubscribe}>
+              <input type="email" placeholder={value('newsletterPlaceholder')} aria-label={value('newsletterPlaceholder')} required />
+              <button type="submit">{subscribed ? 'Subscribed' : value('newsletterButtonLabel')}</button>
+            </form>
+          </section>
+        )}
       </section>
     </main>
   );

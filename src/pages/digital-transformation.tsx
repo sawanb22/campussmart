@@ -44,11 +44,45 @@ const DigitalTransformation = () => {
   const section1Title = data.section1Title || '';
   const cards: CardItem[] = Array.isArray(data.cards) ? data.cards : [];
 
-  const totalPages = Math.ceil(cards.length / PAGE_SIZE);
+  const styles = data.styles || {};
+  const headingFontClass =
+    styles.headingFont === 'playfair' ? 'font-playfair' :
+    styles.headingFont === 'grotesk' ? 'font-grotesk' :
+    styles.headingFont === 'opensans' ? 'font-opensans' :
+    styles.headingFont === 'system' ? 'font-sans' : 'font-poppins';
+
+  const bodyFontClass =
+    styles.bodyFont === 'playfair' ? 'font-playfair' :
+    styles.bodyFont === 'grotesk' ? 'font-grotesk' :
+    styles.bodyFont === 'system' ? 'font-sans' :
+    styles.bodyFont === 'poppins' ? 'font-poppins' : 'font-opensans';
+
+  const primaryColor = styles.primaryColor || '#0047ab';
+  const heroBg = styles.heroBg || 'blue';
+  const heroLayout = styles.heroLayout || 'split-right';
+
+  const heroBgClass =
+    heroBg === 'paper' ? 'bg-[#fbfaf8] text-slate-900 border border-stone-200' :
+    heroBg === 'amber' ? 'bg-[#451a03] text-white' :
+    heroBg === 'slate' ? 'bg-slate-900 text-white' :
+    heroBg === 'stone' ? 'bg-stone-900 text-white' :
+    heroBg === 'white' ? 'bg-white text-slate-900 border border-slate-200 shadow-sm' : 'bg-cm-blue text-white shadow-inner';
+
+  const heroTextColor = heroBg === 'paper' || heroBg === 'white' ? 'text-slate-900' : 'text-white';
+  const heroSubtextColor = heroBg === 'paper' || heroBg === 'white' ? 'text-slate-600' : 'text-white/85';
+
+  const activeSection2Cards = useMemo(() => section2Cards.filter((c: any) => c.active !== false), [section2Cards]);
+  const activeCards = useMemo(() => cards.filter((c: any) => c.active !== false), [cards]);
+
+  const totalPages = Math.ceil(activeCards.length / PAGE_SIZE);
   const paginatedCards = useMemo(() => {
     const startIndex = (page - 1) * PAGE_SIZE;
-    return cards.slice(startIndex, startIndex + PAGE_SIZE);
-  }, [cards, page]);
+    return activeCards.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [activeCards, page]);
+
+  const cardGridCols =
+    styles.cardColumns === '2' ? 'sm:grid-cols-2 lg:grid-cols-2' :
+    styles.cardColumns === '4' ? 'sm:grid-cols-2 lg:grid-cols-4' : 'sm:grid-cols-2 lg:grid-cols-3';
 
   const processEyebrow = data.processEyebrow || '';
   const processTitle = data.processTitle || '';
@@ -84,44 +118,53 @@ const DigitalTransformation = () => {
   }
 
   return (
-    <main className="min-h-screen bg-white">
+    <main
+      className={`min-h-screen bg-white ${bodyFontClass} ${headingFontClass}`}
+      style={{ '--primary-color': primaryColor } as React.CSSProperties}
+    >
       {/* Standard Hero Section */}
-      {!data.hideHero && (
-        <section className="bg-cm-blue mx-3 sm:mx-6 lg:mx-8 rounded-[2rem] py-6 md:py-8 overflow-hidden relative shadow-inner mt-4 mb-4">
-          <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 relative z-10 px-4">
-            <div className="lg:w-1/2 text-left text-white">
+      {!styles.hideHero && !data.hideHero && (
+        <section className={`mx-3 sm:mx-6 lg:mx-8 rounded-[2rem] py-6 md:py-8 overflow-hidden relative mt-4 mb-4 ${heroBgClass}`}>
+          <div className={`max-w-6xl mx-auto flex flex-col gap-8 relative z-10 px-4 ${
+            heroLayout === 'minimal' ? 'items-center text-center' :
+            heroLayout === 'split-left' ? 'lg:flex-row-reverse items-center' :
+            heroLayout === 'centered' ? 'items-center text-center' : 'lg:flex-row items-center'
+          }`}>
+            <div className={`${heroLayout === 'minimal' || heroLayout === 'centered' ? 'max-w-2xl text-center' : 'lg:w-1/2 text-left'} ${heroTextColor}`}>
               {heroBadge && (
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-blue-200 text-xs font-bold uppercase tracking-wider mb-3">
                   <span>{heroBadge}</span>
                 </div>
               )}
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-3 tracking-tight text-white leading-tight">
+              <h1 className={`text-2xl sm:text-3xl lg:text-4xl font-black mb-3 tracking-tight leading-tight ${heroTextColor}`}>
                 {heroTitle}
               </h1>
-              <p className="text-sm md:text-base text-white/85 leading-relaxed max-w-xl">
+              <p className={`text-sm md:text-base leading-relaxed ${heroLayout === 'minimal' || heroLayout === 'centered' ? 'mx-auto' : 'max-w-xl'} ${heroSubtextColor}`}>
                 {heroSubtitle}
               </p>
               {heroButtonLabel && (
-                <div className="mt-5 flex flex-wrap gap-4">
+                <div className={`mt-5 flex flex-wrap gap-4 ${heroLayout === 'minimal' || heroLayout === 'centered' ? 'justify-center' : ''}`}>
                   <Link to={heroButtonHref || '/contact-us'} className="btn-secondary px-6 py-2.5 text-sm font-bold shadow-md">
                     {heroButtonLabel}
                   </Link>
                 </div>
               )}
             </div>
-            <div className="lg:w-1/2 relative w-full">
-              <MediaImage
-                src={heroImage}
-                alt={heroTitle}
-                className="rounded-2xl shadow-xl w-full h-[240px] sm:h-[260px] object-cover border-2 border-cm-blue-dark relative z-10"
-              />
-            </div>
+            {heroImage && heroLayout !== 'minimal' && (
+              <div className={`${heroLayout === 'centered' ? 'w-full max-w-xl' : 'lg:w-1/2'} relative w-full`}>
+                <MediaImage
+                  src={heroImage}
+                  alt={heroTitle}
+                  className="rounded-2xl shadow-xl w-full h-[240px] sm:h-[260px] object-cover border-2 border-cm-blue-dark relative z-10"
+                />
+              </div>
+            )}
           </div>
         </section>
       )}
 
       {/* Why go digital — image cards */}
-      {!data.hideSection2 && !data.hideWhyDigital && (
+      {!styles.hideSection2 && !data.hideSection2 && !data.hideWhyDigital && activeSection2Cards.length > 0 && (
         <section id="why-digital" className="bg-cm-gray px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
           <div className="mx-auto max-w-6xl">
             <div className="mx-auto mb-5 max-w-xl text-center">
@@ -132,27 +175,25 @@ const DigitalTransformation = () => {
                 <h2 className="mt-3 text-2xl font-bold text-cm-blue-dark sm:text-3xl">{section2Title}</h2>
               )}
             </div>
-            {section2Cards.length > 0 && (
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                {section2Cards.map((card) => (
-                  <Link
-                    key={card.title}
-                    to={cardLink(card)}
-                    className="group block overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-                  >
-                    {card.image && (
-                      <div className="h-36 w-full overflow-hidden">
-                        <MediaImage src={card.image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                      </div>
-                    )}
-                    <div className="p-6">
-                      <h3 className="mb-2 text-base font-bold text-cm-blue-dark group-hover:text-cm-blue">{card.title}</h3>
-                      <p className="text-sm leading-relaxed text-gray-500">{card.description}</p>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {activeSection2Cards.map((card) => (
+                <Link
+                  key={card.title}
+                  to={cardLink(card)}
+                  className="group block overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                >
+                  {card.image && (
+                    <div className="h-36 w-full overflow-hidden">
+                      <MediaImage src={card.image} alt={card.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     </div>
-                  </Link>
-                ))}
-              </div>
-            )}
+                  )}
+                  <div className="p-6">
+                    <h3 className="mb-2 text-base font-bold text-cm-blue-dark group-hover:text-cm-blue">{card.title}</h3>
+                    <p className="text-sm leading-relaxed text-gray-500">{card.description}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
             {section2Description && (
               <p className="mx-auto mt-6 max-w-3xl text-center text-sm leading-relaxed text-gray-500 sm:text-base">
                 {section2Description}
@@ -163,7 +204,7 @@ const DigitalTransformation = () => {
       )}
 
       {/* Services grid — numbered */}
-      {!data.hideCards && !data.hideServices && (
+      {!styles.hideCards && !data.hideCards && !data.hideServices && (
         <section id="services" className="bg-white px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
           <div className="mx-auto max-w-6xl">
             <div className="mx-auto mb-5 max-w-xl text-center">
@@ -174,7 +215,7 @@ const DigitalTransformation = () => {
                 <h2 className="mt-3 text-2xl font-bold text-cm-blue-dark sm:text-3xl">{section1Title}</h2>
               )}
             </div>
-            <div ref={cardsRef} className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div ref={cardsRef} className={`grid grid-cols-1 gap-5 ${cardGridCols}`}>
               {paginatedCards.map((card, i) => (
                 <div key={card.title} className="rounded-xl border border-gray-100 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
                   <span className="text-xs font-extrabold text-cm-blue">{String((page - 1) * PAGE_SIZE + i + 1).padStart(2, '0')}</span>
@@ -246,7 +287,7 @@ const DigitalTransformation = () => {
       )}
 
       {/* CTA */}
-      {!data.hideCta && (
+      {!styles.hideCta && !data.hideCta && (
         <section className="bg-cm-blue px-4 py-6 text-center sm:px-6 sm:py-8 lg:px-8">
           <div className="mx-auto max-w-2xl">
             <h2 className="text-2xl font-bold text-white sm:text-4xl">{ctaTitle}</h2>

@@ -23,6 +23,9 @@ import {
   Trophy,
   Palette,
   Volleyball,
+  Dumbbell,
+  Medal,
+  Activity,
   type LucideIcon,
 } from 'lucide-react';
 import { useSiteContent } from '@/contexts/SiteContentContext';
@@ -50,6 +53,9 @@ export const CATEGORY_ICONS: Record<string, LucideIcon> = {
   Trophy,
   Palette,
   Volleyball,
+  Dumbbell,
+  Medal,
+  Activity,
 };
 
 export interface CategoryItem {

@@ -1068,7 +1068,7 @@ export default function UnifiedPageEditor({
                     </div>
                 </section>
 
-                {(page.slug === 'ai-ml' || page.slug === 'campus-design-execution' || page.slug === 'campus-design' || page.slug === 'campus-furniture-design' || page.slug === 'sports-design-execution' || page.slug === 'ai-digital-design-supply' || page.slug === 'ar-vr-experiences' || page.slug === 'furniture' || page.slug === 'sports-infra' || page.slug === 'tech-infra' || page.slug === 'libraries' || page.slug === 'labs' || page.slug === 'collaboration' || page.slug === 'innovation' || page.slug === 'campus-automation' || page.slug === 'campus-master-planning') && (() => {
+                {(page.slug === 'ai-ml' || page.slug === 'campus-design-execution' || page.slug === 'campus-design' || page.slug === 'campus-furniture-design' || page.slug === 'sports-design-execution' || page.slug === 'ai-digital-design-supply' || page.slug === 'ar-vr-experiences' || page.slug === 'furniture' || page.slug === 'sports-infra' || page.slug === 'tech-infra' || page.slug === 'libraries' || page.slug === 'labs' || page.slug === 'collaboration' || page.slug === 'innovation' || page.slug === 'campus-automation' || page.slug === 'campus-master-planning' || page.slug === 'science-tech-labs' || page.slug === 'smart-classrooms' || page.slug === 'digital-transformation' || page.slug === 'ai-stations') && (() => {
                     const isServiceGridPage =
                         page.slug === 'campus-design-execution' ||
                         page.slug === 'campus-design' ||
@@ -1082,7 +1082,11 @@ export default function UnifiedPageEditor({
                         page.slug === 'labs' ||
                         page.slug === 'collaboration' ||
                         page.slug === 'campus-automation' ||
-                        page.slug === 'campus-master-planning';
+                        page.slug === 'campus-master-planning' ||
+                        page.slug === 'science-tech-labs' ||
+                        page.slug === 'smart-classrooms' ||
+                        page.slug === 'digital-transformation' ||
+                        page.slug === 'ai-stations';
                     const isFurniturePage = page.slug === 'furniture';
                     const isSportsInfraPage = page.slug === 'sports-infra';
                     const isTechInfraPage = page.slug === 'tech-infra';
@@ -1092,6 +1096,9 @@ export default function UnifiedPageEditor({
                     const isInnovationPage = page.slug === 'innovation';
                     const isCampusAutomationPage = page.slug === 'campus-automation';
                     const isCampusMasterPlanningPage = page.slug === 'campus-master-planning';
+                    const isSmartClassroomsPage = page.slug === 'smart-classrooms';
+                    const isDigitalTransformationPage = page.slug === 'digital-transformation';
+                    const isScienceTechLabsPage = page.slug === 'science-tech-labs';
                     const defaultHeadingFont = effectiveDefaults.styles?.headingFont || (isInnovationPage ? 'poppins' : isServiceGridPage || isFurniturePage ? 'poppins' : 'playfair');
                     const defaultPrimaryColor = effectiveDefaults.styles?.primaryColor || (isInnovationPage ? '#155b51' : isServiceGridPage || isFurniturePage ? '#0047ab' : '#ea580c');
                     const defaultHeroBg = effectiveDefaults.styles?.heroBg || (isInnovationPage ? 'paper' : isCollabPage || isLabsPage || isLibrariesPage || isTechInfraPage || isSportsInfraPage || isFurniturePage ? 'blue' : isServiceGridPage ? 'white' : 'amber');
@@ -1438,7 +1445,7 @@ export default function UnifiedPageEditor({
                                                 <span>{!data.hideCards ? '● Visible' : '○ Hidden'}</span>
                                             </button>
 
-                                            {page.slug === 'sports-infra' && (
+                                            {(page.slug === 'sports-infra' || isSmartClassroomsPage) && (
                                                 <button
                                                     type="button"
                                                     onClick={() => set('hideFeatures', !data.hideFeatures)}
@@ -1448,12 +1455,70 @@ export default function UnifiedPageEditor({
                                                             : 'bg-slate-50 text-slate-500 border-slate-200'
                                                     }`}
                                                 >
-                                                    <span>Services Bullets</span>
+                                                    <span>{isSmartClassroomsPage ? 'Capabilities Ticker' : 'Services Bullets'}</span>
                                                     <span>{!data.hideFeatures ? '● Visible' : '○ Hidden'}</span>
                                                 </button>
                                             )}
 
-                                            {(page.slug === 'libraries' || page.slug === 'labs') && (
+                                            {isSmartClassroomsPage && (
+                                                <>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => set('hideHighlight', !data.hideHighlight)}
+                                                        className={`flex items-center justify-between px-4 py-3 rounded-xl border text-xs font-bold transition-all ${
+                                                            !data.hideHighlight
+                                                                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                                                : 'bg-slate-50 text-slate-500 border-slate-200'
+                                                        }`}
+                                                    >
+                                                        <span>Highlight Band</span>
+                                                        <span>{!data.hideHighlight ? '● Visible' : '○ Hidden'}</span>
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => set('hideForm', !data.hideForm)}
+                                                        className={`flex items-center justify-between px-4 py-3 rounded-xl border text-xs font-bold transition-all ${
+                                                            !data.hideForm
+                                                                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                                                : 'bg-slate-50 text-slate-500 border-slate-200'
+                                                        }`}
+                                                    >
+                                                        <span>Inquiry Form</span>
+                                                        <span>{!data.hideForm ? '● Visible' : '○ Hidden'}</span>
+                                                    </button>
+                                                </>
+                                            )}
+
+                                            {isDigitalTransformationPage && (
+                                                <>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => set('hideSection2', !data.hideSection2)}
+                                                        className={`flex items-center justify-between px-4 py-3 rounded-xl border text-xs font-bold transition-all ${
+                                                            !data.hideSection2
+                                                                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                                                : 'bg-slate-50 text-slate-500 border-slate-200'
+                                                        }`}
+                                                    >
+                                                        <span>Why Go Digital</span>
+                                                        <span>{!data.hideSection2 ? '● Visible' : '○ Hidden'}</span>
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => set('hideSections', !data.hideSections)}
+                                                        className={`flex items-center justify-between px-4 py-3 rounded-xl border text-xs font-bold transition-all ${
+                                                            !data.hideSections
+                                                                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                                                : 'bg-slate-50 text-slate-500 border-slate-200'
+                                                        }`}
+                                                    >
+                                                        <span>Process Steps</span>
+                                                        <span>{!data.hideSections ? '● Visible' : '○ Hidden'}</span>
+                                                    </button>
+                                                </>
+                                            )}
+
+                                            {(page.slug === 'libraries' || page.slug === 'labs' || isScienceTechLabsPage) && (
                                                 <button
                                                     type="button"
                                                     onClick={() => set('hidePhilosophy', !data.hidePhilosophy)}
@@ -2009,22 +2074,70 @@ export default function UnifiedPageEditor({
 
                         {(page.slug === 'ai-guide' || page.slug === 'science-tech-labs') && (
                             <>
+                                {/* 1. Header & Introduction */}
                                 <section className="space-y-6">
-                                    <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                                    <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                                         <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">
-                                            {page.slug === 'science-tech-labs' ? 'Editorial Layout Content' : 'Journal Layout Content'}
+                                            {page.slug === 'science-tech-labs' ? 'Editorial Layout Content' : 'Header & Introduction'}
                                         </h4>
+                                        <button
+                                            type="button"
+                                            onClick={() => set('hideHeader', !data.hideHeader)}
+                                            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                                data.hideHeader
+                                                    ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                                    : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                            }`}
+                                        >
+                                            {data.hideHeader ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                            {data.hideHeader ? 'Hidden / Draft' : 'Live on Page'}
+                                        </button>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <Field label="Section Eyebrow" value={data.sectionLabel ?? ''} onChange={(v) => set('sectionLabel', v)} />
-                                        <Field label="Section Heading" value={data.sectionTitle ?? ''} onChange={(v) => set('sectionTitle', v)} />
-                                        <Field label="Section Description" value={data.sectionDescription ?? ''} onChange={(v) => set('sectionDescription', v)} multiline />
-                                        <Field label={page.slug === 'science-tech-labs' ? 'Latest Labs Heading' : 'Latest Articles Heading'} value={data.latestTitle ?? ''} onChange={(v) => set('latestTitle', v)} />
-                                        <Field label="View All Label" value={data.viewAllLabel ?? ''} onChange={(v) => set('viewAllLabel', v)} />
-                                        <Field label="Featured Link Label" value={data.readMoreLabel ?? ''} onChange={(v) => set('readMoreLabel', v)} />
+                                        <Field label="Section Eyebrow" value={data.sectionLabel ?? ''} onChange={(v) => set('sectionLabel', v)} placeholder="Explore the guide" />
+                                        <Field label="Section Heading" value={data.sectionTitle ?? ''} onChange={(v) => set('sectionTitle', v)} placeholder="AI, your way." />
+                                        <Field label="Section Description" value={data.sectionDescription ?? ''} onChange={(v) => set('sectionDescription', v)} multiline placeholder="Helpful perspectives for leaders, faculty and teams shaping the next generation of learning environments." />
+                                        <Field label={page.slug === 'science-tech-labs' ? 'Latest Labs Heading' : 'Latest Articles Heading'} value={data.latestTitle ?? ''} onChange={(v) => set('latestTitle', v)} placeholder="Latest insights" />
+                                        <Field label="View All Label" value={data.viewAllLabel ?? ''} onChange={(v) => set('viewAllLabel', v)} placeholder="View all" />
+                                        <Field label="Featured Link Label" value={data.readMoreLabel ?? ''} onChange={(v) => set('readMoreLabel', v)} placeholder="Read article" />
                                     </div>
                                 </section>
 
+                                {/* 2. Filter Categories */}
+                                <section className="space-y-6">
+                                    <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Filter Categories</h4>
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => set('hideFilters', !data.hideFilters)}
+                                                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                                    data.hideFilters
+                                                        ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                                        : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                                }`}
+                                            >
+                                                {data.hideFilters ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                                {data.hideFilters ? 'Hidden / Draft' : 'Live on Page'}
+                                            </button>
+                                            <button type="button" onClick={addFilter} className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-amber-700 transition-all shadow-md">
+                                                <Plus className="w-4 h-4" /> Add Filter
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                        {(data.filters ?? []).map((filter: string, i: number) => (
+                                            <div key={i} className="flex items-center gap-2">
+                                                <input className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm" value={filter} onChange={(e) => setFilter(i, e.target.value)} />
+                                                <button type="button" onClick={() => removeFilter(i)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg">
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+
+                                {/* 3. Featured Article Showcase */}
                                 <section className="space-y-6">
                                     <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                                         <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">
@@ -2045,63 +2158,20 @@ export default function UnifiedPageEditor({
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         {page.slug === 'ai-guide' && (
-                                            <Field label="Category Label" value={data.featured?.category ?? ''} onChange={(v) => setFeatured('category', v)} />
+                                            <Field label="Category Label" value={data.featured?.category ?? ''} onChange={(v) => setFeatured('category', v)} placeholder="Featured · Strategy" />
                                         )}
-                                        <Field label={page.slug === 'science-tech-labs' ? 'Laboratory Title' : 'Article Title'} value={data.featured?.title ?? ''} onChange={(v) => setFeatured('title', v)} />
-                                        <Field label="Description" value={data.featured?.description ?? ''} onChange={(v) => setFeatured('description', v)} multiline />
+                                        <Field label={page.slug === 'science-tech-labs' ? 'Laboratory Title' : 'Article Title'} value={data.featured?.title ?? ''} onChange={(v) => setFeatured('title', v)} placeholder="Where should your campus begin with AI?" />
+                                        <Field label="Description" value={data.featured?.description ?? ''} onChange={(v) => setFeatured('description', v)} multiline placeholder="A thoughtful starting point can turn a complex technology decision into a sequence of useful, measurable steps for your institution." />
                                         <MediaImageField label="Featured Image" value={data.featured?.image ?? ''} onChange={(v) => setFeatured('image', v)} previewClassName="h-32" />
+                                        {page.slug === 'ai-guide' && (
+                                            <Field label="Action / Read More Label" value={data.featured?.readMoreLabel ?? data.readMoreLabel ?? ''} onChange={(v) => { set('readMoreLabel', v); setFeatured('readMoreLabel', v); }} placeholder="Read article" />
+                                        )}
                                         {page.slug === 'science-tech-labs' && (
                                             <>
                                                 <Field label="Action Link Label" value={data.featured?.readMoreLabel ?? ''} onChange={(v) => setFeatured('readMoreLabel', v)} placeholder="Explore Lab Programme" />
                                                 <Field label="Custom Action URL (Optional)" value={data.featured?.href ?? ''} onChange={(v) => setFeatured('href', v)} placeholder="/contact-us or leave blank for detail" />
                                             </>
                                         )}
-                                    </div>
-                                </section>
-
-                                <section className="space-y-6">
-                                    <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-                                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">Filter Categories</h4>
-                                        <button type="button" onClick={addFilter} className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-amber-700 transition-all shadow-md">
-                                            <Plus className="w-4 h-4" /> Add Filter
-                                        </button>
-                                    </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                                        {(data.filters ?? []).map((filter: string, i: number) => (
-                                            <div key={i} className="flex items-center gap-2">
-                                                <input className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm" value={filter} onChange={(e) => setFilter(i, e.target.value)} />
-                                                <button type="button" onClick={() => removeFilter(i)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg">
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </section>
-
-                                <section className="space-y-6">
-                                    <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-                                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">
-                                            {page.slug === 'science-tech-labs' ? 'Inquiry & Consultation Block' : 'Newsletter Block'}
-                                        </h4>
-                                        <button
-                                            type="button"
-                                            onClick={() => set('hideNewsletter', !data.hideNewsletter)}
-                                            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                                                data.hideNewsletter
-                                                    ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
-                                                    : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
-                                            }`}
-                                        >
-                                            {data.hideNewsletter ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                                            {data.hideNewsletter ? 'Hidden / Draft' : 'Live on Page'}
-                                        </button>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <Field label="Eyebrow" value={data.newsletterLabel ?? ''} onChange={(v) => set('newsletterLabel', v)} />
-                                        <Field label="Heading" value={data.newsletterTitle ?? ''} onChange={(v) => set('newsletterTitle', v)} />
-                                        <Field label="Description" value={data.newsletterDescription ?? ''} onChange={(v) => set('newsletterDescription', v)} multiline />
-                                        <Field label="Email Placeholder" value={data.newsletterPlaceholder ?? ''} onChange={(v) => set('newsletterPlaceholder', v)} />
-                                        <Field label="Button Label" value={data.newsletterButtonLabel ?? ''} onChange={(v) => set('newsletterButtonLabel', v)} />
                                     </div>
                                 </section>
                             </>
@@ -2553,9 +2623,23 @@ export default function UnifiedPageEditor({
                                                             <span className="w-8 h-8 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">{i + 1}</span>
                                                             <span className="text-xs font-black text-slate-500 uppercase tracking-widest">{card.title || 'Untitled Card'}</span>
                                                         </div>
-                                                        <button type="button" onClick={() => removeSection2Card(i)} className="flex items-center gap-1.5 text-red-400 hover:text-red-600 text-[10px] font-black uppercase tracking-wider">
-                                                            <Trash2 className="w-3.5 h-3.5" /> Delete
-                                                        </button>
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setSection2Card(i, 'active', card.active === false ? true : false)}
+                                                                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                                                                    card.active !== false
+                                                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+                                                                        : 'bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200'
+                                                                }`}
+                                                            >
+                                                                <span className={`w-1.5 h-1.5 rounded-full ${card.active !== false ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
+                                                                <span>{card.active !== false ? 'Live' : 'Hidden'}</span>
+                                                            </button>
+                                                            <button type="button" onClick={() => removeSection2Card(i)} className="flex items-center gap-1.5 text-red-400 hover:text-red-600 text-[10px] font-black uppercase tracking-wider">
+                                                                <Trash2 className="w-3.5 h-3.5" /> Delete
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                         <Field label="Card Title" value={card.title ?? ''} onChange={(v) => setSection2Card(i, 'title', v)} />
@@ -2632,9 +2716,23 @@ export default function UnifiedPageEditor({
                                                             <span className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs">{String(i + 1).padStart(2, '0')}</span>
                                                             <span className="text-xs font-black text-slate-500 uppercase tracking-widest">{card.title || 'Untitled Card'}</span>
                                                         </div>
-                                                        <button type="button" onClick={() => removeCard(i)} className="flex items-center gap-1.5 text-red-400 hover:text-red-600 text-[10px] font-black uppercase tracking-wider">
-                                                            <Trash2 className="w-3.5 h-3.5" /> Delete
-                                                        </button>
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setCard(i, 'active', (card as any).active === false ? true : false)}
+                                                                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                                                                    (card as any).active !== false
+                                                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+                                                                        : 'bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200'
+                                                                }`}
+                                                            >
+                                                                <span className={`w-1.5 h-1.5 rounded-full ${(card as any).active !== false ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
+                                                                <span>{(card as any).active !== false ? 'Live' : 'Hidden'}</span>
+                                                            </button>
+                                                            <button type="button" onClick={() => removeCard(i)} className="flex items-center gap-1.5 text-red-400 hover:text-red-600 text-[10px] font-black uppercase tracking-wider">
+                                                                <Trash2 className="w-3.5 h-3.5" /> Delete
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                     <div className="space-y-4">
                                                         <Field label="Service Title" value={card.title ?? ''} onChange={(v) => setCard(i, 'title', v)} />
@@ -2749,7 +2847,7 @@ export default function UnifiedPageEditor({
                                 <section className="space-y-6">
                                     <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                                         <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">
-                                            Interactive Cards <span className="text-blue-500 ml-2">({(data.cards ?? []).length})</span>
+                                            {page.slug === 'ai-guide' ? 'Latest Articles Grid' : 'Interactive Cards'} <span className="text-blue-500 ml-2">({(data.cards ?? []).length})</span>
                                         </h4>
                                         <div className="flex items-center gap-3">
                                             <button
@@ -2773,6 +2871,13 @@ export default function UnifiedPageEditor({
                                             </button>
                                         </div>
                                     </div>
+
+                                    {page.slug === 'ai-guide' && (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-4 rounded-xl border border-slate-200/60 mb-2">
+                                            <Field label="Articles Section Heading" value={data.latestTitle ?? ''} onChange={(v) => set('latestTitle', v)} placeholder="Latest insights" />
+                                            <Field label="View All Button Label" value={data.viewAllLabel ?? ''} onChange={(v) => set('viewAllLabel', v)} placeholder="View all" />
+                                        </div>
+                                    )}
 
                                     {cardsUseCategories && (
                                         <div className="rounded-2xl border border-blue-200 bg-blue-50/60 p-5 space-y-4">
@@ -2866,13 +2971,27 @@ export default function UnifiedPageEditor({
                                                         <span className="w-8 h-8 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">{i + 1}</span>
                                                         <span className="text-xs font-black text-slate-500 uppercase tracking-widest">{card.title || 'Untitled Card'}</span>
                                                     </div>
-                                                    <button type="button" onClick={() => removeCard(i)} className="flex items-center gap-1.5 text-red-400 hover:text-red-600 text-[10px] font-black uppercase tracking-wider">
-                                                        <Trash2 className="w-3.5 h-3.5" /> Delete
-                                                    </button>
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setCard(i, 'active', card.active === false ? true : false)}
+                                                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                                                                card.active !== false
+                                                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+                                                                    : 'bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200'
+                                                            }`}
+                                                        >
+                                                            <span className={`w-1.5 h-1.5 rounded-full ${card.active !== false ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
+                                                            <span>{card.active !== false ? 'Live' : 'Hidden'}</span>
+                                                        </button>
+                                                        <button type="button" onClick={() => removeCard(i)} className="flex items-center gap-1.5 text-red-400 hover:text-red-600 text-[10px] font-black uppercase tracking-wider">
+                                                            <Trash2 className="w-3.5 h-3.5" /> Delete
+                                                        </button>
+                                                    </div>
                                                 </div>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                    <Field label="Card Title" value={card.title ?? ''} onChange={(v) => setCard(i, 'title', v)} />
-                                                    <Field label="Card Description" value={card.description ?? ''} onChange={(v) => setCard(i, 'description', v)} multiline />
+                                                    <Field label={page.slug === 'ai-guide' ? 'Article Title' : 'Card Title'} value={card.title ?? ''} onChange={(v) => setCard(i, 'title', v)} placeholder="Article Title" />
+                                                    <Field label={page.slug === 'ai-guide' ? 'Article Summary' : 'Card Description'} value={card.description ?? ''} onChange={(v) => setCard(i, 'description', v)} multiline placeholder="Article summary..." />
                                                     {(page.slug === 'ai-guide' || page.slug === 'setup-college' || page.slug === 'ugc-guidelines' || page.slug === 'innovation' || page.slug === 'science-tech-labs' || page.slug === 'classifieds') && (
                                                         <>
                                                             <Field label={page.slug === 'science-tech-labs' ? 'Lab Category (for Filter)' : page.slug === 'classifieds' ? 'Opportunity Category' : 'Article Category'} value={card.category ?? card.categories?.[0] ?? ''} onChange={(v) => { setCard(i, 'category', v); setCard(i, 'categories', [v]); }} placeholder={page.slug === 'science-tech-labs' ? 'Physics' : page.slug === 'classifieds' ? 'Institutions' : 'Ideation'} />
@@ -2887,7 +3006,7 @@ export default function UnifiedPageEditor({
                                                             )}
                                                         </>
                                                     )}
-                                                    <MediaImageField label="Image (Optional)" value={card.image ?? ''} onChange={(v) => setCard(i, 'image', v)} previewClassName="h-24" />
+                                                    <MediaImageField label={page.slug === 'ai-guide' ? 'Article Thumbnail Image' : 'Image (Optional)'} value={card.image ?? ''} onChange={(v) => setCard(i, 'image', v)} previewClassName="h-24" />
                                                     {page.slug === 'colleges-universities-for-sale' && (
                                                         <>
                                                             <Field label="Location" value={card.location ?? ''} onChange={(v) => setCard(i, 'location', v)} placeholder="Bahraich" />
@@ -2919,7 +3038,7 @@ export default function UnifiedPageEditor({
                                                             onAddGlobalCategory={handleAddGlobalCategory}
                                                         />
                                                     )}
-                                                    {page.slug !== 'catalogues' && ('href' in card || cardsUseHref || page.slug === 'classifieds' || page.slug === 'ai-ml' || page.slug === 'campus-design-execution' || page.slug === 'campus-design' || page.slug === 'campus-furniture-design' || page.slug === 'sports-design-execution' || page.slug === 'ai-digital-design-supply' || page.slug === 'ar-vr-experiences' || page.slug === 'sports-infra' || page.slug === 'tech-infra' || page.slug === 'libraries' || page.slug === 'labs' || page.slug === 'collaboration' || page.slug === 'innovation' || page.slug === 'campus-automation' || page.slug === 'campus-master-planning' || page.slug === 'science-tech-labs' || page.slug === 'smart-classrooms') && (
+                                                    {page.slug !== 'catalogues' && ('href' in card || cardsUseHref || page.slug === 'classifieds' || page.slug === 'ai-ml' || page.slug === 'campus-design-execution' || page.slug === 'campus-design' || page.slug === 'campus-furniture-design' || page.slug === 'sports-design-execution' || page.slug === 'ai-digital-design-supply' || page.slug === 'ar-vr-experiences' || page.slug === 'sports-infra' || page.slug === 'tech-infra' || page.slug === 'libraries' || page.slug === 'labs' || page.slug === 'collaboration' || page.slug === 'innovation' || page.slug === 'campus-automation' || page.slug === 'campus-master-planning' || page.slug === 'science-tech-labs' || page.slug === 'smart-classrooms' || page.slug === 'ai-stations') && (
                                                         <Field label="Card Link" value={card.href ?? ''} onChange={(v) => setCard(i, 'href', v)} />
                                                     )}
                                                     {('downloadLink' in card || cardsUseDownloadLink) && (
@@ -2939,6 +3058,36 @@ export default function UnifiedPageEditor({
                                 </section>
                             );
                         })()}
+
+                        {/* 5. Newsletter Block (AI Guide & Science Tech Labs) */}
+                        {(page.slug === 'ai-guide' || page.slug === 'science-tech-labs') && (
+                            <section className="space-y-6">
+                                <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                                    <h4 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">
+                                        {page.slug === 'science-tech-labs' ? 'Inquiry & Consultation Block' : 'Newsletter Block'}
+                                    </h4>
+                                    <button
+                                        type="button"
+                                        onClick={() => set('hideNewsletter', !data.hideNewsletter)}
+                                        className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                                            data.hideNewsletter
+                                                ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                                                : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                        }`}
+                                    >
+                                        {data.hideNewsletter ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                        {data.hideNewsletter ? 'Hidden / Draft' : 'Live on Page'}
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <Field label="Eyebrow" value={data.newsletterLabel ?? ''} onChange={(v) => set('newsletterLabel', v)} placeholder="Stay curious" />
+                                    <Field label="Heading" value={data.newsletterTitle ?? ''} onChange={(v) => set('newsletterTitle', v)} placeholder="Good ideas, occasionally." />
+                                    <Field label="Description" value={data.newsletterDescription ?? ''} onChange={(v) => set('newsletterDescription', v)} multiline placeholder="Get useful campus technology ideas, new guides and practical stories delivered to your inbox. No noise, just things worth reading." />
+                                    <Field label="Email Placeholder" value={data.newsletterPlaceholder ?? ''} onChange={(v) => set('newsletterPlaceholder', v)} placeholder="Your email address" />
+                                    <Field label="Button Label" value={data.newsletterButtonLabel ?? ''} onChange={(v) => set('newsletterButtonLabel', v)} placeholder="Subscribe" />
+                                </div>
+                            </section>
+                        )}
 
                         {/* Optional second cards block */}
                         {('section2Cards' in effectiveDefaults) && page.slug !== 'digital-transformation' && (

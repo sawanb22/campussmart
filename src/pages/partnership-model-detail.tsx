@@ -175,6 +175,17 @@ const PartnershipModelDetail = () => {
                       {formError}
                     </div>
                   )}
+
+                  <div className="rounded-xl bg-slate-50 border border-slate-200/90 p-4 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                    <div className="flex items-center gap-2 font-bold text-slate-800 mb-1">
+                      <Handshake className="w-4 h-4 text-cm-blue shrink-0" />
+                      <span>{card.title} Consultation</span>
+                    </div>
+                    <p className="text-slate-600 text-xs sm:text-[13px] leading-relaxed">
+                      {data.formIntro || 'Join over 4,000+ partner campuses nationwide. Submit your institution details below to discuss collaboration terms, operational models, and rollout timelines with our partnership director.'}
+                    </p>
+                  </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">

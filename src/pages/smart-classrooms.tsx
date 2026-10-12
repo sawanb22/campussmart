@@ -48,11 +48,43 @@ const SmartClassrooms = () => {
   const formTitle = data.formTitle || 'Request More Information';
   const formSubtitle = data.formSubtitle || 'Tell us what your institution needs and our team will contact you.';
 
-  const totalPages = Math.ceil(cards.length / PAGE_SIZE);
+  const styles = data.styles || {};
+  const headingFontClass =
+    styles.headingFont === 'playfair' ? 'font-playfair' :
+    styles.headingFont === 'grotesk' ? 'font-grotesk' :
+    styles.headingFont === 'opensans' ? 'font-opensans' :
+    styles.headingFont === 'system' ? 'font-sans' : 'font-poppins';
+
+  const bodyFontClass =
+    styles.bodyFont === 'playfair' ? 'font-playfair' :
+    styles.bodyFont === 'grotesk' ? 'font-grotesk' :
+    styles.bodyFont === 'system' ? 'font-sans' :
+    styles.bodyFont === 'poppins' ? 'font-poppins' : 'font-opensans';
+
+  const primaryColor = styles.primaryColor || '#0047ab';
+  const heroBg = styles.heroBg || 'blue';
+  const heroLayout = styles.heroLayout || 'split-right';
+
+  const heroBgClass =
+    heroBg === 'paper' ? 'bg-[#fbfaf8] text-slate-900 border border-stone-200' :
+    heroBg === 'amber' ? 'bg-[#451a03] text-white' :
+    heroBg === 'slate' ? 'bg-slate-900 text-white' :
+    heroBg === 'stone' ? 'bg-stone-900 text-white' :
+    heroBg === 'white' ? 'bg-white text-slate-900 border border-slate-200 shadow-sm' : 'bg-cm-blue text-white shadow-inner';
+
+  const heroTextColor = heroBg === 'paper' || heroBg === 'white' ? 'text-slate-900' : 'text-white';
+  const heroSubtextColor = heroBg === 'paper' || heroBg === 'white' ? 'text-slate-600' : 'text-white/85';
+
+  const activeCards = useMemo(() => cards.filter((c: any) => c.active !== false), [cards]);
+  const totalPages = Math.ceil(activeCards.length / PAGE_SIZE);
   const paginatedCards = useMemo(() => {
     const startIndex = (page - 1) * PAGE_SIZE;
-    return cards.slice(startIndex, startIndex + PAGE_SIZE);
-  }, [cards, page]);
+    return activeCards.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [activeCards, page]);
+
+  const cardGridCols =
+    styles.cardColumns === '2' ? 'sm:grid-cols-2 lg:grid-cols-2' :
+    styles.cardColumns === '3' ? 'sm:grid-cols-2 lg:grid-cols-3' : 'sm:grid-cols-2 lg:grid-cols-4';
 
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', institution: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
@@ -78,39 +110,48 @@ const SmartClassrooms = () => {
   }
 
   return (
-    <main className="min-h-screen bg-white">
+    <main
+      className={`min-h-screen bg-white ${bodyFontClass} ${headingFontClass}`}
+      style={{ '--primary-color': primaryColor } as React.CSSProperties}
+    >
       {/* Hero Section */}
-      {!data.hideHero && (
-        <section className="bg-cm-blue mx-3 sm:mx-6 lg:mx-8 rounded-[2rem] py-6 md:py-8 overflow-hidden relative shadow-inner mt-4 mb-2">
-          <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 relative z-10 px-4">
-            <div className="lg:w-1/2 text-left text-white">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-3 tracking-tight text-white leading-tight">
+      {!styles.hideHero && !data.hideHero && (
+        <section className={`mx-3 sm:mx-6 lg:mx-8 rounded-[2rem] py-6 md:py-8 overflow-hidden relative mt-4 mb-2 ${heroBgClass}`}>
+          <div className={`max-w-6xl mx-auto flex flex-col gap-8 relative z-10 px-4 ${
+            heroLayout === 'minimal' ? 'items-center text-center' :
+            heroLayout === 'split-left' ? 'lg:flex-row-reverse items-center' :
+            heroLayout === 'centered' ? 'items-center text-center' : 'lg:flex-row items-center'
+          }`}>
+            <div className={`${heroLayout === 'minimal' || heroLayout === 'centered' ? 'max-w-2xl text-center' : 'lg:w-1/2 text-left'} ${heroTextColor}`}>
+              <h1 className={`text-2xl sm:text-3xl lg:text-4xl font-black mb-3 tracking-tight leading-tight ${heroTextColor}`}>
                 {heroTitle}
               </h1>
-              <p className="text-sm md:text-base text-white/85 leading-relaxed max-w-xl">
+              <p className={`text-sm md:text-base leading-relaxed ${heroLayout === 'minimal' || heroLayout === 'centered' ? 'mx-auto' : 'max-w-xl'} ${heroSubtextColor}`}>
                 {heroSubtitle}
               </p>
               {heroButtonLabel && (
-                <div className="mt-5 flex flex-wrap gap-4">
+                <div className={`mt-5 flex flex-wrap gap-4 ${heroLayout === 'minimal' || heroLayout === 'centered' ? 'justify-center' : ''}`}>
                   <Link to={heroButtonHref} className="btn-secondary px-6 py-2.5 text-sm font-bold shadow-md">
                     {heroButtonLabel}
                   </Link>
                 </div>
               )}
             </div>
-            <div className="lg:w-1/2 relative w-full">
-              <MediaImage
-                src={heroImage}
-                alt={heroTitle}
-                className="rounded-2xl shadow-xl w-full h-[240px] sm:h-[260px] object-cover border-2 border-cm-blue-dark relative z-10"
-              />
-            </div>
+            {heroImage && heroLayout !== 'minimal' && (
+              <div className={`${heroLayout === 'centered' ? 'w-full max-w-xl' : 'lg:w-1/2'} relative w-full`}>
+                <MediaImage
+                  src={heroImage}
+                  alt={heroTitle}
+                  className="rounded-2xl shadow-xl w-full h-[240px] sm:h-[260px] object-cover border-2 border-cm-blue-dark relative z-10"
+                />
+              </div>
+            )}
           </div>
         </section>
       )}
 
       {/* Capability highlights */}
-      {!data.hideFeatures && features.length > 0 && (
+      {!styles.hideFeatures && !data.hideFeatures && features.length > 0 && (
         <section className="px-4 pt-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-6xl">
             <div className="flex items-center gap-2 overflow-x-auto rounded-full bg-cm-blue-dark p-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -133,13 +174,13 @@ const SmartClassrooms = () => {
       )}
 
       {/* Capability cards */}
-      {!data.hideCards && cards.length > 0 && (
+      {!styles.hideCards && !data.hideCards && activeCards.length > 0 && (
         <section id="capabilities" className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
           <div className="mx-auto max-w-6xl">
             <h2 className="mb-5 text-2xl font-bold tracking-tight text-cm-blue-dark sm:text-3xl">
               {section1Title}
             </h2>
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className={`grid grid-cols-1 gap-5 ${cardGridCols}`}>
               {paginatedCards.map((card, i) => (
                 <div
                   key={`${card.title}-${i}`}
@@ -213,7 +254,7 @@ const SmartClassrooms = () => {
       )}
 
       {/* Highlight band */}
-      {!data.hideHighlight && (
+      {!styles.hideHighlight && !data.hideHighlight && (
         <section className="px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-6xl overflow-hidden rounded-[28px] bg-cm-blue-dark">
             <div className="relative grid grid-cols-1 lg:grid-cols-2">
@@ -246,7 +287,7 @@ const SmartClassrooms = () => {
       )}
 
       {/* CTA banner */}
-      {!data.hideCta && (
+      {!styles.hideCta && !data.hideCta && (
         <section className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
           <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-cm-gray p-6 text-center sm:flex-row sm:p-8 sm:text-left">
             <div>
@@ -263,7 +304,7 @@ const SmartClassrooms = () => {
       )}
 
       {/* Request info form */}
-      {!data.hideForm && (
+      {!styles.hideForm && !data.hideForm && (
         <section id="request-form" className="px-4 pb-8 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl rounded-2xl bg-white p-6 shadow-sm sm:p-10">
             <h2 className="mb-2 text-2xl font-bold text-cm-blue-dark">{formTitle}</h2>
