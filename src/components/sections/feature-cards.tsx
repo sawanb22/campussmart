@@ -27,16 +27,6 @@ const getCanonicalFeatureHref = (title: string): string | null => {
   }
 };
 
-const getCanonicalProjectHref = (label: string): string => {
-  const norm = label?.toLowerCase()?.trim() || '';
-  if (norm.includes('20 stunning')) return '/20-stunning-college-buildings';
-  if (norm.includes('academic buildings')) return '/academic-buildings';
-  if (norm.includes('research facilities')) return '/research-facilities';
-  if (norm.includes('student life')) return '/student-life-centers';
-  if (norm.includes('athletic complexes')) return '/sports-infra';
-  return '/campus-master-planning';
-};
-
 const FeatureCards = () => {
   const { content, loading } = useSiteContent();
 
@@ -54,21 +44,41 @@ const FeatureCards = () => {
     ? content.home_sidebar
     : {};
 
-  const classifieds = (Array.isArray(rawSidebar.classifieds) ? rawSidebar.classifieds : []).map((item: any) =>
-    item.label === 'Colleges / Universities for Sale'
-      ? { ...item, href: '/colleges-universities-for-sale' }
-      : item
-  );
-  const resources = (Array.isArray(rawSidebar.resources) ? rawSidebar.resources : []).map((item: any) =>
-    item.label?.toLowerCase().includes('product catalog') || item.label?.toLowerCase().includes('product catalogue')
-      ? { ...item, href: '/catalogues' }
-      : item
-  );
-  const completedProjects = (Array.isArray(rawSidebar.completedProjects) ? rawSidebar.completedProjects : []).map((item: any) => ({
-    ...item,
-    href: (item.href && item.href !== '/') ? item.href : (getCanonicalProjectHref(item.label) || item.href || '/'),
-  }));
-  const contacts = Array.isArray(rawSidebar.contacts) ? rawSidebar.contacts : [];
+  const classifieds = (Array.isArray(rawSidebar.classifieds) ? rawSidebar.classifieds : [])
+    .filter((item: any) => item && item.active !== false && (item.label || item.title))
+    .map((item: any) => ({
+      ...item,
+      label: item.label || item.title || '',
+    }));
+  const resources = (Array.isArray(rawSidebar.resources) ? rawSidebar.resources : [])
+    .filter((item: any) => item && item.active !== false && (item.label || item.title))
+    .map((item: any) => ({
+      ...item,
+      label: item.label || item.title || '',
+    }));
+  const slugifyProjectLabel = (text: string): string => {
+    const slug = (text || '')
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    return slug || 'project';
+  };
+
+  const hideCompletedProjects = Boolean(rawSidebar.hideCompletedProjects);
+  const completedProjects = (Array.isArray(rawSidebar.completedProjects) ? rawSidebar.completedProjects : [])
+    .filter((item: any) => item && item.active !== false && (item.label || item.title))
+    .map((item: any) => {
+      const displayLabel = item.label || item.title || '';
+      const slug = item.slug ? slugifyProjectLabel(item.slug) : slugifyProjectLabel(displayLabel);
+      return {
+        ...item,
+        label: displayLabel,
+        href: `/completed-projects/${slug}`,
+      };
+    });
+  const contacts = (Array.isArray(rawSidebar.contacts) ? rawSidebar.contacts : [])
+    .filter((item: any) => item && item.active !== false);
   const { modalState, closeModal, triggerContact } = useContactAction();
 
   const sectionRef = useRef<HTMLElement>(null);
@@ -244,19 +254,23 @@ const FeatureCards = () => {
                     </Link>
                   </li>
                 ))}
-                <li>
-                  <div className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-gray-400 bg-gray-50">
-                    Completed Projects
-                  </div>
-                </li>
-                {completedProjects.map(({ label, href }: any) => (
-                  <li key={label}>
-                    <Link to={href} className="flex items-center gap-2 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-gray-700 hover:text-blue-600 hover:bg-blue-50/60 transition-colors">
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 flex-shrink-0" />
-                      {label}
-                    </Link>
-                  </li>
-                ))}
+                {!hideCompletedProjects && completedProjects.length > 0 && (
+                  <>
+                    <li>
+                      <div className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-gray-400 bg-gray-50">
+                        Completed Projects
+                      </div>
+                    </li>
+                    {completedProjects.map(({ label, href }: any, idx: number) => (
+                      <li key={`${label}-${idx}`}>
+                        <Link to={href} className="flex items-center gap-2 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-gray-700 hover:text-blue-600 hover:bg-blue-50/60 transition-colors">
+                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 flex-shrink-0" />
+                          {label}
+                        </Link>
+                      </li>
+                    ))}
+                  </>
+                )}
               </ul>
             </div>
 

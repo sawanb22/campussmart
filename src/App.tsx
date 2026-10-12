@@ -30,6 +30,7 @@ const AIGuideArticle = lazy(() => import('@/pages/ai-guide-article'));
 const SetupCollegeArticle = lazy(() => import('@/pages/setup-college-article'));
 const UGCGuidelineArticle = lazy(() => import('@/pages/ugc-guideline-article'));
 const GenericPageRenderer = lazy(() => import('@/components/cms/GenericPageRenderer'));
+const CompletedProjectDetail = lazy(() => import('@/pages/completed-project-detail'));
 
 // Existing page templates map
 const PageTemplates: Record<string, any> = {
@@ -215,6 +216,7 @@ function App() {
               <Route path="/product/:slug" element={<Layout><ProductDetail /></Layout>} />
               <Route path="/blog/:slug" element={<Layout><BlogPost /></Layout>} />
               <Route path="/case-studies/:slug" element={<Layout><CaseStudyDetail /></Layout>} />
+              <Route path="/completed-projects/:projectSlug" element={<Layout><CompletedProjectDetail /></Layout>} />
               <Route path="/partner-with-colleges/:modelSlug" element={<Layout><PartnershipModelDetail /></Layout>} />
               <Route path="/campus-design-execution/:stepSlug" element={<Layout><CampusDesignExecutionDetail /></Layout>} />
               <Route path="/sports-design-execution/:stepSlug" element={<Layout><SportsDesignExecutionDetail /></Layout>} />

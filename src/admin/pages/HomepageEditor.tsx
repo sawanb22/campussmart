@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Save, RotateCcw, Plus, Trash2, ChevronUp, ChevronDown, Eye, EyeOff, LayoutGrid, Palette, Type, Sliders } from 'lucide-react';
+import { Save, RotateCcw, Plus, Trash2, ChevronUp, ChevronDown, Eye, EyeOff, LayoutGrid, Palette, Type, Sliders, Pencil, ExternalLink, Loader2, Upload, Image as ImageIcon } from 'lucide-react';
 import api from '../api/client';
 import MediaImageField from '../components/MediaImageField';
 import { CATEGORY_ICONS, DEFAULT_CATEGORIES, type CategoryItem } from '@/components/sections/category-bar';
@@ -317,7 +317,20 @@ export default function HomepageEditor() {
             }
 
             // Sidebar
-            try { setSidebar(data.home_sidebar ? JSON.parse(data.home_sidebar) : { classifieds: [], resources: [], completedProjects: [], contacts: [] }); } catch { /**/ }
+            try {
+                const rawSb = data.home_sidebar ? JSON.parse(data.home_sidebar) : { classifieds: [], resources: [], completedProjects: [], contacts: [] };
+                if (Array.isArray(rawSb.completedProjects)) {
+                    rawSb.completedProjects = rawSb.completedProjects.map((item: any) => ({
+                        ...item,
+                        label: (item?.label || item?.title || '').trim(),
+                        category: item?.category || 'Completed Project',
+                        description: item?.description || '',
+                        images: Array.isArray(item?.images) ? item.images : (item?.image ? [item.image] : []),
+                        active: item?.active !== false,
+                    }));
+                }
+                setSidebar(rawSb);
+            } catch { /**/ }
 
             // Resources
             try {
@@ -471,6 +484,111 @@ export default function HomepageEditor() {
     };
     const addListItem = (key: string, defaults: any) => setSidebarList(key, [...(sidebar[key] || []), defaults]);
     const delListItem = (key: string, i: number) => setSidebarList(key, (sidebar[key] || []).filter((_: any, idx: number) => idx !== i));
+
+    // Completed Projects Inline Editor State & Helpers
+    const [expandedProjectIdx, setExpandedProjectIdx] = useState<number | null>(null);
+    const [uploadingProjectIdx, setUploadingProjectIdx] = useState<number | null>(null);
+
+    const slugifyProjectLabel = (text: string): string => {
+        return (
+            (text || '')
+                .toLowerCase()
+                .trim()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '') || 'completed-project'
+        );
+    };
+
+    const moveCompletedProject = (i: number, dir: -1 | 1) => {
+        const list = [...(sidebar.completedProjects || [])];
+        const target = i + dir;
+        if (target < 0 || target >= list.length) return;
+        [list[i], list[target]] = [list[target], list[i]];
+        setSidebarList('completedProjects', list);
+        if (expandedProjectIdx === i) setExpandedProjectIdx(target);
+        else if (expandedProjectIdx === target) setExpandedProjectIdx(i);
+    };
+
+    const addProjectImage = (i: number) => {
+        const list = [...(sidebar.completedProjects || [])];
+        const current = list[i] || {};
+        const images = Array.isArray(current.images) ? [...current.images] : [];
+        images.push('');
+        list[i] = { ...current, images };
+        setSidebarList('completedProjects', list);
+    };
+
+    const updateProjectImage = (i: number, imgIdx: number, url: string) => {
+        const list = [...(sidebar.completedProjects || [])];
+        const current = list[i] || {};
+        const images = Array.isArray(current.images) ? [...current.images] : [];
+        images[imgIdx] = url;
+        list[i] = { ...current, images };
+        setSidebarList('completedProjects', list);
+    };
+
+    const removeProjectImage = (i: number, imgIdx: number) => {
+        const list = [...(sidebar.completedProjects || [])];
+        const current = list[i] || {};
+        const images = (Array.isArray(current.images) ? current.images : []).filter((_: string, idx: number) => idx !== imgIdx);
+        list[i] = { ...current, images };
+        setSidebarList('completedProjects', list);
+    };
+
+    const uploadProjectImages = async (i: number, files: FileList | null) => {
+        if (!files || files.length === 0) return;
+        const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+        for (const file of Array.from(files)) {
+            if (file.size > MAX_IMAGE_SIZE) {
+                const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+                alert(`Image "${file.name}" is ${sizeMb} MB. Images must be under 5 MB.`);
+                return;
+            }
+        }
+
+        setUploadingProjectIdx(i);
+        try {
+            const uploadedUrls: string[] = [];
+            for (const file of Array.from(files)) {
+                const fd = new FormData();
+                fd.append('media', file);
+                fd.append('image', file);
+                const { data } = await api.post('/media', fd, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                });
+                if (data?.url) uploadedUrls.push(data.url);
+            }
+            if (uploadedUrls.length > 0) {
+                const list = [...(sidebar.completedProjects || [])];
+                const current = list[i] || {};
+                const existing = (Array.isArray(current.images) ? current.images : []).filter(Boolean);
+                list[i] = { ...current, images: [...existing, ...uploadedUrls] };
+                const updatedSidebar = { ...sidebar, completedProjects: list };
+                setSidebar(updatedSidebar);
+                await api.put('/content', { home_sidebar: JSON.stringify(updatedSidebar) });
+                await refresh();
+                broadcastCmsInvalidation({ type: 'INVALIDATE_ALL' });
+            }
+        } catch (err: any) {
+            alert(err?.response?.data?.error || 'Image upload failed');
+        } finally {
+            setUploadingProjectIdx(null);
+        }
+    };
+
+    // Ensure editor state re-syncs from DB if Vite HMR preserved pre-schema sidebar state
+    const hasStaleCompletedProjects =
+        Array.isArray(sidebar.completedProjects) &&
+        sidebar.completedProjects.length > 0 &&
+        sidebar.completedProjects.every(
+            (p: any) => (!Array.isArray(p?.images) || p.images.length === 0) && !p?.description
+        );
+
+    useEffect(() => {
+        if (hasStaleCompletedProjects) {
+            void fetchContent();
+        }
+    }, [hasStaleCompletedProjects]);
 
     if (loading) return <div className="flex items-center justify-center h-64"><p className="text-gray-400 text-sm">Loading editor…</p></div>;
 
@@ -1084,16 +1202,21 @@ export default function HomepageEditor() {
                     <div>
                         <div className="flex justify-between items-center mb-2">
                             <span className="font-bold text-sm text-gray-800">Classifieds Block</span>
-                            <button onClick={() => addListItem('classifieds', { tag: 'SALE', title: 'New Listing', subtitle: 'Location • ₹ Price', href: '/classifieds' })} className="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-lg font-semibold hover:bg-blue-100 flex items-center gap-1"><Plus className="w-3 h-3" /> Add</button>
+                            <button onClick={() => addListItem('classifieds', { label: 'New Classified Listing', href: '/classifieds', active: true })} className="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-lg font-semibold hover:bg-blue-100 flex items-center gap-1"><Plus className="w-3 h-3" /> Add</button>
                         </div>
                         <div className="space-y-2">
                             {(sidebar.classifieds || []).map((c: any, i: number) => (
-                                <div key={i} className="flex gap-2 items-center border border-gray-100 p-2 rounded-lg bg-gray-50/50">
-                                    <input className="w-20 border border-gray-200 rounded px-2 py-1 text-xs" placeholder="TAG" value={c.tag || ''} onChange={e => upListItem('classifieds', i, 'tag', e.target.value)} />
-                                    <input className="flex-1 border border-gray-200 rounded px-2 py-1 text-xs" placeholder="Title" value={c.title || ''} onChange={e => upListItem('classifieds', i, 'title', e.target.value)} />
-                                    <input className="flex-1 border border-gray-200 rounded px-2 py-1 text-xs" placeholder="Subtitle" value={c.subtitle || ''} onChange={e => upListItem('classifieds', i, 'subtitle', e.target.value)} />
-                                    <input className="w-28 border border-gray-200 rounded px-2 py-1 text-xs" placeholder="href (/...)" value={c.href || ''} onChange={e => upListItem('classifieds', i, 'href', e.target.value)} />
-                                    <button onClick={() => delListItem('classifieds', i)} className="p-1 text-red-400 hover:text-red-600"><Trash2 className="w-3.5 h-3.5" /></button>
+                                <div key={i} className="flex gap-2 items-center border border-gray-200 p-2.5 rounded-xl bg-gray-50/50">
+                                    <span className="w-5 h-5 rounded-full bg-cyan-100 text-cyan-800 flex items-center justify-center text-[10px] font-bold shrink-0">
+                                        {i + 1}
+                                    </span>
+                                    <input className="flex-1 border border-gray-200 bg-white rounded-lg px-3 py-1.5 text-xs font-semibold text-gray-800" placeholder="Bullet Label (e.g. Colleges / Universities for Sale)" value={c.label ?? c.title ?? ''} onChange={e => upListItem('classifieds', i, 'label', e.target.value)} />
+                                    <input className="w-56 border border-gray-200 bg-white rounded-lg px-2.5 py-1.5 text-xs font-mono text-gray-600" placeholder="Link (/...)" value={c.href || ''} onChange={e => upListItem('classifieds', i, 'href', e.target.value)} />
+                                    <ItemLivePill
+                                        isLive={c.active !== false}
+                                        onToggle={() => upListItem('classifieds', i, 'active', c.active === false)}
+                                    />
+                                    <button onClick={() => delListItem('classifieds', i)} className="p-1.5 text-red-400 hover:text-red-600 rounded-lg hover:bg-red-50"><Trash2 className="w-3.5 h-3.5" /></button>
                                 </div>
                             ))}
                         </div>
@@ -1103,15 +1226,21 @@ export default function HomepageEditor() {
                     <div>
                         <div className="flex justify-between items-center mb-2">
                             <span className="font-bold text-sm text-gray-800">Resources Block</span>
-                            <button onClick={() => addListItem('resources', { tag: 'GUIDE', title: 'New Resource', href: '/catalogues' })} className="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-lg font-semibold hover:bg-blue-100 flex items-center gap-1"><Plus className="w-3 h-3" /> Add</button>
+                            <button onClick={() => addListItem('resources', { label: 'New Resource', href: '/catalogues', active: true })} className="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-lg font-semibold hover:bg-blue-100 flex items-center gap-1"><Plus className="w-3 h-3" /> Add</button>
                         </div>
                         <div className="space-y-2">
                             {(sidebar.resources || []).map((c: any, i: number) => (
-                                <div key={i} className="flex gap-2 items-center border border-gray-100 p-2 rounded-lg bg-gray-50/50">
-                                    <input className="w-20 border border-gray-200 rounded px-2 py-1 text-xs" placeholder="TAG" value={c.tag || ''} onChange={e => upListItem('resources', i, 'tag', e.target.value)} />
-                                    <input className="flex-1 border border-gray-200 rounded px-2 py-1 text-xs" placeholder="Title" value={c.title || ''} onChange={e => upListItem('resources', i, 'title', e.target.value)} />
-                                    <input className="w-36 border border-gray-200 rounded px-2 py-1 text-xs" placeholder="href (/...)" value={c.href || ''} onChange={e => upListItem('resources', i, 'href', e.target.value)} />
-                                    <button onClick={() => delListItem('resources', i)} className="p-1 text-red-400 hover:text-red-600"><Trash2 className="w-3.5 h-3.5" /></button>
+                                <div key={i} className="flex gap-2 items-center border border-gray-200 p-2.5 rounded-xl bg-gray-50/50">
+                                    <span className="w-5 h-5 rounded-full bg-cyan-100 text-cyan-800 flex items-center justify-center text-[10px] font-bold shrink-0">
+                                        {i + 1}
+                                    </span>
+                                    <input className="flex-1 border border-gray-200 bg-white rounded-lg px-3 py-1.5 text-xs font-semibold text-gray-800" placeholder="Resource Label (e.g. Complete Guide on AI Implementation)" value={c.label ?? c.title ?? ''} onChange={e => upListItem('resources', i, 'label', e.target.value)} />
+                                    <input className="w-56 border border-gray-200 bg-white rounded-lg px-2.5 py-1.5 text-xs font-mono text-gray-600" placeholder="Link (/...)" value={c.href || ''} onChange={e => upListItem('resources', i, 'href', e.target.value)} />
+                                    <ItemLivePill
+                                        isLive={c.active !== false}
+                                        onToggle={() => upListItem('resources', i, 'active', c.active === false)}
+                                    />
+                                    <button onClick={() => delListItem('resources', i)} className="p-1.5 text-red-400 hover:text-red-600 rounded-lg hover:bg-red-50"><Trash2 className="w-3.5 h-3.5" /></button>
                                 </div>
                             ))}
                         </div>
@@ -1119,21 +1248,234 @@ export default function HomepageEditor() {
 
                     {/* Completed Projects */}
                     <div>
-                        <div className="flex justify-between items-center mb-2">
-                            <span className="font-bold text-sm text-gray-800">Completed Projects Block</span>
-                            <button onClick={() => addListItem('completedProjects', { title: 'New Project', category: 'Tech Infra', image: '' })} className="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-lg font-semibold hover:bg-blue-100 flex items-center gap-1"><Plus className="w-3 h-3" /> Add</button>
+                        <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
+                            <div className="flex items-center gap-2.5">
+                                <span className="font-bold text-sm text-gray-800">Completed Projects Block</span>
+                                <ItemLivePill
+                                    isLive={!sidebar.hideCompletedProjects}
+                                    onToggle={() => setSidebar((p: any) => ({ ...p, hideCompletedProjects: !p.hideCompletedProjects }))}
+                                />
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const nextIdx = (sidebar.completedProjects || []).length;
+                                    addListItem('completedProjects', {
+                                        label: 'New Completed Project',
+                                        category: 'Completed Project',
+                                        description: '',
+                                        images: [],
+                                        active: true,
+                                    });
+                                    setExpandedProjectIdx(nextIdx);
+                                }}
+                                className="text-xs bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg font-semibold hover:bg-blue-100 flex items-center gap-1"
+                            >
+                                <Plus className="w-3.5 h-3.5" /> Add Project Bullet
+                            </button>
                         </div>
-                        <div className="space-y-2">
-                            {(sidebar.completedProjects || []).map((c: any, i: number) => (
-                                <div key={i} className="border border-gray-100 p-3 rounded-lg bg-gray-50/50 space-y-2">
-                                    <div className="flex gap-2 items-center">
-                                        <input className="flex-1 border border-gray-200 rounded px-2 py-1 text-xs" placeholder="Project Name" value={c.title || ''} onChange={e => upListItem('completedProjects', i, 'title', e.target.value)} />
-                                        <input className="w-36 border border-gray-200 rounded px-2 py-1 text-xs" placeholder="Category" value={c.category || ''} onChange={e => upListItem('completedProjects', i, 'category', e.target.value)} />
-                                        <button onClick={() => delListItem('completedProjects', i)} className="p-1 text-red-400 hover:text-red-600"><Trash2 className="w-3.5 h-3.5" /></button>
+                        <div className="space-y-3">
+                            {(sidebar.completedProjects || []).map((c: any, i: number) => {
+                                const bulletLabel = c.label ?? c.title ?? '';
+                                const projectSlug = slugifyProjectLabel(bulletLabel);
+                                const liveHref = `/completed-projects/${projectSlug}`;
+                                const isExpanded = expandedProjectIdx === i;
+                                const isUploading = uploadingProjectIdx === i;
+                                const images: string[] = Array.isArray(c.images) ? c.images : (c.image ? [c.image] : []);
+                                const validImageCount = images.filter(Boolean).length;
+
+                                return (
+                                    <div
+                                        key={i}
+                                        className={`border rounded-xl transition-all ${
+                                            c.active === false
+                                                ? 'border-gray-200 bg-gray-100/60 opacity-75'
+                                                : isExpanded
+                                                ? 'border-blue-300 bg-blue-50/20 shadow-xs'
+                                                : 'border-gray-200 bg-gray-50/50 hover:border-blue-200'
+                                        }`}
+                                    >
+                                        {/* Compact Top Row */}
+                                        <div className="flex flex-wrap gap-2 items-center p-3">
+                                            <span className="w-5 h-5 rounded-full bg-cyan-100 text-cyan-800 flex items-center justify-center text-[10px] font-bold shrink-0">
+                                                {i + 1}
+                                            </span>
+                                            <input
+                                                className="flex-1 min-w-[180px] border border-gray-200 bg-white rounded-lg px-3 py-1.5 text-xs font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                                placeholder="Project Bullet Name (e.g. 20 Stunning College Buildings)"
+                                                value={bulletLabel}
+                                                onChange={e => upListItem('completedProjects', i, 'label', e.target.value)}
+                                            />
+                                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white border border-gray-200 text-gray-600">
+                                                <ImageIcon className="w-3 h-3 text-blue-500" />
+                                                {validImageCount} {validImageCount === 1 ? 'Photo' : 'Photos'}
+                                            </span>
+                                            <ItemLivePill
+                                                isLive={c.active !== false}
+                                                onToggle={() => upListItem('completedProjects', i, 'active', c.active === false)}
+                                            />
+                                            <div className="flex items-center gap-0.5">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => moveCompletedProject(i, -1)}
+                                                    disabled={i === 0}
+                                                    title="Move Up"
+                                                    className="p-1 text-gray-400 hover:text-gray-700 disabled:opacity-30"
+                                                >
+                                                    <ChevronUp className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => moveCompletedProject(i, 1)}
+                                                    disabled={i === (sidebar.completedProjects || []).length - 1}
+                                                    title="Move Down"
+                                                    className="p-1 text-gray-400 hover:text-gray-700 disabled:opacity-30"
+                                                >
+                                                    <ChevronDown className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => setExpandedProjectIdx(isExpanded ? null : i)}
+                                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs ${
+                                                    isExpanded
+                                                        ? 'bg-slate-800 text-white hover:bg-slate-900'
+                                                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                                                }`}
+                                            >
+                                                <Pencil className="w-3.5 h-3.5" />
+                                                <span>{isExpanded ? 'Close Editor' : 'Edit Page & Photos'}</span>
+                                            </button>
+                                            <a
+                                                href={liveHref}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="p-1.5 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-white transition-colors"
+                                                title={`Open live project page (${liveHref})`}
+                                            >
+                                                <ExternalLink className="w-3.5 h-3.5" />
+                                            </a>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (expandedProjectIdx === i) setExpandedProjectIdx(null);
+                                                    delListItem('completedProjects', i);
+                                                }}
+                                                className="p-1.5 text-red-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                                                title="Delete project bullet"
+                                            >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                            </button>
+                                        </div>
+
+                                        {/* Simple Sleek Inline Editor for Shared Project Template */}
+                                        {isExpanded && (
+                                            <div className="border-t border-blue-200/70 bg-white rounded-b-xl p-4 space-y-4">
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    <Field
+                                                        label="Project Title (Heading on Page)"
+                                                        value={bulletLabel}
+                                                        onChange={v => upListItem('completedProjects', i, 'label', v)}
+                                                        placeholder="e.g. Campus Master Planning"
+                                                    />
+                                                    <Field
+                                                        label="Category Badge"
+                                                        value={c.category || ''}
+                                                        onChange={v => upListItem('completedProjects', i, 'category', v)}
+                                                        placeholder="e.g. Master Planning & Urban Design"
+                                                    />
+                                                </div>
+
+                                                <Field
+                                                    label="Project Description (Shown below Carousel)"
+                                                    value={c.description || ''}
+                                                    onChange={v => upListItem('completedProjects', i, 'description', v)}
+                                                    textarea
+                                                    placeholder="Write the project overview, architectural highlights, and campus impact..."
+                                                />
+
+                                                {/* Carousel Images Manager */}
+                                                <div className="space-y-2.5 pt-1">
+                                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                                        <div>
+                                                            <label className="block text-xs font-bold text-gray-800">
+                                                                Carousel Images ({validImageCount} {validImageCount === 1 ? 'Slide' : 'Slides'})
+                                                            </label>
+                                                            <p className="text-[11px] text-gray-400">
+                                                                Add multiple photos to display in the interactive project carousel
+                                                            </p>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold cursor-pointer transition-colors shadow-xs">
+                                                                {isUploading ? (
+                                                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                                ) : (
+                                                                    <Upload className="w-3.5 h-3.5" />
+                                                                )}
+                                                                <span>{isUploading ? 'Uploading…' : 'Upload Photos'}</span>
+                                                                <input
+                                                                    type="file"
+                                                                    accept="image/*"
+                                                                    multiple
+                                                                    className="hidden"
+                                                                    disabled={isUploading}
+                                                                    onChange={e => {
+                                                                        void uploadProjectImages(i, e.target.files);
+                                                                        e.target.value = '';
+                                                                    }}
+                                                                />
+                                                            </label>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => addProjectImage(i)}
+                                                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 text-xs font-semibold text-gray-700 transition-colors"
+                                                            >
+                                                                <Plus className="w-3.5 h-3.5" /> Add Slide Slot
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    {images.length === 0 ? (
+                                                        <div className="border border-dashed border-gray-200 rounded-xl p-5 text-center bg-gray-50/50">
+                                                            <p className="text-xs text-gray-500">
+                                                                No carousel images added yet. Click <strong>Upload Photos</strong> or <strong>Add Slide Slot</strong> above.
+                                                            </p>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                            {images.map((imgUrl: string, imgIdx: number) => (
+                                                                <div
+                                                                    key={imgIdx}
+                                                                    className="border border-gray-200 rounded-xl p-2.5 bg-gray-50/60 space-y-2"
+                                                                >
+                                                                    <div className="flex items-center justify-between">
+                                                                        <span className="text-[11px] font-bold text-gray-600">
+                                                                            Slide #{imgIdx + 1}
+                                                                        </span>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => removeProjectImage(i, imgIdx)}
+                                                                            className="text-[11px] font-semibold text-red-500 hover:text-red-700 flex items-center gap-1"
+                                                                        >
+                                                                            <Trash2 className="w-3 h-3" /> Remove
+                                                                        </button>
+                                                                    </div>
+                                                                    <MediaImageField
+                                                                        label=""
+                                                                        value={imgUrl || ''}
+                                                                        onChange={url => updateProjectImage(i, imgIdx, url)}
+                                                                        previewClassName="h-32"
+                                                                    />
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
-                                    <MediaImageField label="Project Image" value={c.image || ''} onChange={v => upListItem('completedProjects', i, 'image', v)} previewClassName="h-20 rounded" />
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
 
@@ -1141,21 +1483,27 @@ export default function HomepageEditor() {
                     <div>
                         <div className="flex justify-between items-center mb-2">
                             <span className="font-bold text-sm text-gray-800">Direct Contact Cards (Sidebar Bottom)</span>
-                            <button onClick={() => addListItem('contacts', { title: 'Direct Contact', desc: 'Call us directly', action: 'Call Now', href: 'tel:+919966109191', bg: '#3B82F6' })} className="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-lg font-semibold hover:bg-blue-100 flex items-center gap-1"><Plus className="w-3 h-3" /> Add</button>
+                            <button onClick={() => addListItem('contacts', { queryText: 'FOR QUERIES ON', title: 'Direct Contact', contact: '9966109191', href: 'tel:+919966109191', bg: '#00c4cc', active: true })} className="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-lg font-semibold hover:bg-blue-100 flex items-center gap-1"><Plus className="w-3 h-3" /> Add</button>
                         </div>
                         <div className="space-y-3">
                             {(sidebar.contacts || []).map((c: any, i: number) => (
                                 <div key={i} className="border border-gray-200 rounded-xl p-3 bg-gray-50/50 space-y-2">
                                     <div className="flex justify-between items-center">
                                         <span className="text-xs font-bold text-gray-400">Contact Card {i + 1}</span>
-                                        <button onClick={() => delListItem('contacts', i)} className="p-1 text-red-400 hover:text-red-600"><Trash2 className="w-3.5 h-3.5" /></button>
+                                        <div className="flex items-center gap-2">
+                                            <ItemLivePill
+                                                isLive={c.active !== false}
+                                                onToggle={() => upListItem('contacts', i, 'active', c.active === false)}
+                                            />
+                                            <button onClick={() => delListItem('contacts', i)} className="p-1 text-red-400 hover:text-red-600"><Trash2 className="w-3.5 h-3.5" /></button>
+                                        </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
+                                        <Field label="Top Small Text" value={c.queryText ?? 'FOR QUERIES ON'} onChange={v => upListItem('contacts', i, 'queryText', v)} />
                                         <Field label="Card Title" value={c.title || ''} onChange={v => upListItem('contacts', i, 'title', v)} />
-                                        <Field label="Description" value={c.desc || ''} onChange={v => upListItem('contacts', i, 'desc', v)} />
                                     </div>
                                     <div className="grid grid-cols-3 gap-2">
-                                        <Field label="Button Label" value={c.action || ''} onChange={v => upListItem('contacts', i, 'action', v)} />
+                                        <Field label="Display Phone / Email" value={c.contact ?? c.desc ?? ''} onChange={v => upListItem('contacts', i, 'contact', v)} />
                                         <Field label="Link (tel: / mailto:)" value={c.href || ''} onChange={v => upListItem('contacts', i, 'href', v)} />
                                         <div className="space-y-1">
                                             <label className="block text-xs font-semibold text-gray-600">Background Colour</label>
