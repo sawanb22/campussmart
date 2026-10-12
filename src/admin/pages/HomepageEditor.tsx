@@ -1390,7 +1390,7 @@ export default function HomepageEditor() {
                                                     label="Project Description (Shown below Carousel)"
                                                     value={c.description || ''}
                                                     onChange={v => upListItem('completedProjects', i, 'description', v)}
-                                                    textarea
+                                                    multiline
                                                     placeholder="Write the project overview, architectural highlights, and campus impact..."
                                                 />
 
